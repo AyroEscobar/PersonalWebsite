@@ -3,27 +3,29 @@ import { Link } from 'react-router-dom'
 
 const Navbar = () => {
   return (
-    <nav className = "shadow-lg flex items-center justify-around py=3 px-32 fixed top-0 left-0 w-full">
-    <Link to="/">
-      <span className = "font-semibold text-lg flex items-center">
-        <h1>home</h1>
-      </span>
-    </Link>
-
-      <div className = "flex items-center gap-5 text-black">
-         <Link to="/" className = "py-1 px-3 text-lg font-light text-white hover:text-sky-300 \
-         rounded2x1 hover:bg-slate-700 transition duration-300 ">
-      <span className = "font-semibold text-lg flex items-center">
-        <h1>not home</h1>
-      </span>
-    </Link>
-     <Link to="/about" className = "py-1 px-3 text-lg font-light text-white hover:text-sky-300 \
-         rounded2x1 hover: bg-slate-700 transition duration-300 ">
-      <span className = "font-semibold text-lg flex items-center">
-        <h1>about</h1>
-      </span>
-    </Link>
-
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-4xl bg-slate-800/90 backdrop-blur-sm shadow-xl rounded-2xl px-8 py-4">
+      {/* All Links - Evenly Spaced */}
+      <div className="flex items-center justify-evenly w-full">
+        <Link 
+          to="/" 
+          className="px-4 py-2 text-white font-semibold text-xl hover:text-sky-300 transition duration-300"
+        >
+          Home
+        </Link>
+        
+        <Link 
+          to="/" 
+          className="px-4 py-2 text-white font-medium hover:text-sky-300 hover:bg-slate-700 rounded-lg transition duration-300"
+        >
+          Not Home
+        </Link>
+        
+        <Link 
+          to="/about" 
+          className="px-4 py-2 text-white font-medium hover:text-sky-300 hover:bg-slate-700 rounded-lg transition duration-300"
+        >
+          About
+        </Link>
       </div>
     </nav>
   )
