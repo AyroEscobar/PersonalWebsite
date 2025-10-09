@@ -1,5 +1,6 @@
 import Navbar from "./components/Navbar"
-import pfpImage from './assets/pfp.JPG';
+import { Outlet } from 'react-router-dom'
+
 
 function App() {
   return (
@@ -7,10 +8,9 @@ function App() {
       <h1 className="text-4xl font-bold text-blue-600">
         brooooo
       </h1>
-      <div>
-        <img className="w-[5rem] h-[5rem] object-cover rounded-full" src = {pfpImage} alt = "Profile Image"/>
-      </div>
+   
       <Navbar/>
+      <Outlet/>
     </div>
   )
 }
