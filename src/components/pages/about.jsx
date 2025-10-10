@@ -107,6 +107,18 @@ function About() {
         </div>
       </div>
     </div>
+
+     <div className="flex justify-center p-8 mx-[8%]">
+      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 max-w-6xl w-full text-center ">
+        <h1 className='text-white font-bold text-3xl'>Current Interests</h1>
+
+        <ul className=' list-disc list-inside'>
+          <li>Machine Learning</li>
+
+        </ul>
+
+      </div>
+    </div>
   </div>
 
 
