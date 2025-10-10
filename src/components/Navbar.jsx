@@ -32,16 +32,16 @@ const Navbar = () => {
         Projects
         </Link>
                 <div className="flex items-center gap-4">
-          <a href="your-linkedin-url" className="text-white hover:text-blue-400 transition duration-300">
+          <a href="https://www.linkedin.com/in/ayroescobar/" target="_blank" className="text-white hover:text-blue-400 transition duration-300">
             <FaLinkedin size={20} />
           </a>
-          <a href="your-github-url" className="text-white hover:text-gray-400 transition duration-300">
+          <a href="https://github.com/AyroEscobar" target="_blank" className="text-white hover:text-gray-400 transition duration-300">
             <FaGithub size={20} />
           </a>
-          <a href="mailto:your-email" className="text-white hover:text-red-400 transition duration-300">
+          <a href="mailto:yro.escobar@gmail.com" target="_blank" className="text-white hover:text-red-400 transition duration-300">
             <FaEnvelope size={20} />
           </a>
-          <a href="your-instagram-url" className="text-white hover:text-pink-400 transition duration-300">
+          <a href="https://www.instagram.com/ayro.afk/" target="_blank" className="text-white hover:text-pink-400 transition duration-300">
             <FaInstagram size={20} />
           </a>
         </div>
