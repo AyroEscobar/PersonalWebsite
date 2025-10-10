@@ -6,6 +6,7 @@ import { BrowserRouter, createBrowserRouter, RouterProvider } from "react-router
 import About from './components/pages/about.jsx';
 import Home from './components/pages/home.jsx';
 import Leader from './components/pages/leader.jsx';
+import HackathonMap from './components/pages/projects.jsx'; 
 
 // In your main file
 const router = createBrowserRouter([
@@ -15,7 +16,8 @@ const router = createBrowserRouter([
    children: [
      {path: "/", element: <Home />},
      {path: "/about", element: <About />},
-     {path: "/leadership", element: <Leader />}
+     {path: "/leadership", element: <Leader />},
+     {path: "/projects", element: <HackathonMap />},
    ]
  }
 ])
