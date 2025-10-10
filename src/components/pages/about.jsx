@@ -12,8 +12,8 @@ function About() {
    
 
    <div>
-    <div className="flex justify-center p-8 px-3 pt-[20vh]">
-      <div className="flex items-center gap-8 bg-white/10 backdrop-blur-sm rounded-2xl p-8 max-w-6xl  mx-[10%] ">
+    <div className="flex justify-center p-8 px-3 pt-[20vh] mx-[10%]">
+      <div className="flex items-center gap-8 bg-white/10 backdrop-blur-sm rounded-2xl p-8 max-w-6xl">
         {/* Left side - Image */}
         <div className="flex-shrink-0">
           <img 
@@ -49,8 +49,8 @@ function About() {
     </div>
     
     {/* Skills Section */}
-    <div className="flex justify-center p-8">
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 max-w-6xl w-full mx-[9%]">
+    <div className="flex justify-center p-8 mx-[8%]">
+      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 max-w-6xl w-full ">
         {/* Skills Header */}
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-white mb-4">Skills & Technologies</h2>
