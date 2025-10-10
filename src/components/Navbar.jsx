@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { FaLinkedin, FaGithub, FaInstagram, FaEnvelope } from 'react-icons/fa'
 
 const Navbar = () => {
   return (
@@ -30,6 +31,20 @@ const Navbar = () => {
         >
         Projects
         </Link>
+                <div className="flex items-center gap-4">
+          <a href="your-linkedin-url" className="text-white hover:text-blue-400 transition duration-300">
+            <FaLinkedin size={20} />
+          </a>
+          <a href="your-github-url" className="text-white hover:text-gray-400 transition duration-300">
+            <FaGithub size={20} />
+          </a>
+          <a href="mailto:your-email" className="text-white hover:text-red-400 transition duration-300">
+            <FaEnvelope size={20} />
+          </a>
+          <a href="your-instagram-url" className="text-white hover:text-pink-400 transition duration-300">
+            <FaInstagram size={20} />
+          </a>
+        </div>
       </div>
     </nav>
   )
