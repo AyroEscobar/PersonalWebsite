@@ -354,6 +354,7 @@ const HackathonMap = () => {
         backgroundColor: '#1a1a1a',
         color: 'white',
         fontFamily: 'system-ui'
+        
       }}>
         <div style={{ textAlign: 'center', maxWidth: '500px', padding: '40px' }}>
           <h2 style={{ color: '#EF4444', marginBottom: '16px' }}>⚠️ Map Error</h2>
@@ -383,7 +384,7 @@ const HackathonMap = () => {
   };
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} >
       {/* Map Container */}
       <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
       

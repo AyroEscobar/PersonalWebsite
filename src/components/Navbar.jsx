@@ -4,7 +4,7 @@ import { FaLinkedin, FaGithub, FaInstagram, FaEnvelope } from 'react-icons/fa'
 
 const Navbar = () => {
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-4xl bg-slate-800/90 backdrop-blur-sm shadow-xl rounded-2xl px-8 py-4">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-4xl bg-slate-800/90 backdrop-blur-sm shadow-xl rounded-2xl px-8 py-4 z-50">
       <div className="flex items-center justify-evenly w-full">
         <Link 
           to="/home" 

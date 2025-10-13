@@ -13,7 +13,7 @@ const router = createBrowserRouter([
    path: "/",
    element: <App />, // App contains Navbar
    children: [
-     {path: "/home", element: <Home />},
+     {path: "/", element: <Home />},
      {path: "/leadership", element: <Leader />},
      {path: "/projects", element: <HackathonMap />},
    ]
