@@ -81,7 +81,7 @@ export function useLeadership() {
   })
 }
 
-// Hook for fetching approved testimonials
+// Hook for fetching approved testimonials (public)
 export function useTestimonials() {
   return useCollection('testimonials', {
     where: {
@@ -89,6 +89,14 @@ export function useTestimonials() {
       op: '==',
       value: true
     },
+    orderBy: 'date',
+    orderDirection: 'desc'
+  })
+}
+
+// Hook for fetching ALL testimonials (admin)
+export function useAllTestimonials() {
+  return useCollection('testimonials', {
     orderBy: 'date',
     orderDirection: 'desc'
   })

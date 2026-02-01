@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useHackathons } from '../../hooks/useFirestore';
 
 const HackathonMap = () => {
   const mapContainerRef = useRef(null);
@@ -7,112 +8,10 @@ const HackathonMap = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [error, setError] = useState(null);
+  const [mapReady, setMapReady] = useState(false);
 
-  // Real events based on your hackathon journey!
-  const events = [
-    // Texas Events
-    { 
-      id: 1, 
-      name: 'HackUTD', 
-      lat: 32.9857, 
-      lng: -96.7500, 
-      city: 'Richardson, TX', 
-      type: 'competed', 
-      year: 2023, 
-      date: 'November 2023',
-      description: 'Competed at UTD and built an awesome project!',
-      details: 'This was an incredible 24-hour hackathon where I worked with a team to create an innovative solution. The energy was amazing and we learned so much.',
-      team: '4 people',
-      project: 'Built a project using React and Firebase'
-    },
-    { 
-      id: 2, 
-      name: 'HackUTD', 
-      lat: 32.9857, 
-      lng: -96.7500, 
-      city: 'Richardson, TX', 
-      type: 'organized', 
-      year: 2024, 
-      date: 'November 2024',
-      description: 'Organized the next year - full circle moment!',
-      details: 'Came back as an organizer to help make this event happen for hundreds of students. It was rewarding to give back to the community that gave me so much.',
-      attendees: '500+ hackers',
-      role: 'Lead Organizer'
-    },
-    
-    // Your actual events
-    { 
-      id: 3, 
-      name: 'Hackcon', 
-      lat: 40.7128, 
-      lng: -74.0060, 
-      city: 'New York, NY', 
-      type: 'conference', 
-      year: 2024, 
-      date: 'August 2024',
-      description: 'MLH Conference in NYC - amazing organizer experience',
-      details: 'Hackcon is MLH\'s annual conference for hackathon organizers. I learned best practices, networked with organizers from around the world, and attended workshops on event planning.',
-      workshops: 'Attended 12+ workshops',
-      networking: 'Connected with 50+ organizers'
-    },
-    { 
-      id: 4, 
-      name: 'WHACK', 
-      lat: 42.3736, 
-      lng: -72.5199, 
-      city: 'Wellesley, MA', 
-      type: 'competed', 
-      year: 2024,
-      date: 'March 2024',
-      description: 'Competed at Wellesley College',
-      details: 'WHACK at Wellesley College was an amazing all-gender hackathon focused on empowerment and innovation. Great community and inspiring projects.',
-      project: 'Built an accessibility-focused web app',
-      achievement: 'Top 10 finalist'
-    },
-    { 
-      id: 5, 
-      name: '&Hacks', 
-      lat: 38.0293, 
-      lng: -78.4767, 
-      city: 'Charlottesville, VA', 
-      type: 'organized', 
-      year: 2024,
-      date: 'April 2024',
-      description: 'Helped organize this event in Virginia',
-      details: 'Worked as part of the organizing team at UVA to create an inclusive and exciting hackathon experience. Coordinated logistics and mentored participants.',
-      role: 'Logistics Coordinator',
-      impact: 'Helped 300+ students'
-    },
-    { 
-      id: 6, 
-      name: 'Hack the North', 
-      lat: 43.4723, 
-      lng: -80.5449, 
-      city: 'Waterloo, ON', 
-      type: 'competed', 
-      year: 2024,
-      date: 'September 2024',
-      description: 'Competed at Canada\'s biggest hackathon - University of Waterloo',
-      details: 'Hack the North is Canada\'s largest hackathon with 1000+ hackers. The scale and quality of this event was incredible. Amazing sponsors, workshops, and the iconic Canadian hospitality!',
-      size: '1000+ participants',
-      project: 'Built an AI-powered tool',
-      memorable: 'First international hackathon!'
-    },
-    { 
-      id: 7, 
-      name: 'SteelHacks', 
-      lat: 40.4406, 
-      lng: -79.9959, 
-      city: 'Pittsburgh, PA', 
-      type: 'organized', 
-      year: 2024,
-      date: 'February 2024',
-      description: 'Helped organize at University of Pittsburgh',
-      details: 'Contributed to organizing SteelHacks at Pitt. Helped with sponsor coordination and creating a welcoming environment for first-time hackers.',
-      role: 'Sponsor Relations',
-      firstTimers: '40% first-time hackers'
-    },
-  ];
+  // Fetch hackathons from Firestore
+  const { data: events, loading, error: firestoreError } = useHackathons();
 
   // Home base (Richardson, TX)
   const homeBase = { 
@@ -152,9 +51,10 @@ const HackathonMap = () => {
     return points;
   };
 
+  // Load Mapbox script
   useEffect(() => {
     if (window.mapboxgl) {
-      initializeMap();
+      setMapReady(true);
       return;
     }
 
@@ -166,9 +66,9 @@ const HackathonMap = () => {
     const script = document.createElement('script');
     script.src = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js';
     script.async = true;
-    
+
     script.onload = () => {
-      initializeMap();
+      setMapReady(true);
     };
 
     script.onerror = () => {
@@ -192,6 +92,13 @@ const HackathonMap = () => {
       }
     };
   }, []);
+
+  // Initialize map when both Mapbox is ready AND data is loaded
+  useEffect(() => {
+    if (mapReady && !loading && events.length > 0 && !mapRef.current) {
+      initializeMap();
+    }
+  }, [mapReady, loading, events]);
 
   const initializeMap = () => {
     try {
@@ -338,27 +245,49 @@ const HackathonMap = () => {
     }
   };
 
-  const eventCounts = events.reduce((acc, event) => {
+  const eventCounts = (events || []).reduce((acc, event) => {
     acc[event.type] = (acc[event.type] || 0) + 1;
     return acc;
   }, {});
 
-  if (error) {
+  // Show loading state
+  if (loading) {
     return (
-      <div style={{ 
-        width: '100%', 
+      <div style={{
+        width: '100%',
         minHeight: '600px',
-        display: 'flex', 
-        alignItems: 'center', 
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#1a1a1a',
         color: 'white',
-        fontFamily: 'system-ui'
-        
+        fontFamily: 'system-ui',
+        borderRadius: '20px'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '32px', marginBottom: '16px' }}>🗺️</div>
+          <p>Loading hackathon data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || firestoreError) {
+    return (
+      <div style={{
+        width: '100%',
+        minHeight: '600px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#1a1a1a',
+        color: 'white',
+        fontFamily: 'system-ui',
+        borderRadius: '20px'
       }}>
         <div style={{ textAlign: 'center', maxWidth: '500px', padding: '40px' }}>
-          <h2 style={{ color: '#EF4444', marginBottom: '16px' }}>⚠️ Map Error</h2>
-          <p>{error}</p>
+          <h2 style={{ color: '#EF4444', marginBottom: '16px' }}>Map Error</h2>
+          <p>{error || firestoreError?.message || 'Failed to load data'}</p>
         </div>
       </div>
     );
