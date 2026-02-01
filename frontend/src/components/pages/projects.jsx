@@ -196,7 +196,7 @@ const HackathonMap = () => {
   const initializeMap = () => {
     try {
       const mapboxgl = window.mapboxgl;
-      mapboxgl.accessToken = 'pk.eyJ1IjoiYXlyb2NvZGVzIiwiYSI6ImNtZ2s2ZjI0YTB0MWYyc3BxZTVsdmxmOGQifQ.SXyZnk3ND10QYNtl_Wa7qg';
+      mapboxgl.accessToken = import.meta.env.MAPBOX_TOKEN;
       
       const map = new mapboxgl.Map({
         container: mapContainerRef.current,
