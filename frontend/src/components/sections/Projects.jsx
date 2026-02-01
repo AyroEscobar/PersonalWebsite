@@ -2,32 +2,15 @@
 
 import { motion } from 'framer-motion'
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa'
+import { useProjects } from '../../hooks/useFirestore'
 
 function Projects() {
-  // TODO: Move to Firebase
-  const projects = [
-    {
-      title: "Project 1",
-      description: "Description of your first featured project. What problem does it solve?",
-      tech: ["React", "Firebase", "Tailwind"],
-      github: "https://github.com/AyroEscobar/project1",
-      live: null,
-    },
-    {
-      title: "Project 2",
-      description: "Description of your second featured project. Highlight the technical challenges.",
-      tech: ["Python", "PostgreSQL", "FastAPI"],
-      github: "https://github.com/AyroEscobar/project2",
-      live: "https://project2.com",
-    },
-    {
-      title: "Project 3",
-      description: "Description of your third featured project. What makes this one special?",
-      tech: ["Node.js", "React", "Supabase"],
-      github: "https://github.com/AyroEscobar/project3",
-      live: null,
-    }
-  ]
+  const { data: projects, loading, error } = useProjects()
+
+  // Don't render if no projects or still loading
+  if (loading || error || projects.length === 0) {
+    return null
+  }
 
   return (
     <section id="projects" className="py-24 px-4 md:px-6">
@@ -52,7 +35,7 @@ function Projects() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project, index) => (
             <motion.div
-              key={index}
+              key={project.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
