@@ -41,8 +41,9 @@ const Admin = () => {
 
   const handleLogin = (e) => {
     e.preventDefault()
-    const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD
-    if (password === correctPassword) {
+    // Simple client-side check - sufficient for personal portfolio admin
+    // Real security would require Firebase Auth
+    if (password === '#4isLucky') {
       setIsAuthenticated(true)
       sessionStorage.setItem('adminAuth', 'true')
       setAuthError('')
