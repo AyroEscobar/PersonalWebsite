@@ -41,7 +41,7 @@ const Admin = () => {
 
   const handleLogin = (e) => {
     e.preventDefault()
-    const correctPassword = import.meta.env.ADMIN_PASSWORD
+    const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD
     if (password === correctPassword) {
       setIsAuthenticated(true)
       sessionStorage.setItem('adminAuth', 'true')
