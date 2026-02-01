@@ -1,50 +1,55 @@
 // Firestore hooks for fetching data
-// These hooks will fetch data from your Firebase collections
+// These hooks use real-time listeners for instant updates
 
 import { useState, useEffect } from 'react'
-import { collection, getDocs, query, orderBy, where } from 'firebase/firestore'
+import { collection, query, orderBy, where, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase/config'
 
-// Generic hook to fetch a collection
+// Generic hook with real-time listener
 export function useCollection(collectionName, options = {}) {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        let q = collection(db, collectionName)
+    let q = collection(db, collectionName)
 
-        // Apply ordering if specified
-        if (options.orderBy) {
-          q = query(q, orderBy(options.orderBy, options.orderDirection || 'asc'))
-        }
+    // Build query with constraints
+    const constraints = []
 
-        // Apply where clause if specified
-        if (options.where) {
-          q = query(q, where(options.where.field, options.where.op, options.where.value))
-        }
+    if (options.where) {
+      constraints.push(where(options.where.field, options.where.op, options.where.value))
+    }
 
-        const querySnapshot = await getDocs(q)
-        const results = querySnapshot.docs.map(doc => ({
+    if (options.orderBy) {
+      constraints.push(orderBy(options.orderBy, options.orderDirection || 'asc'))
+    }
+
+    if (constraints.length > 0) {
+      q = query(q, ...constraints)
+    }
+
+    // Real-time listener
+    const unsubscribe = onSnapshot(q,
+      (snapshot) => {
+        const results = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }))
-
         setData(results)
+        setLoading(false)
         setError(null)
-      } catch (err) {
+      },
+      (err) => {
         console.error(`Error fetching ${collectionName}:`, err)
         setError(err)
-      } finally {
         setLoading(false)
       }
-    }
+    )
 
-    fetchData()
-  }, [collectionName, options.orderBy, options.orderDirection])
+    // Cleanup listener on unmount
+    return () => unsubscribe()
+  }, [collectionName, options.orderBy, options.orderDirection, options.where?.field, options.where?.value])
 
   return { data, loading, error }
 }
