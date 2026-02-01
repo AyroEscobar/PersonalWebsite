@@ -1,12 +1,62 @@
-# React + Vite
+# Ayro's Personal Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, interactive personal portfolio website showcasing my journey as a developer, hackathon enthusiast, and community leader.
 
-Currently, two official plugins are available:
+**Status:** Under Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
 
-## Expanding the ESLint configuration
+**Frontend**
+- React 19 + Vite
+- Tailwind CSS
+- Framer Motion (animations)
+- Three.js + React Three Fiber (3D graphics)
+- React Router
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Backend**
+- Firebase (Firestore)
+
+## Features
+
+- Interactive 3D particle hero section
+- Smooth scroll animations
+- Hackathon map showcase
+- Skills & technology grid
+- Testimonials section
+- Responsive design
+
+## Project Structure
+
+```
+PersonalWebsite/
+├── frontend/          # React application
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── pages/      # Route pages
+│   │   │   └── sections/   # Page sections
+│   │   ├── firebase/       # Firebase config
+│   │   └── hooks/          # Custom hooks
+│   └── ...
+└── backend/           # API (coming soon)
+```
+
+## Getting Started
+
+```bash
+# Install dependencies
+cd frontend && npm install
+
+# Run development server
+npm run dev
+
+# Or from root
+npm run dev
+```
+
+## Environment Variables
+
+Copy `frontend/.env.example` to `frontend/.env` and fill in your Firebase credentials.
+
+---
+
+Built by Ayro Escobar
