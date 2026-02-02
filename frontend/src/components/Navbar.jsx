@@ -1,13 +1,24 @@
-import { useState } from 'react'
+// Navbar - Clean, minimal navigation
+
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FaLinkedin, FaGithub, FaInstagram, FaEnvelope, FaMapMarkedAlt } from 'react-icons/fa'
 import { HiMenuAlt4, HiX } from 'react-icons/hi'
+import { FaMapMarkedAlt } from 'react-icons/fa'
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const isHome = location.pathname === '/' || location.pathname === '/home'
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const scrollToSection = (sectionId) => {
     setMobileMenuOpen(false)
@@ -23,16 +34,9 @@ const Navbar = () => {
 
   const navLinks = [
     { label: 'About', action: () => scrollToSection('about') },
-    { label: 'Roles', action: () => scrollToSection('roles') },
     { label: 'Projects', action: () => scrollToSection('projects') },
+    { label: 'Experience', action: () => scrollToSection('roles') },
     { label: 'Contact', action: () => scrollToSection('contact') },
-  ]
-
-  const socialLinks = [
-    { href: "https://www.linkedin.com/in/ayroescobar/", icon: FaLinkedin, hoverColor: "hover:text-blue-400", label: "LinkedIn" },
-    { href: "https://github.com/AyroEscobar", icon: FaGithub, hoverColor: "hover:text-white", label: "GitHub" },
-    { href: "mailto:yro.escobar@gmail.com", icon: FaEnvelope, hoverColor: "hover:text-red-400", label: "Email" },
-    { href: "https://www.instagram.com/ayro.afk/", icon: FaInstagram, hoverColor: "hover:text-pink-400", label: "Instagram" },
   ]
 
   return (
@@ -40,62 +44,60 @@ const Navbar = () => {
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.5 }}
-        className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-3xl z-50"
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled ? 'bg-[#030303]/90 backdrop-blur-md border-b border-[rgba(255,255,255,0.05)]' : ''
+        }`}
       >
-        <div className="glass rounded-2xl px-4 md:px-6 py-3">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link
               to="/"
-              className="text-white font-semibold text-lg tracking-tight hover:text-sky-400 transition-colors"
+              className="text-white font-semibold text-lg tracking-tight hover:opacity-70 transition-opacity"
             >
-              <span className="gradient-text">A</span>yro
+              Ayro<span className="text-[#38bdf8]">.</span>
             </Link>
 
             {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
                 <button
                   key={link.label}
                   onClick={link.action}
-                  className="px-3 py-1.5 text-white/70 text-sm font-medium hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
+                  className="text-[#888888] text-sm font-medium hover:text-white transition-colors duration-200"
                 >
                   {link.label}
                 </button>
               ))}
               <Link
                 to="/hackathons"
-                className="px-3 py-1.5 text-white/70 text-sm font-medium hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 flex items-center gap-1.5"
+                className="text-[#888888] text-sm font-medium hover:text-white transition-colors duration-200 flex items-center gap-2"
               >
                 <FaMapMarkedAlt size={12} />
                 Map
               </Link>
             </div>
 
-            {/* Desktop Social Links */}
-            <div className="hidden md:flex items-center gap-2">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target={social.href.startsWith("mailto") ? undefined : "_blank"}
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  className={`text-white/40 ${social.hoverColor} transition-colors duration-200 p-1.5`}
-                >
-                  <social.icon size={16} />
-                </a>
-              ))}
+            {/* Resume Button - Desktop */}
+            <div className="hidden md:block">
+              <a
+                href="https://github.com/AyroEscobar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-white border border-[rgba(255,255,255,0.15)] px-4 py-2 rounded-lg hover:bg-white hover:text-black transition-all duration-200"
+              >
+                GitHub
+              </a>
             </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-white/70 hover:text-white p-1.5 transition-colors"
+              className="md:hidden text-white p-2"
               aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <HiX size={22} /> : <HiMenuAlt4 size={22} />}
+              {mobileMenuOpen ? <HiX size={24} /> : <HiMenuAlt4 size={24} />}
             </button>
           </div>
         </div>
@@ -104,18 +106,18 @@ const Navbar = () => {
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="glass rounded-2xl mt-2 p-4 md:hidden"
+              className="md:hidden bg-[#030303] border-t border-[rgba(255,255,255,0.05)]"
             >
-              <div className="flex flex-col gap-1">
+              <div className="px-6 py-6 space-y-1">
                 {navLinks.map((link) => (
                   <button
                     key={link.label}
                     onClick={link.action}
-                    className="px-4 py-3 text-white/80 text-left font-medium hover:bg-white/5 rounded-xl transition-colors"
+                    className="block w-full text-left px-4 py-3 text-[#c2c2c2] text-base font-medium hover:text-white hover:bg-[rgba(255,255,255,0.02)] rounded-lg transition-colors"
                   >
                     {link.label}
                   </button>
@@ -123,27 +125,21 @@ const Navbar = () => {
                 <Link
                   to="/hackathons"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-3 text-white/80 font-medium hover:bg-white/5 rounded-xl transition-colors flex items-center gap-2"
+                  className="flex items-center gap-2 px-4 py-3 text-[#c2c2c2] text-base font-medium hover:text-white hover:bg-[rgba(255,255,255,0.02)] rounded-lg transition-colors"
                 >
                   <FaMapMarkedAlt size={14} />
                   Hackathon Map
                 </Link>
-              </div>
-
-              {/* Mobile Social Links */}
-              <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-white/10">
-                {socialLinks.map((social) => (
+                <div className="pt-4 mt-4 border-t border-[rgba(255,255,255,0.05)]">
                   <a
-                    key={social.label}
-                    href={social.href}
-                    target={social.href.startsWith("mailto") ? undefined : "_blank"}
+                    href="https://github.com/AyroEscobar"
+                    target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={social.label}
-                    className={`text-white/50 ${social.hoverColor} transition-colors p-2`}
+                    className="block text-center text-sm font-medium text-white border border-[rgba(255,255,255,0.15)] px-4 py-3 rounded-lg"
                   >
-                    <social.icon size={20} />
+                    GitHub Profile
                   </a>
-                ))}
+                </div>
               </div>
             </motion.div>
           )}

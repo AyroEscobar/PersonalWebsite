@@ -1,100 +1,91 @@
-// About Section - Premium design with photo and bio
+// About Section - Clean, minimal design
 
 import { motion } from 'framer-motion'
 import pfp from '../../assets/pfp.JPG'
 
 function About() {
   return (
-    <section id="about" className="py-24 px-4 md:px-6">
-      <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="glass rounded-3xl p-6 md:p-10"
-        >
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            {/* Photo */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="relative flex-shrink-0"
-            >
-              {/* Glow effect behind image */}
-              <div className="absolute inset-0 bg-gradient-to-br from-sky-500/30 to-purple-500/30 rounded-full blur-2xl scale-110" />
+    <section id="about" className="py-32 px-6 md:px-12 lg:px-24">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          {/* Image */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative"
+          >
+            <div className="aspect-square max-w-md mx-auto lg:mx-0">
               <img
                 src={pfp}
                 alt="Ayro Escobar"
-                className="relative h-48 w-48 md:h-56 md:w-56 rounded-full object-cover object-right border-2 border-white/10"
+                className="w-full h-full object-cover object-right rounded-2xl grayscale hover:grayscale-0 transition-all duration-500"
               />
-            </motion.div>
-
-            {/* Content */}
-            <div className="flex-1 text-center md:text-left">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                  About <span className="gradient-text">Me</span>
-                </h2>
-                <div className="w-12 h-1 bg-gradient-to-r from-sky-400 to-purple-400 rounded-full mb-6 mx-auto md:mx-0" />
-              </motion.div>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="text-white/80 text-base md:text-lg leading-relaxed mb-4"
-              >
-                I'm a software engineer and CS student at UT Dallas who's passionate
-                about building cool stuff and helping others do the same.
-              </motion.p>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-                className="text-white/70 text-base md:text-lg leading-relaxed mb-4"
-              >
-                I believe the best way to learn is to teach—that's why I spend so much time
-                mentoring at hackathons, helping classmates, and pair programming on projects.
-              </motion.p>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                className="text-white/60 text-base md:text-lg leading-relaxed mb-6"
-              >
-                I love that lightbulb moment when things finally click. Always learning, always sharing.
-              </motion.p>
-
-              {/* Status badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.7 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-sky-500/10 border border-sky-500/20 text-sky-300 rounded-full text-sm font-medium"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
-                </span>
-                Incoming SWE @ JP Morgan • Summer 2026
-              </motion.div>
             </div>
-          </div>
-        </motion.div>
+            {/* Decorative border */}
+            <div className="absolute -bottom-4 -right-4 w-full h-full border border-[rgba(255,255,255,0.1)] rounded-2xl -z-10 max-w-md mx-auto lg:mx-0" />
+          </motion.div>
+
+          {/* Content */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {/* Section label */}
+            <p className="text-[#38bdf8] text-sm font-medium tracking-widest uppercase mb-4">
+              About
+            </p>
+
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white mb-8 leading-tight">
+              Building cool stuff &<br />
+              <span className="text-[#666666]">helping others do the same</span>
+            </h2>
+
+            <div className="space-y-6 text-[#888888] text-base md:text-lg leading-relaxed">
+              <p>
+                I'm a software engineer and CS student at UT Dallas who's passionate
+                about creating impactful products and fostering community growth.
+              </p>
+
+              <p>
+                I believe the best way to learn is to teach—that's why I spend time
+                mentoring at hackathons, helping classmates, and pair programming on
+                projects. There's nothing better than that lightbulb moment when
+                things finally click.
+              </p>
+
+              <p className="text-[#c2c2c2]">
+                Currently focused on AI/ML, full-stack development, and building
+                tools that make developers' lives easier.
+              </p>
+            </div>
+
+            {/* Status */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="mt-10 pt-10 border-t border-[rgba(255,255,255,0.08)]"
+            >
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-400"></span>
+                </span>
+                <span className="text-white font-medium">
+                  Incoming SWE @ JP Morgan
+                </span>
+                <span className="text-[#666666]">
+                  — Summer 2026
+                </span>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
       </div>
     </section>
   )

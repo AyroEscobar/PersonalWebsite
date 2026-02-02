@@ -1,4 +1,4 @@
-// Skills Section - Clean grid with hover effects
+// Skills Section - Clean, minimal grid
 
 import { motion } from 'framer-motion'
 import { FaJava, FaPython, FaReact, FaJs, FaNodeJs, FaGitAlt } from 'react-icons/fa'
@@ -6,37 +6,38 @@ import { SiCplusplus, SiTailwindcss, SiPostgresql, SiSupabase, SiFirebase, SiTyp
 
 function Skills() {
   const skills = [
-    { name: "Java", icon: FaJava, color: "#f89820" },
-    { name: "Python", icon: FaPython, color: "#3776ab" },
-    { name: "C++", icon: SiCplusplus, color: "#00599c" },
-    { name: "JavaScript", icon: FaJs, color: "#f7df1e" },
-    { name: "TypeScript", icon: SiTypescript, color: "#3178c6" },
-    { name: "React", icon: FaReact, color: "#61dafb" },
-    { name: "Node.js", icon: FaNodeJs, color: "#339933" },
-    { name: "Tailwind", icon: SiTailwindcss, color: "#06b6d4" },
-    { name: "PostgreSQL", icon: SiPostgresql, color: "#336791" },
-    { name: "Supabase", icon: SiSupabase, color: "#3ecf8e" },
-    { name: "Firebase", icon: SiFirebase, color: "#ffca28" },
-    { name: "Git", icon: FaGitAlt, color: "#f05032" },
+    { name: "Java", icon: FaJava },
+    { name: "Python", icon: FaPython },
+    { name: "C++", icon: SiCplusplus },
+    { name: "JavaScript", icon: FaJs },
+    { name: "TypeScript", icon: SiTypescript },
+    { name: "React", icon: FaReact },
+    { name: "Node.js", icon: FaNodeJs },
+    { name: "Tailwind", icon: SiTailwindcss },
+    { name: "PostgreSQL", icon: SiPostgresql },
+    { name: "Supabase", icon: SiSupabase },
+    { name: "Firebase", icon: SiFirebase },
+    { name: "Git", icon: FaGitAlt },
   ]
 
   return (
-    <section id="skills" className="py-24 px-4 md:px-6">
-      <div className="max-w-5xl mx-auto">
+    <section id="skills" className="py-32 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.05)]">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          transition={{ duration: 0.6 }}
+          className="mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-            Tech <span className="gradient-text">Stack</span>
-          </h2>
-          <p className="text-white/50 text-base md:text-lg">
-            Technologies I work with
+          <p className="text-[#38bdf8] text-sm font-medium tracking-widest uppercase mb-4">
+            Skills
           </p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
+            Tech<br />
+            <span className="text-[#666666]">Stack</span>
+          </h2>
         </motion.div>
 
         {/* Skills Grid */}
@@ -45,27 +46,26 @@ function Skills() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="glass rounded-3xl p-6 md:p-8"
         >
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {skills.map((skill, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: index * 0.03 }}
-                whileHover={{ y: -4, scale: 1.05 }}
-                className="flex flex-col items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all duration-200 cursor-default group"
+                className="group"
               >
-                <skill.icon
-                  size={32}
-                  style={{ color: skill.color }}
-                  className="mb-2 group-hover:scale-110 transition-transform duration-200"
-                />
-                <span className="text-white/70 text-xs font-medium text-center group-hover:text-white transition-colors">
-                  {skill.name}
-                </span>
+                <div className="flex flex-col items-center justify-center p-6 bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-xl hover:border-[rgba(255,255,255,0.15)] transition-all duration-300">
+                  <skill.icon
+                    size={28}
+                    className="text-[#666666] group-hover:text-white transition-colors duration-300 mb-3"
+                  />
+                  <span className="text-[#666666] text-xs font-medium text-center group-hover:text-[#c2c2c2] transition-colors">
+                    {skill.name}
+                  </span>
+                </div>
               </motion.div>
             ))}
           </div>
