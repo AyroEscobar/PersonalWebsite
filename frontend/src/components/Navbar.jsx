@@ -56,7 +56,7 @@ const Navbar = () => {
               to="/"
               className="text-white font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
             >
-              Ayro<span className="text-[#6366f1]">.</span>
+              Ayro
             </Link>
 
             {/* Desktop Nav */}
