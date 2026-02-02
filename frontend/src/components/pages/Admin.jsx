@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { db } from '../../firebase/config'
-import { useHackathons, useAllTestimonials } from '../../hooks/useFirestore'
+import { useHackathons, useAllTestimonials, useProjects } from '../../hooks/useFirestore'
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -12,6 +12,7 @@ const Admin = () => {
   // Data hooks
   const { data: hackathons, loading: hackathonsLoading } = useHackathons()
   const { data: testimonials, loading: testimonialsLoading } = useAllTestimonials()
+  const { data: projects, loading: projectsLoading } = useProjects()
 
   // Hackathon form state
   const [formData, setFormData] = useState({
@@ -23,6 +24,19 @@ const Admin = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const [editingId, setEditingId] = useState(null)
+
+  // Project form state
+  const [projectForm, setProjectForm] = useState({
+    title: '',
+    description: '',
+    tech: '',
+    github: '',
+    live: '',
+    order: 1
+  })
+  const [projectSubmitting, setProjectSubmitting] = useState(false)
+  const [projectMessage, setProjectMessage] = useState('')
+  const [editingProjectId, setEditingProjectId] = useState(null)
 
   const eventTypes = [
     { value: 'competed', label: 'Competed', color: '#3B82F6' },
@@ -115,6 +129,57 @@ const Admin = () => {
   const handleTestimonialDelete = async (id) => {
     if (window.confirm('Delete this testimonial?')) {
       await deleteDoc(doc(db, 'testimonials', id))
+    }
+  }
+
+  // Project handlers
+  const handleProjectSubmit = async (e) => {
+    e.preventDefault()
+    setProjectSubmitting(true)
+    setProjectMessage('')
+    try {
+      const techArray = projectForm.tech.split(',').map(t => t.trim()).filter(t => t)
+      const projectData = {
+        title: projectForm.title,
+        description: projectForm.description,
+        tech: techArray,
+        github: projectForm.github || null,
+        live: projectForm.live || null,
+        order: parseInt(projectForm.order) || 1
+      }
+
+      if (editingProjectId) {
+        await updateDoc(doc(db, 'projects', editingProjectId), projectData)
+        setProjectMessage('Project updated!')
+        setEditingProjectId(null)
+      } else {
+        await addDoc(collection(db, 'projects'), projectData)
+        setProjectMessage('Project added!')
+      }
+      setProjectForm({ title: '', description: '', tech: '', github: '', live: '', order: 1 })
+    } catch (error) {
+      setProjectMessage('Error: ' + error.message)
+    } finally {
+      setProjectSubmitting(false)
+    }
+  }
+
+  const handleProjectEdit = (project) => {
+    setProjectForm({
+      title: project.title,
+      description: project.description,
+      tech: project.tech?.join(', ') || '',
+      github: project.github || '',
+      live: project.live || '',
+      order: project.order || 1
+    })
+    setEditingProjectId(project.id)
+  }
+
+  const handleProjectDelete = async (id) => {
+    if (window.confirm('Delete this project?')) {
+      await deleteDoc(doc(db, 'projects', id))
+      setProjectMessage('Project deleted!')
     }
   }
 
@@ -211,6 +276,21 @@ const Admin = () => {
                 {pendingCount}
               </span>
             )}
+          </button>
+          <button
+            onClick={() => setActiveTab('projects')}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: activeTab === 'projects' ? '#3B82F6' : 'transparent',
+              color: activeTab === 'projects' ? 'white' : '#888',
+              border: activeTab === 'projects' ? 'none' : '1px solid #333',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            Projects ({projects?.length || 0})
           </button>
         </div>
 
@@ -343,6 +423,93 @@ const Admin = () => {
                       >
                         Delete
                       </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Projects Tab */}
+        {activeTab === 'projects' && (
+          <>
+            {/* Add/Edit Project Form */}
+            <div style={{ ...cardStyle, padding: '24px', marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px' }}>
+                {editingProjectId ? 'Edit Project' : 'Add New Project'}
+              </h2>
+              <form onSubmit={handleProjectSubmit}>
+                <div style={{ display: 'grid', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '14px', color: '#888', marginBottom: '6px' }}>Title</label>
+                      <input type="text" value={projectForm.title} onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} placeholder="e.g. Routed" required style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '14px', color: '#888', marginBottom: '6px' }}>Order</label>
+                      <input type="number" value={projectForm.order} onChange={(e) => setProjectForm({ ...projectForm, order: e.target.value })} min="1" style={{ ...inputStyle, width: '80px' }} />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', color: '#888', marginBottom: '6px' }}>Description</label>
+                    <textarea value={projectForm.description} onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })} placeholder="What does this project do?" required rows="3" style={{ ...inputStyle, resize: 'vertical' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', color: '#888', marginBottom: '6px' }}>Tech Stack</label>
+                    <input type="text" value={projectForm.tech} onChange={(e) => setProjectForm({ ...projectForm, tech: e.target.value })} placeholder="React, Firebase, Node.js (comma-separated)" required style={inputStyle} />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '14px', color: '#888', marginBottom: '6px' }}>GitHub URL</label>
+                      <input type="url" value={projectForm.github} onChange={(e) => setProjectForm({ ...projectForm, github: e.target.value })} placeholder="https://github.com/..." style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '14px', color: '#888', marginBottom: '6px' }}>Live URL (optional)</label>
+                      <input type="url" value={projectForm.live} onChange={(e) => setProjectForm({ ...projectForm, live: e.target.value })} placeholder="https://..." style={inputStyle} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button type="submit" disabled={projectSubmitting} style={{ padding: '12px 24px', backgroundColor: projectSubmitting ? '#333' : '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: projectSubmitting ? 'not-allowed' : 'pointer' }}>
+                      {projectSubmitting ? 'Saving...' : (editingProjectId ? 'Update' : 'Add Project')}
+                    </button>
+                    {editingProjectId && <button type="button" onClick={() => { setEditingProjectId(null); setProjectForm({ title: '', description: '', tech: '', github: '', live: '', order: 1 }) }} style={{ padding: '12px 24px', backgroundColor: 'transparent', color: '#888', border: '1px solid #333', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>}
+                  </div>
+                </div>
+              </form>
+              {projectMessage && <p style={{ marginTop: '16px', padding: '12px', backgroundColor: projectMessage.includes('Error') ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', border: `1px solid ${projectMessage.includes('Error') ? '#EF4444' : '#10B981'}`, borderRadius: '8px', color: projectMessage.includes('Error') ? '#EF4444' : '#10B981' }}>{projectMessage}</p>}
+            </div>
+
+            {/* Projects List */}
+            {projectsLoading ? (
+              <p style={{ color: '#666' }}>Loading...</p>
+            ) : projects?.length === 0 ? (
+              <p style={{ color: '#666' }}>No projects yet. Add your first project above!</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {projects?.map(p => (
+                  <div key={p.id} style={{ ...cardStyle, padding: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                      <div>
+                        <div style={{ fontWeight: '600', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {p.title}
+                          <span style={{ fontSize: '12px', color: '#666', fontWeight: 'normal' }}>#{p.order}</span>
+                        </div>
+                        <p style={{ fontSize: '14px', color: '#aaa', marginTop: '4px', lineHeight: '1.5' }}>{p.description}</p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
+                      {p.tech?.map((t, i) => (
+                        <span key={i} style={{ fontSize: '12px', padding: '4px 8px', backgroundColor: 'rgba(59,130,246,0.1)', color: '#3B82F6', borderRadius: '4px' }}>{t}</span>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {p.github && <a href={p.github} target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px', color: '#888' }}>GitHub</a>}
+                      {p.live && <a href={p.live} target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px', color: '#10B981' }}>Live</a>}
+                      <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                        <button onClick={() => handleProjectEdit(p)} style={{ padding: '8px 16px', backgroundColor: 'transparent', color: '#3B82F6', border: '1px solid #3B82F6', borderRadius: '6px', fontSize: '14px', cursor: 'pointer' }}>Edit</button>
+                        <button onClick={() => handleProjectDelete(p.id)} style={{ padding: '8px 16px', backgroundColor: 'transparent', color: '#EF4444', border: '1px solid #EF4444', borderRadius: '6px', fontSize: '14px', cursor: 'pointer' }}>Delete</button>
+                      </div>
                     </div>
                   </div>
                 ))}
