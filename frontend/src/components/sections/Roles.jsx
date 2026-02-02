@@ -28,7 +28,7 @@ function Roles() {
   ]
 
   return (
-    <section id="roles" className="py-32 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.05)]">
+    <section id="roles" className="py-32 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.06)]">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
@@ -38,12 +38,12 @@ function Roles() {
           transition={{ duration: 0.6 }}
           className="mb-16"
         >
-          <p className="text-[#38bdf8] text-sm font-medium tracking-widest uppercase mb-4">
+          <p className="text-[#6366f1] text-sm font-semibold tracking-widest uppercase mb-4">
             Experience
           </p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
             What I<br />
-            <span className="text-[#666666]">Do</span>
+            <span className="text-[#8888a0]">Do</span>
           </h2>
         </motion.div>
 
@@ -58,28 +58,28 @@ function Roles() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="group"
             >
-              <div className="h-full bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-xl p-6 md:p-8 hover:border-[rgba(255,255,255,0.15)] transition-all duration-300">
+              <div className="h-full bg-[#12121a] border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 md:p-8 hover:border-[rgba(255,255,255,0.2)] hover:bg-[#14141c] transition-all duration-300">
                 {/* Icon */}
-                <div className="w-12 h-12 rounded-lg bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.05)] flex items-center justify-center mb-6 group-hover:border-[rgba(255,255,255,0.1)] transition-colors">
-                  <role.icon size={24} className="text-white" />
+                <div className="w-14 h-14 rounded-xl bg-[rgba(99,102,241,0.1)] flex items-center justify-center mb-6 group-hover:bg-[rgba(99,102,241,0.15)] transition-colors">
+                  <role.icon size={26} className="text-[#6366f1]" />
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl font-semibold text-white mb-4">
+                <h3 className="text-xl font-bold text-white mb-4">
                   {role.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-[#888888] text-sm leading-relaxed mb-6">
+                <p className="text-[#8888a0] text-sm leading-relaxed mb-6">
                   {role.description}
                 </p>
 
                 {/* Highlights */}
-                <div className="flex flex-wrap gap-2 pt-4 border-t border-[rgba(255,255,255,0.05)]">
+                <div className="flex flex-wrap gap-2 pt-4 border-t border-[rgba(255,255,255,0.06)]">
                   {role.highlights.map((highlight, i) => (
                     <span
                       key={i}
-                      className="text-xs px-3 py-1.5 bg-[rgba(255,255,255,0.03)] text-[#666666] rounded-md"
+                      className="text-xs px-3 py-1.5 bg-[rgba(255,255,255,0.04)] text-[#8888a0] rounded-lg font-medium"
                     >
                       {highlight}
                     </span>

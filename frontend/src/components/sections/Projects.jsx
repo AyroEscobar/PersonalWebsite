@@ -22,19 +22,19 @@ function Projects() {
           transition={{ duration: 0.6 }}
           className="mb-16"
         >
-          <p className="text-[#38bdf8] text-sm font-medium tracking-widest uppercase mb-4">
+          <p className="text-[#6366f1] text-sm font-semibold tracking-widest uppercase mb-4">
             Projects
           </p>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
               Featured<br />
-              <span className="text-[#666666]">Work</span>
+              <span className="text-[#8888a0]">Work</span>
             </h2>
             <a
               href="https://github.com/AyroEscobar"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-[#888888] hover:text-white transition-colors text-sm"
+              className="inline-flex items-center gap-2 text-[#8888a0] hover:text-[#6366f1] transition-colors text-sm font-medium"
             >
               View all on GitHub
               <FaArrowRight size={12} />
@@ -53,19 +53,19 @@ function Projects() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="group"
             >
-              <div className="h-full bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-xl p-6 md:p-8 hover:border-[rgba(255,255,255,0.15)] transition-all duration-300">
+              <div className="h-full bg-[#12121a] border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 md:p-8 hover:border-[rgba(255,255,255,0.2)] hover:bg-[#14141c] transition-all duration-300">
                 {/* Project number */}
-                <span className="text-[#333333] text-sm font-mono mb-4 block">
+                <span className="text-[#3a3a4a] text-sm font-mono mb-4 block">
                   {String(index + 1).padStart(2, '0')}
                 </span>
 
                 {/* Title */}
-                <h3 className="text-xl md:text-2xl font-semibold text-white mb-3 group-hover:text-[#38bdf8] transition-colors">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 group-hover:text-[#6366f1] transition-colors">
                   {project.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-[#888888] text-sm md:text-base leading-relaxed mb-6">
+                <p className="text-[#8888a0] text-sm md:text-base leading-relaxed mb-6">
                   {project.description}
                 </p>
 
@@ -74,7 +74,7 @@ function Projects() {
                   {project.tech?.map((tech, i) => (
                     <span
                       key={i}
-                      className="text-xs px-3 py-1.5 bg-[rgba(255,255,255,0.03)] text-[#888888] rounded-md border border-[rgba(255,255,255,0.05)]"
+                      className="text-xs px-3 py-1.5 bg-[rgba(99,102,241,0.1)] text-[#818cf8] rounded-lg font-medium"
                     >
                       {tech}
                     </span>
@@ -82,13 +82,13 @@ function Projects() {
                 </div>
 
                 {/* Links */}
-                <div className="flex items-center gap-4 pt-4 border-t border-[rgba(255,255,255,0.05)]">
+                <div className="flex items-center gap-4 pt-4 border-t border-[rgba(255,255,255,0.06)]">
                   {project.github && (
                     <a
                       href={project.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-[#666666] hover:text-white text-sm transition-colors"
+                      className="flex items-center gap-2 text-[#8888a0] hover:text-white text-sm font-medium transition-colors"
                     >
                       <FaGithub size={16} />
                       <span>Code</span>
@@ -99,7 +99,7 @@ function Projects() {
                       href={project.live}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-[#666666] hover:text-[#38bdf8] text-sm transition-colors"
+                      className="flex items-center gap-2 text-[#8888a0] hover:text-[#6366f1] text-sm font-medium transition-colors"
                     >
                       <FaExternalLinkAlt size={14} />
                       <span>Live</span>

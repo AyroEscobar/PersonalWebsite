@@ -13,7 +13,7 @@ function Testimonials() {
   }
 
   return (
-    <section id="testimonials" className="py-32 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.05)]">
+    <section id="testimonials" className="py-32 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.06)]">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
@@ -23,12 +23,12 @@ function Testimonials() {
           transition={{ duration: 0.6 }}
           className="mb-16"
         >
-          <p className="text-[#38bdf8] text-sm font-medium tracking-widest uppercase mb-4">
+          <p className="text-[#6366f1] text-sm font-semibold tracking-widest uppercase mb-4">
             Testimonials
           </p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
             What People<br />
-            <span className="text-[#666666]">Say</span>
+            <span className="text-[#8888a0]">Say</span>
           </h2>
         </motion.div>
 
@@ -43,23 +43,23 @@ function Testimonials() {
               transition={{ duration: 0.4, delay: index * 0.08 }}
               className="group"
             >
-              <div className="h-full p-6 bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-xl hover:border-[rgba(255,255,255,0.15)] transition-all duration-300">
+              <div className="h-full p-6 bg-[#12121a] border border-[rgba(255,255,255,0.08)] rounded-xl hover:border-[rgba(255,255,255,0.2)] hover:bg-[#14141c] transition-all duration-300">
                 {/* Quote icon */}
-                <FaQuoteLeft className="text-[rgba(255,255,255,0.06)] text-2xl mb-4" />
+                <FaQuoteLeft className="text-[#6366f1]/30 text-2xl mb-4" />
 
                 {/* Message */}
-                <p className="text-[#888888] text-sm leading-relaxed mb-6 group-hover:text-[#c2c2c2] transition-colors">
+                <p className="text-[#8888a0] text-sm leading-relaxed mb-6 group-hover:text-[#d4d4dc] transition-colors">
                   "{testimonial.message}"
                 </p>
 
                 {/* Author */}
                 <div className="flex items-center gap-3 pt-4 border-t border-[rgba(255,255,255,0.06)]">
-                  <div className="w-10 h-10 rounded-full bg-[#111111] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#38bdf8] font-medium text-sm">
+                  <div className="w-10 h-10 rounded-full bg-[rgba(99,102,241,0.15)] flex items-center justify-center text-[#6366f1] font-bold text-sm">
                     {testimonial.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-white font-medium text-sm">{testimonial.name}</p>
-                    <p className="text-[#666666] text-xs">{testimonial.role}</p>
+                    <p className="text-white font-semibold text-sm">{testimonial.name}</p>
+                    <p className="text-[#8888a0] text-xs">{testimonial.role}</p>
                   </div>
                 </div>
               </div>

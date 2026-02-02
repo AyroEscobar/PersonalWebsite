@@ -21,7 +21,7 @@ function Skills() {
   ]
 
   return (
-    <section id="skills" className="py-32 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.05)]">
+    <section id="skills" className="py-32 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.06)]">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
@@ -31,12 +31,12 @@ function Skills() {
           transition={{ duration: 0.6 }}
           className="mb-16"
         >
-          <p className="text-[#38bdf8] text-sm font-medium tracking-widest uppercase mb-4">
+          <p className="text-[#6366f1] text-sm font-semibold tracking-widest uppercase mb-4">
             Skills
           </p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
             Tech<br />
-            <span className="text-[#666666]">Stack</span>
+            <span className="text-[#8888a0]">Stack</span>
           </h2>
         </motion.div>
 
@@ -57,12 +57,12 @@ function Skills() {
                 transition={{ duration: 0.3, delay: index * 0.03 }}
                 className="group"
               >
-                <div className="flex flex-col items-center justify-center p-6 bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-xl hover:border-[rgba(255,255,255,0.15)] transition-all duration-300">
+                <div className="flex flex-col items-center justify-center p-6 bg-[#12121a] border border-[rgba(255,255,255,0.08)] rounded-xl hover:border-[rgba(255,255,255,0.2)] hover:bg-[#14141c] transition-all duration-300">
                   <skill.icon
                     size={28}
-                    className="text-[#666666] group-hover:text-white transition-colors duration-300 mb-3"
+                    className="text-[#8888a0] group-hover:text-[#6366f1] transition-colors duration-300 mb-3"
                   />
-                  <span className="text-[#666666] text-xs font-medium text-center group-hover:text-[#c2c2c2] transition-colors">
+                  <span className="text-[#8888a0] text-xs font-semibold text-center group-hover:text-white transition-colors">
                     {skill.name}
                   </span>
                 </div>

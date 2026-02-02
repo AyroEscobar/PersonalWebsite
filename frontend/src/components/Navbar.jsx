@@ -46,7 +46,7 @@ const Navbar = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.2 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-[#030303]/90 backdrop-blur-md border-b border-[rgba(255,255,255,0.05)]' : ''
+          scrolled ? 'bg-[#0a0a0f]/95 backdrop-blur-xl border-b border-[rgba(255,255,255,0.08)]' : ''
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
@@ -54,9 +54,9 @@ const Navbar = () => {
             {/* Logo */}
             <Link
               to="/"
-              className="text-white font-semibold text-lg tracking-tight hover:opacity-70 transition-opacity"
+              className="text-white font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
             >
-              Ayro<span className="text-[#38bdf8]">.</span>
+              Ayro<span className="text-[#6366f1]">.</span>
             </Link>
 
             {/* Desktop Nav */}
@@ -65,14 +65,14 @@ const Navbar = () => {
                 <button
                   key={link.label}
                   onClick={link.action}
-                  className="text-[#888888] text-sm font-medium hover:text-white transition-colors duration-200"
+                  className="text-[#8888a0] text-sm font-medium hover:text-white transition-colors duration-200"
                 >
                   {link.label}
                 </button>
               ))}
               <Link
                 to="/hackathons"
-                className="text-[#888888] text-sm font-medium hover:text-white transition-colors duration-200 flex items-center gap-2"
+                className="text-[#8888a0] text-sm font-medium hover:text-white transition-colors duration-200 flex items-center gap-2"
               >
                 <FaMapMarkedAlt size={12} />
                 Map
@@ -85,7 +85,7 @@ const Navbar = () => {
                 href="https://github.com/AyroEscobar"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-white border border-[rgba(255,255,255,0.15)] px-4 py-2 rounded-lg hover:bg-white hover:text-black transition-all duration-200"
+                className="text-sm font-semibold text-white border border-[rgba(255,255,255,0.15)] px-5 py-2.5 rounded-xl hover:bg-[#6366f1] hover:border-[#6366f1] transition-all duration-200"
               >
                 GitHub
               </a>
@@ -110,14 +110,14 @@ const Navbar = () => {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden bg-[#030303] border-t border-[rgba(255,255,255,0.05)]"
+              className="md:hidden bg-[#0a0a0f] border-t border-[rgba(255,255,255,0.08)]"
             >
               <div className="px-6 py-6 space-y-1">
                 {navLinks.map((link) => (
                   <button
                     key={link.label}
                     onClick={link.action}
-                    className="block w-full text-left px-4 py-3 text-[#c2c2c2] text-base font-medium hover:text-white hover:bg-[rgba(255,255,255,0.02)] rounded-lg transition-colors"
+                    className="block w-full text-left px-4 py-3 text-[#d4d4dc] text-base font-medium hover:text-white hover:bg-[rgba(255,255,255,0.03)] rounded-xl transition-colors"
                   >
                     {link.label}
                   </button>
@@ -125,17 +125,17 @@ const Navbar = () => {
                 <Link
                   to="/hackathons"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 text-[#c2c2c2] text-base font-medium hover:text-white hover:bg-[rgba(255,255,255,0.02)] rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-3 text-[#d4d4dc] text-base font-medium hover:text-white hover:bg-[rgba(255,255,255,0.03)] rounded-xl transition-colors"
                 >
                   <FaMapMarkedAlt size={14} />
                   Hackathon Map
                 </Link>
-                <div className="pt-4 mt-4 border-t border-[rgba(255,255,255,0.05)]">
+                <div className="pt-4 mt-4 border-t border-[rgba(255,255,255,0.08)]">
                   <a
                     href="https://github.com/AyroEscobar"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block text-center text-sm font-medium text-white border border-[rgba(255,255,255,0.15)] px-4 py-3 rounded-lg"
+                    className="block text-center text-sm font-semibold text-white bg-[#6366f1] px-4 py-3 rounded-xl"
                   >
                     GitHub Profile
                   </a>
