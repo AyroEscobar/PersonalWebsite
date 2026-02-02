@@ -1,4 +1,4 @@
-// Testimonials Section - Clean, minimal design
+// Testimonials Section - Compact design
 
 import { motion } from 'framer-motion'
 import { FaQuoteLeft } from 'react-icons/fa'
@@ -13,52 +13,51 @@ function Testimonials() {
   }
 
   return (
-    <section id="testimonials" className="py-32 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.06)]">
-      <div className="max-w-6xl mx-auto">
+    <section id="testimonials" className="py-24 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.06)]">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-16"
+          className="mb-10"
         >
-          <p className="text-[#6366f1] text-sm font-semibold tracking-widest uppercase mb-4">
+          <p className="text-[#6366f1] text-xs font-semibold tracking-widest uppercase mb-3">
             Testimonials
           </p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
-            What People<br />
-            <span className="text-[#8888a0]">Say</span>
+          <h2 className="text-2xl md:text-3xl font-bold text-white">
+            What People Say
           </h2>
         </motion.div>
 
         {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.slice(0, 6).map((testimonial, index) => (
+        <div className="grid md:grid-cols-2 gap-4">
+          {testimonials.slice(0, 4).map((testimonial, index) => (
             <motion.div
               key={testimonial.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.08 }}
               className="group"
             >
-              <div className="h-full p-6 bg-[#12121a] border border-[rgba(255,255,255,0.08)] rounded-xl hover:border-[rgba(255,255,255,0.2)] hover:bg-[#14141c] transition-all duration-300">
+              <div className="h-full p-5 bg-[#12121a] border border-[rgba(255,255,255,0.06)] rounded-xl hover:border-[rgba(255,255,255,0.15)] transition-all">
                 {/* Quote icon */}
-                <FaQuoteLeft className="text-[#6366f1]/30 text-2xl mb-4" />
+                <FaQuoteLeft className="text-[#6366f1]/20 text-lg mb-3" />
 
                 {/* Message */}
-                <p className="text-[#8888a0] text-sm leading-relaxed mb-6 group-hover:text-[#d4d4dc] transition-colors">
+                <p className="text-[#8888a0] text-sm leading-relaxed mb-4">
                   "{testimonial.message}"
                 </p>
 
                 {/* Author */}
-                <div className="flex items-center gap-3 pt-4 border-t border-[rgba(255,255,255,0.06)]">
-                  <div className="w-10 h-10 rounded-full bg-[rgba(99,102,241,0.15)] flex items-center justify-center text-[#6366f1] font-bold text-sm">
+                <div className="flex items-center gap-3 pt-3 border-t border-[rgba(255,255,255,0.06)]">
+                  <div className="w-8 h-8 rounded-full bg-[rgba(99,102,241,0.1)] flex items-center justify-center text-[#6366f1] font-semibold text-xs">
                     {testimonial.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">{testimonial.name}</p>
+                    <p className="text-white font-medium text-sm">{testimonial.name}</p>
                     <p className="text-[#8888a0] text-xs">{testimonial.role}</p>
                   </div>
                 </div>

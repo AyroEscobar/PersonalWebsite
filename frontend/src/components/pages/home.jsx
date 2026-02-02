@@ -8,6 +8,7 @@ import Projects from '../sections/Projects'
 import HackathonPreview from '../sections/HackathonPreview'
 import Testimonials from '../sections/Testimonials'
 import Contact from '../sections/Contact'
+import Footer from '../sections/Footer'
 
 function Home() {
   return (
@@ -20,6 +21,7 @@ function Home() {
       <HackathonPreview />
       <Testimonials />
       <Contact />
+      <Footer />
     </div>
   )
 }
