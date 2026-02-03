@@ -41,7 +41,7 @@ function Hero() {
 
       {/* Main content */}
       <div className="relative z-10 max-w-6xl mx-auto w-full">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+        <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-8 lg:gap-16 pb-20 lg:pb-0">
           {/* Left - Text content */}
           <div className="flex-1">
             {/* Name */}
@@ -165,15 +165,15 @@ function Hero() {
             className="flex-shrink-0"
           >
             <div className="relative">
-              <div className="w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-2xl overflow-hidden border-2 border-[rgba(255,255,255,0.1)]">
+              <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-2xl overflow-hidden border-2 border-[rgba(255,255,255,0.1)]">
                 <img
                   src={pfp}
                   alt="Ayro Escobar"
                   className="w-full h-full object-cover"
                 />
               </div>
-              {/* Decorative border */}
-              <div className="absolute -bottom-4 -right-4 w-full h-full border-2 border-[#6366f1]/30 rounded-2xl -z-10" />
+              {/* Decorative border - hidden on mobile */}
+              <div className="hidden sm:block absolute -bottom-4 -right-4 w-full h-full border-2 border-[#6366f1]/30 rounded-2xl -z-10" />
             </div>
           </motion.div>
         </div>
