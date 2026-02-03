@@ -103,7 +103,7 @@ const HackathonMap = () => {
   const initializeMap = () => {
     try {
       const mapboxgl = window.mapboxgl;
-      mapboxgl.accessToken = import.meta.env.MAPBOX_TOKEN;
+      mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
       
       const map = new mapboxgl.Map({
         container: mapContainerRef.current,

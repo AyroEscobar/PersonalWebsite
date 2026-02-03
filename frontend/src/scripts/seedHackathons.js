@@ -38,20 +38,12 @@ const hackathons = [
     date: 'March 2024'
   },
   {
-    name: '&Hacks',
-    city: 'Charlottesville, VA',
-    lat: 38.0293,
-    lng: -78.4767,
-    type: 'organized',
-    date: 'April 2024'
-  },
-  {
     name: 'Hack the North',
     city: 'Waterloo, ON',
     lat: 43.4723,
     lng: -80.5449,
     type: 'competed',
-    date: 'September 2024'
+    date: 'September 2025'
   },
   {
     name: 'SteelHacks',
