@@ -23,7 +23,7 @@ function Roles() {
       title: "HackUTD Organizer",
       icon: HiUserGroup,
       description: "Organizing UTD's flagship hackathon, managing logistics, sponsors, and hacker experience.",
-      tags: ["HackUTD", "&Hacks"]
+      tags: ["HackUTD", "Logistics"]
     },
     {
       title: "TIP Officer",

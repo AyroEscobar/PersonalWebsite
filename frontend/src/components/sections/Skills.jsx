@@ -1,7 +1,7 @@
 // Skills Section - Categorized tech stack
 
 import { motion } from 'framer-motion'
-import { FaJava, FaPython, FaReact, FaJs, FaNodeJs, FaGitAlt, FaAws } from 'react-icons/fa'
+import { FaJava, FaPython, FaReact, FaJs, FaNodeJs, FaGitAlt, FaAws, FaHtml5 } from 'react-icons/fa'
 import { SiCplusplus, SiTailwindcss, SiPostgresql, SiSupabase, SiFirebase, SiTypescript, SiMongodb, SiDocker } from 'react-icons/si'
 
 function Skills() {
@@ -19,6 +19,7 @@ function Skills() {
     {
       title: "Frontend",
       skills: [
+        { name: "HTML/CSS", icon: FaHtml5 },
         { name: "React", icon: FaReact },
         { name: "Tailwind", icon: SiTailwindcss },
       ]
