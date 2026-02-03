@@ -1,7 +1,8 @@
 // Testimonials Section - Compact design
 
 import { motion } from 'framer-motion'
-import { FaQuoteLeft } from 'react-icons/fa'
+import { FaQuoteLeft, FaPen } from 'react-icons/fa'
+import { Link } from 'react-router-dom'
 import { useTestimonials } from '../../hooks/useFirestore'
 
 function Testimonials() {
@@ -21,14 +22,23 @@ function Testimonials() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-10"
+          className="mb-10 flex items-end justify-between"
         >
-          <p className="text-[#6366f1] text-xs font-semibold tracking-widest uppercase mb-3">
-            Testimonials
-          </p>
-          <h2 className="text-2xl md:text-3xl font-bold text-white">
-            What People Say
-          </h2>
+          <div>
+            <p className="text-[#6366f1] text-xs font-semibold tracking-widest uppercase mb-3">
+              Testimonials
+            </p>
+            <h2 className="text-2xl md:text-3xl font-bold text-white">
+              What People Say
+            </h2>
+          </div>
+          <Link
+            to="/review"
+            className="flex items-center gap-2 px-4 py-2 bg-[#6366f1] hover:bg-[#5558e3] text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            <FaPen size={12} />
+            Leave a Review
+          </Link>
         </motion.div>
 
         {/* Testimonials Grid */}

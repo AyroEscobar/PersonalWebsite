@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config'
-import { FaCheckCircle, FaPaperPlane, FaHeart } from 'react-icons/fa'
+import { FaCheckCircle, FaPaperPlane, FaHeart, FaArrowLeft } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import { useTestimonials } from '../../hooks/useFirestore'
 
@@ -125,6 +125,22 @@ function Review() {
   return (
     <div className="min-h-screen px-4 pt-20 pb-10">
       <div className="max-w-4xl mx-auto">
+        {/* Back Button */}
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-6"
+        >
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm"
+          >
+            <FaArrowLeft size={12} />
+            Back to Home
+          </Link>
+        </motion.div>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
