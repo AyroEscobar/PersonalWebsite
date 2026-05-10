@@ -3,45 +3,40 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 const roles = [
   {
-    org: 'RBC Capital Markets',
-    title: 'Software Engineer Intern',
-    period: 'Summer 2025',
-    desc: 'Working on engineering teams in New York. Financial technology at scale.',
+    org: 'JP Morgan Chase',
+    title: 'Software Engineer Intern · Digital Platform Services',
+    period: 'Jun – Aug 2026',
+    desc: 'Incoming. Working in Java, Spring Boot, Kafka, and GraphQL on platform services that power JPMC\'s digital surface.',
     type: 'work',
+    badge: 'Incoming',
   },
   {
-    org: 'JP Morgan Chase',
+    org: 'MD7',
+    title: 'Software Engineer (Contract)',
+    period: '2025 – Present',
+    desc: 'Building a Power BI competitor — clean executive dashboards focused on summaries and exec-level perspective. Shipping with the CTO; real ownership over architecture and ship cadence.',
+    type: 'work',
+    badge: 'Current',
+  },
+  {
+    org: 'RBC — Royal Bank of Canada',
     title: 'Software Engineer Intern',
-    period: 'Summer 2026',
-    desc: 'Incoming internship in software engineering.',
+    period: 'New York City',
+    desc: 'Shipped on engineering teams in midtown. Strong enough finish that a return offer (Jan–April) or a London posting is on the table.',
     type: 'work',
   },
   {
     org: 'Major League Hacking',
     title: 'MLH Coach',
     period: 'Ongoing',
-    desc: 'Mentoring hackers at MLH-sanctioned events. Helped 100+ hackers across 10+ events debug, ideate, and ship projects under 24–48 hour deadlines.',
-    type: 'community',
-  },
-  {
-    org: 'GitHub',
-    title: 'Campus Expert',
-    period: 'Ongoing',
-    desc: 'Building the developer community at UTD — workshops, open source advocacy, and connecting students with industry.',
+    desc: 'Working directly with Jon Gottfried (MLH co-founder). Mentoring hackers, supporting marketing + outreach, and building automation — including a CSV → Google Sheet pipeline now used by the team.',
     type: 'community',
   },
   {
     org: 'HackUTD',
-    title: 'Organizer',
-    period: '2024–2025',
-    desc: "Running UTD's flagship 24-hour hackathon — sponsor relations, logistics, and making sure 500+ hackers have the best weekend of the year.",
-    type: 'community',
-  },
-  {
-    org: 'ACM UTD — TIP',
-    title: 'Officer',
-    period: 'Fall 2025',
-    desc: 'Technical Interview Prep. Coached a cohort from basic arrays through dynamic programming, trees, and graphs.',
+    title: 'Tech Team',
+    period: 'Ongoing',
+    desc: 'Tech crew for one of the largest collegiate hackathons in the country. 1,000+ hackers, a single weekend, very little sleep.',
     type: 'community',
   },
 ]
@@ -63,7 +58,7 @@ export default function Roles() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-[#e6f1ff] text-2xl font-semibold mb-10 flex items-center">
+        <h2 className="text-[#ecf2fb] text-2xl font-semibold mb-10 flex items-center">
           <span className="num">02.</span>
           Experience
           <span className="rule" />
@@ -78,7 +73,7 @@ export default function Roles() {
               className={`mono text-[13px] px-5 py-2.5 border-b-2 -mb-px transition-all ${
                 tab === t
                   ? 'text-[#64ffda] border-[#64ffda]'
-                  : 'text-[#8892a4] border-transparent hover:text-[#64ffda] hover:bg-[rgba(100,255,218,0.03)]'
+                  : 'text-[#8a93a3] border-transparent hover:text-[#64ffda] hover:bg-[rgba(100,255,218,0.03)]'
               }`}
             >
               {t}
@@ -105,14 +100,26 @@ export default function Roles() {
                 className="py-6 border-b border-[rgba(100,255,218,0.07)] last:border-0 group -mx-4 px-4 rounded-lg hover:bg-[rgba(100,255,218,0.025)] transition-colors cursor-default"
               >
                 <div className="flex items-start justify-between gap-4 flex-wrap mb-1.5">
-                  <div>
-                    <span className="text-[#e6f1ff] font-semibold">{r.title}</span>
-                    <span className="text-[#64ffda] mx-2 opacity-70">@</span>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-[#ecf2fb] font-semibold">{r.title}</span>
+                    <span className="text-[#64ffda] opacity-70">@</span>
                     <span className="text-[#64ffda]">{r.org}</span>
+                    {r.badge && (
+                      <span
+                        className="mono text-[10px] tracking-widest uppercase px-2 py-0.5 rounded"
+                        style={{
+                          color: '#64ffda',
+                          background: 'rgba(100,255,218,0.08)',
+                          border: '1px solid rgba(100,255,218,0.25)',
+                        }}
+                      >
+                        {r.badge}
+                      </span>
+                    )}
                   </div>
-                  <span className="mono text-[12px] text-[#8892a4] whitespace-nowrap pt-0.5">{r.period}</span>
+                  <span className="mono text-[12px] text-[#8a93a3] whitespace-nowrap pt-0.5">{r.period}</span>
                 </div>
-                <p className="text-[#8892a4] text-sm leading-relaxed">{r.desc}</p>
+                <p className="text-[#8a93a3] text-sm leading-relaxed">{r.desc}</p>
               </motion.div>
             ))}
           </motion.div>
