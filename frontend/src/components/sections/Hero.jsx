@@ -3,7 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FaLinkedin, FaGithub, FaInstagram } from 'react-icons/fa'
 import { MdEmail } from 'react-icons/md'
 
-const ROLES = ['Software Engineer', 'MLH Coach', 'GitHub Campus Expert', 'Hackathon Organizer']
+const ROLES = [
+  'Software Engineer',
+  'Builder',
+  'JPMC ’26 / RBC ’25',
+  'AI Infrastructure Guy',
+]
 
 const socials = [
   { href: 'https://www.linkedin.com/in/ayroescobar/', Icon: FaLinkedin, label: 'LinkedIn' },
@@ -34,24 +39,24 @@ export default function Hero() {
             target={href.startsWith('mailto') ? undefined : '_blank'}
             rel="noopener noreferrer"
             aria-label={label}
-            className="text-[#8892a4] hover:text-[#64ffda] hover:-translate-y-1 transition-all duration-200"
+            className="text-[#8a93a3] hover:text-[#64ffda] hover:-translate-y-1 transition-all duration-200"
           >
             <Icon size={18} />
           </a>
         ))}
-        <div className="w-px h-24 mt-2" style={{ background: 'linear-gradient(180deg, #8892a4, transparent)' }} />
+        <div className="w-px h-24 mt-2" style={{ background: 'linear-gradient(180deg, #8a93a3, transparent)' }} />
       </div>
 
       {/* Fixed right email rail */}
       <div className="fixed right-10 bottom-0 hidden xl:flex flex-col items-center gap-4 z-40">
         <a
           href="mailto:ayro.escobar@gmail.com"
-          className="mono text-[12px] text-[#8892a4] hover:text-[#64ffda] hover:-translate-y-1 transition-all duration-200 tracking-widest"
+          className="mono text-[12px] text-[#8a93a3] hover:text-[#64ffda] hover:-translate-y-1 transition-all duration-200 tracking-widest"
           style={{ writingMode: 'vertical-rl' }}
         >
           ayro.escobar@gmail.com
         </a>
-        <div className="w-px h-24 mt-2" style={{ background: 'linear-gradient(180deg, #8892a4, transparent)' }} />
+        <div className="w-px h-24 mt-2" style={{ background: 'linear-gradient(180deg, #8a93a3, transparent)' }} />
       </div>
 
       {/* Content */}
@@ -62,7 +67,7 @@ export default function Hero() {
           transition={{ delay: 0.1 }}
           className="mono text-[#64ffda] text-sm mb-5 tracking-widest"
         >
-          Hi, my name is
+          Plano, TX — 20 y/o
         </motion.p>
 
         {/* Name — shimmer gradient */}
@@ -75,7 +80,7 @@ export default function Hero() {
             fontSize: 'clamp(48px, 8vw, 82px)',
             lineHeight: 1,
             fontWeight: 800,
-            background: 'linear-gradient(90deg, #e6f1ff 0%, #64ffda 40%, #a8b2d8 65%, #e6f1ff 100%)',
+            background: 'linear-gradient(90deg, #ecf2fb 0%, #64ffda 40%, #b0b8c7 65%, #ecf2fb 100%)',
             backgroundSize: '300%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -100,7 +105,7 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25 }}
-              className="font-semibold text-[#8892a4]"
+              className="font-semibold text-[#8a93a3]"
               style={{ fontSize: 'clamp(26px, 4.5vw, 48px)' }}
             >
               {ROLES[idx]}
@@ -112,13 +117,21 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="text-[#8892a4] max-w-lg mb-4 leading-relaxed text-base"
+          className="text-[#8a93a3] max-w-lg mb-3 leading-relaxed text-base"
         >
-          I build products that matter and help others learn to do the same.
-          CS student at UT Dallas, currently interning at{' '}
-          <span className="text-[#e6f1ff] font-medium">RBC</span> in New York.
-          Incoming at{' '}
-          <span className="text-[#e6f1ff] font-medium">JP Morgan</span> this summer.
+          I ship software at <span className="text-[#ecf2fb] font-medium">MD7</span>, interned at{' '}
+          <span className="text-[#ecf2fb] font-medium">RBC</span> in NYC, and head to{' '}
+          <span className="text-[#ecf2fb] font-medium">JP Morgan</span> this summer.
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="text-[#8a93a3] max-w-lg mb-4 leading-relaxed text-base"
+        >
+          Trying to build a life where my family never worries about money — and a few things
+          that outlast me. Both before 25.
         </motion.p>
 
         <motion.div
@@ -131,7 +144,9 @@ export default function Hero() {
             className="w-2 h-2 rounded-full inline-block"
             style={{ background: '#64ffda', boxShadow: '0 0 8px #64ffda' }}
           />
-          <span className="mono text-[12px] text-[#8892a4] tracking-wider">Available for opportunities</span>
+          <span className="mono text-[12px] text-[#8a93a3] tracking-wider">
+            Available for full-time conversations
+          </span>
         </motion.div>
 
         <motion.div
@@ -140,10 +155,10 @@ export default function Hero() {
           transition={{ delay: 0.6 }}
           className="flex flex-wrap gap-4"
         >
-          <a href="#projects" className="btn-teal">See my work</a>
+          <a href="#projects" className="btn-teal">See what I'm building</a>
           <a
             href="#contact"
-            className="mono text-sm text-[#8892a4] border border-[rgba(168,178,216,0.25)] rounded px-7 py-4 hover:border-[#64ffda] hover:text-[#64ffda] transition-all"
+            className="mono text-sm text-[#8a93a3] border border-[rgba(176,184,199,0.25)] rounded px-7 py-4 hover:border-[#64ffda] hover:text-[#64ffda] transition-all"
           >
             Get in touch
           </a>
@@ -163,7 +178,7 @@ export default function Hero() {
               target={href.startsWith('mailto') ? undefined : '_blank'}
               rel="noopener noreferrer"
               aria-label={label}
-              className="text-[#8892a4] hover:text-[#64ffda] transition-colors"
+              className="text-[#8a93a3] hover:text-[#64ffda] transition-colors"
             >
               <Icon size={20} />
             </a>
