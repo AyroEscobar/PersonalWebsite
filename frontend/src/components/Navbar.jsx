@@ -1,151 +1,127 @@
-// Navbar - Clean, minimal navigation
-
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiMenuAlt4, HiX } from 'react-icons/hi'
-import { FaMapMarkedAlt } from 'react-icons/fa'
+import { HiX, HiMenu } from 'react-icons/hi'
 
 const Navbar = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const isHome = location.pathname === '/' || location.pathname === '/home'
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const fn = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', fn)
+    return () => window.removeEventListener('scroll', fn)
   }, [])
 
-  const scrollToSection = (sectionId) => {
-    setMobileMenuOpen(false)
-    if (!isHome) {
-      window.location.href = `/#${sectionId}`
-      return
-    }
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
-    }
+  const go = (id) => {
+    setOpen(false)
+    if (!isHome) { window.location.href = `/#${id}`; return }
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const navLinks = [
-    { label: 'About', action: () => scrollToSection('about') },
-    { label: 'Projects', action: () => scrollToSection('projects') },
-    { label: 'Experience', action: () => scrollToSection('roles') },
-    { label: 'Contact', action: () => scrollToSection('contact') },
+  const links = [
+    { label: 'About',      id: 'about' },
+    { label: 'Work',       id: 'roles' },
+    { label: 'Projects',   id: 'projects' },
+    { label: 'Contact',    id: 'contact' },
   ]
 
   return (
-    <>
-      <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-[#0a0a0f]/95 backdrop-blur-xl border-b border-[rgba(255,255,255,0.08)]' : ''
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <Link
-              to="/"
-              className="text-white font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
-            >
-              Ayro
-            </Link>
+    <motion.header
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        scrolled ? 'bg-[#0a0d12]/90 backdrop-blur-xl shadow-[0_1px_0_rgba(100,255,218,0.06)]' : ''
+      }`}
+    >
+      <nav className="max-w-[900px] mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="text-[#64ffda] mono text-sm hover:opacity-70 transition-opacity">
+          ayro.
+        </Link>
 
-            {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <button
-                  key={link.label}
-                  onClick={link.action}
-                  className="text-[#8888a0] text-sm font-medium hover:text-white transition-colors duration-200"
-                >
-                  {link.label}
-                </button>
-              ))}
-              <Link
-                to="/hackathons"
-                className="text-[#8888a0] text-sm font-medium hover:text-white transition-colors duration-200 flex items-center gap-2"
-              >
-                <FaMapMarkedAlt size={12} />
-                Map
-              </Link>
-            </div>
-
-            {/* Resume Button - Desktop */}
-            <div className="hidden md:block">
-              <a
-                href="https://github.com/AyroEscobar"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-semibold text-white border border-[rgba(255,255,255,0.15)] px-5 py-2.5 rounded-xl hover:bg-[#6366f1] hover:border-[#6366f1] transition-all duration-200"
-              >
-                GitHub
-              </a>
-            </div>
-
-            {/* Mobile Menu Button */}
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-8">
+          {links.map((l, i) => (
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-white p-2"
-              aria-label="Toggle menu"
+              key={l.label}
+              onClick={() => go(l.id)}
+              className="mono text-[13px] text-[#8892a4] hover:text-[#64ffda] transition-colors"
             >
-              {mobileMenuOpen ? <HiX size={24} /> : <HiMenuAlt4 size={24} />}
+              <span className="text-[#64ffda] mr-1.5">{String(i + 1).padStart(2,'0')}.</span>
+              {l.label}
             </button>
-          </div>
+          ))}
+          <Link
+            to="/hackathons"
+            className="mono text-[13px] text-[#8892a4] hover:text-[#64ffda] transition-colors"
+          >
+            <span className="text-[#64ffda] mr-1.5">05.</span>
+            Map
+          </Link>
+          <a
+            href="https://github.com/AyroEscobar"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mono text-[13px] text-[#64ffda] border border-[#64ffda] rounded px-4 py-2 hover:bg-[rgba(100,255,218,0.08)] transition-colors"
+          >
+            GitHub
+          </a>
         </div>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden bg-[#0a0a0f] border-t border-[rgba(255,255,255,0.08)]"
+        {/* Mobile toggle */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="md:hidden text-[#64ffda] p-2"
+          aria-label="Menu"
+        >
+          {open ? <HiX size={22} /> : <HiMenu size={22} />}
+        </button>
+      </nav>
+
+      {/* Mobile menu */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            className="md:hidden bg-[#0a0d12] border-t border-[rgba(100,255,218,0.08)] px-6 py-8 flex flex-col gap-5"
+          >
+            {links.map((l, i) => (
+              <button
+                key={l.label}
+                onClick={() => go(l.id)}
+                className="mono text-sm text-[#ccd6f6] text-left hover:text-[#64ffda] transition-colors"
+              >
+                <span className="text-[#64ffda] block text-xs mb-0.5">{String(i + 1).padStart(2,'0')}.</span>
+                {l.label}
+              </button>
+            ))}
+            <Link
+              to="/hackathons"
+              onClick={() => setOpen(false)}
+              className="mono text-sm text-[#ccd6f6] hover:text-[#64ffda] transition-colors"
             >
-              <div className="px-6 py-6 space-y-1">
-                {navLinks.map((link) => (
-                  <button
-                    key={link.label}
-                    onClick={link.action}
-                    className="block w-full text-left px-4 py-3 text-[#d4d4dc] text-base font-medium hover:text-white hover:bg-[rgba(255,255,255,0.03)] rounded-xl transition-colors"
-                  >
-                    {link.label}
-                  </button>
-                ))}
-                <Link
-                  to="/hackathons"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 text-[#d4d4dc] text-base font-medium hover:text-white hover:bg-[rgba(255,255,255,0.03)] rounded-xl transition-colors"
-                >
-                  <FaMapMarkedAlt size={14} />
-                  Hackathon Map
-                </Link>
-                <div className="pt-4 mt-4 border-t border-[rgba(255,255,255,0.08)]">
-                  <a
-                    href="https://github.com/AyroEscobar"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block text-center text-sm font-semibold text-white bg-[#6366f1] px-4 py-3 rounded-xl"
-                  >
-                    GitHub Profile
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
-    </>
+              <span className="text-[#64ffda] block text-xs mb-0.5">05.</span>
+              Map
+            </Link>
+            <a
+              href="https://github.com/AyroEscobar"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mono text-sm text-[#64ffda] border border-[#64ffda] rounded px-4 py-3 text-center hover:bg-[rgba(100,255,218,0.08)] transition-colors mt-2"
+            >
+              GitHub
+            </a>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   )
 }
 

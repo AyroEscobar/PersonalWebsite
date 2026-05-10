@@ -30,7 +30,7 @@ const HackathonMap = () => {
     organized: '#10B981',     // Green
     coached: '#F59E0B',       // Amber/Orange
     conference: '#EC4899',    // Pink
-    travel: '#8B5CF6'         // Purple
+    travel: '#64ffda'         // Teal
   };
 
   // Function to create curved arc between two points (flight path effect)

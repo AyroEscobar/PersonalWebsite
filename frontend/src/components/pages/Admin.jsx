@@ -187,31 +187,33 @@ const Admin = () => {
   const inputStyle = {
     width: '100%',
     padding: '12px 16px',
-    backgroundColor: '#0a0a0a',
-    border: '1px solid #333',
+    backgroundColor: '#060d1f',
+    border: '1px solid rgba(100,255,218,0.12)',
     borderRadius: '8px',
-    color: 'white',
-    fontSize: '16px'
+    color: '#e6f1ff',
+    fontSize: '15px',
+    fontFamily: 'DM Sans, system-ui',
+    outline: 'none',
   }
 
   const cardStyle = {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#0d1b35',
     borderRadius: '12px',
     padding: '16px 20px',
-    border: '1px solid #333'
+    border: '1px solid rgba(100,255,218,0.08)',
   }
 
   // Login screen
   if (!isAuthenticated) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0a', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'system-ui' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: '#060d1f', color: '#e6f1ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, system-ui' }}>
         <div style={{ ...cardStyle, padding: '40px', width: '100%', maxWidth: '400px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '8px', textAlign: 'center' }}>Admin Access</h1>
-          <p style={{ color: '#666', marginBottom: '24px', textAlign: 'center' }}>Enter password to continue</p>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '8px', textAlign: 'center', color: '#e6f1ff' }}>Admin Access</h1>
+          <p style={{ color: '#8892a4', marginBottom: '24px', textAlign: 'center', fontSize: '14px' }}>Enter password to continue</p>
           <form onSubmit={handleLogin}>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" style={{ ...inputStyle, marginBottom: '16px' }} />
-            {authError && <p style={{ color: '#EF4444', fontSize: '14px', marginBottom: '16px', textAlign: 'center' }}>{authError}</p>}
-            <button type="submit" style={{ width: '100%', padding: '12px 24px', backgroundColor: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer' }}>Login</button>
+            {authError && <p style={{ color: '#f0b429', fontSize: '14px', marginBottom: '16px', textAlign: 'center' }}>{authError}</p>}
+            <button type="submit" style={{ width: '100%', padding: '12px 24px', backgroundColor: 'transparent', color: '#64ffda', border: '1px solid #64ffda', borderRadius: '6px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', fontFamily: 'SF Mono, monospace' }}>Login</button>
           </form>
         </div>
       </div>
@@ -221,7 +223,7 @@ const Admin = () => {
   const pendingCount = testimonials?.filter(t => !t.approved).length || 0
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0a', color: 'white', padding: '40px 20px', fontFamily: 'system-ui' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#060d1f', color: '#e6f1ff', padding: '40px 20px', fontFamily: 'DM Sans, system-ui' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>

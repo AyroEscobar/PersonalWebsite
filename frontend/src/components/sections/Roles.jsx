@@ -1,106 +1,123 @@
-// Roles Section - Compact experience cards
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
-import { motion } from 'framer-motion'
-import { FaGithub, FaChalkboardTeacher } from 'react-icons/fa'
-import { SiMajorleaguehacking } from 'react-icons/si'
-import { HiUserGroup } from 'react-icons/hi'
+const roles = [
+  {
+    org: 'RBC Capital Markets',
+    title: 'Software Engineer Intern',
+    period: 'Summer 2025',
+    desc: 'Working on engineering teams in New York. Financial technology at scale.',
+    type: 'work',
+  },
+  {
+    org: 'JP Morgan Chase',
+    title: 'Software Engineer Intern',
+    period: 'Summer 2026',
+    desc: 'Incoming internship in software engineering.',
+    type: 'work',
+  },
+  {
+    org: 'Major League Hacking',
+    title: 'MLH Coach',
+    period: 'Ongoing',
+    desc: 'Mentoring hackers at MLH-sanctioned events. Helped 100+ hackers across 10+ events debug, ideate, and ship projects under 24–48 hour deadlines.',
+    type: 'community',
+  },
+  {
+    org: 'GitHub',
+    title: 'Campus Expert',
+    period: 'Ongoing',
+    desc: 'Building the developer community at UTD — workshops, open source advocacy, and connecting students with industry.',
+    type: 'community',
+  },
+  {
+    org: 'HackUTD',
+    title: 'Organizer',
+    period: '2024–2025',
+    desc: "Running UTD's flagship 24-hour hackathon — sponsor relations, logistics, and making sure 500+ hackers have the best weekend of the year.",
+    type: 'community',
+  },
+  {
+    org: 'ACM UTD — TIP',
+    title: 'Officer',
+    period: 'Fall 2025',
+    desc: 'Technical Interview Prep. Coached a cohort from basic arrays through dynamic programming, trees, and graphs.',
+    type: 'community',
+  },
+]
 
-function Roles() {
-  const roles = [
-    {
-      title: "MLH Coach",
-      icon: SiMajorleaguehacking,
-      description: "Mentoring hackers at Major League Hacking events, helping teams debug, ideate, and ship.",
-      tags: ["10+ events", "100+ hackers"]
-    },
-    {
-      title: "GitHub Campus Expert",
-      icon: FaGithub,
-      description: "Building developer communities on campus, hosting workshops, spreading open source culture.",
-      tags: ["Workshops", "Community"]
-    },
-    {
-      title: "HackUTD Organizer",
-      icon: HiUserGroup,
-      description: "Organizing UTD's flagship hackathon, managing logistics, sponsors, and hacker experience.",
-      tags: ["HackUTD", "Logistics"]
-    },
-    {
-      title: "TIP Officer",
-      icon: FaChalkboardTeacher,
-      description: "Technical Interview Prep officer — coached a team of 4 from arrays to dynamic programming.",
-      tags: ["Fall 2025", "DSA"]
-    }
-  ]
+const TABS = ['All', 'Work', 'Community']
+
+export default function Roles() {
+  const [tab, setTab] = useState('All')
+
+  const filtered = roles.filter(r =>
+    tab === 'All' ? true : r.type === tab.toLowerCase()
+  )
 
   return (
-    <section id="roles" className="py-24 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.06)]">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-10"
-        >
-          <p className="text-[#6366f1] text-xs font-semibold tracking-widest uppercase mb-3">
-            Experience
-          </p>
-          <h2 className="text-2xl md:text-3xl font-bold text-white">
-            What I Do
-          </h2>
-        </motion.div>
+    <section id="roles" className="py-28 px-6 md:px-12 max-w-[900px] mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <h2 className="text-[#e6f1ff] text-2xl font-semibold mb-10 flex items-center">
+          <span className="num">02.</span>
+          Experience
+          <span className="rule" />
+        </h2>
 
-        {/* Roles Grid */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          {roles.map((role, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.08 }}
-              className="group"
+        {/* Filter tabs */}
+        <div className="flex gap-0 mb-8 border-b border-[rgba(100,255,218,0.1)]">
+          {TABS.map(t => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`mono text-[13px] px-5 py-2.5 border-b-2 -mb-px transition-all ${
+                tab === t
+                  ? 'text-[#64ffda] border-[#64ffda]'
+                  : 'text-[#8892a4] border-transparent hover:text-[#64ffda] hover:bg-[rgba(100,255,218,0.03)]'
+              }`}
             >
-              <div className="h-full bg-[#12121a] border border-[rgba(255,255,255,0.06)] rounded-xl p-5 hover:border-[rgba(255,255,255,0.15)] transition-all">
-                <div className="flex items-start gap-4">
-                  {/* Icon */}
-                  <div className="w-10 h-10 rounded-lg bg-[rgba(99,102,241,0.1)] flex items-center justify-center flex-shrink-0 group-hover:bg-[rgba(99,102,241,0.15)] transition-colors">
-                    <role.icon size={18} className="text-[#6366f1]" />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    {/* Title */}
-                    <h3 className="text-white font-semibold text-sm mb-1">
-                      {role.title}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-[#8888a0] text-xs leading-relaxed mb-3">
-                      {role.description}
-                    </p>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2">
-                      {role.tags.map((tag, i) => (
-                        <span
-                          key={i}
-                          className="text-[10px] px-2 py-1 bg-[rgba(255,255,255,0.04)] text-[#8888a0] rounded-md font-medium"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+              {t}
+            </button>
           ))}
         </div>
-      </div>
+
+        {/* Role rows */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-0"
+          >
+            {filtered.map((r, i) => (
+              <motion.div
+                key={r.org + r.title}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.07 }}
+                className="py-6 border-b border-[rgba(100,255,218,0.07)] last:border-0 group -mx-4 px-4 rounded-lg hover:bg-[rgba(100,255,218,0.025)] transition-colors cursor-default"
+              >
+                <div className="flex items-start justify-between gap-4 flex-wrap mb-1.5">
+                  <div>
+                    <span className="text-[#e6f1ff] font-semibold">{r.title}</span>
+                    <span className="text-[#64ffda] mx-2 opacity-70">@</span>
+                    <span className="text-[#64ffda]">{r.org}</span>
+                  </div>
+                  <span className="mono text-[12px] text-[#8892a4] whitespace-nowrap pt-0.5">{r.period}</span>
+                </div>
+                <p className="text-[#8892a4] text-sm leading-relaxed">{r.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
     </section>
   )
 }
-
-export default Roles

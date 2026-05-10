@@ -1,143 +1,88 @@
-// Review Page - Form for people to submit testimonials about Ayro
-// URL: /review (share this link with people you've helped)
-
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config'
-import { FaCheckCircle, FaPaperPlane, FaHeart, FaArrowLeft } from 'react-icons/fa'
+import { FaCheckCircle, FaPaperPlane, FaArrowLeft } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import { useTestimonials } from '../../hooks/useFirestore'
 
-const MIN_MESSAGE_LENGTH = 20
-const MAX_MESSAGE_LENGTH = 300
+const MIN = 20
+const MAX = 300
 
-function Review() {
-  const [formData, setFormData] = useState({
-    name: '',
-    role: '',
-    message: '',
-    website: '' // Honeypot field - bots will fill this, humans won't see it
-  })
-  const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState(null)
+const ROLES = ['Hacker', 'Hackathon Organizer', 'Mentee', 'Student', 'Colleague', 'Friend', 'Other']
 
-  // Get approved testimonials to show as social proof
-  const { data: testimonials } = useTestimonials()
+export default function Review() {
+  const [form, setForm]         = useState({ name: '', role: '', message: '', website: '' })
+  const [submitting, setSub]    = useState(false)
+  const [submitted, setDone]    = useState(false)
+  const [error, setError]       = useState(null)
+  const { data: testimonials }  = useTestimonials()
 
-  const roles = [
-    'Hacker',
-    'Hackathon Organizer',
-    'Mentee',
-    'Student',
-    'Colleague',
-    'Friend',
-    'Other'
-  ]
-
-  const handleChange = (e) => {
+  const onChange = (e) => {
     const { name, value } = e.target
-
-    // Enforce max length on message
-    if (name === 'message' && value.length > MAX_MESSAGE_LENGTH) {
-      return
-    }
-
-    setFormData({
-      ...formData,
-      [name]: value
-    })
+    if (name === 'message' && value.length > MAX) return
+    setForm(p => ({ ...p, [name]: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
     setError(null)
-
-    // Honeypot check - if filled, it's a bot
-    if (formData.website) {
-      // Silently "succeed" but don't actually submit
-      setSubmitted(true)
-      return
-    }
-
-    // Validate message length
-    if (formData.message.length < MIN_MESSAGE_LENGTH) {
-      setError(`Please write at least ${MIN_MESSAGE_LENGTH} characters.`)
-      return
-    }
-
-    setSubmitting(true)
-
+    if (form.website) { setDone(true); return }
+    if (form.message.length < MIN) { setError(`${MIN - form.message.length} more characters needed.`); return }
+    setSub(true)
     try {
       await addDoc(collection(db, 'testimonials'), {
-        name: formData.name.trim(),
-        role: formData.role,
-        message: formData.message.trim(),
+        name: form.name.trim(),
+        role: form.role,
+        message: form.message.trim(),
         approved: false,
-        date: serverTimestamp()
+        date: serverTimestamp(),
       })
-
-      setSubmitted(true)
-    } catch (err) {
-      console.error('Error submitting review:', err)
+      setDone(true)
+    } catch {
       setError('Failed to submit. Please try again.')
     } finally {
-      setSubmitting(false)
+      setSub(false)
     }
   }
 
-  const messageLength = formData.message.length
-  const isMessageValid = messageLength >= MIN_MESSAGE_LENGTH && messageLength <= MAX_MESSAGE_LENGTH
+  const len   = form.message.length
+  const valid = len >= MIN && len <= MAX
 
-  // Success state
+  /* ─── Success ─── */
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 pt-20">
+      <div className="min-h-screen flex items-center justify-center px-6 pt-20">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="glass rounded-3xl p-8 md:p-12 text-center max-w-md"
+          className="glass-card p-12 text-center max-w-md w-full"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring" }}
-            className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6"
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{ background: 'rgba(100,255,218,0.1)', border: '1px solid rgba(100,255,218,0.3)' }}
           >
-            <FaCheckCircle className="text-green-400 text-3xl" />
-          </motion.div>
-          <h2 className="text-2xl font-bold text-white mb-3">Thank You!</h2>
-          <p className="text-white/60 mb-6">
-            Your kind words mean so much to me. Your review will appear on my site shortly!
+            <FaCheckCircle className="text-[#64ffda] text-3xl" />
+          </div>
+          <h2 className="text-[#e6f1ff] text-2xl font-semibold mb-3">Thank You!</h2>
+          <p className="text-[#8892a4] mb-8 leading-relaxed">
+            Your kind words mean a lot. Your review will appear on the site after a quick check.
           </p>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-sky-500 hover:bg-sky-400 text-white font-medium rounded-xl transition-colors"
-          >
-            Back to Home
-          </Link>
+          <Link to="/" className="btn-teal">Back to Home</Link>
         </motion.div>
       </div>
     )
   }
 
+  /* ─── Form ─── */
   return (
-    <div className="min-h-screen px-4 pt-20 pb-10">
-      <div className="max-w-4xl mx-auto">
-        {/* Back Button */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mb-6"
-        >
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm"
-          >
-            <FaArrowLeft size={12} />
-            Back to Home
+    <div className="min-h-screen px-6 md:px-12 pt-28 pb-16">
+      <div className="max-w-[900px] mx-auto">
+
+        {/* Back */}
+        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="mb-8">
+          <Link to="/" className="mono text-[13px] text-[#8892a4] hover:text-[#64ffda] transition-colors flex items-center gap-2">
+            <FaArrowLeft size={11} /> Back to Home
           </Link>
         </motion.div>
 
@@ -145,178 +90,135 @@ function Review() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-10"
+          transition={{ delay: 0.1 }}
+          className="mb-12"
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
-            Leave a <span className="gradient-text">Review</span>
+          <p className="mono text-[#64ffda] text-sm mb-3 tracking-widest">Leave a Review</p>
+          <h1
+            className="font-bold mb-3"
+            style={{
+              fontFamily: "'Fraunces', serif",
+              fontSize: 'clamp(32px, 5vw, 52px)',
+              background: 'linear-gradient(135deg, #e6f1ff, #a8b2d8)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            Worked with me?
           </h1>
-          <p className="text-white/50 max-w-md mx-auto">
-            Worked with me at a hackathon, project, or event? I'd love to hear how I helped you!
+          <p className="text-[#8892a4] max-w-md">
+            At a hackathon, project, or event? I'd love to hear how I helped.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8 items-start">
-          {/* Form */}
+        <div className="grid md:grid-cols-[3fr_2fr] gap-10 items-start">
+
+          {/* Form card */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            transition={{ delay: 0.15 }}
           >
-            <form onSubmit={handleSubmit} className="glass rounded-3xl p-6 md:p-8">
-              {/* Honeypot - hidden from humans */}
+            <form onSubmit={onSubmit} className="glass-card p-8 space-y-5">
+              {/* Honeypot */}
               <input
-                type="text"
-                name="website"
-                value={formData.website}
-                onChange={handleChange}
-                style={{ position: 'absolute', left: '-9999px' }}
-                tabIndex={-1}
-                autoComplete="off"
+                type="text" name="website" value={form.website} onChange={onChange}
+                style={{ position: 'absolute', left: '-9999px' }} tabIndex={-1} autoComplete="off"
               />
 
-              {/* Name */}
-              <div className="mb-5">
-                <label htmlFor="name" className="block text-white/70 text-sm font-medium mb-2">
-                  Your Name
-                </label>
+              <div>
+                <label className="block text-[#a8b2d8] text-sm mb-2">Your Name</label>
                 <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  placeholder="John Doe"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-sky-500/50 transition-colors"
+                  type="text" name="name" value={form.name} onChange={onChange}
+                  required placeholder="Jane Doe"
+                  className="field"
                 />
               </div>
 
-              {/* Role */}
-              <div className="mb-5">
-                <label htmlFor="role" className="block text-white/70 text-sm font-medium mb-2">
-                  How do you know me?
-                </label>
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-sky-500/50 transition-colors appearance-none cursor-pointer"
-                >
-                  <option value="" disabled className="bg-[#0B0B42]">Select an option</option>
-                  {roles.map(role => (
-                    <option key={role} value={role} className="bg-[#0B0B42]">{role}</option>
-                  ))}
+              <div>
+                <label className="block text-[#a8b2d8] text-sm mb-2">How do you know me?</label>
+                <select name="role" value={form.role} onChange={onChange} required className="field">
+                  <option value="" disabled>Select one…</option>
+                  {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
 
-              {/* Message */}
-              <div className="mb-6">
-                <label htmlFor="message" className="block text-white/70 text-sm font-medium mb-2">
-                  How did I help you?
-                </label>
+              <div>
+                <label className="block text-[#a8b2d8] text-sm mb-2">How did I help you?</label>
                 <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={4}
-                  placeholder="Share a quick story about how I helped you..."
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-sky-500/50 transition-colors resize-none"
+                  name="message" value={form.message} onChange={onChange}
+                  required rows={4} placeholder="Share a quick story…"
+                  className="field resize-none"
                 />
-                <div className="flex justify-between items-center mt-2">
-                  <span className={`text-xs ${messageLength < MIN_MESSAGE_LENGTH ? 'text-amber-400' : 'text-white/30'}`}>
-                    {messageLength < MIN_MESSAGE_LENGTH
-                      ? `${MIN_MESSAGE_LENGTH - messageLength} more characters needed`
-                      : 'Keep it short and sweet!'
-                    }
+                <div className="flex justify-between mt-2">
+                  <span className={`mono text-[11px] ${len < MIN ? 'text-[#f0b429]' : 'text-[#8892a4]'}`}>
+                    {len < MIN ? `${MIN - len} more characters needed` : 'Looks good!'}
                   </span>
-                  <span className={`text-xs ${messageLength > MAX_MESSAGE_LENGTH * 0.9 ? 'text-amber-400' : 'text-white/30'}`}>
-                    {messageLength}/{MAX_MESSAGE_LENGTH}
+                  <span className={`mono text-[11px] ${len > MAX * 0.9 ? 'text-[#f0b429]' : 'text-[#8892a4]'}`}>
+                    {len}/{MAX}
                   </span>
                 </div>
               </div>
 
-              {/* Error */}
-              {error && (
-                <p className="text-red-400 text-sm mb-4">{error}</p>
-              )}
+              {error && <p className="text-[#f0b429] text-sm">{error}</p>}
 
-              {/* Submit */}
-              <motion.button
+              <button
                 type="submit"
-                disabled={submitting || !isMessageValid}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-sky-500 hover:bg-sky-400 disabled:bg-sky-500/50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors"
+                disabled={submitting || !valid}
+                className="btn-teal w-full flex items-center justify-center gap-2 !py-4 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {submitting ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <FaPaperPlane />
-                    Submit Review
-                  </>
-                )}
-              </motion.button>
+                {submitting
+                  ? <><span className="w-4 h-4 border-2 border-[#64ffda]/30 border-t-[#64ffda] rounded-full animate-spin" /> Submitting…</>
+                  : <><FaPaperPlane size={13} /> Submit Review</>
+                }
+              </button>
             </form>
           </motion.div>
 
-          {/* Social Proof - Show existing testimonials */}
+          {/* Social proof */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ delay: 0.2 }}
             className="space-y-4"
           >
-            <div className="flex items-center gap-2 text-white/50 mb-4">
-              <FaHeart className="text-red-400" />
-              <span className="text-sm font-medium">
-                {testimonials?.length || 0} people have shared their experience
-              </span>
-            </div>
+            <p className="mono text-[12px] text-[#8892a4] mb-5 tracking-wider">
+              {testimonials?.length || 0} people have shared their experience
+            </p>
 
             {testimonials?.slice(0, 3).map((t, i) => (
               <motion.div
                 key={t.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + i * 0.1 }}
-                className="glass rounded-2xl p-5"
+                transition={{ delay: 0.3 + i * 0.08 }}
+                className="glass-card p-5"
               >
-                <p className="text-white/80 text-sm mb-3 line-clamp-3">
-                  "{t.message}"
-                </p>
+                <p className="text-[#8892a4] text-sm mb-3 italic line-clamp-3">"{t.message}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-sm font-medium">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center mono text-[#64ffda] text-xs flex-shrink-0"
+                    style={{ background: 'rgba(100,255,218,0.08)', border: '1px solid rgba(100,255,218,0.2)' }}
+                  >
                     {t.name?.charAt(0)?.toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-white text-sm font-medium">{t.name}</p>
-                    <p className="text-white/40 text-xs">{t.role}</p>
+                    <p className="text-[#e6f1ff] text-sm font-medium">{t.name}</p>
+                    <p className="text-[#8892a4] text-xs">{t.role}</p>
                   </div>
                 </div>
               </motion.div>
             ))}
 
             {(!testimonials || testimonials.length === 0) && (
-              <div className="glass rounded-2xl p-6 text-center">
-                <p className="text-white/50 text-sm">
-                  Be one of the first to leave a review!
-                </p>
+              <div className="glass-card p-6 text-center">
+                <p className="text-[#8892a4] text-sm">Be the first to leave a review!</p>
               </div>
             )}
           </motion.div>
+
         </div>
       </div>
     </div>
   )
 }
-
-export default Review

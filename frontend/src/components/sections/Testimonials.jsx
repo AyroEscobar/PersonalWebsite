@@ -1,83 +1,59 @@
-// Testimonials Section - Compact design
-
 import { motion } from 'framer-motion'
-import { FaQuoteLeft, FaPen } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import { useTestimonials } from '../../hooks/useFirestore'
 
-function Testimonials() {
+export default function Testimonials() {
   const { data: testimonials, loading, error } = useTestimonials()
-
-  // Don't render if no testimonials or still loading
-  if (loading || error || testimonials.length === 0) {
-    return null
-  }
+  if (loading || error || testimonials.length === 0) return null
 
   return (
-    <section id="testimonials" className="py-24 px-6 md:px-12 lg:px-24 border-t border-[rgba(255,255,255,0.06)]">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-10 flex items-end justify-between"
-        >
-          <div>
-            <p className="text-[#6366f1] text-xs font-semibold tracking-widest uppercase mb-3">
-              Testimonials
-            </p>
-            <h2 className="text-2xl md:text-3xl font-bold text-white">
-              What People Say
-            </h2>
-          </div>
-          <Link
-            to="/review"
-            className="flex items-center gap-2 px-4 py-2 bg-[#6366f1] hover:bg-[#5558e3] text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            <FaPen size={12} />
-            Leave a Review
+    <section id="testimonials" className="py-28 px-6 md:px-12 max-w-[900px] mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
+          <h2 className="text-[#e6f1ff] text-2xl font-semibold flex items-center">
+            <span className="num">05.</span>
+            What People Say
+            <span className="rule" />
+          </h2>
+          <Link to="/review" className="btn-teal !py-2.5 !px-5 !text-[12px]">
+            + Leave a review
           </Link>
-        </motion.div>
+        </div>
 
-        {/* Testimonials Grid */}
         <div className="grid md:grid-cols-2 gap-4">
-          {testimonials.slice(0, 4).map((testimonial, index) => (
+          {testimonials.slice(0, 4).map((t, i) => (
             <motion.div
-              key={testimonial.id}
-              initial={{ opacity: 0, y: 20 }}
+              key={t.id}
+              initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.08 }}
-              className="group"
+              transition={{ delay: i * 0.08 }}
+              className="glass-card p-6"
             >
-              <div className="h-full p-5 bg-[#12121a] border border-[rgba(255,255,255,0.06)] rounded-xl hover:border-[rgba(255,255,255,0.15)] transition-all">
-                {/* Quote icon */}
-                <FaQuoteLeft className="text-[#6366f1]/20 text-lg mb-3" />
-
-                {/* Message */}
-                <p className="text-[#8888a0] text-sm leading-relaxed mb-4">
-                  "{testimonial.message}"
-                </p>
-
-                {/* Author */}
-                <div className="flex items-center gap-3 pt-3 border-t border-[rgba(255,255,255,0.06)]">
-                  <div className="w-8 h-8 rounded-full bg-[rgba(99,102,241,0.1)] flex items-center justify-center text-[#6366f1] font-semibold text-xs">
-                    {testimonial.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="text-white font-medium text-sm">{testimonial.name}</p>
-                    <p className="text-[#8888a0] text-xs">{testimonial.role}</p>
-                  </div>
+              <p className="text-[#a8b2d8] text-sm leading-relaxed mb-5 italic">
+                "{t.message}"
+              </p>
+              <div className="flex items-center gap-3 pt-4 border-t border-[rgba(100,255,218,0.07)]">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center mono text-[#64ffda] text-xs font-semibold flex-shrink-0"
+                  style={{ background: 'rgba(100,255,218,0.08)', border: '1px solid rgba(100,255,218,0.2)' }}
+                >
+                  {t.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-[#e6f1ff] text-sm font-medium">{t.name}</p>
+                  {t.role && <p className="text-[#8892a4] text-xs">{t.role}</p>}
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }
-
-export default Testimonials

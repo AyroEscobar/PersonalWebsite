@@ -1,167 +1,101 @@
-// Projects Section - Compact expandable cards
-
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FaGithub, FaExternalLinkAlt, FaChevronDown } from 'react-icons/fa'
+import { motion } from 'framer-motion'
+import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa'
 import { useProjects } from '../../hooks/useFirestore'
 
-function Projects() {
+export default function Projects() {
   const { data: projects, loading, error } = useProjects()
-  const [expandedId, setExpandedId] = useState(null)
+  const [hovered, setHovered] = useState(null)
 
-  if (loading || error || projects.length === 0) {
-    return null
-  }
-
-  const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id)
-  }
+  if (loading || error || projects.length === 0) return null
 
   return (
-    <section id="projects" className="py-24 px-6 md:px-12 lg:px-24">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-10"
-        >
-          <p className="text-[#6366f1] text-xs font-semibold tracking-widest uppercase mb-3">
-            Projects
-          </p>
-          <h2 className="text-2xl md:text-3xl font-bold text-white">
-            Featured Work
-          </h2>
-        </motion.div>
+    <section id="projects" className="py-28 px-6 md:px-12 max-w-[900px] mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <h2 className="text-[#e6f1ff] text-2xl font-semibold mb-10 flex items-center">
+          <span className="num">03.</span>
+          Projects
+          <span className="rule" />
+        </h2>
 
-        {/* Projects List */}
-        <div className="space-y-3">
-          {projects.map((project, index) => (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {projects.map((p, i) => (
             <motion.div
-              key={project.id}
+              key={p.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
+              transition={{ delay: i * 0.08 }}
+              onMouseEnter={() => setHovered(p.id)}
+              onMouseLeave={() => setHovered(null)}
+              className="glass-card flex flex-col p-6 cursor-default"
+              style={hovered === p.id ? {
+                boxShadow: '0 0 40px rgba(100,255,218,0.09), 0 16px 48px rgba(0,0,0,0.5)',
+              } : {}}
             >
-              <div
-                className={`bg-[#12121a] border rounded-xl overflow-hidden transition-all duration-300 ${
-                  expandedId === project.id
-                    ? 'border-[#6366f1]/40'
-                    : 'border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)]'
-                }`}
-              >
-                {/* Collapsed View - Always visible */}
-                <button
-                  onClick={() => toggleExpand(project.id)}
-                  className="w-full flex items-center justify-between p-4 text-left"
-                >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <span className="text-[#3a3a4a] text-xs font-mono flex-shrink-0">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <h3 className="text-white font-semibold text-sm truncate">
-                      {project.title}
-                    </h3>
-                    <span className="hidden sm:block text-[#8888a0] text-xs truncate">
-                      {project.tech?.slice(0, 3).join(' · ')}
-                    </span>
-                  </div>
-                  <motion.div
-                    animate={{ rotate: expandedId === project.id ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex-shrink-0 ml-4"
-                  >
-                    <FaChevronDown className="text-[#8888a0] text-xs" />
-                  </motion.div>
-                </button>
-
-                {/* Expanded View */}
-                <AnimatePresence>
-                  {expandedId === project.id && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-4 pb-4 pt-0">
-                        <div className="pt-3 border-t border-[rgba(255,255,255,0.06)]">
-                          {/* Description */}
-                          <p className="text-[#8888a0] text-sm leading-relaxed mb-4">
-                            {project.description}
-                          </p>
-
-                          {/* Tech stack */}
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {project.tech?.map((tech, i) => (
-                              <span
-                                key={i}
-                                className="text-xs px-2 py-1 bg-[rgba(99,102,241,0.1)] text-[#818cf8] rounded-md font-medium"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-
-                          {/* Links */}
-                          <div className="flex items-center gap-4">
-                            {project.github && (
-                              <a
-                                href={project.github}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-[#8888a0] hover:text-white text-xs font-medium transition-colors"
-                              >
-                                <FaGithub size={14} />
-                                <span>Code</span>
-                              </a>
-                            )}
-                            {project.live && (
-                              <a
-                                href={project.live}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-[#8888a0] hover:text-[#6366f1] text-xs font-medium transition-colors"
-                              >
-                                <FaExternalLinkAlt size={12} />
-                                <span>Live</span>
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
+              {/* Top row */}
+              <div className="flex items-center justify-between mb-6">
+                {/* Folder icon */}
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                  <path d="M6 13C6 11.3 7.3 10 9 10h7.5l2 3H31c1.7 0 3 1.3 3 3v11c0 1.7-1.3 3-3 3H9c-1.7 0-3-1.3-3-3V13z"
+                    stroke="#64ffda" strokeWidth="1.5" fill="none"/>
+                </svg>
+                <div className="flex items-center gap-3">
+                  {p.github && (
+                    <a href={p.github} target="_blank" rel="noopener noreferrer"
+                      className="text-[#8892a4] hover:text-[#64ffda] transition-colors"
+                      onClick={e => e.stopPropagation()}>
+                      <FaGithub size={18} />
+                    </a>
                   )}
-                </AnimatePresence>
+                  {p.live && (
+                    <a href={p.live} target="_blank" rel="noopener noreferrer"
+                      className="text-[#8892a4] hover:text-[#64ffda] transition-colors"
+                      onClick={e => e.stopPropagation()}>
+                      <FaExternalLinkAlt size={14} />
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              <h3 className="text-[#e6f1ff] font-semibold text-lg mb-2 group-hover:text-[#64ffda] transition-colors">
+                {p.title}
+              </h3>
+              <p className="text-[#8892a4] text-sm leading-relaxed flex-1 mb-6">
+                {p.description}
+              </p>
+
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-auto">
+                {p.tech?.map((t, j) => (
+                  <span key={j} className="mono text-[11px] text-[#8892a4]">{t}</span>
+                ))}
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* View more link */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="mt-6 text-center"
+          transition={{ delay: 0.4 }}
+          className="mt-12 text-center"
         >
           <a
             href="https://github.com/AyroEscobar"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#8888a0] hover:text-[#6366f1] text-sm font-medium transition-colors"
+            className="btn-teal"
           >
-            View all on GitHub →
+            View more on GitHub
           </a>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   )
 }
-
-export default Projects
