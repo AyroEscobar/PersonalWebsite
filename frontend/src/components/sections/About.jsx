@@ -2,7 +2,14 @@ import { motion } from 'framer-motion'
 import pfp from '../../assets/pfp123.jpg'
 
 export default function About() {
-  const skills = ['Java & Python', 'TypeScript', 'React & Tailwind', 'Node.js', 'PostgreSQL / Firebase', 'Docker & AWS']
+  const stack = [
+    'Java · Spring Boot',
+    'Python',
+    'JavaScript · React',
+    'Kafka · GraphQL',
+    'AWS (Cloud Practitioner)',
+    'Claude · multi-agent',
+  ]
 
   return (
     <section id="about" className="py-28 px-6 md:px-12 max-w-[900px] mx-auto">
@@ -12,35 +19,38 @@ export default function About() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-[#e6f1ff] text-2xl font-semibold mb-10 flex items-center">
+        <h2 className="text-[#ecf2fb] text-2xl font-semibold mb-10 flex items-center">
           <span className="num">01.</span>
-          About Me
+          About
           <span className="rule" />
         </h2>
 
         <div className="grid md:grid-cols-[3fr_2fr] gap-14">
-          <div className="space-y-4 text-[#8892a4] leading-relaxed">
+          <div className="space-y-4 text-[#8a93a3] leading-relaxed">
             <p>
-              I'm a software engineer and CS student at UT Dallas who loves building
-              impactful products and helping others do the same. My path into tech
-              started at hackathons — and I've been hooked ever since.
+              I'm a 20-year-old software engineer out of <span className="text-[#ecf2fb]">Plano,
+              Texas</span> — CS at <span className="text-[#ecf2fb]">UT Dallas</span>, graduating
+              Fall 2027. The extended timeline isn't a slow walk; it's back-to-back internships
+              that I refused to skip.
             </p>
             <p>
-              I believe the best way to learn is to teach. That's why I spend time
-              mentoring at hackathons, coaching peers through technical interviews, and
-              organizing events that give students the same chance I got.
+              I want to be financially free, take care of my family, and ship things that
+              matter — before 25. That sentence is the whole map. Everything I build, every
+              role I take, every hour I spend, gets weighed against it.
             </p>
             <p>
-              Outside of code, I'm usually at a hackathon (attending, coaching, or running
-              one), deep in an AI/ML rabbit hole, or trying to become a better technical
-              communicator.
+              I went <span className="text-[#ecf2fb]">RBC New York</span> →{' '}
+              <span className="text-[#ecf2fb]">MD7</span> →{' '}
+              <span className="text-[#ecf2fb]">JP Morgan</span> before turning 21. In between,
+              I built <span className="text-[#ecf2fb]">OpenClaw</span> — a 24/7 personal AI OS
+              that runs my life so I can focus on the work that actually moves things.
             </p>
 
             <div className="pt-3">
-              <p className="text-[#8892a4] text-sm mb-4">A few things I work with:</p>
+              <p className="text-[#8a93a3] text-sm mb-4">What I build with:</p>
               <ul className="grid grid-cols-2 gap-2">
-                {skills.map(s => (
-                  <li key={s} className="mono text-[12px] text-[#a8b2d8] flex items-center gap-2">
+                {stack.map(s => (
+                  <li key={s} className="mono text-[12px] text-[#b0b8c7] flex items-center gap-2">
                     <span className="text-[#64ffda] text-xs">▹</span>{s}
                   </li>
                 ))}
