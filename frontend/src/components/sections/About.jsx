@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import pfp from '../../assets/pfp123.jpg'
+import pfp from '../../assets/pfp-web.jpg'
 
 export default function About() {
   const stack = [
@@ -74,6 +74,8 @@ export default function About() {
               <img
                 src={pfp}
                 alt="Ayro Escobar"
+                loading="lazy"
+                decoding="async"
                 className="relative z-10 w-full h-full object-cover rounded"
                 style={{ filter: 'grayscale(20%) contrast(1.05)' }}
               />
