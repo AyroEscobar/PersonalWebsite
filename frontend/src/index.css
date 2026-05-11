@@ -6,21 +6,24 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Design Tokens — warm graphite + teal ───────────────── */
+/* ─── Warm Paper palette — cream, ink, clay ──────────────── */
 :root {
-  --bg:          #0a0d12;
-  --bg-2:        #11161f;
-  --bg-3:        #161c27;
-  --bg-4:        #1d2532;
+  --paper:        #f5efe2;
+  --paper-2:      #ede5d4;
+  --paper-3:      #ddd0b8;
+  --paper-4:      #c8b89c;
 
-  --slate:       #8a93a3;
-  --slate-light: #b0b8c7;
-  --white:       #ecf2fb;
+  --ink:          #2d2520;
+  --ink-soft:     #57483b;
+  --cocoa:        #6b5847;
+  --sand:         #8c7a66;
 
-  --teal:        #64ffda;
-  --teal-mid:    rgba(100, 255, 218, 0.18);
-  --teal-dim:    rgba(100, 255, 218, 0.07);
-  --teal-glow:   rgba(100, 255, 218, 0.12);
+  --clay:         #8b4d2c;
+  --clay-bright:  #b8714a;
+  --clay-deep:    #6b3a1f;
+  --clay-mid:     rgba(139, 77, 44, 0.18);
+  --clay-dim:     rgba(139, 77, 44, 0.08);
+  --clay-glow:    rgba(139, 77, 44, 0.12);
 }
 
 /* ─── Base ───────────────────────────────────────────────── */
@@ -30,49 +33,65 @@ html { scroll-behavior: smooth; }
 body, html, #root {
   width: 100%;
   min-height: 100%;
-  background-color: var(--bg);
-  color: var(--slate);
+  background-color: var(--paper);
+  color: var(--ink-soft);
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 16px;
-  line-height: 1.7;
+  font-size: 17px;
+  line-height: 1.75;
+  letter-spacing: 0.003em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-/* Soft teal glow — single accent, no purple aurora */
+/* Soft warm light — no aurora, no spotlight */
 body::before {
   content: '';
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
   background:
-    radial-gradient(ellipse 70% 55% at 12% -10%, rgba(100, 255, 218, 0.045) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at 92% 18%, rgba(100, 255, 218, 0.035) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 50% 105%, rgba(100, 255, 218, 0.025) 0%, transparent 60%);
+    radial-gradient(ellipse 70% 55% at 8% -10%,   rgba(184, 113, 74, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 95% 30%,   rgba(184, 113, 74, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 110%,  rgba(184, 113, 74, 0.05) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
+}
+
+/* Subtle paper grain — adds retro tactility, kept very low opacity */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.32;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.18  0 0 0 0 0.14  0 0 0 0 0.10  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/></svg>");
 }
 
 #root { position: relative; z-index: 1; }
 
 /* ─── Scrollbar ──────────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--paper-2); }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(100,255,218,0.9), rgba(100,255,218,0.25));
+  background: linear-gradient(180deg, var(--clay), rgba(139,77,44,0.3));
   border-radius: 99px;
 }
 
 /* ─── Selection ──────────────────────────────────────────── */
-::selection { background: rgba(100,255,218,0.2); color: var(--teal); }
+::selection { background: rgba(184,113,74,0.22); color: var(--clay-deep); }
 
 /* ─── Focus ──────────────────────────────────────────────── */
-*:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 2px; }
+*:focus-visible { outline: 2px solid var(--clay); outline-offset: 3px; border-radius: 2px; }
 
 /* ─── Typography ─────────────────────────────────────────── */
 .mono {
   font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
   font-size: 13px;
+  letter-spacing: 0.01em;
 }
 
 /* Gradient section rule */
@@ -81,72 +100,73 @@ body::before {
   height: 1px;
   margin-left: 16px;
   max-width: 260px;
-  background: linear-gradient(90deg, var(--teal), transparent);
-  opacity: 0.3;
+  background: linear-gradient(90deg, var(--clay), transparent);
+  opacity: 0.4;
 }
 
 /* Section number */
 .num {
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-size: 14px;
-  color: var(--teal);
+  color: var(--clay);
   margin-right: 6px;
 }
 
-/* ─── Glass card ─────────────────────────────────────────── */
+/* ─── Paper card (was glass-card on dark) ────────────────── */
 .glass-card {
-  background: linear-gradient(145deg, var(--bg-2), var(--bg-3));
-  border: 1px solid rgba(100,255,218,0.08);
+  background: linear-gradient(145deg, var(--paper-2), rgba(221,208,184,0.6));
+  border: 1px solid rgba(139, 77, 44, 0.14);
   border-radius: 12px;
   transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
 }
 
 .glass-card:hover {
-  border-color: rgba(100,255,218,0.25);
-  box-shadow: 0 0 32px rgba(100,255,218,0.07), 0 8px 32px rgba(0,0,0,0.4);
+  border-color: rgba(139, 77, 44, 0.30);
+  box-shadow: 0 0 28px rgba(139, 77, 44, 0.06), 0 12px 28px rgba(74, 53, 38, 0.08);
   transform: translateY(-3px);
 }
 
-/* ─── Teal button ────────────────────────────────────────── */
+/* ─── Clay button (CSS class name kept as btn-teal for compat) */
 .btn-teal {
   display: inline-block;
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-size: 13px;
-  color: var(--teal);
-  border: 1px solid var(--teal);
+  color: var(--clay-deep);
+  border: 1px solid var(--clay);
   border-radius: 4px;
   padding: 14px 28px;
-  transition: background 0.2s, box-shadow 0.2s;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
   cursor: pointer;
   background: transparent;
   text-decoration: none;
+  letter-spacing: 0.01em;
 }
 
 .btn-teal:hover {
-  background: rgba(100,255,218,0.08);
-  box-shadow: 0 0 24px rgba(100,255,218,0.1);
+  background: rgba(139, 77, 44, 0.07);
+  box-shadow: 0 0 22px rgba(139, 77, 44, 0.10);
+  transform: translateY(-1px);
 }
 
-/* ─── Input/form styles (shared by Review) ───────────────── */
+/* ─── Input/form styles ──────────────────────────────────── */
 .field {
   width: 100%;
   padding: 12px 16px;
-  background: var(--bg);
-  border: 1px solid rgba(100,255,218,0.12);
+  background: var(--paper-2);
+  border: 1px solid rgba(139, 77, 44, 0.18);
   border-radius: 8px;
-  color: var(--white);
+  color: var(--ink);
   font-family: 'DM Sans', sans-serif;
   font-size: 15px;
   transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
 }
 
-.field::placeholder { color: rgba(176,184,199,0.35); }
+.field::placeholder { color: rgba(140, 122, 102, 0.55); }
 
 .field:focus {
-  border-color: rgba(100,255,218,0.4);
-  box-shadow: 0 0 0 3px rgba(100,255,218,0.06);
+  border-color: rgba(139, 77, 44, 0.5);
+  box-shadow: 0 0 0 3px rgba(139, 77, 44, 0.08);
 }
 
-/* select arrow color fix */
-select.field option { background: var(--bg-3); color: var(--white); }
+select.field option { background: var(--paper-2); color: var(--ink); }
