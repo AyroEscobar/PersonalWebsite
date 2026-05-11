@@ -15,7 +15,7 @@ export default function Testimonials() {
         transition={{ duration: 0.6 }}
       >
         <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
-          <h2 className="text-[#e6f1ff] text-2xl font-semibold flex items-center">
+          <h2 className="text-[#ecf2fb] text-2xl font-semibold flex items-center">
             <span className="num">05.</span>
             What People Say
             <span className="rule" />
@@ -35,7 +35,7 @@ export default function Testimonials() {
               transition={{ delay: i * 0.08 }}
               className="glass-card p-6"
             >
-              <p className="text-[#a8b2d8] text-sm leading-relaxed mb-5 italic">
+              <p className="text-[#b0b8c7] text-sm leading-relaxed mb-5 italic">
                 "{t.message}"
               </p>
               <div className="flex items-center gap-3 pt-4 border-t border-[rgba(100,255,218,0.07)]">
@@ -46,8 +46,8 @@ export default function Testimonials() {
                   {t.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-[#e6f1ff] text-sm font-medium">{t.name}</p>
-                  {t.role && <p className="text-[#8892a4] text-xs">{t.role}</p>}
+                  <p className="text-[#ecf2fb] text-sm font-medium">{t.name}</p>
+                  {t.role && <p className="text-[#8a93a3] text-xs">{t.role}</p>}
                 </div>
               </div>
             </motion.div>

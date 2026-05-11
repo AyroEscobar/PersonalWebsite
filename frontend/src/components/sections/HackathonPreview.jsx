@@ -2,10 +2,10 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 
 const stats = [
+  { n: '10+', label: 'Events\ncoached'    },
   { n: '7+',  label: 'Hackathons\nattended' },
   { n: '6',   label: 'Cities\nvisited'     },
-  { n: '3',   label: 'Events\norganized'   },
-  { n: '10+', label: 'Events\ncoached'     },
+  { n: '24h', label: 'Average\nsleep cycle' },
 ]
 
 export default function HackathonPreview() {
@@ -17,16 +17,17 @@ export default function HackathonPreview() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-[#e6f1ff] text-2xl font-semibold mb-10 flex items-center">
+        <h2 className="text-[#ecf2fb] text-2xl font-semibold mb-10 flex items-center">
           <span className="num">04.</span>
-          Hackathons
+          The Circuit
           <span className="rule" />
         </h2>
 
-        <p className="text-[#8892a4] leading-relaxed mb-12 max-w-xl">
-          Hackathons changed my life — first real projects, best friends, and my first job offer.
-          Now I spend a lot of time making that happen for others, whether coaching, organizing,
-          or just showing up to help teams across the finish line.
+        <p className="text-[#8a93a3] leading-relaxed mb-12 max-w-xl">
+          Hackathons are where the network came from — friends, first projects, first job
+          offer. Now I show up as an <span className="text-[#ecf2fb]">MLH Coach</span> and
+          on the <span className="text-[#ecf2fb]">HackUTD</span> tech team. If you're
+          shipping at 4 a.m., I'm probably awake too.
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
@@ -44,14 +45,14 @@ export default function HackathonPreview() {
                   fontFamily: "'Fraunces', serif",
                   fontSize: 'clamp(40px, 5vw, 56px)',
                   lineHeight: 1,
-                  background: 'linear-gradient(135deg, #e6f1ff, #64ffda)',
+                  background: 'linear-gradient(135deg, #ecf2fb, #64ffda)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}
               >
                 {s.n}
               </p>
-              <p className="mono text-[12px] text-[#8892a4] whitespace-pre-line leading-relaxed">{s.label}</p>
+              <p className="mono text-[12px] text-[#8a93a3] whitespace-pre-line leading-relaxed">{s.label}</p>
             </motion.div>
           ))}
         </div>

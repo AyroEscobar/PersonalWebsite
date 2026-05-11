@@ -64,8 +64,8 @@ export default function Review() {
           >
             <FaCheckCircle className="text-[#64ffda] text-3xl" />
           </div>
-          <h2 className="text-[#e6f1ff] text-2xl font-semibold mb-3">Thank You!</h2>
-          <p className="text-[#8892a4] mb-8 leading-relaxed">
+          <h2 className="text-[#ecf2fb] text-2xl font-semibold mb-3">Thank You!</h2>
+          <p className="text-[#8a93a3] mb-8 leading-relaxed">
             Your kind words mean a lot. Your review will appear on the site after a quick check.
           </p>
           <Link to="/" className="btn-teal">Back to Home</Link>
@@ -81,7 +81,7 @@ export default function Review() {
 
         {/* Back */}
         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="mb-8">
-          <Link to="/" className="mono text-[13px] text-[#8892a4] hover:text-[#64ffda] transition-colors flex items-center gap-2">
+          <Link to="/" className="mono text-[13px] text-[#8a93a3] hover:text-[#64ffda] transition-colors flex items-center gap-2">
             <FaArrowLeft size={11} /> Back to Home
           </Link>
         </motion.div>
@@ -99,14 +99,14 @@ export default function Review() {
             style={{
               fontFamily: "'Fraunces', serif",
               fontSize: 'clamp(32px, 5vw, 52px)',
-              background: 'linear-gradient(135deg, #e6f1ff, #a8b2d8)',
+              background: 'linear-gradient(135deg, #ecf2fb, #b0b8c7)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
           >
             Worked with me?
           </h1>
-          <p className="text-[#8892a4] max-w-md">
+          <p className="text-[#8a93a3] max-w-md">
             At a hackathon, project, or event? I'd love to hear how I helped.
           </p>
         </motion.div>
@@ -127,7 +127,7 @@ export default function Review() {
               />
 
               <div>
-                <label className="block text-[#a8b2d8] text-sm mb-2">Your Name</label>
+                <label className="block text-[#b0b8c7] text-sm mb-2">Your Name</label>
                 <input
                   type="text" name="name" value={form.name} onChange={onChange}
                   required placeholder="Jane Doe"
@@ -136,7 +136,7 @@ export default function Review() {
               </div>
 
               <div>
-                <label className="block text-[#a8b2d8] text-sm mb-2">How do you know me?</label>
+                <label className="block text-[#b0b8c7] text-sm mb-2">How do you know me?</label>
                 <select name="role" value={form.role} onChange={onChange} required className="field">
                   <option value="" disabled>Select one…</option>
                   {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
@@ -144,17 +144,17 @@ export default function Review() {
               </div>
 
               <div>
-                <label className="block text-[#a8b2d8] text-sm mb-2">How did I help you?</label>
+                <label className="block text-[#b0b8c7] text-sm mb-2">How did I help you?</label>
                 <textarea
                   name="message" value={form.message} onChange={onChange}
                   required rows={4} placeholder="Share a quick story…"
                   className="field resize-none"
                 />
                 <div className="flex justify-between mt-2">
-                  <span className={`mono text-[11px] ${len < MIN ? 'text-[#f0b429]' : 'text-[#8892a4]'}`}>
+                  <span className={`mono text-[11px] ${len < MIN ? 'text-[#f0b429]' : 'text-[#8a93a3]'}`}>
                     {len < MIN ? `${MIN - len} more characters needed` : 'Looks good!'}
                   </span>
-                  <span className={`mono text-[11px] ${len > MAX * 0.9 ? 'text-[#f0b429]' : 'text-[#8892a4]'}`}>
+                  <span className={`mono text-[11px] ${len > MAX * 0.9 ? 'text-[#f0b429]' : 'text-[#8a93a3]'}`}>
                     {len}/{MAX}
                   </span>
                 </div>
@@ -182,7 +182,7 @@ export default function Review() {
             transition={{ delay: 0.2 }}
             className="space-y-4"
           >
-            <p className="mono text-[12px] text-[#8892a4] mb-5 tracking-wider">
+            <p className="mono text-[12px] text-[#8a93a3] mb-5 tracking-wider">
               {testimonials?.length || 0} people have shared their experience
             </p>
 
@@ -194,7 +194,7 @@ export default function Review() {
                 transition={{ delay: 0.3 + i * 0.08 }}
                 className="glass-card p-5"
               >
-                <p className="text-[#8892a4] text-sm mb-3 italic line-clamp-3">"{t.message}"</p>
+                <p className="text-[#8a93a3] text-sm mb-3 italic line-clamp-3">"{t.message}"</p>
                 <div className="flex items-center gap-3">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center mono text-[#64ffda] text-xs flex-shrink-0"
@@ -203,8 +203,8 @@ export default function Review() {
                     {t.name?.charAt(0)?.toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-[#e6f1ff] text-sm font-medium">{t.name}</p>
-                    <p className="text-[#8892a4] text-xs">{t.role}</p>
+                    <p className="text-[#ecf2fb] text-sm font-medium">{t.name}</p>
+                    <p className="text-[#8a93a3] text-xs">{t.role}</p>
                   </div>
                 </div>
               </motion.div>
@@ -212,7 +212,7 @@ export default function Review() {
 
             {(!testimonials || testimonials.length === 0) && (
               <div className="glass-card p-6 text-center">
-                <p className="text-[#8892a4] text-sm">Be the first to leave a review!</p>
+                <p className="text-[#8a93a3] text-sm">Be the first to leave a review!</p>
               </div>
             )}
           </motion.div>

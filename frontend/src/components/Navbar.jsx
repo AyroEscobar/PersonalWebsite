@@ -22,10 +22,10 @@ const Navbar = () => {
   }
 
   const links = [
-    { label: 'About',      id: 'about' },
-    { label: 'Work',       id: 'roles' },
-    { label: 'Projects',   id: 'projects' },
-    { label: 'Contact',    id: 'contact' },
+    { label: 'About',       id: 'about' },
+    { label: 'Experience',  id: 'roles' },
+    { label: 'Projects',    id: 'projects' },
+    { label: 'Contact',     id: 'contact' },
   ]
 
   return (
@@ -49,7 +49,7 @@ const Navbar = () => {
             <button
               key={l.label}
               onClick={() => go(l.id)}
-              className="mono text-[13px] text-[#8892a4] hover:text-[#64ffda] transition-colors"
+              className="mono text-[13px] text-[#8a93a3] hover:text-[#64ffda] transition-colors"
             >
               <span className="text-[#64ffda] mr-1.5">{String(i + 1).padStart(2,'0')}.</span>
               {l.label}
@@ -57,10 +57,10 @@ const Navbar = () => {
           ))}
           <Link
             to="/hackathons"
-            className="mono text-[13px] text-[#8892a4] hover:text-[#64ffda] transition-colors"
+            className="mono text-[13px] text-[#8a93a3] hover:text-[#64ffda] transition-colors"
           >
             <span className="text-[#64ffda] mr-1.5">05.</span>
-            Map
+            Circuit
           </Link>
           <a
             href="https://github.com/AyroEscobar"
@@ -96,7 +96,7 @@ const Navbar = () => {
               <button
                 key={l.label}
                 onClick={() => go(l.id)}
-                className="mono text-sm text-[#ccd6f6] text-left hover:text-[#64ffda] transition-colors"
+                className="mono text-sm text-[#ecf2fb] text-left hover:text-[#64ffda] transition-colors"
               >
                 <span className="text-[#64ffda] block text-xs mb-0.5">{String(i + 1).padStart(2,'0')}.</span>
                 {l.label}
@@ -105,7 +105,7 @@ const Navbar = () => {
             <Link
               to="/hackathons"
               onClick={() => setOpen(false)}
-              className="mono text-sm text-[#ccd6f6] hover:text-[#64ffda] transition-colors"
+              className="mono text-sm text-[#ecf2fb] hover:text-[#64ffda] transition-colors"
             >
               <span className="text-[#64ffda] block text-xs mb-0.5">05.</span>
               Map
