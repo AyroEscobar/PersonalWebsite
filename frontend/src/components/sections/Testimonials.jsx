@@ -15,7 +15,7 @@ export default function Testimonials() {
         transition={{ duration: 0.6 }}
       >
         <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
-          <h2 className="text-[#ecf2fb] text-2xl font-semibold flex items-center">
+          <h2 className="text-[#2d2520] text-2xl font-semibold flex items-center">
             <span className="num">05.</span>
             What People Say
             <span className="rule" />
@@ -35,19 +35,19 @@ export default function Testimonials() {
               transition={{ delay: i * 0.08 }}
               className="glass-card p-6"
             >
-              <p className="text-[#b0b8c7] text-sm leading-relaxed mb-5 italic">
+              <p className="text-[#57483b] text-sm leading-relaxed mb-5 italic">
                 "{t.message}"
               </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-[rgba(100,255,218,0.07)]">
+              <div className="flex items-center gap-3 pt-4 border-t border-[rgba(139,77,44,0.07)]">
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center mono text-[#64ffda] text-xs font-semibold flex-shrink-0"
-                  style={{ background: 'rgba(100,255,218,0.08)', border: '1px solid rgba(100,255,218,0.2)' }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center mono text-[#8b4d2c] text-xs font-semibold flex-shrink-0"
+                  style={{ background: 'rgba(139,77,44,0.08)', border: '1px solid rgba(139,77,44,0.2)' }}
                 >
                   {t.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-[#ecf2fb] text-sm font-medium">{t.name}</p>
-                  {t.role && <p className="text-[#8a93a3] text-xs">{t.role}</p>}
+                  <p className="text-[#2d2520] text-sm font-medium">{t.name}</p>
+                  {t.role && <p className="text-[#6b5847] text-xs">{t.role}</p>}
                 </div>
               </div>
             </motion.div>

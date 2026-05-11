@@ -33,7 +33,7 @@ export default function Projects() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-[#ecf2fb] text-2xl font-semibold mb-10 flex items-center">
+        <h2 className="text-[#2d2520] text-2xl font-semibold mb-10 flex items-center">
           <span className="num">03.</span>
           Projects
           <span className="rule" />
@@ -48,10 +48,10 @@ export default function Projects() {
           className="relative mb-14 rounded-xl overflow-hidden"
           style={{
             background:
-              'linear-gradient(145deg, rgba(22,28,39,0.95), rgba(17,22,31,0.95))',
-            border: '1px solid rgba(100,255,218,0.18)',
+              'linear-gradient(145deg, rgba(237,229,212,0.95), rgba(221,208,184,0.88))',
+            border: '1px solid rgba(139,77,44,0.22)',
             boxShadow:
-              '0 0 0 1px rgba(100,255,218,0.02), 0 24px 60px rgba(0,0,0,0.45)',
+              '0 0 0 1px rgba(139,77,44,0.04), 0 18px 44px rgba(74,53,38,0.10)',
           }}
         >
           {/* Top accent line */}
@@ -59,18 +59,18 @@ export default function Projects() {
             className="absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent, #64ffda 30%, #64ffda 70%, transparent)',
+                'linear-gradient(90deg, transparent, #8b4d2c 30%, #8b4d2c 70%, transparent)',
               opacity: 0.6,
             }}
           />
           <div className="grid md:grid-cols-[1.4fr_1fr] gap-10 p-8 md:p-10">
             <div>
-              <p className="mono text-[11px] tracking-widest text-[#64ffda] mb-3 uppercase">
+              <p className="mono text-[11px] tracking-widest text-[#8b4d2c] mb-3 uppercase">
                 Featured · {FEATURED.status}
               </p>
               <div className="flex items-baseline gap-4 mb-4 flex-wrap">
                 <h3
-                  className="text-[#ecf2fb]"
+                  className="text-[#2d2520]"
                   style={{
                     fontFamily: "'Fraunces', serif",
                     fontSize: 'clamp(32px, 4.4vw, 44px)',
@@ -80,27 +80,27 @@ export default function Projects() {
                 >
                   {FEATURED.name}
                 </h3>
-                <span className="mono text-[12px] text-[#8a93a3]">
+                <span className="mono text-[12px] text-[#6b5847]">
                   / {FEATURED.tagline}
                 </span>
               </div>
-              <p className="text-[#8a93a3] leading-relaxed mb-6">{FEATURED.body}</p>
+              <p className="text-[#6b5847] leading-relaxed mb-6">{FEATURED.body}</p>
               <div className="flex flex-wrap gap-x-4 gap-y-1">
                 {FEATURED.tech.map(t => (
-                  <span key={t} className="mono text-[11px] text-[#b0b8c7]">
+                  <span key={t} className="mono text-[11px] text-[#57483b]">
                     {t}
                   </span>
                 ))}
               </div>
             </div>
 
-            <ul className="space-y-3 md:border-l md:border-[rgba(100,255,218,0.1)] md:pl-8">
+            <ul className="space-y-3 md:border-l md:border-[rgba(139,77,44,0.1)] md:pl-8">
               {FEATURED.bullets.map(b => (
                 <li
                   key={b}
-                  className="text-[#b0b8c7] text-sm leading-relaxed flex gap-3"
+                  className="text-[#57483b] text-sm leading-relaxed flex gap-3"
                 >
-                  <span className="text-[#64ffda] mt-1 flex-shrink-0">▹</span>
+                  <span className="text-[#8b4d2c] mt-1 flex-shrink-0">▹</span>
                   <span>{b}</span>
                 </li>
               ))}
@@ -110,7 +110,7 @@ export default function Projects() {
 
         {hasGrid && (
           <>
-            <p className="mono text-[12px] tracking-widest text-[#8a93a3] mb-6 uppercase">
+            <p className="mono text-[12px] tracking-widest text-[#6b5847] mb-6 uppercase">
               More things I've built
             </p>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -125,25 +125,25 @@ export default function Projects() {
                   onMouseLeave={() => setHovered(null)}
                   className="glass-card flex flex-col p-6 cursor-default"
                   style={hovered === p.id ? {
-                    boxShadow: '0 0 40px rgba(100,255,218,0.09), 0 16px 48px rgba(0,0,0,0.5)',
+                    boxShadow: '0 0 32px rgba(139,77,44,0.10), 0 14px 32px rgba(74,53,38,0.10)',
                   } : {}}
                 >
                   <div className="flex items-center justify-between mb-6">
                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
                       <path d="M6 13C6 11.3 7.3 10 9 10h7.5l2 3H31c1.7 0 3 1.3 3 3v11c0 1.7-1.3 3-3 3H9c-1.7 0-3-1.3-3-3V13z"
-                        stroke="#64ffda" strokeWidth="1.5" fill="none"/>
+                        stroke="#8b4d2c" strokeWidth="1.5" fill="none"/>
                     </svg>
                     <div className="flex items-center gap-3">
                       {p.github && (
                         <a href={p.github} target="_blank" rel="noopener noreferrer"
-                          className="text-[#8a93a3] hover:text-[#64ffda] transition-colors"
+                          className="text-[#6b5847] hover:text-[#8b4d2c] transition-colors"
                           onClick={e => e.stopPropagation()}>
                           <FaGithub size={18} />
                         </a>
                       )}
                       {p.live && (
                         <a href={p.live} target="_blank" rel="noopener noreferrer"
-                          className="text-[#8a93a3] hover:text-[#64ffda] transition-colors"
+                          className="text-[#6b5847] hover:text-[#8b4d2c] transition-colors"
                           onClick={e => e.stopPropagation()}>
                           <FaExternalLinkAlt size={14} />
                         </a>
@@ -151,16 +151,16 @@ export default function Projects() {
                     </div>
                   </div>
 
-                  <h3 className="text-[#ecf2fb] font-semibold text-lg mb-2 group-hover:text-[#64ffda] transition-colors">
+                  <h3 className="text-[#2d2520] font-semibold text-lg mb-2 group-hover:text-[#8b4d2c] transition-colors">
                     {p.title}
                   </h3>
-                  <p className="text-[#8a93a3] text-sm leading-relaxed flex-1 mb-6">
+                  <p className="text-[#6b5847] text-sm leading-relaxed flex-1 mb-6">
                     {p.description}
                   </p>
 
                   <div className="flex flex-wrap gap-x-4 gap-y-1 mt-auto">
                     {p.tech?.map((t, j) => (
-                      <span key={j} className="mono text-[11px] text-[#8a93a3]">{t}</span>
+                      <span key={j} className="mono text-[11px] text-[#6b5847]">{t}</span>
                     ))}
                   </div>
                 </motion.div>

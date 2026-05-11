@@ -39,24 +39,24 @@ export default function Hero() {
             target={href.startsWith('mailto') ? undefined : '_blank'}
             rel="noopener noreferrer"
             aria-label={label}
-            className="text-[#8a93a3] hover:text-[#64ffda] hover:-translate-y-1 transition-all duration-200"
+            className="text-[#6b5847] hover:text-[#8b4d2c] hover:-translate-y-1 transition-all duration-200"
           >
             <Icon size={18} />
           </a>
         ))}
-        <div className="w-px h-24 mt-2" style={{ background: 'linear-gradient(180deg, #8a93a3, transparent)' }} />
+        <div className="w-px h-24 mt-2" style={{ background: 'linear-gradient(180deg, #6b5847, transparent)' }} />
       </div>
 
       {/* Fixed right email rail */}
       <div className="fixed right-10 bottom-0 hidden xl:flex flex-col items-center gap-4 z-40">
         <a
           href="mailto:ayro.escobar@gmail.com"
-          className="mono text-[12px] text-[#8a93a3] hover:text-[#64ffda] hover:-translate-y-1 transition-all duration-200 tracking-widest"
+          className="mono text-[12px] text-[#6b5847] hover:text-[#8b4d2c] hover:-translate-y-1 transition-all duration-200 tracking-widest"
           style={{ writingMode: 'vertical-rl' }}
         >
           ayro.escobar@gmail.com
         </a>
-        <div className="w-px h-24 mt-2" style={{ background: 'linear-gradient(180deg, #8a93a3, transparent)' }} />
+        <div className="w-px h-24 mt-2" style={{ background: 'linear-gradient(180deg, #6b5847, transparent)' }} />
       </div>
 
       {/* Content */}
@@ -65,12 +65,12 @@ export default function Hero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mono text-[#64ffda] text-sm mb-5 tracking-widest"
+          className="mono text-[#8b4d2c] text-sm mb-5 tracking-widest"
         >
           Plano, TX — 20 y/o
         </motion.p>
 
-        {/* Name — shimmer gradient */}
+        {/* Name — static warm gradient, no motion (peace) */}
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -80,12 +80,10 @@ export default function Hero() {
             fontSize: 'clamp(48px, 8vw, 82px)',
             lineHeight: 1,
             fontWeight: 800,
-            background: 'linear-gradient(90deg, #ecf2fb 0%, #64ffda 40%, #b0b8c7 65%, #ecf2fb 100%)',
-            backgroundSize: '300%',
+            background: 'linear-gradient(95deg, #2d2520 0%, #8b4d2c 55%, #6b3a1f 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
-            animation: 'shimmer 6s linear infinite',
           }}
         >
           Ayro Escobar.
@@ -105,7 +103,7 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25 }}
-              className="font-semibold text-[#8a93a3]"
+              className="font-semibold text-[#6b5847]"
               style={{ fontSize: 'clamp(26px, 4.5vw, 48px)' }}
             >
               {ROLES[idx]}
@@ -117,18 +115,18 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="text-[#8a93a3] max-w-lg mb-3 leading-relaxed text-base"
+          className="text-[#6b5847] max-w-lg mb-3 leading-relaxed text-base"
         >
-          I ship software at <span className="text-[#ecf2fb] font-medium">MD7</span>, interned at{' '}
-          <span className="text-[#ecf2fb] font-medium">RBC</span> in NYC, and head to{' '}
-          <span className="text-[#ecf2fb] font-medium">JP Morgan</span> this summer.
+          I ship software at <span className="text-[#2d2520] font-medium">MD7</span>, interned at{' '}
+          <span className="text-[#2d2520] font-medium">RBC</span> in NYC, and head to{' '}
+          <span className="text-[#2d2520] font-medium">JP Morgan</span> this summer.
         </motion.p>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45 }}
-          className="text-[#8a93a3] max-w-lg mb-4 leading-relaxed text-base"
+          className="text-[#6b5847] max-w-lg mb-4 leading-relaxed text-base"
         >
           Trying to build a life where my family never worries about money — and a few things
           that outlast me. Both before 25.
@@ -142,9 +140,9 @@ export default function Hero() {
         >
           <span
             className="w-2 h-2 rounded-full inline-block"
-            style={{ background: '#64ffda', boxShadow: '0 0 8px #64ffda' }}
+            style={{ background: '#8b4d2c', boxShadow: '0 0 8px #8b4d2c' }}
           />
-          <span className="mono text-[12px] text-[#8a93a3] tracking-wider">
+          <span className="mono text-[12px] text-[#6b5847] tracking-wider">
             Available for full-time conversations
           </span>
         </motion.div>
@@ -158,7 +156,7 @@ export default function Hero() {
           <a href="#projects" className="btn-teal">See what I'm building</a>
           <a
             href="#contact"
-            className="mono text-sm text-[#8a93a3] border border-[rgba(176,184,199,0.25)] rounded px-7 py-4 hover:border-[#64ffda] hover:text-[#64ffda] transition-all"
+            className="mono text-sm text-[#6b5847] border border-[rgba(140,122,102,0.25)] rounded px-7 py-4 hover:border-[#8b4d2c] hover:text-[#8b4d2c] transition-all"
           >
             Get in touch
           </a>
@@ -178,20 +176,13 @@ export default function Hero() {
               target={href.startsWith('mailto') ? undefined : '_blank'}
               rel="noopener noreferrer"
               aria-label={label}
-              className="text-[#8a93a3] hover:text-[#64ffda] transition-colors"
+              className="text-[#6b5847] hover:text-[#8b4d2c] transition-colors"
             >
               <Icon size={20} />
             </a>
           ))}
         </motion.div>
       </div>
-
-      <style>{`
-        @keyframes shimmer {
-          0%   { background-position: 0%   center; }
-          100% { background-position: 300% center; }
-        }
-      `}</style>
     </section>
   )
 }

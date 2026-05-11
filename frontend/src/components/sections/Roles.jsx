@@ -58,22 +58,22 @@ export default function Roles() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-[#ecf2fb] text-2xl font-semibold mb-10 flex items-center">
+        <h2 className="text-[#2d2520] text-2xl font-semibold mb-10 flex items-center">
           <span className="num">02.</span>
           Experience
           <span className="rule" />
         </h2>
 
         {/* Filter tabs */}
-        <div className="flex gap-0 mb-8 border-b border-[rgba(100,255,218,0.1)]">
+        <div className="flex gap-0 mb-8 border-b border-[rgba(139,77,44,0.1)]">
           {TABS.map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`mono text-[13px] px-5 py-2.5 border-b-2 -mb-px transition-all ${
                 tab === t
-                  ? 'text-[#64ffda] border-[#64ffda]'
-                  : 'text-[#8a93a3] border-transparent hover:text-[#64ffda] hover:bg-[rgba(100,255,218,0.03)]'
+                  ? 'text-[#8b4d2c] border-[#8b4d2c]'
+                  : 'text-[#6b5847] border-transparent hover:text-[#8b4d2c] hover:bg-[rgba(139,77,44,0.03)]'
               }`}
             >
               {t}
@@ -97,29 +97,29 @@ export default function Roles() {
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.07 }}
-                className="py-6 border-b border-[rgba(100,255,218,0.07)] last:border-0 group -mx-4 px-4 rounded-lg hover:bg-[rgba(100,255,218,0.025)] transition-colors cursor-default"
+                className="py-6 border-b border-[rgba(139,77,44,0.07)] last:border-0 group -mx-4 px-4 rounded-lg hover:bg-[rgba(139,77,44,0.025)] transition-colors cursor-default"
               >
                 <div className="flex items-start justify-between gap-4 flex-wrap mb-1.5">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-[#ecf2fb] font-semibold">{r.title}</span>
-                    <span className="text-[#64ffda] opacity-70">@</span>
-                    <span className="text-[#64ffda]">{r.org}</span>
+                    <span className="text-[#2d2520] font-semibold">{r.title}</span>
+                    <span className="text-[#8b4d2c] opacity-70">@</span>
+                    <span className="text-[#8b4d2c]">{r.org}</span>
                     {r.badge && (
                       <span
                         className="mono text-[10px] tracking-widest uppercase px-2 py-0.5 rounded"
                         style={{
-                          color: '#64ffda',
-                          background: 'rgba(100,255,218,0.08)',
-                          border: '1px solid rgba(100,255,218,0.25)',
+                          color: '#8b4d2c',
+                          background: 'rgba(139,77,44,0.08)',
+                          border: '1px solid rgba(139,77,44,0.25)',
                         }}
                       >
                         {r.badge}
                       </span>
                     )}
                   </div>
-                  <span className="mono text-[12px] text-[#8a93a3] whitespace-nowrap pt-0.5">{r.period}</span>
+                  <span className="mono text-[12px] text-[#6b5847] whitespace-nowrap pt-0.5">{r.period}</span>
                 </div>
-                <p className="text-[#8a93a3] text-sm leading-relaxed">{r.desc}</p>
+                <p className="text-[#6b5847] text-sm leading-relaxed">{r.desc}</p>
               </motion.div>
             ))}
           </motion.div>

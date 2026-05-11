@@ -6,11 +6,11 @@ export default function Footer() {
           href="https://github.com/AyroEscobar"
           target="_blank"
           rel="noopener noreferrer"
-          className="mono text-[12px] text-[#8a93a3] hover:text-[#64ffda] transition-colors"
+          className="mono text-[12px] text-[#6b5847] hover:text-[#8b4d2c] transition-colors"
         >
           Built by Ayro Escobar
         </a>
-        <span className="mono text-[11px] text-[#8a93a3] opacity-70">
+        <span className="mono text-[11px] text-[#6b5847] opacity-70">
           RBC NYC → MD7 → JPMC · before 25
         </span>
       </div>
