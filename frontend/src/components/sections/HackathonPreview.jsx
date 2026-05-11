@@ -2,11 +2,13 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 
 const stats = [
-  { n: '10+', label: 'Events\ncoached'    },
-  { n: '7+',  label: 'Hackathons\nattended' },
-  { n: '6',   label: 'Cities\nvisited'     },
-  { n: '24h', label: 'Average\nsleep cycle' },
+  { n: '10+', label: 'events\ncoached'    },
+  { n: '7+',  label: 'hackathons\nattended' },
+  { n: '6',   label: 'cities\nvisited'     },
+  { n: '24h', label: 'average\nsleep cycle' },
 ]
+
+const serifItalic = { fontFamily: "'Fraunces', Georgia, serif", fontStyle: 'italic' }
 
 export default function HackathonPreview() {
   return (
@@ -17,17 +19,23 @@ export default function HackathonPreview() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-[#2d2520] text-2xl font-semibold mb-10 flex items-center">
-          <span className="num">04.</span>
+        <h2
+          className="text-[#2a1f15] mb-10 flex items-center"
+          style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: '32px' }}
+        >
+          <span className="num">IV.</span>
           The Circuit
           <span className="rule" />
         </h2>
 
-        <p className="text-[#6b5847] leading-relaxed mb-12 max-w-xl">
+        <p
+          className="text-[#4f3d2e] leading-relaxed mb-12 max-w-xl"
+          style={{ fontSize: '18px' }}
+        >
           Hackathons are where the network came from — friends, first projects, first job
-          offer. Now I show up as an <span className="text-[#2d2520]">MLH Coach</span> and
-          on the <span className="text-[#2d2520]">HackUTD</span> tech team. If you're
-          shipping at 4 a.m., I'm probably awake too.
+          offer. Now I show up as an <span className="text-[#2a1f15] font-semibold">MLH
+          Coach</span> and on the <span className="text-[#2a1f15] font-semibold">HackUTD</span>{' '}
+          tech team. If you're shipping at 4 a.m., I'm probably awake too.
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
@@ -40,26 +48,31 @@ export default function HackathonPreview() {
               transition={{ delay: i * 0.1 }}
             >
               <p
-                className="font-bold mb-1"
+                className="text-[#9e451d] mb-1"
                 style={{
                   fontFamily: "'Fraunces', serif",
-                  fontSize: 'clamp(40px, 5vw, 56px)',
+                  fontSize: 'clamp(44px, 5.2vw, 60px)',
+                  fontWeight: 700,
                   lineHeight: 1,
-                  background: 'linear-gradient(135deg, #2d2520, #8b4d2c)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 {s.n}
               </p>
-              <p className="mono text-[12px] text-[#6b5847] whitespace-pre-line leading-relaxed">{s.label}</p>
+              <p
+                className="text-[#6b5645] whitespace-pre-line leading-snug"
+                style={{ ...serifItalic, fontSize: '15px' }}
+              >
+                {s.label}
+              </p>
             </motion.div>
           ))}
         </div>
 
         <Link
           to="/hackathons"
-          className="mono text-sm text-[#8b4d2c] flex items-center gap-2 group w-fit hover:opacity-80 transition-opacity"
+          className="inline-flex items-center gap-2 text-[#9e451d] hover:text-[#7a3416] transition-colors group"
+          style={{ ...serifItalic, fontSize: '17px' }}
         >
           Explore the interactive map
           <span className="group-hover:translate-x-1.5 transition-transform">→</span>

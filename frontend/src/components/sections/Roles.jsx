@@ -43,6 +43,12 @@ const roles = [
 
 const TABS = ['All', 'Work', 'Community']
 
+const tabStyle = {
+  fontFamily: "'Fraunces', Georgia, serif",
+  fontStyle: 'italic',
+  fontSize: '17px',
+}
+
 export default function Roles() {
   const [tab, setTab] = useState('All')
 
@@ -58,22 +64,26 @@ export default function Roles() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-[#2d2520] text-2xl font-semibold mb-10 flex items-center">
-          <span className="num">02.</span>
+        <h2
+          className="text-[#2a1f15] mb-10 flex items-center"
+          style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: '32px' }}
+        >
+          <span className="num">II.</span>
           Experience
           <span className="rule" />
         </h2>
 
-        {/* Filter tabs */}
-        <div className="flex gap-0 mb-8 border-b border-[rgba(139,77,44,0.1)]">
+        {/* Filter tabs — italic serif */}
+        <div className="flex gap-1 mb-8 border-b border-[rgba(158,69,29,0.18)]">
           {TABS.map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`mono text-[13px] px-5 py-2.5 border-b-2 -mb-px transition-all ${
+              style={tabStyle}
+              className={`px-5 py-2.5 border-b-2 -mb-px transition-all ${
                 tab === t
-                  ? 'text-[#8b4d2c] border-[#8b4d2c]'
-                  : 'text-[#6b5847] border-transparent hover:text-[#8b4d2c] hover:bg-[rgba(139,77,44,0.03)]'
+                  ? 'text-[#9e451d] border-[#9e451d]'
+                  : 'text-[#6b5645] border-transparent hover:text-[#9e451d]'
               }`}
             >
               {t}
@@ -97,29 +107,59 @@ export default function Roles() {
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.07 }}
-                className="py-6 border-b border-[rgba(139,77,44,0.07)] last:border-0 group -mx-4 px-4 rounded-lg hover:bg-[rgba(139,77,44,0.025)] transition-colors cursor-default"
+                className="py-6 border-b border-[rgba(158,69,29,0.12)] last:border-0 group -mx-4 px-4 rounded transition-colors cursor-default hover:bg-[rgba(158,69,29,0.04)]"
               >
-                <div className="flex items-start justify-between gap-4 flex-wrap mb-1.5">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-[#2d2520] font-semibold">{r.title}</span>
-                    <span className="text-[#8b4d2c] opacity-70">@</span>
-                    <span className="text-[#8b4d2c]">{r.org}</span>
+                <div className="flex items-start justify-between gap-4 flex-wrap mb-2">
+                  <div className="flex items-baseline gap-2.5 flex-wrap">
+                    <span className="text-[#2a1f15] font-semibold" style={{ fontSize: '18px' }}>
+                      {r.title}
+                    </span>
+                    <span
+                      className="text-[#9e451d]"
+                      style={{
+                        fontFamily: "'Fraunces', Georgia, serif",
+                        fontStyle: 'italic',
+                        fontSize: '17px',
+                      }}
+                    >
+                      at
+                    </span>
+                    <span
+                      className="text-[#9e451d] font-semibold"
+                      style={{ fontSize: '18px' }}
+                    >
+                      {r.org}
+                    </span>
                     {r.badge && (
                       <span
-                        className="mono text-[10px] tracking-widest uppercase px-2 py-0.5 rounded"
+                        className="px-2.5 py-0.5 rounded-sm"
                         style={{
-                          color: '#8b4d2c',
-                          background: 'rgba(139,77,44,0.08)',
-                          border: '1px solid rgba(139,77,44,0.25)',
+                          fontFamily: "'Fraunces', Georgia, serif",
+                          fontStyle: 'italic',
+                          fontSize: '12px',
+                          color: '#9e451d',
+                          background: 'rgba(158,69,29,0.08)',
+                          border: '1px solid rgba(158,69,29,0.30)',
                         }}
                       >
                         {r.badge}
                       </span>
                     )}
                   </div>
-                  <span className="mono text-[12px] text-[#6b5847] whitespace-nowrap pt-0.5">{r.period}</span>
+                  <span
+                    className="text-[#6b5645] whitespace-nowrap"
+                    style={{
+                      fontFamily: "'Fraunces', Georgia, serif",
+                      fontStyle: 'italic',
+                      fontSize: '15px',
+                    }}
+                  >
+                    {r.period}
+                  </span>
                 </div>
-                <p className="text-[#6b5847] text-sm leading-relaxed">{r.desc}</p>
+                <p className="text-[#4f3d2e] leading-relaxed" style={{ fontSize: '16.5px' }}>
+                  {r.desc}
+                </p>
               </motion.div>
             ))}
           </motion.div>

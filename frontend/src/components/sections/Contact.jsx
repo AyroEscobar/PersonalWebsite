@@ -9,28 +9,34 @@ export default function Contact() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <p className="mono text-[#8b4d2c] text-sm mb-5 tracking-widest">06. What's next</p>
+        <p className="smallcaps mb-5">VI. — What's next</p>
 
         <h2
-          className="font-bold mb-6"
+          className="text-[#2a1f15] mb-6"
           style={{
             fontFamily: "'Fraunces', serif",
-            fontSize: 'clamp(40px, 6vw, 64px)',
-            lineHeight: 1.1,
-            background: 'linear-gradient(135deg, #2d2520 0%, #57483b 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            fontWeight: 700,
+            fontSize: 'clamp(44px, 6.5vw, 72px)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.015em',
           }}
         >
           Let's build something.
         </h2>
 
-        <p className="text-[#6b5847] max-w-md mx-auto leading-relaxed mb-12">
+        <p
+          className="text-[#4f3d2e] max-w-md mx-auto leading-relaxed mb-12"
+          style={{ fontSize: '18px' }}
+        >
           Hiring, co-founding, or just want to talk about what you're working on —
           inbox is open and I'm fast to reply.
         </p>
 
-        <a href="mailto:ayro.escobar@gmail.com" className="btn-teal text-base !px-10 !py-5">
+        <a
+          href="mailto:ayro.escobar@gmail.com"
+          className="btn-teal"
+          style={{ fontSize: '19px', padding: '14px 32px' }}
+        >
           ayro.escobar@gmail.com
         </a>
       </motion.div>

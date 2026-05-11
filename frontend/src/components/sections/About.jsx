@@ -19,65 +19,83 @@ export default function About() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-[#2d2520] text-2xl font-semibold mb-10 flex items-center">
-          <span className="num">01.</span>
+        <h2
+          className="text-[#2a1f15] mb-10 flex items-center"
+          style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: '32px' }}
+        >
+          <span className="num">I.</span>
           About
           <span className="rule" />
         </h2>
 
         <div className="grid md:grid-cols-[3fr_2fr] gap-14">
-          <div className="space-y-4 text-[#6b5847] leading-relaxed">
-            <p>
-              I'm a 20-year-old software engineer out of <span className="text-[#2d2520]">Plano,
-              Texas</span> — CS at <span className="text-[#2d2520]">UT Dallas</span>, graduating
-              Fall 2027. The extended timeline isn't a slow walk; it's back-to-back internships
-              that I refused to skip.
+          <div className="space-y-5 text-[#4f3d2e] leading-relaxed" style={{ fontSize: '18px' }}>
+            <p className="dropcap">
+              I'm a twenty-year-old software engineer out of{' '}
+              <span className="text-[#2a1f15] font-semibold">Plano, Texas</span> — Computer
+              Science at <span className="text-[#2a1f15] font-semibold">UT Dallas</span>,
+              graduating Fall 2027. The extended timeline isn't a slow walk; it's
+              back-to-back internships that I refused to skip.
             </p>
             <p>
               I want to be financially free, take care of my family, and ship things that
-              matter — before 25. That sentence is the whole map. Everything I build, every
-              role I take, every hour I spend, gets weighed against it.
+              matter — before twenty-five. That sentence is the whole map. Every role I take,
+              every hour I spend, gets weighed against it.
             </p>
             <p>
-              I went <span className="text-[#2d2520]">RBC New York</span> →{' '}
-              <span className="text-[#2d2520]">MD7</span> →{' '}
-              <span className="text-[#2d2520]">JP Morgan</span> before turning 21. In between,
-              I built <span className="text-[#2d2520]">OpenClaw</span> — a 24/7 personal AI OS
-              that runs my life so I can focus on the work that actually moves things.
+              I went <span className="text-[#2a1f15] font-semibold">RBC New York</span> →{' '}
+              <span className="text-[#2a1f15] font-semibold">MD7</span> →{' '}
+              <span className="text-[#2a1f15] font-semibold">JP Morgan</span> before turning
+              twenty-one. In between, I built{' '}
+              <span className="text-[#2a1f15] font-semibold">OpenClaw</span> — a 24/7 personal
+              AI OS that runs my life so I can focus on the work that actually moves things.
             </p>
 
-            <div className="pt-3">
-              <p className="text-[#6b5847] text-sm mb-4">What I build with:</p>
-              <ul className="grid grid-cols-2 gap-2">
+            <div className="pt-4">
+              <p
+                className="smallcaps mb-4"
+                style={{ color: '#6b5645', letterSpacing: '0.22em' }}
+              >
+                What I build with
+              </p>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
                 {stack.map(s => (
-                  <li key={s} className="mono text-[12px] text-[#57483b] flex items-center gap-2">
-                    <span className="text-[#8b4d2c] text-xs">▹</span>{s}
+                  <li
+                    key={s}
+                    className="text-[#4f3d2e] flex items-baseline gap-3"
+                    style={{ fontSize: '16px' }}
+                  >
+                    <span
+                      className="text-[#9e451d] flex-shrink-0"
+                      style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic' }}
+                    >
+                      —
+                    </span>
+                    {s}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
 
-          {/* Profile image with teal offset border */}
+          {/* Profile photograph — sepia print */}
           <div className="flex justify-center md:justify-start mt-2">
-            <div className="relative w-56 h-56 flex-shrink-0 group">
-              {/* Offset clay border — printer's mark */}
+            <div className="relative w-60 h-60 flex-shrink-0 group">
               <div
-                className="absolute inset-0 rounded translate-x-5 translate-y-5 transition-transform duration-300 group-hover:translate-x-4 group-hover:translate-y-4"
-                style={{ border: '2px solid #8b4d2c', opacity: 0.65 }}
+                className="absolute inset-0 rounded-sm translate-x-5 translate-y-5 transition-transform duration-300 group-hover:translate-x-4 group-hover:translate-y-4"
+                style={{ border: '2px solid #9e451d', opacity: 0.7 }}
               />
-              {/* Warm clay tint, fades on hover */}
               <div
-                className="absolute inset-0 z-20 rounded transition-opacity duration-300 group-hover:opacity-0"
-                style={{ background: 'rgba(139,77,44,0.12)', mixBlendMode: 'multiply' }}
+                className="absolute inset-0 z-20 rounded-sm transition-opacity duration-300 group-hover:opacity-0"
+                style={{ background: 'rgba(158,69,29,0.14)', mixBlendMode: 'multiply' }}
               />
               <img
                 src={pfp}
                 alt="Ayro Escobar"
                 loading="lazy"
                 decoding="async"
-                className="relative z-10 w-full h-full object-cover rounded"
-                style={{ filter: 'sepia(18%) saturate(1.05) contrast(1.02)' }}
+                className="relative z-10 w-full h-full object-cover rounded-sm"
+                style={{ filter: 'sepia(22%) saturate(1.05) contrast(1.02)' }}
               />
             </div>
           </div>

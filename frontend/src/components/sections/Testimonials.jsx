@@ -2,6 +2,8 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useTestimonials } from '../../hooks/useFirestore'
 
+const serifItalic = { fontFamily: "'Fraunces', Georgia, serif", fontStyle: 'italic' }
+
 export default function Testimonials() {
   const { data: testimonials, loading, error } = useTestimonials()
   if (loading || error || testimonials.length === 0) return null
@@ -15,13 +17,16 @@ export default function Testimonials() {
         transition={{ duration: 0.6 }}
       >
         <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
-          <h2 className="text-[#2d2520] text-2xl font-semibold flex items-center">
-            <span className="num">05.</span>
+          <h2
+            className="text-[#2a1f15] flex items-center"
+            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: '32px' }}
+          >
+            <span className="num">V.</span>
             What People Say
             <span className="rule" />
           </h2>
-          <Link to="/review" className="btn-teal !py-2.5 !px-5 !text-[12px]">
-            + Leave a review
+          <Link to="/review" className="btn-teal !py-2 !px-4 !text-[14px]">
+            Leave a note
           </Link>
         </div>
 
@@ -33,21 +38,44 @@ export default function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="glass-card p-6"
+              className="glass-card p-7"
             >
-              <p className="text-[#57483b] text-sm leading-relaxed mb-5 italic">
-                "{t.message}"
+              <span
+                className="block text-[#9e451d] mb-3"
+                style={{ fontFamily: "'Fraunces', serif", fontSize: '42px', lineHeight: 0.5, fontWeight: 700 }}
+              >
+                “
+              </span>
+              <p
+                className="text-[#4f3d2e] leading-relaxed mb-5"
+                style={{ ...serifItalic, fontSize: '16.5px' }}
+              >
+                {t.message}
               </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-[rgba(139,77,44,0.07)]">
+              <div className="flex items-center gap-3 pt-4 border-t border-[rgba(158,69,29,0.14)]">
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center mono text-[#8b4d2c] text-xs font-semibold flex-shrink-0"
-                  style={{ background: 'rgba(139,77,44,0.08)', border: '1px solid rgba(139,77,44,0.2)' }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-[#9e451d] text-sm flex-shrink-0"
+                  style={{
+                    background: 'rgba(158,69,29,0.10)',
+                    border: '1px solid rgba(158,69,29,0.28)',
+                    fontFamily: "'Fraunces', serif",
+                    fontWeight: 600,
+                  }}
                 >
                   {t.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-[#2d2520] text-sm font-medium">{t.name}</p>
-                  {t.role && <p className="text-[#6b5847] text-xs">{t.role}</p>}
+                  <p className="text-[#2a1f15] font-medium" style={{ fontSize: '15px' }}>
+                    {t.name}
+                  </p>
+                  {t.role && (
+                    <p
+                      className="text-[#6b5645]"
+                      style={{ ...serifItalic, fontSize: '13px' }}
+                    >
+                      {t.role}
+                    </p>
+                  )}
                 </div>
               </div>
             </motion.div>
