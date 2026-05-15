@@ -1,6 +1,7 @@
 // Home Page - Single scroll page with all sections
 
 import Hero from '../sections/Hero'
+import Currently from '../sections/Currently'
 import About from '../sections/About'
 import Roles from '../sections/Roles'
 import Skills from '../sections/Skills'
@@ -14,6 +15,7 @@ function Home() {
   return (
     <div className="relative">
       <Hero />
+      <Currently />
       <About />
       <Roles />
       <Skills />
