@@ -11,7 +11,7 @@ const italicSerif = { fontFamily: "'Fraunces', Georgia, serif", fontStyle: 'ital
 
 export default function Currently() {
   return (
-    <section className="pt-2 pb-10 px-6 md:px-12 max-w-[900px] mx-auto">
+    <section className="pt-2 pb-14 px-6 md:px-12 max-w-[900px] mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -37,6 +37,25 @@ export default function Currently() {
               )}
             </div>
           ))}
+        </div>
+
+        {/* Vintage divider */}
+        <div
+          className="flex items-center justify-center gap-3 mt-12 text-[#9c8a72]"
+          style={{ opacity: 0.55 }}
+          aria-hidden="true"
+        >
+          <span style={{ width: 56, height: 1, background: 'currentColor' }} />
+          <span
+            style={{
+              fontFamily: "'Fraunces', serif",
+              fontStyle: 'italic',
+              fontSize: '16px',
+            }}
+          >
+            §
+          </span>
+          <span style={{ width: 56, height: 1, background: 'currentColor' }} />
         </div>
       </motion.div>
     </section>
