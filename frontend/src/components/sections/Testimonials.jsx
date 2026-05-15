@@ -42,7 +42,13 @@ export default function Testimonials() {
             >
               <span
                 className="block text-[#9e451d] mb-3"
-                style={{ fontFamily: "'Fraunces', serif", fontSize: '42px', lineHeight: 0.5, fontWeight: 700 }}
+                style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontSize: '42px',
+                  lineHeight: 0.5,
+                  fontWeight: 700,
+                  opacity: 0.5,
+                }}
               >
                 “
               </span>
