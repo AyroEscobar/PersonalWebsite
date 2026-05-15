@@ -269,6 +269,49 @@ body::after {
 
 select.field option { background: var(--paper-2); color: var(--ink); }
 
+/* Halftone / dither overlay — sahassharma-style printed-photo effect */
+.dither {
+  position: relative;
+  display: inline-block;
+}
+
+.dither > img {
+  display: block;
+}
+
+.dither::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(45,31,21,0.45) 0.6px, transparent 0.6px);
+  background-size: 2.5px 2.5px;
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+}
+
+/* Italic-serif caption for photos */
+.photo-caption {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--cocoa);
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.photo-caption::before {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
 /* Ornamental section divider — vintage book glyph */
 .ornament {
   display: flex;
