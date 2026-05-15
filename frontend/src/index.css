@@ -66,6 +66,10 @@ body, html, #root {
 /* Anchor offsets — scroll-to lands clear of the sticky nav */
 section[id] { scroll-margin-top: 88px; }
 
+/* Selection on body text — keep it warm */
+*::selection { background: rgba(196,101,53,0.22); color: var(--ink); }
+img::selection { background: rgba(196,101,53,0.35); }
+
 /* Reduced motion — respect the user's OS setting */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
