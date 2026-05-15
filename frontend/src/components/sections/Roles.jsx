@@ -137,14 +137,15 @@ export default function Roles() {
                     </span>
                     {r.badge && (
                       <span
-                        className="px-2.5 py-0.5 rounded-sm"
+                        className="px-2 py-0.5 rounded-sm"
                         style={{
                           fontFamily: "'Fraunces', Georgia, serif",
                           fontStyle: 'italic',
-                          fontSize: '12px',
-                          color: '#9e451d',
-                          background: 'rgba(158,69,29,0.08)',
-                          border: '1px solid rgba(158,69,29,0.30)',
+                          fontSize: '11.5px',
+                          letterSpacing: '0.02em',
+                          color: '#4f3d2e',
+                          background: 'rgba(74,53,38,0.07)',
+                          border: '1px solid rgba(74,53,38,0.18)',
                         }}
                       >
                         {r.badge}
