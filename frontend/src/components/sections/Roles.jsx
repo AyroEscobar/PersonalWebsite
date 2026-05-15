@@ -104,7 +104,7 @@ export default function Roles() {
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.07 }}
-                className="py-6 border-b border-[rgba(158,69,29,0.12)] last:border-0 group -mx-4 px-4 rounded transition-colors cursor-default hover:bg-[rgba(158,69,29,0.04)]"
+                className="py-6 border-b border-[rgba(74,53,38,0.10)] last:border-0 group -mx-4 px-4 rounded transition-colors cursor-default hover:bg-[rgba(74,53,38,0.04)]"
               >
                 <div className="flex items-start justify-between gap-4 flex-wrap mb-2">
                   <div className="flex items-baseline gap-2.5 flex-wrap">
