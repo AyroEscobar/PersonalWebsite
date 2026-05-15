@@ -69,10 +69,17 @@ export default function HackathonPreview() {
         <Link
           to="/hackathons"
           className="inline-flex items-center gap-2 text-[#9e451d] hover:text-[#7a3416] transition-colors group"
-          style={{ ...serifItalic, fontSize: '17px' }}
+          style={{
+            ...serifItalic,
+            fontSize: '17px',
+            textDecoration: 'underline',
+            textUnderlineOffset: '6px',
+            textDecorationColor: 'rgba(158,69,29,0.30)',
+            textDecorationThickness: '1px',
+          }}
         >
           Explore the interactive map
-          <span className="group-hover:translate-x-1.5 transition-transform">→</span>
+          <span className="group-hover:translate-x-1.5 transition-transform" style={{ textDecoration: 'none' }}>→</span>
         </Link>
       </motion.div>
     </section>
