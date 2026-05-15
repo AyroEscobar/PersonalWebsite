@@ -48,6 +48,21 @@ body, html, #root {
   body, html, #root { font-size: 17px; line-height: 1.7; }
 }
 
+/* Print stylesheet — clean black-on-white for paper or PDF */
+@media print {
+  body, html, #root {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    font-size: 11pt;
+  }
+  body::before, body::after { display: none !important; }
+  header, .fixed { display: none !important; }
+  section { page-break-inside: avoid; padding: 0.5cm 0 !important; }
+  .rule, .num { color: #555 !important; }
+  a { color: inherit !important; text-decoration: underline; }
+  .glass-card { box-shadow: none !important; border: 1px solid #ccc !important; background: white !important; }
+}
+
 /* Anchor offsets — scroll-to lands clear of the sticky nav */
 section[id] { scroll-margin-top: 88px; }
 
