@@ -169,6 +169,7 @@ body::after {
   color: var(--ink);
   letter-spacing: -0.012em;
   line-height: 1.1;
+  font-variation-settings: "opsz" 96;
 }
 
 /* Decorative rule — hairline with rust→transparent gradient */

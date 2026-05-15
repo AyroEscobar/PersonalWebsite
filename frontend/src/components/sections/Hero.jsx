@@ -76,6 +76,7 @@ export default function Hero() {
               fontWeight: 700,
               letterSpacing: '-0.018em',
               color: '#2a1f15',
+              fontVariationSettings: '"opsz" 144, "SOFT" 30',
             }}
           >
             I'm Ayro Escobar.
