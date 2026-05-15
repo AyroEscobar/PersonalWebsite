@@ -192,17 +192,27 @@ body::after {
   border: 1px solid var(--rust);
   border-radius: 3px;
   padding: 12px 26px;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.2s, color 0.2s;
+  transition: background 0.25s, box-shadow 0.25s, transform 0.25s, color 0.25s, letter-spacing 0.25s;
   cursor: pointer;
   background: transparent;
   text-decoration: none;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 1px 2px rgba(74,53,38,0.04);
 }
 
 .btn-teal:hover {
-  background: rgba(158, 69, 29, 0.08);
+  background: rgba(158, 69, 29, 0.07);
   color: var(--rust);
-  box-shadow: inset 0 0 0 1px rgba(158, 69, 29, 0.25);
+  border-color: var(--rust-deep);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.45) inset,
+    0 2px 12px rgba(158, 69, 29, 0.18);
   transform: translateY(-1px);
+  letter-spacing: 0.02em;
+}
+
+.btn-teal:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(74,53,38,0.10) inset;
 }
 
 /* ─── Form ───────────────────────────────────────────────── */
