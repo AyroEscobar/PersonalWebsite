@@ -112,7 +112,7 @@ export default function Hero() {
                 fontStyle: 'italic',
                 fontWeight: 400,
                 fontSize: 'clamp(22px, 3.4vw, 32px)',
-                color: '#9e451d',
+                color: '#4f3d2e',
                 letterSpacing: '0.005em',
               }}
             >
