@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa'
 import { useProjects } from '../../hooks/useFirestore'
+import { PROJECTS } from '../../data/projects'
 
 const FEATURED = {
   name: 'OpenClaw',
@@ -25,10 +26,29 @@ const italicSerif = {
   fontStyle: 'italic',
 }
 
+const sectionHeader = {
+  fontFamily: "'Fraunces', Georgia, serif",
+  fontWeight: 700,
+  fontSize: '32px',
+}
+
 export default function Projects() {
-  const { data: projects, loading, error } = useProjects()
+  const { data: liveProjects } = useProjects()
   const [hovered, setHovered] = useState(null)
-  const hasGrid = !loading && !error && projects.length > 0
+
+  // Merge: hardcoded baseline + any Firestore additions (de-duped by id/title)
+  const grid = (() => {
+    const base = [...PROJECTS]
+    if (liveProjects?.length) {
+      for (const lp of liveProjects) {
+        const key = (lp.id || lp.title || '').toString().toLowerCase()
+        if (!base.find(p => (p.id || p.title || '').toString().toLowerCase() === key)) {
+          base.push(lp)
+        }
+      }
+    }
+    return base
+  })()
 
   return (
     <section id="projects" className="py-28 px-6 md:px-12 max-w-[900px] mx-auto">
@@ -38,10 +58,7 @@ export default function Projects() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2
-          className="text-[#2a1f15] mb-10 flex items-center"
-          style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: '32px' }}
-        >
+        <h2 className="text-[#2a1f15] mb-10 flex items-center" style={sectionHeader}>
           <span className="num">III.</span>
           Projects
           <span className="rule" />
@@ -53,29 +70,26 @@ export default function Projects() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="relative mb-14 rounded-sm overflow-hidden"
+          className="relative mb-16 rounded-sm overflow-hidden"
           style={{
             background:
               'linear-gradient(145deg, rgba(235,223,197,0.96), rgba(220,207,176,0.88))',
-            border: '1px solid rgba(158,69,29,0.28)',
+            border: '1px solid rgba(158,69,29,0.24)',
             boxShadow:
-              '0 0 0 1px rgba(158,69,29,0.04), 0 18px 44px rgba(74,53,38,0.10)',
+              '0 0 0 1px rgba(158,69,29,0.03), 0 18px 44px rgba(74,53,38,0.10)',
           }}
         >
-          {/* Top accent line */}
           <div
             className="absolute inset-x-0 top-0 h-px"
             style={{
               background:
                 'linear-gradient(90deg, transparent, #9e451d 30%, #9e451d 70%, transparent)',
-              opacity: 0.7,
+              opacity: 0.65,
             }}
           />
           <div className="grid md:grid-cols-[1.4fr_1fr] gap-10 p-8 md:p-10">
             <div>
-              <p className="smallcaps mb-3">
-                Featured · {FEATURED.status}
-              </p>
+              <p className="smallcaps mb-3">Featured · {FEATURED.status}</p>
               <div className="flex items-baseline gap-4 mb-4 flex-wrap">
                 <h3
                   className="text-[#2a1f15]"
@@ -115,7 +129,7 @@ export default function Projects() {
               </div>
             </div>
 
-            <ul className="space-y-3 md:border-l md:border-[rgba(158,69,29,0.20)] md:pl-8">
+            <ul className="space-y-3 md:border-l md:border-[rgba(158,69,29,0.18)] md:pl-8">
               {FEATURED.bullets.map(b => (
                 <li
                   key={b}
@@ -135,90 +149,113 @@ export default function Projects() {
           </div>
         </motion.article>
 
-        {hasGrid && (
-          <>
-            <p className="smallcaps mb-6" style={{ color: '#6b5645' }}>
-              More things I've built
-            </p>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {projects.map((p, i) => (
-                <motion.div
-                  key={p.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                  onMouseEnter={() => setHovered(p.id)}
-                  onMouseLeave={() => setHovered(null)}
-                  className="glass-card flex flex-col p-6 cursor-default"
-                  style={hovered === p.id ? {
-                    boxShadow: '0 0 32px rgba(158,69,29,0.10), 0 14px 32px rgba(74,53,38,0.10)',
-                  } : {}}
-                >
-                  <div className="flex items-center justify-between mb-6">
-                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                      <path d="M6 13C6 11.3 7.3 10 9 10h7.5l2 3H31c1.7 0 3 1.3 3 3v11c0 1.7-1.3 3-3 3H9c-1.7 0-3-1.3-3-3V13z"
-                        stroke="#9e451d" strokeWidth="1.5" fill="none"/>
-                    </svg>
-                    <div className="flex items-center gap-3">
-                      {p.github && (
-                        <a href={p.github} target="_blank" rel="noopener noreferrer"
-                          className="text-[#6b5645] hover:text-[#9e451d] transition-colors"
-                          onClick={e => e.stopPropagation()}>
-                          <FaGithub size={18} />
-                        </a>
-                      )}
-                      {p.live && (
-                        <a href={p.live} target="_blank" rel="noopener noreferrer"
-                          className="text-[#6b5645] hover:text-[#9e451d] transition-colors"
-                          onClick={e => e.stopPropagation()}>
-                          <FaExternalLinkAlt size={14} />
-                        </a>
-                      )}
-                    </div>
-                  </div>
+        <p className="smallcaps mb-6" style={{ color: '#6b5645' }}>
+          The Shelf — more things I've built
+        </p>
 
+        <div className="grid md:grid-cols-2 gap-5">
+          {grid.map((p, i) => (
+            <motion.article
+              key={p.id || p.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ delay: (i % 6) * 0.07 }}
+              onMouseEnter={() => setHovered(p.id || p.title)}
+              onMouseLeave={() => setHovered(null)}
+              className="glass-card flex flex-col p-7 cursor-default relative"
+              style={hovered === (p.id || p.title) ? {
+                boxShadow: '0 0 28px rgba(158,69,29,0.10), 0 14px 28px rgba(74,53,38,0.10)',
+              } : {}}
+            >
+              <div className="flex items-start justify-between mb-3 gap-4">
+                <div className="flex-1 min-w-0">
                   <h3
-                    className="text-[#2a1f15] mb-2"
+                    className="text-[#2a1f15] mb-1"
                     style={{
                       fontFamily: "'Fraunces', serif",
-                      fontWeight: 600,
-                      fontSize: '21px',
+                      fontWeight: 700,
+                      fontSize: '22px',
                       letterSpacing: '-0.005em',
+                      lineHeight: 1.1,
                     }}
                   >
                     {p.title}
                   </h3>
-                  <p
-                    className="text-[#4f3d2e] leading-relaxed flex-1 mb-6"
-                    style={{ fontSize: '15.5px' }}
-                  >
-                    {p.description}
-                  </p>
+                  {p.tagline && (
+                    <p
+                      className="text-[#6b5645]"
+                      style={{ ...italicSerif, fontSize: '15px' }}
+                    >
+                      {p.tagline}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0 pt-1">
+                  {p.github && (
+                    <a
+                      href={p.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#6b5645] hover:text-[#9e451d] transition-colors"
+                      onClick={e => e.stopPropagation()}
+                      aria-label={`${p.title} on GitHub`}
+                    >
+                      <FaGithub size={17} />
+                    </a>
+                  )}
+                  {p.live && (
+                    <a
+                      href={p.live}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#6b5645] hover:text-[#9e451d] transition-colors"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <FaExternalLinkAlt size={13} />
+                    </a>
+                  )}
+                </div>
+              </div>
 
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-auto">
-                    {p.tech?.map((t, j) => (
-                      <span
-                        key={j}
-                        className="text-[#6b5645]"
-                        style={{ ...italicSerif, fontSize: '14px' }}
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </>
-        )}
+              <p
+                className="text-[#4f3d2e] leading-relaxed flex-1 mb-5"
+                style={{ fontSize: '15.5px' }}
+              >
+                {p.description}
+              </p>
+
+              <div className="flex items-end justify-between gap-3 mt-auto">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  {(p.tech || []).map((t, j) => (
+                    <span
+                      key={j}
+                      className="text-[#6b5645]"
+                      style={{ ...italicSerif, fontSize: '13.5px' }}
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+                {(p.category || p.status) && (
+                  <span
+                    className="text-[#9c8a72] whitespace-nowrap"
+                    style={{ ...italicSerif, fontSize: '12px', letterSpacing: '0.04em' }}
+                  >
+                    {p.status || p.category}
+                  </span>
+                )}
+              </div>
+            </motion.article>
+          ))}
+        </div>
 
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="mt-12 text-center"
+          transition={{ delay: 0.3 }}
+          className="mt-14 text-center"
         >
           <a
             href="https://github.com/AyroEscobar"
@@ -226,7 +263,7 @@ export default function Projects() {
             rel="noopener noreferrer"
             className="btn-teal"
           >
-            View more on GitHub →
+            More on GitHub →
           </a>
         </motion.div>
       </motion.div>
