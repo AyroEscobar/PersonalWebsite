@@ -186,7 +186,7 @@ export default function MusicPlayer() {
         <button
           onClick={() => setOpen(o => !o)}
           aria-label={open ? 'Close music player' : 'Open music player'}
-          className="flex items-center gap-2 px-3 py-2 rounded-full transition-all hover:-translate-y-0.5"
+          className="flex items-center gap-2.5 pl-2.5 pr-3.5 py-2 rounded-full transition-all hover:-translate-y-0.5"
           style={{
             background: 'rgba(235,223,197,0.92)',
             border: '1px solid rgba(74,53,38,0.20)',
@@ -194,15 +194,19 @@ export default function MusicPlayer() {
             backdropFilter: 'blur(6px)',
           }}
         >
-          <span
-            className="inline-block"
-            style={{
-              width: 9, height: 9, borderRadius: '50%',
-              background: playing ? '#9e451d' : '#9c8a72',
-              boxShadow: playing ? '0 0 8px rgba(196,101,53,0.55)' : 'none',
-              transition: 'all 0.3s',
-            }}
-          />
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+            <circle cx="7" cy="7" r="6.4" fill="none" stroke="#9e451d" strokeWidth="1.1" opacity="0.55" />
+            <circle cx="7" cy="7" r="3" fill="none" stroke="#9e451d" strokeWidth="0.8" opacity="0.45" />
+            <circle
+              cx="7" cy="7" r="1.4"
+              fill="#9e451d"
+              style={{
+                transformOrigin: '7px 7px',
+                animation: playing ? 'spin 3.5s linear infinite' : 'none',
+                opacity: playing ? 1 : 0.7,
+              }}
+            />
+          </svg>
           <span
             className="text-[#4f3d2e]"
             style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '13.5px' }}
@@ -210,6 +214,7 @@ export default function MusicPlayer() {
             {playing ? 'on the air' : 'tune in'}
           </span>
         </button>
+        <style>{`@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }`}</style>
       </div>
     </>
   )
