@@ -170,6 +170,14 @@ export default function Projects() {
             >
               <div className="flex items-start justify-between mb-3 gap-4">
                 <div className="flex-1 min-w-0">
+                  {p.award && (
+                    <p
+                      className="smallcaps mb-1.5"
+                      style={{ fontSize: '11px', letterSpacing: '0.22em', color: '#9e451d' }}
+                    >
+                      ✦ {p.award}
+                    </p>
+                  )}
                   <h3
                     className="text-[#2a1f15] mb-1"
                     style={{

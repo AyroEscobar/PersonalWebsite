@@ -14,6 +14,7 @@ export const PROJECTS = [
     tech: ['Python', 'Flask', 'React', 'Postgres'],
     category: 'Startup',
     status: 'In development',
+    award: 'With co-founders',
   },
   {
     id: 'viralengine',
@@ -58,6 +59,7 @@ export const PROJECTS = [
       'updates that previously took an hour of manual work per event. Now used by the team weekly.',
     tech: ['Python', 'Google Sheets API'],
     category: 'Internal tool',
+    award: 'In production',
   },
   {
     id: 'this-site',
