@@ -273,22 +273,39 @@ select.field option { background: var(--paper-2); color: var(--ink); }
 .dither {
   position: relative;
   display: inline-block;
+  box-shadow: 0 12px 28px rgba(74,53,38,0.18), 0 2px 6px rgba(74,53,38,0.08);
 }
 
 .dither > img {
   display: block;
+  filter: sepia(28%) saturate(1.05) contrast(1.08) brightness(0.97);
 }
 
-.dither::after {
+/* Layer 1 — fine halftone dots */
+.dither::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
   background-image:
-    radial-gradient(circle at 1px 1px, rgba(45,31,21,0.45) 0.6px, transparent 0.6px);
-  background-size: 2.5px 2.5px;
+    radial-gradient(circle at 1px 1px, rgba(45,31,21,0.55) 0.9px, transparent 0.9px);
+  background-size: 3px 3px;
   mix-blend-mode: multiply;
-  opacity: 0.7;
+  opacity: 0.85;
+  z-index: 1;
+}
+
+/* Layer 2 — paper texture tint */
+.dither::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(243,234,214,0.18), rgba(196,101,53,0.06)),
+    repeating-linear-gradient(0deg, rgba(45,31,21,0.04) 0 1px, transparent 1px 3px);
+  mix-blend-mode: multiply;
+  z-index: 2;
 }
 
 /* Italic-serif caption for photos */
