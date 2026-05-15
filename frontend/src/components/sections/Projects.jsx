@@ -239,8 +239,8 @@ export default function Projects() {
                 </div>
                 {(p.category || p.status) && (
                   <span
-                    className="text-[#9c8a72] whitespace-nowrap"
-                    style={{ ...italicSerif, fontSize: '12px', letterSpacing: '0.04em' }}
+                    className="text-[#6b5645] whitespace-nowrap"
+                    style={{ ...italicSerif, fontSize: '13px', letterSpacing: '0.03em', opacity: 0.85 }}
                   >
                     {p.status || p.category}
                   </span>
