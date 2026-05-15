@@ -207,7 +207,7 @@ export default function MusicPlayer() {
             className="text-[#4f3d2e]"
             style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '13.5px' }}
           >
-            {playing ? 'on the air' : 'music'}
+            {playing ? 'on the air' : 'tune in'}
           </span>
         </button>
       </div>
