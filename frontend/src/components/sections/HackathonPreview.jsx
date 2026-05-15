@@ -48,7 +48,7 @@ export default function HackathonPreview() {
               transition={{ delay: i * 0.1 }}
             >
               <p
-                className="text-[#9e451d] mb-1"
+                className="text-[#2a1f15] mb-1"
                 style={{
                   fontFamily: "'Fraunces', serif",
                   fontSize: 'clamp(44px, 5.2vw, 60px)',
