@@ -1,6 +1,7 @@
 import Navbar from './components/Navbar'
 import MusicPlayer from './components/MusicPlayer'
 import BackToTop from './components/BackToTop'
+import ScrollProgress from './components/ScrollProgress'
 import { Outlet, useLocation } from 'react-router-dom'
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
 
   return (
     <div className="min-h-screen w-full flex flex-col relative">
+      {showChrome && <ScrollProgress />}
       <Navbar />
       <Outlet />
       {showChrome && <MusicPlayer />}
