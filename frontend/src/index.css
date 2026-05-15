@@ -104,7 +104,7 @@ body::after {
   font-style: normal;
   letter-spacing: 0.18em;
   font-size: 13px;
-  color: var(--rust);
+  color: var(--cocoa);
 }
 
 /* Kept for any actual code/tech-tag uses */
