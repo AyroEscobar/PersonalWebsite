@@ -120,13 +120,18 @@ export default function Roles() {
                         fontFamily: "'Fraunces', Georgia, serif",
                         fontStyle: 'italic',
                         fontSize: '17px',
+                        opacity: 0.85,
                       }}
                     >
                       at
                     </span>
                     <span
-                      className="text-[#9e451d] font-semibold"
-                      style={{ fontSize: '18px' }}
+                      className="text-[#2a1f15]"
+                      style={{
+                        fontFamily: "'Fraunces', Georgia, serif",
+                        fontWeight: 600,
+                        fontSize: '18px',
+                      }}
                     >
                       {r.org}
                     </span>
