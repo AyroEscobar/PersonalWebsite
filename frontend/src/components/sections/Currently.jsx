@@ -19,7 +19,9 @@ export default function Currently() {
         transition={{ duration: 0.6 }}
         className="text-center"
       >
-        <p className="smallcaps mb-5">A dispatch from the desk</p>
+        <p className="smallcaps mb-5">
+          A dispatch from the desk · <span style={{ color: '#9e451d' }}>May 2026</span>
+        </p>
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[#4f3d2e]">
           {ITEMS.map((it, i) => (
             <div key={it.label} className="flex items-center gap-6">
