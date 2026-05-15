@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import pfp from '../../assets/pfp-web.jpg'
 
 export default function About() {
   const stack = [
@@ -25,7 +24,7 @@ export default function About() {
           <span className="rule" />
         </h2>
 
-        <div className="grid md:grid-cols-[3fr_2fr] gap-14">
+        <div className="grid md:grid-cols-[2fr_1fr] gap-12 md:gap-16">
           <div className="space-y-5 text-[#4f3d2e] leading-relaxed" style={{ fontSize: '18px' }}>
             <p className="dropcap">
               I'm a twenty-year-old software engineer out of{' '}
@@ -48,59 +47,56 @@ export default function About() {
               AI OS that runs my life so I can focus on the work that actually moves things.
             </p>
 
-            <div className="pt-4">
+            {/* Dated reflection — sahas-style quote with month */}
+            <blockquote
+              className="mt-8 border-l-2 pl-5 py-1"
+              style={{ borderColor: 'rgba(158,69,29,0.4)' }}
+            >
               <p
-                className="smallcaps mb-4"
-                style={{ color: '#6b5645', letterSpacing: '0.22em' }}
+                className="text-[#2a1f15]"
+                style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontStyle: 'italic',
+                  fontSize: '20px',
+                  lineHeight: 1.5,
+                }}
               >
-                What I build with
+                “The cost of doing the work is doing the work. There is no shortcut.”
               </p>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
-                {stack.map(s => (
-                  <li
-                    key={s}
-                    className="text-[#4f3d2e] flex items-baseline gap-3"
-                    style={{ fontSize: '16px' }}
-                  >
-                    <span
-                      className="text-[#9e451d] flex-shrink-0"
-                      style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic' }}
-                    >
-                      —
-                    </span>
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <footer
+                className="mt-2 text-[#6b5645]"
+                style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontStyle: 'italic',
+                  fontSize: '13px',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                — a note to myself, May 2026
+              </footer>
+            </blockquote>
           </div>
 
-          {/* Profile photograph — tacked-up sepia print */}
-          <div className="flex justify-center md:justify-start mt-4">
-            <div
-              className="relative w-60 h-60 flex-shrink-0 group"
-              style={{ transform: 'rotate(-1.5deg)' }}
-            >
-              <div
-                className="absolute inset-0 rounded-sm translate-x-4 translate-y-4 transition-transform duration-300 group-hover:translate-x-3 group-hover:translate-y-3"
-                style={{ border: '1.5px solid #9e451d', opacity: 0.55 }}
-              />
-              <div
-                className="absolute inset-0 z-20 rounded-sm transition-opacity duration-300 group-hover:opacity-0"
-                style={{ background: 'rgba(158,69,29,0.12)', mixBlendMode: 'multiply' }}
-              />
-              <img
-                src={pfp}
-                alt="Ayro Escobar"
-                loading="lazy"
-                decoding="async"
-                className="relative z-10 w-full h-full object-cover rounded-sm"
-                style={{
-                  filter: 'sepia(22%) saturate(1.05) contrast(1.02)',
-                  boxShadow: '0 12px 24px rgba(74,53,38,0.18)',
-                }}
-              />
-            </div>
+          {/* Side column — stack list */}
+          <div>
+            <p className="smallcaps mb-4">What I build with</p>
+            <ul className="space-y-2">
+              {stack.map(s => (
+                <li
+                  key={s}
+                  className="text-[#4f3d2e] flex items-baseline gap-3"
+                  style={{ fontSize: '15.5px' }}
+                >
+                  <span
+                    className="text-[#9e451d] flex-shrink-0"
+                    style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic' }}
+                  >
+                    —
+                  </span>
+                  {s}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </motion.div>
