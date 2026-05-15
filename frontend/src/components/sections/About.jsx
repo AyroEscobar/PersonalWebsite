@@ -78,16 +78,19 @@ export default function About() {
             </div>
           </div>
 
-          {/* Profile photograph — sepia print */}
-          <div className="flex justify-center md:justify-start mt-2">
-            <div className="relative w-60 h-60 flex-shrink-0 group">
+          {/* Profile photograph — tacked-up sepia print */}
+          <div className="flex justify-center md:justify-start mt-4">
+            <div
+              className="relative w-60 h-60 flex-shrink-0 group"
+              style={{ transform: 'rotate(-1.5deg)' }}
+            >
               <div
-                className="absolute inset-0 rounded-sm translate-x-5 translate-y-5 transition-transform duration-300 group-hover:translate-x-4 group-hover:translate-y-4"
-                style={{ border: '2px solid #9e451d', opacity: 0.7 }}
+                className="absolute inset-0 rounded-sm translate-x-4 translate-y-4 transition-transform duration-300 group-hover:translate-x-3 group-hover:translate-y-3"
+                style={{ border: '1.5px solid #9e451d', opacity: 0.55 }}
               />
               <div
                 className="absolute inset-0 z-20 rounded-sm transition-opacity duration-300 group-hover:opacity-0"
-                style={{ background: 'rgba(158,69,29,0.14)', mixBlendMode: 'multiply' }}
+                style={{ background: 'rgba(158,69,29,0.12)', mixBlendMode: 'multiply' }}
               />
               <img
                 src={pfp}
@@ -95,7 +98,10 @@ export default function About() {
                 loading="lazy"
                 decoding="async"
                 className="relative z-10 w-full h-full object-cover rounded-sm"
-                style={{ filter: 'sepia(22%) saturate(1.05) contrast(1.02)' }}
+                style={{
+                  filter: 'sepia(22%) saturate(1.05) contrast(1.02)',
+                  boxShadow: '0 12px 24px rgba(74,53,38,0.18)',
+                }}
               />
             </div>
           </div>
