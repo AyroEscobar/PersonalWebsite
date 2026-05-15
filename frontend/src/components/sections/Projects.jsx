@@ -58,7 +58,7 @@ export default function Projects() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-[#2a1f15] mb-10 flex items-center" style={sectionHeader}>
+        <h2 className="section-h mb-10 flex items-center">
           <span className="num">III.</span>
           Projects
           <span className="rule" />

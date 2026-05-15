@@ -17,10 +17,7 @@ export default function Testimonials() {
         transition={{ duration: 0.6 }}
       >
         <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
-          <h2
-            className="text-[#2a1f15] flex items-center"
-            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: '32px' }}
-          >
+          <h2 className="section-h flex items-center">
             <span className="num">V.</span>
             What People Say
             <span className="rule" />

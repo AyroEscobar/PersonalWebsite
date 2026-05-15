@@ -64,10 +64,7 @@ export default function Roles() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <h2
-          className="text-[#2a1f15] mb-10 flex items-center"
-          style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: '32px' }}
-        >
+        <h2 className="section-h mb-10 flex items-center">
           <span className="num">II.</span>
           Experience
           <span className="rule" />
