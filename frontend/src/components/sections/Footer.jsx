@@ -4,8 +4,8 @@ export default function Footer() {
   return (
     <footer className="py-10 px-6 max-w-[900px] mx-auto">
       <div
-        className="flex items-center justify-center mb-6 text-[#9e451d]"
-        style={{ ...serifItalic, fontSize: '18px', opacity: 0.55, letterSpacing: '0.4em' }}
+        className="flex items-center justify-center mb-7 text-[#9c8a72]"
+        style={{ ...serifItalic, fontSize: '14px', opacity: 0.7, letterSpacing: '0.5em' }}
       >
         ✦ ✦ ✦
       </div>
