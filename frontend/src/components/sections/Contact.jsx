@@ -9,7 +9,7 @@ export default function Contact() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <p className="smallcaps mb-5">VI. — What's next</p>
+        <p className="smallcaps mb-5">VII. — What's next</p>
 
         <h2
           className="text-[#2a1f15] mb-6"

@@ -7,6 +7,7 @@ import Roles from '../sections/Roles'
 import Skills from '../sections/Skills'
 import Projects from '../sections/Projects'
 import HackathonPreview from '../sections/HackathonPreview'
+import FieldNotes from '../sections/FieldNotes'
 import Testimonials from '../sections/Testimonials'
 import Contact from '../sections/Contact'
 import Footer from '../sections/Footer'
@@ -21,6 +22,7 @@ function Home() {
       <Skills />
       <Projects />
       <HackathonPreview />
+      <FieldNotes />
       <Testimonials />
       <Contact />
       <Footer />

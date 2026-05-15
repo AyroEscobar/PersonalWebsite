@@ -18,7 +18,7 @@ export default function Testimonials() {
       >
         <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
           <h2 className="section-h flex items-center">
-            <span className="num">V.</span>
+            <span className="num">VI.</span>
             What People Say
             <span className="rule" />
           </h2>
