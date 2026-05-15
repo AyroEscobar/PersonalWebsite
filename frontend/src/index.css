@@ -120,10 +120,11 @@ body::after {
   font-family: 'Fraunces', Georgia, serif;
   font-style: italic;
   font-weight: 500;
-  font-size: 22px;
+  font-size: 19px;
   color: var(--rust);
-  margin-right: 10px;
+  margin-right: 12px;
   line-height: 1;
+  opacity: 0.92;
 }
 
 /* Decorative rule — hairline with rust→transparent gradient */
@@ -132,8 +133,8 @@ body::after {
   height: 1px;
   margin-left: 18px;
   max-width: 260px;
-  background: linear-gradient(90deg, var(--rust), transparent);
-  opacity: 0.45;
+  background: linear-gradient(90deg, rgba(158,69,29,0.5), transparent);
+  opacity: 0.5;
 }
 
 /* Drop cap — used on the About lede */
