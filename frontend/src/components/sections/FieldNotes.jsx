@@ -52,7 +52,7 @@ export default function FieldNotes() {
           className="text-[#6b5645] mb-12 max-w-xl"
           style={{ ...italicSerif, fontSize: '17px' }}
         >
-          Things outside the work that keep me grounded.
+          Things outside the work that keep me grounded. Updated as I remember to.
         </p>
 
         <div className="grid md:grid-cols-2 gap-x-12 gap-y-10">
