@@ -5,9 +5,9 @@ import { MdEmail } from 'react-icons/md'
 
 const ROLES = [
   'Software Engineer',
-  'Builder',
-  'JPMC ’26 / RBC ’25',
-  'AI Infrastructure Guy',
+  'Builder of OpenClaw',
+  'RBC → MD7 → JPMC',
+  'Twenty, in a hurry',
 ]
 
 const socials = [
