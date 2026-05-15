@@ -143,6 +143,17 @@ body::after {
   margin-right: 12px;
   line-height: 1;
   opacity: 0.92;
+  font-feature-settings: "salt", "ss01";
+}
+
+/* Section h2 — beefier serif, slight letter-spacing tightening */
+.section-h {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(28px, 3.6vw, 36px);
+  color: var(--ink);
+  letter-spacing: -0.012em;
+  line-height: 1.1;
 }
 
 /* Decorative rule — hairline with rust→transparent gradient */
