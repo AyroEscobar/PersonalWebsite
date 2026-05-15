@@ -41,6 +41,11 @@ body, html, #root {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+}
+
+@media (max-width: 640px) {
+  body, html, #root { font-size: 17px; line-height: 1.7; }
 }
 
 /* Anchor offsets — scroll-to lands clear of the sticky nav */
