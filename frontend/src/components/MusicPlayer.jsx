@@ -107,7 +107,7 @@ export default function MusicPlayer() {
               <div className="px-4 py-3">
                 <p
                   className="smallcaps mb-2"
-                  style={{ fontSize: '11px', letterSpacing: '0.22em', color: '#9c8a72' }}
+                  style={{ fontSize: '11px', letterSpacing: '0.22em', color: '#6b5645' }}
                 >
                   Now Playing
                 </p>
