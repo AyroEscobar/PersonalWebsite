@@ -275,6 +275,12 @@ select.field option { background: var(--paper-2); color: var(--ink); }
   position: relative;
   display: inline-block;
   box-shadow: 0 12px 28px rgba(74,53,38,0.18), 0 2px 6px rgba(74,53,38,0.08);
+  transition: transform 0.6s cubic-bezier(.2,.7,.2,1), box-shadow 0.6s ease;
+}
+
+.dither:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px rgba(74,53,38,0.22), 0 4px 8px rgba(74,53,38,0.10);
 }
 
 .dither > img {
