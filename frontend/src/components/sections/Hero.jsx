@@ -21,7 +21,7 @@ export default function Hero() {
   const [idx, setIdx] = useState(0)
 
   useEffect(() => {
-    const t = setInterval(() => setIdx(p => (p + 1) % ROLES.length), 3000)
+    const t = setInterval(() => setIdx(p => (p + 1) % ROLES.length), 4200)
     return () => clearInterval(t)
   }, [])
 
