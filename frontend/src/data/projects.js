@@ -4,6 +4,7 @@
 export const PROJECTS = [
   {
     id: 'aviation',
+    year: '2025',
     title: 'Aviation',
     tagline: 'Maintenance & flight log for GA pilots',
     description:
@@ -18,6 +19,7 @@ export const PROJECTS = [
   },
   {
     id: 'viralengine',
+    year: '2025',
     title: 'ViralEngine',
     tagline: 'AI video pipeline → multi-platform autopost',
     description:
@@ -30,6 +32,7 @@ export const PROJECTS = [
   },
   {
     id: 'expense-tracker',
+    year: '2024',
     title: 'Expense Tracker',
     tagline: 'Personal finance dashboard',
     description:
@@ -41,6 +44,7 @@ export const PROJECTS = [
   },
   {
     id: 'interviewlens',
+    year: '2024',
     title: 'InterviewLens',
     tagline: 'Technical interview coaching, instrumented',
     description:
@@ -52,6 +56,7 @@ export const PROJECTS = [
   },
   {
     id: 'mlh-automation',
+    year: '2024',
     title: 'MLH Sheet Pipeline',
     tagline: 'CSV → Google Sheet automation',
     description:
@@ -63,6 +68,7 @@ export const PROJECTS = [
   },
   {
     id: 'this-site',
+    year: '2026',
     title: 'This Site',
     tagline: 'The site you are reading',
     description:
