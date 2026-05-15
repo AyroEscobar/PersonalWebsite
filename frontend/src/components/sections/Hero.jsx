@@ -175,7 +175,7 @@ export default function Hero() {
           transition={{ delay: 0.35, duration: 0.6 }}
           className="flex flex-col items-start md:items-center"
         >
-          <div className="dither rounded-sm overflow-hidden" style={{ maxWidth: 280, width: '100%' }}>
+          <div className="dither rounded-sm overflow-hidden" style={{ maxWidth: 300, width: '100%' }}>
             <img
               src={pfp}
               alt="Ayro Escobar"
@@ -185,7 +185,6 @@ export default function Hero() {
                 width: '100%',
                 aspectRatio: '4 / 5',
                 objectFit: 'cover',
-                filter: 'sepia(22%) saturate(1.05) contrast(1.04)',
               }}
             />
           </div>
