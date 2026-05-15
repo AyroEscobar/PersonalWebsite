@@ -63,6 +63,7 @@ export default function FieldNotes() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ delay: (i % 2) * 0.08 }}
+              className="group"
             >
               <p
                 className="smallcaps mb-2"
@@ -71,7 +72,7 @@ export default function FieldNotes() {
                 field note <span style={{ color: '#9e451d', marginLeft: 4 }}>{n.n}</span>
               </p>
               <h3
-                className="text-[#2a1f15] mb-3"
+                className="text-[#2a1f15] mb-3 transition-colors group-hover:text-[#9e451d]"
                 style={{
                   fontFamily: "'Fraunces', serif",
                   fontWeight: 700,
