@@ -70,8 +70,9 @@ export default function Hero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="label mb-5"
+          className="label mb-4 flex items-center gap-3"
         >
+          <span aria-hidden="true" style={{ width: 28, height: 1, background: 'currentColor', opacity: 0.5 }} />
           From Plano, Texas — twenty years old
         </motion.p>
 
