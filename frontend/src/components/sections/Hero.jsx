@@ -171,7 +171,7 @@ export default function Hero() {
           <a href="#projects" className="btn-teal">See what I'm building →</a>
           <a
             href="#contact"
-            className="text-[16px] text-[#6b5645] hover:text-[#9e451d] transition-colors"
+            className="group text-[16px] text-[#6b5645] hover:text-[#9e451d] transition-colors"
             style={{
               fontFamily: "'Fraunces', Georgia, serif",
               fontStyle: 'italic',
