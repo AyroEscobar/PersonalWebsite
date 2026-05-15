@@ -28,7 +28,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="min-h-screen flex flex-col justify-center px-6 md:px-12 max-w-[900px] mx-auto"
+      className="relative min-h-screen flex flex-col justify-center px-6 md:px-12 max-w-[900px] mx-auto"
     >
       {/* Fixed left social rail */}
       <div className="fixed left-10 bottom-0 hidden xl:flex flex-col items-center gap-5 z-40">
@@ -206,6 +206,26 @@ export default function Hero() {
           ))}
         </motion.div>
       </div>
+
+      {/* Scroll cue */}
+      <motion.a
+        href="#about"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2, duration: 0.6 }}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#9c8a72] hover:text-[#4f3d2e] transition-colors"
+        style={{ fontFamily: "'Fraunces', Georgia, serif", fontStyle: 'italic', fontSize: '13px' }}
+        aria-label="Scroll to about"
+      >
+        <span>read on</span>
+        <motion.span
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ fontSize: '14px' }}
+        >
+          ↓
+        </motion.span>
+      </motion.a>
     </section>
   )
 }
