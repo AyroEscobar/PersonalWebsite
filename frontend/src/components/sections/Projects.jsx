@@ -73,10 +73,10 @@ export default function Projects() {
           className="relative mb-16 rounded-sm overflow-hidden"
           style={{
             background:
-              'linear-gradient(145deg, rgba(235,223,197,0.96), rgba(220,207,176,0.88))',
-            border: '1px solid rgba(158,69,29,0.24)',
+              'linear-gradient(145deg, rgba(235,223,197,0.96), rgba(220,207,176,0.85))',
+            border: '1px solid rgba(74,53,38,0.16)',
             boxShadow:
-              '0 0 0 1px rgba(158,69,29,0.03), 0 18px 44px rgba(74,53,38,0.10)',
+              '0 0 0 1px rgba(74,53,38,0.02), 0 16px 36px rgba(74,53,38,0.08)',
           }}
         >
           <div
