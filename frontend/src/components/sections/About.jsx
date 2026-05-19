@@ -5,7 +5,7 @@ import pfp from '../../assets/pfp-web.jpg'
 const FACTS = [
   { k: 'AGE',    v: '20' },
   { k: 'ORIGIN', v: 'Plano, Texas' },
-  { k: 'EDU',    v: 'UT Dallas · CS · Dec 2027' },
+  { k: 'EDU',    v: 'UT Dallas · CS · 2027' },
   { k: 'LANGS',  v: 'English · Spanish' },
   { k: 'STATUS', v: 'US Citizen' },
 ]
@@ -18,22 +18,23 @@ export default function About() {
           <div className="space-y-4 text-dim" style={{ fontSize: '14px', lineHeight: 1.85 }}>
             <p>
               <span className="text-cyan">▸ </span>
-              Twenty-year-old software engineer out of{' '}
-              <span className="text-ink">Plano, Texas</span> — Computer Science at{' '}
-              <span className="text-ink">UT Dallas</span>, graduating December 2027. The
-              extended timeline isn't a slow walk; it's back-to-back internships I refused to skip.
+              I'm a software engineer out of <span className="text-ink">Plano, Texas</span>,
+              twenty years old, studying Computer Science at{' '}
+              <span className="text-ink">UT Dallas</span> with a 2027 graduation. The long
+              timeline is not a slow walk. It is back to back internships I refused to skip.
             </p>
             <p>
               I went <span className="text-ink">RBC New York</span> →{' '}
               <span className="text-ink">MD7</span> → <span className="text-ink">JP Morgan</span>{' '}
-              before turning twenty-one. In between I built{' '}
-              <span className="text-cyan">OpenClaw</span> — a 24/7 personal AI operating system
-              that runs my life so I can focus on the work that actually moves things.
+              before I turned twenty one. Alongside that I built a 24/7 multi-agent system
+              that runs my life: finances, health, the news I read, the briefing I wake up
+              to. It runs on Claude and the OpenClaw runtime, so I can spend my attention on
+              the work that actually moves things.
             </p>
             <p>
               I want to be financially free, take care of my family, and ship things that
-              outlast me — before twenty-five. That sentence is the whole map. Every role,
-              every hour, gets weighed against it.
+              outlast me, all before I turn twenty five. That sentence is the whole map.
+              Every role, every hour, gets weighed against it.
             </p>
           </div>
 
@@ -41,7 +42,7 @@ export default function About() {
             <p className="text-ink" style={{ fontSize: '13.5px', lineHeight: 1.75 }}>
               "The cost of doing the work is doing the work. There is no shortcut."
             </p>
-            <p className="eyebrow mt-2">— LOG ENTRY · MAY 2026</p>
+            <p className="eyebrow mt-2">LOG ENTRY · MAY 2026</p>
           </div>
         </Panel>
 

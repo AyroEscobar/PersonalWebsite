@@ -5,9 +5,9 @@ import Tag from '../ui/Tag'
 
 const STACK = [
   { cat: 'LANGUAGES',    accent: 'cyan',    items: ['Java', 'TypeScript', 'JavaScript', 'Python', 'C++', 'SQL'] },
+  { cat: 'AI & AGENTS',  accent: 'magenta', items: ['Prompt Engineering', 'Multi-agent systems', 'Agent orchestration', 'Claude API', 'Gemini API', 'OpenAI API'] },
   { cat: 'FRAMEWORKS',   accent: 'green',   items: ['React', 'Next.js', 'Node.js', 'Spring Boot', 'React Native', 'Tailwind'] },
-  { cat: 'CLOUD & DATA', accent: 'amber',   items: ['AWS', 'Firebase', 'Supabase', 'PostgreSQL', 'MongoDB', 'Kafka', 'GraphQL'] },
-  { cat: 'AI & AGENTS',  accent: 'magenta', items: ['Claude API', 'Multi-agent systems', 'Gemini API', 'Whisper', 'Prompt engineering'] },
+  { cat: 'CLOUD & DATA', accent: 'amber',   items: ['AWS', 'PostgreSQL', 'Firebase', 'Supabase', 'MongoDB', 'Kafka', 'GraphQL'] },
 ]
 
 export default function Skills() {
@@ -33,7 +33,7 @@ export default function Skills() {
         ))}
       </div>
       <p className="mt-6 eyebrow" style={{ opacity: 0.5 }}>
-        ▸ AWS Certified Cloud Practitioner · always compounding
+        ▸ AWS Certified Cloud Practitioner · Solutions Architect next
       </p>
     </Section>
   )

@@ -7,24 +7,26 @@ import { Panel } from '../ui/Panel'
 import Tag from '../ui/Tag'
 
 const FEATURED = {
-  name: 'OpenClaw',
-  tagline: 'Personal AI operating system',
+  name: '24/7 Multi-Agent System',
+  tagline: 'the system that runs my life',
   body:
-    'A 24/7 multi-agent AI OS running on a Mac Mini M4 Pro — calendar, email, health, ' +
-    'finance, morning briefings, reminders. Built on Claude with a custom multi-agent ' +
-    'architecture. It runs my life so I can focus on the work that moves things.',
+    'A 24/7 multi-agent system I built and run on a Mac Mini M4 Pro. It watches my ' +
+    'finances, tracks my health, curates the news I read, files my notes, and writes the ' +
+    'briefing I wake up to. It runs on Claude and the OpenClaw runtime, orchestrated ' +
+    'through agents I wrote and schedule myself. It carries the operational overhead of ' +
+    'my life so I can spend my attention on the work that moves things.',
   bullets: [
-    'Always-on multi-agent runtime, 20+ scheduled services',
-    'Calendar · email · finance · health integrations',
-    'Daily executive briefings + ambient reminders',
-    'Custom Claude-based agent orchestration',
+    'Always on, 20+ scheduled agents and services',
+    'Autonomous finance tracking, from bank email to dashboard',
+    'Health, news, and research agents reporting in daily',
+    'A briefing on my phone before 8am, every morning',
   ],
-  tech: ['Claude', 'Python', 'Multi-agent', 'macOS', 'Postgres', 'OAuth'],
+  tech: ['Claude', 'OpenClaw', 'Python', 'PostgreSQL', 'LaunchAgents', 'Telegram'],
 }
 
 const STATUS_COLOR = {
-  LIVE: '#6ee7a3', SHIPPED: '#6ee7a3', ONGOING: '#6dd5ff',
-  'IN-DEV': '#ffb86b', HACKATHON: '#d99cff', TOOL: '#6dd5ff', ARCHIVED: '#6b7689',
+  LIVE: '#6ee7a3', SHIPPED: '#6ee7a3', BUILDING: '#ffb86b',
+  HACKATHON: '#d99cff', TOOL: '#6dd5ff', ARCHIVED: '#6b7689',
 }
 
 export default function Projects() {
@@ -53,12 +55,12 @@ export default function Projects() {
         transition={{ duration: 0.5 }}
         className="mb-6"
       >
-        <Panel title="FEATURED // OPENCLAW" accent="cyan" meta="ALWAYS-ON" glow scan>
+        <Panel title="FEATURED // THE SYSTEM" accent="cyan" meta="ALWAYS ON" glow scan>
           <div className="grid md:grid-cols-[1.5fr_1fr] gap-6">
             <div>
               <div className="flex items-baseline gap-3 flex-wrap mb-3">
-                <h3 className="display text-ink" style={{ fontSize: 'clamp(28px,4vw,40px)', lineHeight: 1 }}>
-                  OpenClaw
+                <h3 className="display text-ink" style={{ fontSize: 'clamp(24px,3.4vw,34px)', lineHeight: 1.05 }}>
+                  {FEATURED.name}
                 </h3>
                 <span className="text-cyan" style={{ fontSize: '13px' }}>/ {FEATURED.tagline}</span>
               </div>

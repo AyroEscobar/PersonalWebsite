@@ -4,7 +4,7 @@ import { Panel } from '../ui/Panel'
 
 export default function Contact() {
   return (
-    <Section id="contact" code="SECTION 08 // CHANNEL" title="Open channel" intro="LET'S BUILD SOMETHING">
+    <Section id="contact" code="SECTION 08 // CHANNEL" title="Open channel" intro="REACH THE OPERATOR">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -14,14 +14,14 @@ export default function Contact() {
         <Panel title="OPEN.CHANNEL" accent="green" meta="RESPONSE ~FAST" glow scan>
           <div className="font-mono mb-5" style={{ fontSize: '12.5px' }}>
             <div className="text-dim">
-              <span className="text-green">$</span> ./contact --operator ayro
+              <span className="text-green">$</span> open channel
             </div>
             <div className="text-green mt-1.5">▸ channel open · inbox monitored daily</div>
           </div>
 
           <p className="text-dim mb-7 max-w-[520px]" style={{ fontSize: '14px', lineHeight: 1.85 }}>
-            Hiring, co-founding, or just want to talk about what you're building — the
-            inbox is open and I reply fast. Bring a hard problem.
+            Building something, stuck on something hard, or just want to trade ideas? My
+            inbox is open and I move fast. I am always down to meet people who build.
           </p>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -29,7 +29,7 @@ export default function Contact() {
               ▸ ayro.escobar@gmail.com
             </a>
             <a
-              href="https://www.linkedin.com/in/ayroescobar/"
+              href="https://www.linkedin.com/in/ayroescobar"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-ghost"

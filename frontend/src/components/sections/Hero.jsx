@@ -65,7 +65,7 @@ export default function Hero() {
           >
             <span className="eyebrow text-cyan" style={{ letterSpacing: '0.2em' }}>OPERATOR</span>
             <span className="w-8 h-px bg-border" />
-            <span className="eyebrow">PLANO, TX · UTD CS '27</span>
+            <span className="eyebrow">PLANO, TX · UTD CS 2027</span>
           </motion.div>
 
           <motion.h1
@@ -83,7 +83,7 @@ export default function Hero() {
           >
             <span className="text-green">$</span>
             <span className="text-dim">whoami</span>
-            <span className="text-muted">—</span>
+            <span className="text-cyan">▸</span>
             <span className="text-ink">{typed}</span>
             <span className="blink text-cyan">▋</span>
           </motion.div>
@@ -96,7 +96,7 @@ export default function Hero() {
             Currently shipping at <span className="text-ink">MD7</span>. Interned at{' '}
             <span className="text-ink">RBC</span> in New York, headed to{' '}
             <span className="text-ink">JP Morgan</span> this summer. Building software that
-            outlasts me — and a life where my family never worries about money.
+            outlasts me, and a life where my family never worries about money.
           </motion.p>
 
           <motion.div
@@ -106,7 +106,7 @@ export default function Hero() {
             <span className="w-2 h-2 rounded-full bg-green" style={{ boxShadow: '0 0 10px #6ee7a3' }} />
             <span className="eyebrow text-green" style={{ letterSpacing: '0.16em' }}>ONLINE</span>
             <span className="text-muted">·</span>
-            <span className="eyebrow">available for full-time</span>
+            <span className="eyebrow">building in public</span>
           </motion.div>
 
           <motion.div

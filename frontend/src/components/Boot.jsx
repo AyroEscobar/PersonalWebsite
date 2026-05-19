@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 
 const LINES = [
-  { t: 'OPENCLAW.SYS v2.0  —  OPERATOR CONSOLE', c: '#6b7689' },
+  { t: 'OPERATOR.SYS v2.0  //  AYRO ESCOBAR', c: '#6b7689' },
   { t: '> initializing kernel ............. OK', c: '#6ee7a3' },
   { t: '> mounting /sections .............. OK', c: '#6ee7a3' },
   { t: '> linking build.log ............... OK', c: '#6ee7a3' },

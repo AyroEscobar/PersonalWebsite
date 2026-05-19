@@ -13,7 +13,7 @@ const NOTES = [
   },
   {
     n: '03', title: 'BUILDING', accent: 'amber',
-    body: "Mostly OpenClaw — extending its agent surface, wiring new integrations. Weekends go to the startups. Most of my best ideas show up in the gym.",
+    body: "Mostly my agent system, wiring up new integrations and tightening what it can do. Weekends go to the startups. My best ideas still show up in the gym.",
   },
   {
     n: '04', title: 'WATCHING', accent: 'magenta',
