@@ -1,87 +1,49 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import Section from '../ui/Section'
+import { Panel } from '../ui/Panel'
 
-const stats = [
-  { n: '10+', label: 'events\ncoached'    },
-  { n: '7+',  label: 'hackathons\nattended' },
-  { n: '6',   label: 'cities\nvisited'     },
-  { n: '24h', label: 'average\nsleep cycle' },
+const STATS = [
+  { n: '10+', label: 'EVENTS COACHED' },
+  { n: '7+',  label: 'HACKATHONS RUN' },
+  { n: '6',   label: 'CITIES ON MAP' },
+  { n: '1.2K', label: 'HACKERS REACHED' },
 ]
-
-const serifItalic = { fontFamily: "'Fraunces', Georgia, serif", fontStyle: 'italic' }
 
 export default function HackathonPreview() {
   return (
-    <section id="hackathons" className="py-28 px-6 md:px-12 max-w-[900px] mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
-        <h2 className="section-h mb-10 flex items-center">
-          <span className="num">IV.</span>
-          The Circuit
-          <span className="rule" />
-        </h2>
-
-        <p
-          className="text-[#4f3d2e] leading-relaxed mb-12 max-w-xl"
-          style={{ fontSize: '18px' }}
-        >
+    <Section id="hackathons" code="SECTION 05 // FIELD.OPS" title="The circuit" intro="WHERE THE NETWORK CAME FROM">
+      <Panel title="FIELD.OPS" accent="amber" meta="MLH · HACKUTD" glow>
+        <p className="text-dim mb-6" style={{ fontSize: '13.5px', lineHeight: 1.8 }}>
+          <span className="text-amber">▸ </span>
           Hackathons are where the network came from — friends, first projects, first job
-          offer. Now I show up as an <span className="text-[#2a1f15] font-semibold">MLH
-          Coach</span> and on the <span className="text-[#2a1f15] font-semibold">HackUTD</span>{' '}
-          tech team. If you're shipping at 4 a.m., I'm probably awake too.
+          offer. Now I show up as an <span className="text-ink">MLH Coach</span> and on the{' '}
+          <span className="text-ink">HackUTD</span> tech team. If you're shipping at 4 a.m.,
+          I'm probably awake too.
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-          {stats.map((s, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          {STATS.map((s, i) => (
             <motion.div
-              key={i}
+              key={s.label}
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: i * 0.08 }}
+              className="border border-border rounded-sm p-4 bg-panel-hi"
             >
-              <p
-                className="text-[#2a1f15] mb-1"
-                style={{
-                  fontFamily: "'Fraunces', serif",
-                  fontSize: 'clamp(44px, 5.2vw, 60px)',
-                  fontWeight: 700,
-                  lineHeight: 1,
-                  letterSpacing: '-0.02em',
-                }}
-              >
+              <div className="display text-ink" style={{ fontSize: 'clamp(28px,4vw,40px)', lineHeight: 1 }}>
                 {s.n}
-              </p>
-              <p
-                className="text-[#6b5645] whitespace-pre-line leading-snug"
-                style={{ ...serifItalic, fontSize: '15px' }}
-              >
-                {s.label}
-              </p>
+              </div>
+              <div className="eyebrow mt-1.5">{s.label}</div>
             </motion.div>
           ))}
         </div>
 
-        <Link
-          to="/hackathons"
-          className="inline-flex items-center gap-2 text-[#9e451d] hover:text-[#7a3416] transition-colors group"
-          style={{
-            ...serifItalic,
-            fontSize: '17px',
-            textDecoration: 'underline',
-            textUnderlineOffset: '6px',
-            textDecorationColor: 'rgba(158,69,29,0.30)',
-            textDecorationThickness: '1px',
-          }}
-        >
-          Explore the interactive map
-          <span className="group-hover:translate-x-1.5 transition-transform" style={{ textDecoration: 'none' }}>→</span>
+        <Link to="/hackathons" className="btn-ghost">
+          ▸ Open Interactive Map
         </Link>
-      </motion.div>
-    </section>
+      </Panel>
+    </Section>
   )
 }

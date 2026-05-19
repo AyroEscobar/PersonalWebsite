@@ -1,48 +1,41 @@
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa'
 import { useProjects } from '../../hooks/useFirestore'
 import { PROJECTS } from '../../data/projects'
+import Section from '../ui/Section'
+import { Panel } from '../ui/Panel'
+import Tag from '../ui/Tag'
 
 const FEATURED = {
   name: 'OpenClaw',
-  tagline: 'Personal AI OS',
+  tagline: 'Personal AI operating system',
   body:
-    'A 24/7 multi-agent AI OS running on a Mac Mini M4 Pro — calendar, email, ' +
-    'health, finance, morning briefings, reminders. Built on Claude with a custom ' +
-    'multi-agent architecture. It runs my life so I can focus on the work that moves things.',
-  status: 'Always-on',
+    'A 24/7 multi-agent AI OS running on a Mac Mini M4 Pro — calendar, email, health, ' +
+    'finance, morning briefings, reminders. Built on Claude with a custom multi-agent ' +
+    'architecture. It runs my life so I can focus on the work that moves things.',
   bullets: [
-    'Always-on multi-agent runtime on Mac Mini M4 Pro',
-    'Calendar, email, finance, health integrations',
-    'Daily executive briefings and ambient reminders',
+    'Always-on multi-agent runtime, 20+ scheduled services',
+    'Calendar · email · finance · health integrations',
+    'Daily executive briefings + ambient reminders',
     'Custom Claude-based agent orchestration',
   ],
-  tech: ['Claude', 'Python', 'multi-agent', 'macOS', 'cron', 'IMAP / OAuth'],
+  tech: ['Claude', 'Python', 'Multi-agent', 'macOS', 'Postgres', 'OAuth'],
 }
 
-const italicSerif = {
-  fontFamily: "'Fraunces', Georgia, serif",
-  fontStyle: 'italic',
-}
-
-const sectionHeader = {
-  fontFamily: "'Fraunces', Georgia, serif",
-  fontWeight: 700,
-  fontSize: '32px',
+const STATUS_COLOR = {
+  LIVE: '#6ee7a3', SHIPPED: '#6ee7a3', ONGOING: '#6dd5ff',
+  'IN-DEV': '#ffb86b', HACKATHON: '#d99cff', TOOL: '#6dd5ff', ARCHIVED: '#6b7689',
 }
 
 export default function Projects() {
   const { data: liveProjects } = useProjects()
-  const [hovered, setHovered] = useState(null)
 
-  // Merge: hardcoded baseline + any Firestore additions (de-duped by id/title)
   const grid = (() => {
     const base = [...PROJECTS]
     if (liveProjects?.length) {
       for (const lp of liveProjects) {
         const key = (lp.id || lp.title || '').toString().toLowerCase()
-        if (!base.find(p => (p.id || p.title || '').toString().toLowerCase() === key)) {
+        if (!base.find((p) => (p.id || p.title || '').toString().toLowerCase() === key)) {
           base.push(lp)
         }
       }
@@ -51,240 +44,113 @@ export default function Projects() {
   })()
 
   return (
-    <section id="projects" className="py-28 px-6 md:px-12 max-w-[900px] mx-auto">
+    <Section id="projects" code="SECTION 04 // BUILD.LOG" title="Build log" intro="THINGS I HAVE SHIPPED">
+      {/* Featured — OpenClaw */}
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={{ opacity: 0, y: 18 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.5 }}
+        className="mb-6"
       >
-        <h2 className="section-h mb-10 flex items-center">
-          <span className="num">III.</span>
-          Projects
-          <span className="rule" />
-        </h2>
-
-        {/* Featured: OpenClaw */}
-        <motion.article
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="relative mb-16 rounded-sm overflow-hidden"
-          style={{
-            background:
-              'linear-gradient(145deg, rgba(235,223,197,0.96), rgba(220,207,176,0.85))',
-            border: '1px solid rgba(74,53,38,0.16)',
-            boxShadow:
-              '0 0 0 1px rgba(74,53,38,0.02), 0 16px 36px rgba(74,53,38,0.08)',
-          }}
-        >
-          <div
-            className="absolute inset-x-0 top-0 h-px"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent, #9e451d 30%, #9e451d 70%, transparent)',
-              opacity: 0.65,
-            }}
-          />
-          <div className="grid md:grid-cols-[1.4fr_1fr] gap-10 p-8 md:p-10">
+        <Panel title="FEATURED // OPENCLAW" accent="cyan" meta="ALWAYS-ON" glow scan>
+          <div className="grid md:grid-cols-[1.5fr_1fr] gap-6">
             <div>
-              <p className="smallcaps mb-3">Featured · {FEATURED.status}</p>
-              <div className="flex items-baseline gap-4 mb-4 flex-wrap">
-                <h3
-                  className="text-[#2a1f15]"
-                  style={{
-                    fontFamily: "'Fraunces', serif",
-                    fontSize: 'clamp(34px, 4.6vw, 46px)',
-                    fontWeight: 700,
-                    lineHeight: 1,
-                    letterSpacing: '-0.01em',
-                  }}
-                >
-                  {FEATURED.name}
+              <div className="flex items-baseline gap-3 flex-wrap mb-3">
+                <h3 className="display text-ink" style={{ fontSize: 'clamp(28px,4vw,40px)', lineHeight: 1 }}>
+                  OpenClaw
                 </h3>
-                <span
-                  className="text-[#6b5645]"
-                  style={{ ...italicSerif, fontSize: '17px' }}
-                >
-                  / {FEATURED.tagline}
-                </span>
+                <span className="text-cyan" style={{ fontSize: '13px' }}>/ {FEATURED.tagline}</span>
               </div>
-              <p
-                className="text-[#4f3d2e] leading-relaxed mb-6"
-                style={{ fontSize: '17px' }}
-              >
+              <p className="text-dim mb-5" style={{ fontSize: '13.5px', lineHeight: 1.8 }}>
                 {FEATURED.body}
               </p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1">
-                {FEATURED.tech.map(t => (
-                  <span
-                    key={t}
-                    className="text-[#6b5645]"
-                    style={{ ...italicSerif, fontSize: '14px' }}
-                  >
-                    {t}
-                  </span>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {FEATURED.tech.map((t) => <Tag key={t}>{t}</Tag>)}
               </div>
             </div>
-
-            <ul className="space-y-3 md:border-l md:border-[rgba(158,69,29,0.18)] md:pl-8">
-              {FEATURED.bullets.map(b => (
-                <li
-                  key={b}
-                  className="text-[#4f3d2e] leading-relaxed flex gap-3"
-                  style={{ fontSize: '16px' }}
-                >
-                  <span
-                    className="text-[#9e451d] flex-shrink-0 mt-0.5"
-                    style={italicSerif}
-                  >
-                    —
-                  </span>
+            <ul className="space-y-2.5 md:border-l border-border md:pl-6">
+              {FEATURED.bullets.map((b) => (
+                <li key={b} className="flex gap-2.5 text-dim" style={{ fontSize: '12.5px', lineHeight: 1.6 }}>
+                  <span className="text-cyan shrink-0">▸</span>
                   <span>{b}</span>
                 </li>
               ))}
             </ul>
           </div>
-        </motion.article>
+        </Panel>
+      </motion.div>
 
-        <p className="smallcaps mb-6" style={{ color: '#6b5645' }}>
-          The Shelf — more things I've built
-        </p>
-
-        <div className="grid md:grid-cols-2 gap-5">
-          {grid.map((p, i) => (
-            <motion.article
+      {/* Grid */}
+      <div className="grid md:grid-cols-2 gap-5">
+        {grid.map((p, i) => {
+          const col = STATUS_COLOR[p.status] || '#6b7689'
+          return (
+            <motion.div
               key={p.id || p.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
-              transition={{ delay: (i % 6) * 0.07 }}
-              onMouseEnter={() => setHovered(p.id || p.title)}
-              onMouseLeave={() => setHovered(null)}
-              className="glass-card flex flex-col p-7 cursor-default relative"
-              style={hovered === (p.id || p.title) ? {
-                boxShadow: '0 0 28px rgba(158,69,29,0.10), 0 14px 28px rgba(74,53,38,0.10)',
-              } : {}}
+              transition={{ delay: (i % 6) * 0.06 }}
+              className="panel panel-glow flex flex-col"
             >
-              <div className="flex items-start justify-between mb-3 gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1.5">
-                    {p.year && (
-                      <p
-                        className="smallcaps"
-                        style={{ fontSize: '11px', letterSpacing: '0.22em', color: '#6b5645' }}
-                      >
-                        {p.year}
-                      </p>
-                    )}
-                    {p.award && (
-                      <p
-                        className="smallcaps"
-                        style={{ fontSize: '11px', letterSpacing: '0.22em', color: '#9e451d' }}
-                      >
-                        ✦ {p.award}
-                      </p>
-                    )}
-                  </div>
-                  <h3
-                    className="text-[#2a1f15] mb-1"
-                    style={{
-                      fontFamily: "'Fraunces', serif",
-                      fontWeight: 700,
-                      fontSize: '22px',
-                      letterSpacing: '-0.005em',
-                      lineHeight: 1.1,
-                    }}
-                  >
-                    {p.title}
-                  </h3>
-                  {p.tagline && (
-                    <p
-                      className="text-[#6b5645]"
-                      style={{ ...italicSerif, fontSize: '15px' }}
-                    >
-                      {p.tagline}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0 pt-1">
-                  {p.github && (
-                    <a
-                      href={p.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#6b5645] hover:text-[#9e451d] transition-colors"
-                      onClick={e => e.stopPropagation()}
-                      aria-label={`${p.title} on GitHub`}
-                    >
-                      <FaGithub size={17} />
-                    </a>
-                  )}
-                  {p.live && (
-                    <a
-                      href={p.live}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#6b5645] hover:text-[#9e451d] transition-colors"
-                      onClick={e => e.stopPropagation()}
-                    >
-                      <FaExternalLinkAlt size={13} />
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              <p
-                className="text-[#4f3d2e] leading-relaxed flex-1 mb-5"
-                style={{ fontSize: '15.5px' }}
-              >
-                {p.description}
-              </p>
-
-              <div className="flex items-end justify-between gap-3 mt-auto">
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  {(p.tech || []).map((t, j) => (
-                    <span
-                      key={j}
-                      className="text-[#6b5645]"
-                      style={{ ...italicSerif, fontSize: '13.5px' }}
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-                {(p.category || p.status) && (
+              <div className="flex items-center gap-2.5 px-4 h-9 border-b border-border">
+                <span className="text-muted text-xs">[</span>
+                <span className="font-mono text-ink" style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em' }}>
+                  {(p.title || '').toUpperCase()}
+                </span>
+                <span className="flex-1 h-px bg-line" />
+                {p.status && (
                   <span
-                    className="text-[#6b5645] whitespace-nowrap"
-                    style={{ ...italicSerif, fontSize: '13px', letterSpacing: '0.03em', opacity: 0.85 }}
+                    className="font-mono px-1.5 py-0.5 rounded-sm"
+                    style={{ fontSize: '9px', letterSpacing: '0.1em', color: col, border: `1px solid ${col}55`, background: `${col}0f` }}
                   >
-                    {p.status || p.category}
+                    {p.status}
                   </span>
                 )}
+                <span className="text-muted text-xs">]</span>
               </div>
-            </motion.article>
-          ))}
-        </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="mt-14 text-center"
-        >
-          <a
-            href="https://github.com/AyroEscobar"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-teal"
-          >
-            More on GitHub →
-          </a>
-        </motion.div>
-      </motion.div>
-    </section>
+              <div className="p-5 flex flex-col flex-1">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div>
+                    <span className="eyebrow">{p.year} · {p.category}</span>
+                    {p.tagline && (
+                      <p className="text-cyan mt-1" style={{ fontSize: '13px' }}>{p.tagline}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 pt-1 shrink-0">
+                    {p.github && (
+                      <a href={p.github} target="_blank" rel="noopener noreferrer"
+                         aria-label={`${p.title} on GitHub`} className="text-dim hover:text-cyan transition-colors">
+                        <FaGithub size={15} />
+                      </a>
+                    )}
+                    {p.live && (
+                      <a href={p.live} target="_blank" rel="noopener noreferrer"
+                         aria-label={`${p.title} live`} className="text-dim hover:text-cyan transition-colors">
+                        <FaExternalLinkAlt size={11} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <p className="text-dim flex-1 mb-4" style={{ fontSize: '12.5px', lineHeight: 1.75 }}>
+                  {p.description}
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-auto">
+                  {(p.tech || []).map((t) => <Tag key={t}>{t}</Tag>)}
+                </div>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+
+      <div className="mt-10 text-center">
+        <a href="https://github.com/AyroEscobar" target="_blank" rel="noopener noreferrer" className="btn-term">
+          ▸ Full Repository Index
+        </a>
+      </div>
+    </Section>
   )
 }

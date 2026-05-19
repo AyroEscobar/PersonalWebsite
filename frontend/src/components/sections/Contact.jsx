@@ -1,45 +1,52 @@
 import { motion } from 'framer-motion'
+import Section from '../ui/Section'
+import { Panel } from '../ui/Panel'
 
 export default function Contact() {
   return (
-    <section id="contact" className="py-36 px-6 md:px-12 max-w-[900px] mx-auto text-center">
+    <Section id="contact" code="SECTION 08 // CHANNEL" title="Open channel" intro="LET'S BUILD SOMETHING">
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.5 }}
       >
-        <p className="smallcaps mb-5">VII. — What's next</p>
+        <Panel title="OPEN.CHANNEL" accent="green" meta="RESPONSE ~FAST" glow scan>
+          <div className="font-mono mb-5" style={{ fontSize: '12.5px' }}>
+            <div className="text-dim">
+              <span className="text-green">$</span> ./contact --operator ayro
+            </div>
+            <div className="text-green mt-1.5">▸ channel open · inbox monitored daily</div>
+          </div>
 
-        <h2
-          className="text-[#2a1f15] mb-6"
-          style={{
-            fontFamily: "'Fraunces', serif",
-            fontWeight: 700,
-            fontSize: 'clamp(44px, 6.5vw, 72px)',
-            lineHeight: 1.05,
-            letterSpacing: '-0.015em',
-          }}
-        >
-          Let's build something.
-        </h2>
+          <p className="text-dim mb-7 max-w-[520px]" style={{ fontSize: '14px', lineHeight: 1.85 }}>
+            Hiring, co-founding, or just want to talk about what you're building — the
+            inbox is open and I reply fast. Bring a hard problem.
+          </p>
 
-        <p
-          className="text-[#4f3d2e] max-w-md mx-auto leading-relaxed mb-12"
-          style={{ fontSize: '18px' }}
-        >
-          Hiring, co-founding, or just want to talk about what you're working on —
-          inbox is open and I'm fast to reply.
-        </p>
-
-        <a
-          href="mailto:ayro.escobar@gmail.com"
-          className="btn-teal"
-          style={{ fontSize: '19px', padding: '14px 32px' }}
-        >
-          ayro.escobar@gmail.com
-        </a>
+          <div className="flex flex-wrap items-center gap-3">
+            <a href="mailto:ayro.escobar@gmail.com" className="btn-term">
+              ▸ ayro.escobar@gmail.com
+            </a>
+            <a
+              href="https://www.linkedin.com/in/ayroescobar/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost"
+            >
+              LinkedIn
+            </a>
+            <a
+              href="https://github.com/AyroEscobar"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost"
+            >
+              GitHub
+            </a>
+          </div>
+        </Panel>
       </motion.div>
-    </section>
+    </Section>
   )
 }
