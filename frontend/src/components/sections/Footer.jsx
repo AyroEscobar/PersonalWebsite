@@ -1,37 +1,49 @@
-const serifItalic = { fontFamily: "'Fraunces', Georgia, serif", fontStyle: 'italic' }
+import { FaGithub, FaLinkedin, FaInstagram } from 'react-icons/fa'
+import { MdEmail } from 'react-icons/md'
+
+const CHANNELS = [
+  { href: 'https://github.com/AyroEscobar', Icon: FaGithub, label: 'GitHub' },
+  { href: 'https://www.linkedin.com/in/ayroescobar/', Icon: FaLinkedin, label: 'LinkedIn' },
+  { href: 'mailto:ayro.escobar@gmail.com', Icon: MdEmail, label: 'Email' },
+  { href: 'https://www.instagram.com/ayro.afk/', Icon: FaInstagram, label: 'Instagram' },
+]
 
 export default function Footer() {
   return (
-    <footer className="py-10 px-6 max-w-[900px] mx-auto">
-      <div
-        className="flex items-center justify-center mb-7 text-[#9c8a72]"
-        style={{ ...serifItalic, fontSize: '14px', opacity: 0.7, letterSpacing: '0.5em' }}
-        aria-hidden="true"
-      >
-        ✦ ✦ ✦
-      </div>
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <a
-          href="https://github.com/AyroEscobar"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#6b5645] hover:text-[#9e451d] transition-colors"
-          style={{ ...serifItalic, fontSize: '14px' }}
-        >
-          Set by hand, in React.
-        </a>
-        <span
-          className="text-[#9c8a72]"
-          style={{ ...serifItalic, fontSize: '13px', opacity: 0.85, letterSpacing: '0.04em' }}
-        >
-          Vol. <span style={{ fontVariant: 'small-caps' }}>i</span> · MMXXVI
-        </span>
-        <span
-          className="text-[#6b5645]"
-          style={{ ...serifItalic, fontSize: '13px', opacity: 0.85 }}
-        >
-          RBC NYC → MD7 → JPMC
-        </span>
+    <footer className="px-6 md:px-10 pb-10 pt-4">
+      <div className="max-w-[1120px] mx-auto">
+        <div className="h-px bg-border mb-5" />
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <span className="text-cyan" style={{ fontSize: '12px' }}>◇</span>
+            <span className="eyebrow" style={{ letterSpacing: '0.14em' }}>
+              OPERATOR.AYRO
+            </span>
+            <span className="text-muted">·</span>
+            <span className="eyebrow">BUILD v2.0</span>
+            <span className="text-muted">·</span>
+            <span className="eyebrow text-green" style={{ letterSpacing: '0.14em' }}>ONLINE</span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {CHANNELS.map(({ href, Icon, label }) => (
+              <a
+                key={label}
+                href={href}
+                target={href.startsWith('mailto') ? undefined : '_blank'}
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="text-dim hover:text-cyan transition-colors"
+              >
+                <Icon size={15} />
+              </a>
+            ))}
+          </div>
+
+          <span className="eyebrow" style={{ opacity: 0.7 }}>
+            RBC NYC → MD7 → JPMC · MMXXVI
+          </span>
+        </div>
       </div>
     </footer>
   )

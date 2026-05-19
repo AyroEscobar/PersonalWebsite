@@ -1,17 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function ScrollProgress() {
   const [pct, setPct] = useState(0)
 
   useEffect(() => {
     const fn = () => {
-      const h = document.documentElement
-      const max = h.scrollHeight - h.clientHeight
-      setPct(max > 0 ? (h.scrollTop / max) * 100 : 0)
+      const el = document.documentElement
+      const max = el.scrollHeight - el.clientHeight
+      setPct(max > 0 ? (el.scrollTop / max) * 100 : 0)
     }
     fn()
     window.addEventListener('scroll', fn, { passive: true })
-    return () => window.removeEventListener('scroll', fn)
+    window.addEventListener('resize', fn)
+    return () => {
+      window.removeEventListener('scroll', fn)
+      window.removeEventListener('resize', fn)
+    }
   }, [])
 
   return (
@@ -24,8 +28,9 @@ export default function ScrollProgress() {
         style={{
           height: '100%',
           width: `${pct}%`,
-          background: 'linear-gradient(90deg, transparent, #9e451d 50%, #c46535)',
-          transition: 'width 0.05s linear',
+          background: 'linear-gradient(90deg, #6dd5ff, #d99cff)',
+          boxShadow: '0 0 10px rgba(109,213,255,0.55)',
+          transition: 'width 0.1s linear',
         }}
       />
     </div>

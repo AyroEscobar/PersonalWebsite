@@ -3,15 +3,40 @@ import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiX, HiMenu } from 'react-icons/hi'
 
-const Navbar = () => {
+const LINKS = [
+  { label: 'ABOUT',      id: 'about'    },
+  { label: 'EXPERIENCE', id: 'roles'    },
+  { label: 'BUILD.LOG',  id: 'projects' },
+  { label: 'CONTACT',    id: 'contact'  },
+]
+
+function Clock() {
+  const [t, setT] = useState('')
+  useEffect(() => {
+    const tick = () =>
+      setT(new Date().toLocaleTimeString('en-US', { hour12: false, timeZone: 'America/Chicago' }))
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <span className="hidden lg:flex items-center gap-2 eyebrow" style={{ letterSpacing: '0.12em' }}>
+      <span className="w-1.5 h-1.5 rounded-full bg-green" style={{ boxShadow: '0 0 8px #6ee7a3' }} />
+      {t} CT
+    </span>
+  )
+}
+
+export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const isHome = location.pathname === '/' || location.pathname === '/home'
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', fn)
+    const fn = () => setScrolled(window.scrollY > 16)
+    fn()
+    window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
@@ -21,120 +46,100 @@ const Navbar = () => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const links = [
-    { label: 'About',       id: 'about',    roman: 'I.'   },
-    { label: 'Experience',  id: 'roles',    roman: 'II.'  },
-    { label: 'Projects',    id: 'projects', roman: 'III.' },
-    { label: 'Contact',     id: 'contact',  roman: 'VI.'  },
-  ]
-
-  const serifItalic = { fontFamily: "'Fraunces', Georgia, serif", fontStyle: 'italic' }
-  const roman       = { fontFamily: "'Fraunces', Georgia, serif", fontStyle: 'italic', fontWeight: 500 }
-
   return (
     <motion.header
-      initial={{ y: -80, opacity: 0 }}
+      initial={{ y: -64, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-[#f3ead6]/92 backdrop-blur-xl shadow-[0_1px_0_rgba(158,69,29,0.10)]' : ''
+      transition={{ duration: 0.5, delay: 0.1 }}
+      className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
+        scrolled ? 'bg-bg/92 backdrop-blur-md border-b border-border' : 'border-b border-transparent'
       }`}
     >
-      <nav className="max-w-[900px] mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
-        {/* Logo — serif italic monogram */}
-        <Link
-          to="/"
-          className="text-[#9e451d] hover:opacity-70 transition-opacity"
-          style={{ ...serifItalic, fontSize: '20px', fontWeight: 600 }}
-        >
-          Ayro.
+      <nav className="max-w-[1120px] mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
+        {/* Monogram */}
+        <Link to="/" className="flex items-center gap-2.5 group" aria-label="Home">
+          <span className="text-cyan" style={{ fontSize: '13px' }}>◇</span>
+          <span
+            className="font-mono text-ink group-hover:text-cyan transition-colors"
+            style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '0.16em' }}
+          >
+            AYRO.ESCOBAR
+          </span>
         </Link>
 
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-7">
-          {links.map(l => (
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-1">
+          {LINKS.map((l) => (
             <button
-              key={l.label}
+              key={l.id}
               onClick={() => go(l.id)}
-              className="text-[#6b5645] hover:text-[#9e451d] transition-colors"
-              style={{ ...serifItalic, fontSize: '16px' }}
+              className="px-3 py-1.5 font-mono text-dim hover:text-cyan transition-colors"
+              style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.14em' }}
             >
-              <span className="text-[#9e451d] mr-1.5" style={roman}>{l.roman}</span>
               {l.label}
             </button>
           ))}
           <Link
             to="/hackathons"
-            className="text-[#6b5645] hover:text-[#9e451d] transition-colors"
-            style={{ ...serifItalic, fontSize: '16px' }}
+            className="px-3 py-1.5 font-mono text-dim hover:text-cyan transition-colors"
+            style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.14em' }}
           >
-            <span className="text-[#9e451d] mr-1.5" style={roman}>IV.</span>
-            Circuit
+            FIELD.OPS
           </Link>
-          <a
-            href="https://github.com/AyroEscobar"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#9e451d] border border-[#9e451d] rounded-sm px-4 py-1.5 hover:bg-[rgba(158,69,29,0.07)] transition-colors"
-            style={{ ...serifItalic, fontSize: '15px', fontWeight: 500 }}
-          >
+        </div>
+
+        <div className="hidden md:flex items-center gap-5">
+          <Clock />
+          <a href="https://github.com/AyroEscobar" target="_blank" rel="noopener noreferrer" className="btn-term" style={{ padding: '7px 13px', fontSize: '11px' }}>
             GitHub
           </a>
         </div>
 
         {/* Mobile toggle */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="md:hidden text-[#9e451d] p-2"
-          aria-label="Menu"
-        >
-          {open ? <HiX size={22} /> : <HiMenu size={22} />}
+        <button onClick={() => setOpen(!open)} className="md:hidden text-cyan p-2" aria-label="Menu">
+          {open ? <HiX size={20} /> : <HiMenu size={20} />}
         </button>
       </nav>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15 }}
-            className="md:hidden bg-[#f3ead6] border-t border-[rgba(158,69,29,0.18)] px-6 py-8 flex flex-col gap-5"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden bg-panel border-t border-border overflow-hidden"
           >
-            {links.map(l => (
+            <div className="px-6 py-6 flex flex-col gap-1">
+              {LINKS.map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => go(l.id)}
+                  className="text-left px-3 py-3 font-mono text-ink hover:text-cyan transition-colors"
+                  style={{ fontSize: '13px', letterSpacing: '0.12em' }}
+                >
+                  {l.label}
+                </button>
+              ))}
               <button
-                key={l.label}
-                onClick={() => go(l.id)}
-                className="text-[#2a1f15] text-left hover:text-[#9e451d] transition-colors"
-                style={{ ...serifItalic, fontSize: '18px' }}
+                onClick={() => { setOpen(false); window.location.href = '/hackathons' }}
+                className="text-left px-3 py-3 font-mono text-ink hover:text-cyan transition-colors"
+                style={{ fontSize: '13px', letterSpacing: '0.12em' }}
               >
-                <span className="text-[#9e451d] block text-[14px] mb-0.5" style={roman}>{l.roman}</span>
-                {l.label}
+                FIELD.OPS
               </button>
-            ))}
-            <button
-              onClick={() => { setOpen(false); window.location.href = '/hackathons' }}
-              className="text-[#2a1f15] text-left hover:text-[#9e451d] transition-colors"
-              style={{ ...serifItalic, fontSize: '18px' }}
-            >
-              <span className="text-[#9e451d] block text-[14px] mb-0.5" style={roman}>IV.</span>
-              Circuit
-            </button>
-            <a
-              href="https://github.com/AyroEscobar"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#9e451d] border border-[#9e451d] rounded-sm px-4 py-3 text-center hover:bg-[rgba(158,69,29,0.08)] transition-colors mt-2"
-              style={{ ...serifItalic, fontSize: '16px', fontWeight: 500 }}
-            >
-              GitHub
-            </a>
+              <a
+                href="https://github.com/AyroEscobar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-term mt-3 justify-center"
+              >
+                GitHub
+              </a>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
     </motion.header>
   )
 }
-
-export default Navbar

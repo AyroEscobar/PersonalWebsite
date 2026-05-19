@@ -1,353 +1,178 @@
-@import '@fontsource/dm-sans/400.css';
-@import '@fontsource/dm-sans/500.css';
-@import '@fontsource/dm-sans/600.css';
+@import '@fontsource/jetbrains-mono/300.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/700.css';
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/600.css';
+@import '@fontsource/space-grotesk/700.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Antique paper + burnt-sienna palette ──────────────── */
+/* ─── OPERATOR // mission-control theme ─────────────────────── */
 :root {
-  --paper:        #f3ead6;
-  --paper-2:      #ebdfc5;
-  --paper-3:      #dccfb0;
-  --paper-4:      #c4b08c;
-
-  --ink:          #2a1f15;
-  --ink-soft:     #4f3d2e;
-  --cocoa:        #6b5645;
-  --sand:         #9c8a72;
-
-  --rust:         #9e451d;
-  --rust-bright:  #c46535;
-  --rust-deep:    #7a3416;
-  --rust-tint:    rgba(158, 69, 29, 0.10);
-  --rust-mid:     rgba(158, 69, 29, 0.20);
+  --bg:#07080d; --panel:#0c0e14; --panel-hi:#11141c;
+  --border:#1f2532; --line:#161a24;
+  --ink:#d4dde9; --dim:#6b7689; --muted:#424b5e;
+  --cyan:#6dd5ff; --amber:#ffb86b; --green:#6ee7a3;
+  --red:#ff6b8a; --yellow:#f5d76e; --magenta:#d99cff;
 }
 
-/* ─── Base ───────────────────────────────────────────────── */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+* , *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
 
 body, html, #root {
-  width: 100%;
-  min-height: 100%;
-  background-color: var(--paper);
-  color: var(--ink-soft);
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 18px;
-  line-height: 1.75;
-  letter-spacing: 0.003em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  text-rendering: optimizeLegibility;
+  width:100%; min-height:100%;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'JetBrains Mono', ui-monospace, monospace;
+  font-size:15px; line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  text-rendering:optimizeLegibility;
 }
 
-@media (max-width: 640px) {
-  body, html, #root { font-size: 17px; line-height: 1.7; }
+section[id] { scroll-margin-top:84px; }
+
+/* Faint engineering grid — masked to fade out lower on the page */
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(rgba(109,213,255,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(109,213,255,0.022) 1px, transparent 1px);
+  background-size:46px 46px;
+  -webkit-mask-image:radial-gradient(ellipse 75% 60% at 50% 0%, #000 25%, transparent 78%);
+  mask-image:radial-gradient(ellipse 75% 60% at 50% 0%, #000 25%, transparent 78%);
 }
-
-/* Print stylesheet — clean black-on-white for paper or PDF */
-@media print {
-  body, html, #root {
-    background: #ffffff !important;
-    color: #1a1a1a !important;
-    font-size: 11pt;
-  }
-  body::before, body::after { display: none !important; }
-  header, .fixed { display: none !important; }
-  section { page-break-inside: avoid; padding: 0.5cm 0 !important; }
-  .rule, .num { color: #555 !important; }
-  a { color: inherit !important; text-decoration: underline; }
-  .glass-card { box-shadow: none !important; border: 1px solid #ccc !important; background: white !important; }
+/* Top glow + corner vignette */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 55% 45% at 50% -8%, rgba(109,213,255,0.07), transparent 70%),
+    radial-gradient(ellipse 95% 95% at 50% 50%, transparent 56%, rgba(0,0,0,0.6));
 }
+#root { position:relative; z-index:1; }
 
-/* Anchor offsets — scroll-to lands clear of the sticky nav */
-section[id] { scroll-margin-top: 88px; }
+/* Scrollbar */
+::-webkit-scrollbar { width:9px; height:9px; }
+::-webkit-scrollbar-track { background:#0a0b11; }
+::-webkit-scrollbar-thumb { background:#1f2532; border-radius:99px; border:2px solid #0a0b11; }
+::-webkit-scrollbar-thumb:hover { background:#2b3447; }
 
-/* Selection on body text — keep it warm */
-*::selection { background: rgba(196,101,53,0.22); color: var(--ink); }
-img::selection { background: rgba(196,101,53,0.35); }
+::selection { background:rgba(109,213,255,0.26); color:#ffffff; }
+*:focus-visible { outline:1px solid var(--cyan); outline-offset:3px; border-radius:2px; }
 
-/* Reduced motion — respect the user's OS setting */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
   }
 }
 
-/* Warm ambient light — late-afternoon sun */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background:
-    radial-gradient(ellipse 70% 55% at 8% -10%,   rgba(196, 101, 53, 0.14) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at 95% 30%,   rgba(196, 101, 53, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 50% 110%,  rgba(196, 101, 53, 0.06) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
+/* ─── Typography helpers ────────────────────────────────────── */
+.eyebrow {
+  font-size:10.5px; font-weight:500; letter-spacing:0.22em;
+  text-transform:uppercase; color:var(--dim);
+}
+.section-title {
+  font-family:'Space Grotesk', system-ui, sans-serif;
+  font-weight:700; letter-spacing:-0.012em; color:var(--ink);
+  font-size:clamp(26px, 3.6vw, 38px); line-height:1.08;
+}
+.display {
+  font-family:'Space Grotesk', system-ui, sans-serif;
+  font-weight:700; letter-spacing:-0.02em;
 }
 
-/* Paper grain — turbulence noise, blends multiply */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.38;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16  0 0 0 0 0.12  0 0 0 0 0.08  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.65'/></svg>");
+/* ─── Panel ─────────────────────────────────────────────────── */
+.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:3px;
+  position:relative;
+}
+.panel-glow {
+  transition:border-color .3s, box-shadow .3s, transform .3s ease-out;
+}
+.panel-glow:hover {
+  border-color:rgba(109,213,255,0.32);
+  box-shadow:0 0 0 1px rgba(109,213,255,0.05), 0 16px 40px rgba(0,0,0,0.55);
+  transform:translateY(-2px);
 }
 
-#root { position: relative; z-index: 1; }
-
-/* ─── Scrollbar ──────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--paper-2); }
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--rust), rgba(158,69,29,0.3));
-  border-radius: 99px;
+/* CRT scanline overlay — opt-in per element */
+.scanlines::after {
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 3px);
+  opacity:.45; mix-blend-mode:overlay;
 }
 
-::selection { background: rgba(196,101,53,0.22); color: var(--rust-deep); }
+.blink { animation:blink 1.1s steps(2,start) infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-*:focus-visible { outline: 2px solid var(--rust); outline-offset: 3px; border-radius: 2px; }
+/* ─── Buttons ───────────────────────────────────────────────── */
+.btn-term {
+  display:inline-flex; align-items:center; gap:9px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px; font-weight:500; letter-spacing:0.13em; text-transform:uppercase;
+  color:var(--cyan);
+  border:1px solid rgba(109,213,255,0.4);
+  background:rgba(109,213,255,0.05);
+  padding:11px 18px; border-radius:3px; cursor:pointer;
+  text-decoration:none;
+  transition:background .2s, border-color .2s, box-shadow .2s, transform .12s;
+}
+.btn-term:hover {
+  background:rgba(109,213,255,0.12);
+  border-color:var(--cyan);
+  box-shadow:0 0 20px rgba(109,213,255,0.18);
+}
+.btn-term:active { transform:translateY(1px); }
 
-/* ─── Typography classes ─────────────────────────────────── */
+.btn-ghost {
+  display:inline-flex; align-items:center; gap:9px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px; font-weight:500; letter-spacing:0.13em; text-transform:uppercase;
+  color:var(--dim);
+  border:1px solid var(--border);
+  background:transparent;
+  padding:11px 18px; border-radius:3px; cursor:pointer;
+  text-decoration:none;
+  transition:color .2s, border-color .2s;
+}
+.btn-ghost:hover { color:var(--ink); border-color:#2b3447; }
 
-/* Italic-serif label — replaces mono everywhere it was a styling choice */
-.label {
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: 15px;
-  letter-spacing: 0.01em;
-  color: var(--rust);
+/* ─── Tech tag ──────────────────────────────────────────────── */
+.tag {
+  display:inline-block;
+  font-size:10.5px; letter-spacing:0.06em;
+  color:var(--dim);
+  border:1px solid var(--line);
+  background:var(--panel-hi);
+  padding:3px 8px; border-radius:2px;
+  white-space:nowrap;
 }
 
-/* Small caps — for eyebrows like "FEATURED" */
-.smallcaps {
-  font-family: 'Fraunces', Georgia, serif;
-  font-weight: 500;
-  font-variant: small-caps;
-  font-style: normal;
-  letter-spacing: 0.18em;
-  font-size: 13px;
-  color: var(--cocoa);
-}
-
-/* Kept for any actual code/tech-tag uses */
-.mono {
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
-  font-size: 13.5px;
-  letter-spacing: 0.01em;
-  color: var(--cocoa);
-}
-
-/* Section number — italic Roman, not mono */
-.num {
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic;
-  font-weight: 500;
-  font-size: 19px;
-  color: var(--rust);
-  margin-right: 12px;
-  line-height: 1;
-  opacity: 0.92;
-  font-feature-settings: "salt", "ss01";
-}
-
-/* Section h2 — beefier serif, slight letter-spacing tightening */
-.section-h {
-  font-family: 'Fraunces', Georgia, serif;
-  font-weight: 700;
-  font-size: clamp(28px, 3.6vw, 36px);
-  color: var(--ink);
-  letter-spacing: -0.012em;
-  line-height: 1.1;
-  font-variation-settings: "opsz" 96;
-}
-
-/* Decorative rule — hairline with rust→transparent gradient */
-.rule {
-  flex: 1;
-  height: 1px;
-  margin-left: 18px;
-  max-width: 260px;
-  background: linear-gradient(90deg, rgba(158,69,29,0.5), transparent);
-  opacity: 0.5;
-}
-
-/* Drop cap — used on the About lede */
-.dropcap::first-letter {
-  font-family: 'Fraunces', Georgia, serif;
-  font-weight: 700;
-  float: left;
-  font-size: 4.4em;
-  line-height: 0.85;
-  padding: 4px 12px 0 0;
-  color: var(--rust);
-  font-feature-settings: "ss01";
-}
-
-/* ─── Paper card ─────────────────────────────────────────── */
-.glass-card {
-  background: linear-gradient(145deg, var(--paper-2), rgba(220,207,176,0.55));
-  border: 1px solid rgba(74, 53, 38, 0.10);
-  border-radius: 4px;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.45) inset, 0 2px 6px rgba(74,53,38,0.04);
-  transition: border-color 0.35s, box-shadow 0.35s, transform 0.35s ease-out;
-}
-
-.glass-card:hover {
-  border-color: rgba(158, 69, 29, 0.25);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.55) inset,
-    0 16px 32px rgba(74, 53, 38, 0.08),
-    0 0 0 1px rgba(158, 69, 29, 0.10);
-  transform: translateY(-2px);
-}
-
-/* ─── Letterpress button (class kept as btn-teal for backwards compat) */
-.btn-teal {
-  display: inline-block;
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic;
-  font-weight: 500;
-  font-size: 17px;
-  letter-spacing: 0.005em;
-  color: var(--rust-deep);
-  border: 1px solid var(--rust);
-  border-radius: 3px;
-  padding: 12px 26px;
-  transition: background 0.25s, box-shadow 0.25s, transform 0.25s, color 0.25s, letter-spacing 0.25s;
-  cursor: pointer;
-  background: transparent;
-  text-decoration: none;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 1px 2px rgba(74,53,38,0.04);
-}
-
-.btn-teal:hover {
-  background: rgba(158, 69, 29, 0.07);
-  color: var(--rust);
-  border-color: var(--rust-deep);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.45) inset,
-    0 2px 12px rgba(158, 69, 29, 0.18);
-  transform: translateY(-1px);
-  letter-spacing: 0.02em;
-}
-
-.btn-teal:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(74,53,38,0.10) inset;
-}
-
-/* ─── Form ───────────────────────────────────────────────── */
+/* ─── Form field ────────────────────────────────────────────── */
 .field {
-  width: 100%;
-  padding: 12px 16px;
-  background: var(--paper-2);
-  border: 1px solid rgba(158, 69, 29, 0.18);
-  border-radius: 6px;
-  color: var(--ink);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
+  width:100%;
+  padding:11px 14px;
+  background:var(--panel-hi);
+  border:1px solid var(--border);
+  border-radius:3px;
+  color:var(--ink);
+  font-family:'JetBrains Mono', monospace;
+  font-size:13.5px;
+  outline:none;
+  transition:border-color .2s, box-shadow .2s;
 }
-
-.field::placeholder { color: rgba(140, 122, 102, 0.55); }
-
+.field::placeholder { color:var(--muted); }
 .field:focus {
-  border-color: rgba(158, 69, 29, 0.5);
-  box-shadow: 0 0 0 3px rgba(158, 69, 29, 0.08);
+  border-color:rgba(109,213,255,0.5);
+  box-shadow:0 0 0 3px rgba(109,213,255,0.07);
 }
-
-select.field option { background: var(--paper-2); color: var(--ink); }
-
-/* Halftone / dither overlay — sahassharma-style printed-photo effect */
-.dither {
-  position: relative;
-  display: inline-block;
-  box-shadow: 0 12px 28px rgba(74,53,38,0.18), 0 2px 6px rgba(74,53,38,0.08);
-  transition: transform 0.6s cubic-bezier(.2,.7,.2,1), box-shadow 0.6s ease;
-}
-
-.dither:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 36px rgba(74,53,38,0.22), 0 4px 8px rgba(74,53,38,0.10);
-}
-
-.dither > img {
-  display: block;
-  filter: sepia(28%) saturate(1.05) contrast(1.08) brightness(0.97);
-}
-
-/* Layer 1 — fine halftone dots */
-.dither::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(45,31,21,0.55) 0.9px, transparent 0.9px);
-  background-size: 3px 3px;
-  mix-blend-mode: multiply;
-  opacity: 0.85;
-  z-index: 1;
-}
-
-/* Layer 2 — paper texture tint */
-.dither::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(135deg, rgba(243,234,214,0.18), rgba(196,101,53,0.06)),
-    repeating-linear-gradient(0deg, rgba(45,31,21,0.04) 0 1px, transparent 1px 3px);
-  mix-blend-mode: multiply;
-  z-index: 2;
-}
-
-/* Italic-serif caption for photos */
-.photo-caption {
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  color: var(--cocoa);
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.photo-caption::before {
-  content: '';
-  width: 16px;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.5;
-}
-
-/* Ornamental section divider — vintage book glyph */
-.ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--rust);
-  opacity: 0.55;
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 22px;
-  letter-spacing: 0.6em;
-}
+select.field option { background:var(--panel-hi); color:var(--ink); }

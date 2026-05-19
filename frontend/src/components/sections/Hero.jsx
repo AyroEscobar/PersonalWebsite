@@ -1,217 +1,176 @@
+import { useState, useEffect, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { FaLinkedin, FaGithub, FaInstagram } from 'react-icons/fa'
 import { MdEmail } from 'react-icons/md'
-import pfp from '../../assets/pfp-web.jpg'
+import Globe from '../Globe'
 
-const socials = [
-  { href: 'https://www.linkedin.com/in/ayroescobar/', Icon: FaLinkedin, label: 'LinkedIn' },
-  { href: 'https://github.com/AyroEscobar',          Icon: FaGithub,   label: 'GitHub'   },
-  { href: 'mailto:ayro.escobar@gmail.com',           Icon: MdEmail,    label: 'Email'    },
-  { href: 'https://www.instagram.com/ayro.afk/',     Icon: FaInstagram,label: 'Instagram'},
+const ROLES = ['software engineer', 'systems builder', 'automation obsessive', 'founding engineer']
+
+const CHANNELS = [
+  { href: 'https://github.com/AyroEscobar',           Icon: FaGithub,    code: 'GH', label: 'GitHub'    },
+  { href: 'https://www.linkedin.com/in/ayroescobar/', Icon: FaLinkedin,  code: 'IN', label: 'LinkedIn'  },
+  { href: 'mailto:ayro.escobar@gmail.com',            Icon: MdEmail,     code: 'EM', label: 'Email'     },
+  { href: 'https://www.instagram.com/ayro.afk/',      Icon: FaInstagram, code: 'IG', label: 'Instagram' },
 ]
 
+// Type-and-erase loop over a list of words.
+function useTyped(words, speed = 62, erase = 30, hold = 1600) {
+  const [display, setDisplay] = useState('')
+  const [wordIdx, setWordIdx] = useState(0)
+  const [deleting, setDeleting] = useState(false)
+
+  useEffect(() => {
+    const word = words[wordIdx % words.length]
+    let to
+    if (!deleting && display === word) {
+      to = setTimeout(() => setDeleting(true), hold)
+    } else if (deleting && display === '') {
+      setDeleting(false)
+      setWordIdx((i) => i + 1)
+    } else {
+      to = setTimeout(() => {
+        setDisplay((d) => (deleting ? word.slice(0, d.length - 1) : word.slice(0, d.length + 1)))
+      }, deleting ? erase : speed)
+    }
+    return () => clearTimeout(to)
+  }, [display, deleting, wordIdx, words, speed, erase, hold])
+
+  return display
+}
+
+function Corner({ pos }) {
+  const map = {
+    tl: 'top-0 left-0 border-t border-l',
+    tr: 'top-0 right-0 border-t border-r',
+    bl: 'bottom-0 left-0 border-b border-l',
+    br: 'bottom-0 right-0 border-b border-r',
+  }
+  return <span className={`absolute w-4 h-4 border-cyan/40 ${map[pos]}`} aria-hidden="true" />
+}
+
 export default function Hero() {
+  const typed = useTyped(ROLES)
+
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex flex-col justify-center px-6 md:px-12 max-w-[1000px] mx-auto"
+      className="relative min-h-screen flex items-center px-6 md:px-10 pt-24 pb-20"
     >
-      {/* Fixed left social rail */}
-      <div className="fixed left-10 bottom-0 hidden xl:flex flex-col items-center gap-5 z-40">
-        {socials.map(({ href, Icon, label }) => (
-          <a
-            key={label}
-            href={href}
-            target={href.startsWith('mailto') ? undefined : '_blank'}
-            rel="noopener noreferrer"
-            aria-label={label}
-            className="text-[#6b5645] hover:text-[#9e451d] hover:-translate-y-1 transition-all duration-200"
-          >
-            <Icon size={18} />
-          </a>
-        ))}
-        <div className="w-px h-24 mt-2" style={{ background: 'linear-gradient(180deg, #6b5645, transparent)' }} />
-      </div>
-
-      {/* Fixed right email rail */}
-      <div className="fixed right-10 bottom-0 hidden xl:flex flex-col items-center gap-4 z-40">
-        <a
-          href="mailto:ayro.escobar@gmail.com"
-          className="text-[13px] text-[#6b5645] hover:text-[#9e451d] hover:-translate-y-1 transition-all duration-200"
-          style={{
-            writingMode: 'vertical-rl',
-            fontFamily: "'Fraunces', Georgia, serif",
-            fontStyle: 'italic',
-            letterSpacing: '0.05em',
-          }}
-        >
-          ayro.escobar@gmail.com
-        </a>
-        <div className="w-px h-24 mt-2" style={{ background: 'linear-gradient(180deg, #6b5645, transparent)' }} />
-      </div>
-
-      {/* Two-column hero — text left, dithered photo right */}
-      <div className="grid md:grid-cols-[1.55fr_1fr] gap-10 md:gap-14 items-center pt-20 md:pt-0">
-        {/* Text column */}
+      <div className="max-w-[1120px] mx-auto w-full grid md:grid-cols-[1.2fr_1fr] gap-10 md:gap-6 items-center">
+        {/* ─── Console column ─── */}
         <div>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="label mb-5 flex items-center gap-3"
+          <motion.div
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            className="flex items-center gap-3 mb-6"
           >
-            <span aria-hidden="true" style={{ width: 28, height: 1, background: 'currentColor', opacity: 0.5 }} />
-            From Plano, Texas — twenty years old
-          </motion.p>
+            <span className="eyebrow text-cyan" style={{ letterSpacing: '0.2em' }}>OPERATOR</span>
+            <span className="w-8 h-px bg-border" />
+            <span className="eyebrow">PLANO, TX · UTD CS '27</span>
+          </motion.div>
 
-          {/* Name */}
           <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            style={{
-              fontFamily: "'Fraunces', Georgia, serif",
-              fontSize: 'clamp(46px, 7vw, 78px)',
-              lineHeight: 0.96,
-              fontWeight: 700,
-              letterSpacing: '-0.018em',
-              color: '#2a1f15',
-              fontVariationSettings: '"opsz" 144',
-            }}
+            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.6 }}
+            className="display"
+            style={{ fontSize: 'clamp(44px, 7.4vw, 86px)', lineHeight: 0.97, color: '#eef3f9' }}
           >
-            I'm Ayro Escobar.
+            AYRO<br />ESCOBAR
           </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-[#4f3d2e] max-w-xl mt-7 mb-3 leading-relaxed"
-            style={{ fontSize: '18px' }}
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.42 }}
+            className="mt-5 font-mono flex flex-wrap items-center gap-x-2 gap-y-1"
+            style={{ fontSize: '14.5px' }}
           >
-            Software engineer. Currently shipping at{' '}
-            <span className="text-[#2a1f15] font-semibold">MD7</span>, interned at{' '}
-            <span className="text-[#2a1f15] font-semibold">RBC</span> in New York, and head to{' '}
-            <span className="text-[#2a1f15] font-semibold">JP Morgan</span> this summer.
-          </motion.p>
+            <span className="text-green">$</span>
+            <span className="text-dim">whoami</span>
+            <span className="text-muted">—</span>
+            <span className="text-ink">{typed}</span>
+            <span className="blink text-cyan">▋</span>
+          </motion.div>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="text-[#4f3d2e] max-w-xl mb-6 leading-relaxed"
-            style={{ fontSize: '18px' }}
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.52 }}
+            className="mt-6 text-dim max-w-[460px]"
+            style={{ fontSize: '14px', lineHeight: 1.85 }}
           >
-            Trying to build a life where my family never worries about money — and a few
-            things that outlast me. Both before twenty-five.
+            Currently shipping at <span className="text-ink">MD7</span>. Interned at{' '}
+            <span className="text-ink">RBC</span> in New York, headed to{' '}
+            <span className="text-ink">JP Morgan</span> this summer. Building software that
+            outlasts me — and a life where my family never worries about money.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="flex items-center gap-3 mb-8"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.62 }}
+            className="mt-6 flex items-center gap-2.5"
           >
-            <span
-              className="w-2 h-2 rounded-full inline-block"
-              style={{ background: '#9e451d', boxShadow: '0 0 10px rgba(196,101,53,0.55)' }}
-            />
-            <span
-              className="text-[15px] text-[#6b5645]"
-              style={{ fontFamily: "'Fraunces', Georgia, serif", fontStyle: 'italic' }}
-            >
-              Available for full-time conversations
-            </span>
+            <span className="w-2 h-2 rounded-full bg-green" style={{ boxShadow: '0 0 10px #6ee7a3' }} />
+            <span className="eyebrow text-green" style={{ letterSpacing: '0.16em' }}>ONLINE</span>
+            <span className="text-muted">·</span>
+            <span className="eyebrow">available for full-time</span>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="flex flex-wrap items-center gap-x-7 gap-y-4"
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.72 }}
+            className="mt-8 flex flex-wrap items-center gap-3"
           >
-            <a href="#projects" className="btn-teal">See what I'm building →</a>
-            <a
-              href="#contact"
-              className="text-[16px] text-[#6b5645] hover:text-[#9e451d] transition-colors"
-              style={{
-                fontFamily: "'Fraunces', Georgia, serif",
-                fontStyle: 'italic',
-                textDecoration: 'underline',
-                textUnderlineOffset: '6px',
-                textDecorationColor: 'rgba(158,69,29,0.35)',
-                textDecorationThickness: '1px',
-              }}
-            >
-              or just say hello
-            </a>
+            <a href="#projects" className="btn-term">▸ View Build Log</a>
+            <a href="#contact" className="btn-ghost">Open Channel</a>
           </motion.div>
 
-          {/* Mobile socials */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="flex xl:hidden items-center gap-5 mt-10"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.82 }}
+            className="mt-9 flex items-center gap-5 flex-wrap"
           >
-            {socials.map(({ href, Icon, label }) => (
+            <span className="eyebrow" style={{ opacity: 0.55 }}>CHANNELS</span>
+            {CHANNELS.map(({ href, Icon, code, label }) => (
               <a
-                key={label}
+                key={code}
                 href={href}
                 target={href.startsWith('mailto') ? undefined : '_blank'}
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="text-[#6b5645] hover:text-[#9e451d] transition-colors"
+                className="flex items-center gap-1.5 text-dim hover:text-cyan transition-colors"
               >
-                <Icon size={20} />
+                <Icon size={13} />
+                <span className="eyebrow" style={{ letterSpacing: '0.1em' }}>{code}</span>
               </a>
             ))}
           </motion.div>
         </div>
 
-        {/* Photo column — dithered with caption */}
+        {/* ─── Globe column ─── */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.6 }}
-          className="flex flex-col items-start md:items-center"
+          initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.35, duration: 0.8 }}
+          className="relative h-[300px] md:h-[480px]"
         >
-          <div className="dither rounded-sm overflow-hidden" style={{ maxWidth: 300, width: '100%' }}>
-            <img
-              src={pfp}
-              alt="Ayro Escobar"
-              loading="eager"
-              decoding="async"
-              style={{
-                width: '100%',
-                aspectRatio: '4 / 5',
-                objectFit: 'cover',
-              }}
-            />
+          <Corner pos="tl" /><Corner pos="tr" /><Corner pos="bl" /><Corner pos="br" />
+          <div className="absolute inset-0">
+            <Suspense fallback={null}><Globe /></Suspense>
           </div>
-          <p className="photo-caption">Plano, TX — May ’26</p>
+          <div
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 eyebrow whitespace-nowrap"
+            style={{ opacity: 0.5 }}
+          >
+            ◇ OPERATOR MESH · LIVE
+          </div>
         </motion.div>
       </div>
 
       {/* Scroll cue */}
-      <motion.a
+      <a
         href="#about"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.6 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#9c8a72] hover:text-[#4f3d2e] transition-colors"
-        style={{ fontFamily: "'Fraunces', Georgia, serif", fontStyle: 'italic', fontSize: '13px' }}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-muted hover:text-cyan transition-colors"
         aria-label="Scroll to about"
       >
-        <span>read on</span>
+        <span className="eyebrow">SCROLL</span>
         <motion.span
-          animate={{ y: [0, 6, 0] }}
+          animate={{ y: [0, 5, 0] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ fontSize: '14px' }}
         >
           ↓
         </motion.span>
-      </motion.a>
+      </a>
     </section>
   )
 }
