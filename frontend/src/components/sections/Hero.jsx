@@ -93,11 +93,11 @@ export default function Hero() {
             className="mt-6 text-dim max-w-[460px]"
             style={{ fontSize: '14px', lineHeight: 1.85 }}
           >
-            I build <span className="text-cyan">AI agents</span> that do real work, not
-            demos. A system of them runs around the clock on the Mac Mini in my room,
-            handling my money, my health, and the briefing I wake up to. Twenty years old,
-            moving fast, building toward a life where{' '}
-            <span className="text-ink">the people I love never think about money</span>.
+            I am twenty years old and{' '}
+            <span className="text-ink">I love this</span>. Not the idea of it, the actual
+            work, the late nights deep in a problem until it finally gives. I am hungry, I
+            do not slow down, and I am not here to be good.{' '}
+            <span className="text-cyan">I am here to win.</span>
           </motion.p>
 
           <motion.div
