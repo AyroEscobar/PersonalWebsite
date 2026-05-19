@@ -1,61 +1,53 @@
-# Ayro's Personal Website
+# Ayro Escobar // Personal Website
 
-A modern, interactive personal portfolio website showcasing my journey as a developer, hackathon enthusiast, and community leader.
+Personal site and portfolio. Currently being redesigned on the `retro-revamp` branch.
 
-**Status:** Under Development
+## Status: work in progress
 
-## Tech Stack
+`retro-revamp` is an active rebuild of the site into a dark mission control theme called OPERATOR. It is not finished and it is not merged to `master`. Production at ayroescobar.com still runs the previous design.
 
-**Frontend**
-- React 19 + Vite
-- Tailwind CSS
-- Framer Motion (animations)
-- Three.js + React Three Fiber (3D graphics)
-- React Router
+**Done**
 
-**Backend**
-- Firebase (Firestore)
+- Full theme rebuild: dark OPERATOR look, JetBrains Mono and Space Grotesk
+- Boot sequence intro
+- Hero: glitch in name, live status eyebrow, personal brand paragraph
+- Home sections rebuilt as console panels: profile, status, experience with the expandable RBC desk log, stack matrix, build log, contact
+- Content rewritten from the resume and verified info
 
-## Features
+**In progress and next**
 
-- Interactive 3D particle hero section
-- Smooth scroll animations
-- Hackathon map showcase
-- Skills & technology grid
-- Testimonials section
-- Responsive design
+- Personal section (DISPATCH) is pulled, waiting on real content
+- Command palette, deeper polish, OG image, favicon
+- Remaining routes (`/review`, `/admin`) still on the old theme
+- Do not merge to `master` until the redesign is approved
 
-## Project Structure
+## Tech
 
-```
-PersonalWebsite/
-├── frontend/          # React application
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── pages/      # Route pages
-│   │   │   └── sections/   # Page sections
-│   │   ├── firebase/       # Firebase config
-│   │   └── hooks/          # Custom hooks
-│   └── ...
-└── backend/           # API (coming soon)
-```
+- Frontend: React 19, Vite, Tailwind CSS, Framer Motion, Three.js
+- Backend: Firebase Firestore
 
-## Getting Started
+## Run it locally
 
 ```bash
-# Install dependencies
-cd frontend && npm install
-
-# Run development server
-npm run dev
-
-# Or from root
+cd frontend
+npm install
 npm run dev
 ```
 
-## Environment Variables
+Serves on http://localhost:5173
 
-Copy `frontend/.env.example` to `frontend/.env` and fill in your Firebase credentials.
+## Picking this up on another machine
+
+```bash
+git fetch origin
+git checkout retro-revamp
+cd frontend && npm install
+npm run dev
+```
+
+## Environment variables
+
+Copy `frontend/.env.example` to `frontend/.env` and fill in the Firebase credentials.
 
 ---
 
