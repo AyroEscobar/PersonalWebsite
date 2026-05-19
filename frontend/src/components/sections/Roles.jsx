@@ -1,173 +1,126 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Section from '../ui/Section'
 
-const roles = [
+const ROLES = [
   {
-    org: 'JP Morgan Chase',
-    title: 'Software Engineer Intern · Digital Platform Services',
-    period: 'Jun – Aug 2026',
-    desc: 'Incoming. Working in Java, Spring Boot, Kafka, and GraphQL on platform services that power JPMC\'s digital surface.',
-    type: 'work',
-    badge: 'Incoming',
+    org: 'JP Morgan Chase', title: 'Software Engineer Intern',
+    unit: 'Digital Platform Services', period: 'JUN–AUG 2026',
+    type: 'work', badge: 'INCOMING', accent: '#6dd5ff',
+    desc: 'Incoming SWE intern. Java, Spring Boot, Kafka and GraphQL on platform services powering JPMC\'s digital surface under Commercial Investment Banking.',
   },
   {
-    org: 'MD7',
-    title: 'Software Engineer (Contract)',
-    period: '2025 – Present',
-    desc: 'Building a Power BI competitor — clean executive dashboards focused on summaries and exec-level perspective. Shipping with the CTO; real ownership over architecture and ship cadence.',
-    type: 'work',
-    badge: 'Current',
+    org: 'MD7', title: 'Software Engineer', unit: 'Contract',
+    period: '2025–PRESENT', type: 'work', badge: 'CURRENT', accent: '#6ee7a3',
+    desc: 'Building a Power BI competitor — clean executive dashboards focused on summaries and exec-level perspective. Shipping directly with the CTO; real ownership over architecture and ship cadence.',
   },
   {
-    org: 'RBC — Royal Bank of Canada',
-    title: 'Software Engineer Intern',
-    period: 'New York City',
-    desc: 'Shipped on engineering teams in midtown. Strong enough finish that a return offer (Jan–April) or a London posting is on the table.',
-    type: 'work',
+    org: 'RBC — Royal Bank of Canada', title: 'Software Engineer Intern',
+    unit: 'New York City', period: 'PRIOR', type: 'work', accent: '#6b7689',
+    desc: 'Shipped on engineering teams in midtown Manhattan. Strong enough finish that a return offer is on the table.',
   },
   {
-    org: 'Major League Hacking',
-    title: 'MLH Coach',
-    period: 'Ongoing',
-    desc: 'Working directly with Jon Gottfried (MLH co-founder). Mentoring hackers, supporting marketing + outreach, and building automation — including a CSV → Google Sheet pipeline now used by the team.',
-    type: 'community',
+    org: 'Major League Hacking', title: 'Coach', unit: 'Hybrid',
+    period: '2025–PRESENT', type: 'community', accent: '#ffb86b',
+    desc: 'Mentoring hackers and supporting Global Hack Week events streamed to hundreds of viewers. Built a CSV → Google Sheet automation now used by the team weekly.',
   },
   {
-    org: 'HackUTD',
-    title: 'Tech Team',
-    period: 'Ongoing',
-    desc: 'Tech crew for one of the largest collegiate hackathons in the country. 1,000+ hackers, a single weekend, very little sleep.',
-    type: 'community',
+    org: 'ACM UTD', title: 'Technical Interview Prep Officer',
+    unit: 'Richardson, TX', period: '2025–PRESENT', type: 'community', accent: '#d99cff',
+    desc: 'Lead DSA prep for 15 students — arrays through dynamic programming — and run mock technical interviews with personalized feedback on problem-solving.',
+  },
+  {
+    org: 'HackUTD', title: 'Software Engineer · Tech Team',
+    unit: 'Richardson, TX', period: '2024–PRESENT', type: 'community', accent: '#6b7689',
+    desc: 'Tech crew for North America\'s largest hackathon — 1,200+ participants. Optimized HackPortal and the event site, lowering latency on SVG-heavy components.',
   },
 ]
 
-const TABS = ['All', 'Work', 'Community']
-
-const tabStyle = {
-  fontFamily: "'Fraunces', Georgia, serif",
-  fontStyle: 'italic',
-  fontSize: '17px',
-}
+const TABS = ['ALL', 'WORK', 'COMMUNITY']
 
 export default function Roles() {
-  const [tab, setTab] = useState('All')
-
-  const filtered = roles.filter(r =>
-    tab === 'All' ? true : r.type === tab.toLowerCase()
-  )
+  const [tab, setTab] = useState('ALL')
+  const filtered = ROLES.filter((r) => (tab === 'ALL' ? true : r.type === tab.toLowerCase()))
 
   return (
-    <section id="roles" className="py-28 px-6 md:px-12 max-w-[900px] mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
-        <h2 className="section-h mb-10 flex items-center">
-          <span className="num">II.</span>
-          Experience
-          <span className="rule" />
-        </h2>
-
-        {/* Filter tabs — italic serif */}
-        <div className="flex gap-1 mb-8 border-b border-[rgba(158,69,29,0.18)]">
-          {TABS.map(t => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              style={tabStyle}
-              className={`px-5 py-2.5 border-b-2 -mb-px transition-all ${
-                tab === t
-                  ? 'text-[#9e451d] border-[#9e451d]'
-                  : 'text-[#6b5645] border-transparent hover:text-[#9e451d]'
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-
-        {/* Role rows */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={tab}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-0"
+    <Section id="roles" code="SECTION 02 // EXPERIENCE" title="Deployment log" intro="WHERE I HAVE SHIPPED">
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6">
+        {TABS.map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-4 py-2 font-mono transition-colors border ${
+              tab === t
+                ? 'text-cyan border-cyan/40 bg-cyan/5'
+                : 'text-dim border-border hover:text-ink'
+            }`}
+            style={{ fontSize: '10.5px', letterSpacing: '0.16em' }}
           >
-            {filtered.map((r, i) => (
-              <motion.div
-                key={r.org + r.title}
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.07 }}
-                className="py-6 border-b border-[rgba(74,53,38,0.10)] last:border-0 group -mx-4 px-4 rounded transition-colors cursor-default hover:bg-[rgba(74,53,38,0.04)]"
-              >
-                <div className="flex items-start justify-between gap-4 flex-wrap mb-2">
-                  <div className="flex items-baseline gap-2.5 flex-wrap">
-                    <span className="text-[#2a1f15] font-semibold" style={{ fontSize: '18px' }}>
-                      {r.title}
-                    </span>
-                    <span
-                      className="text-[#9e451d]"
-                      style={{
-                        fontFamily: "'Fraunces', Georgia, serif",
-                        fontStyle: 'italic',
-                        fontSize: '17px',
-                        opacity: 0.85,
-                      }}
-                    >
-                      at
-                    </span>
-                    <span
-                      className="text-[#2a1f15]"
-                      style={{
-                        fontFamily: "'Fraunces', Georgia, serif",
-                        fontWeight: 600,
-                        fontSize: '18px',
-                      }}
-                    >
-                      {r.org}
-                    </span>
-                    {r.badge && (
-                      <span
-                        className="px-2 py-0.5 rounded-sm"
-                        style={{
-                          fontFamily: "'Fraunces', Georgia, serif",
-                          fontStyle: 'italic',
-                          fontSize: '11.5px',
-                          letterSpacing: '0.02em',
-                          color: '#4f3d2e',
-                          background: 'rgba(74,53,38,0.07)',
-                          border: '1px solid rgba(74,53,38,0.18)',
-                        }}
-                      >
-                        {r.badge}
+            {t}
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-2.5"
+        >
+          {filtered.map((r, i) => (
+            <motion.div
+              key={r.org + r.title}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.06 }}
+              className="panel panel-glow p-5"
+            >
+              <div className="flex items-start gap-4">
+                <span
+                  className="font-mono shrink-0 mt-0.5"
+                  style={{ fontSize: '11px', color: r.accent, letterSpacing: '0.05em' }}
+                >
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-3 flex-wrap">
+                    <div className="flex items-baseline gap-2.5 flex-wrap">
+                      <span className="display text-ink" style={{ fontSize: '16px', fontWeight: 600 }}>
+                        {r.org}
                       </span>
-                    )}
+                      {r.badge && (
+                        <span
+                          className="font-mono px-1.5 py-0.5 rounded-sm"
+                          style={{
+                            fontSize: '9px', letterSpacing: '0.12em',
+                            color: r.accent, border: `1px solid ${r.accent}55`,
+                            background: `${r.accent}0f`,
+                          }}
+                        >
+                          {r.badge}
+                        </span>
+                      )}
+                    </div>
+                    <span className="eyebrow shrink-0">{r.period}</span>
                   </div>
-                  <span
-                    className="text-[#6b5645] whitespace-nowrap"
-                    style={{
-                      fontFamily: "'Fraunces', Georgia, serif",
-                      fontStyle: 'italic',
-                      fontSize: '15px',
-                    }}
-                  >
-                    {r.period}
-                  </span>
+                  <div className="mt-1 flex items-center gap-2 flex-wrap">
+                    <span className="text-cyan" style={{ fontSize: '12.5px' }}>{r.title}</span>
+                    <span className="text-muted">·</span>
+                    <span className="eyebrow">{r.unit}</span>
+                  </div>
+                  <p className="mt-2.5 text-dim" style={{ fontSize: '13px', lineHeight: 1.75 }}>
+                    {r.desc}
+                  </p>
                 </div>
-                <p className="text-[#4f3d2e] leading-relaxed" style={{ fontSize: '16.5px' }}>
-                  {r.desc}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
-    </section>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+    </Section>
   )
 }

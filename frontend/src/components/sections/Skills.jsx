@@ -1,2 +1,40 @@
-// Skills are now folded into About. This file is kept as a no-op so the import in home.jsx still resolves.
-export default function Skills() { return null }
+import { motion } from 'framer-motion'
+import Section from '../ui/Section'
+import { Panel } from '../ui/Panel'
+import Tag from '../ui/Tag'
+
+const STACK = [
+  { cat: 'LANGUAGES',    accent: 'cyan',    items: ['Java', 'TypeScript', 'JavaScript', 'Python', 'C++', 'SQL'] },
+  { cat: 'FRAMEWORKS',   accent: 'green',   items: ['React', 'Next.js', 'Node.js', 'Spring Boot', 'React Native', 'Tailwind'] },
+  { cat: 'CLOUD & DATA', accent: 'amber',   items: ['AWS', 'Firebase', 'Supabase', 'PostgreSQL', 'MongoDB', 'Kafka', 'GraphQL'] },
+  { cat: 'AI & AGENTS',  accent: 'magenta', items: ['Claude API', 'Multi-agent systems', 'Gemini API', 'Whisper', 'Prompt engineering'] },
+]
+
+export default function Skills() {
+  return (
+    <Section id="skills" code="SECTION 03 // STACK" title="Stack matrix" intro="WHAT I BUILD WITH">
+      <div className="grid sm:grid-cols-2 gap-6">
+        {STACK.map((g, i) => (
+          <motion.div
+            key={g.cat}
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: i * 0.08 }}
+          >
+            <Panel title={g.cat} accent={g.accent} glow meta={`${g.items.length} MODULES`}>
+              <div className="flex flex-wrap gap-2">
+                {g.items.map((it) => (
+                  <Tag key={it}>{it}</Tag>
+                ))}
+              </div>
+            </Panel>
+          </motion.div>
+        ))}
+      </div>
+      <p className="mt-6 eyebrow" style={{ opacity: 0.5 }}>
+        ▸ AWS Certified Cloud Practitioner · always compounding
+      </p>
+    </Section>
+  )
+}
