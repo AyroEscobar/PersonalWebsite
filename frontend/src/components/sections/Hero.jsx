@@ -4,7 +4,7 @@ import { FaLinkedin, FaGithub, FaInstagram } from 'react-icons/fa'
 import { MdEmail } from 'react-icons/md'
 import Globe from '../Globe'
 
-const ROLES = ['software engineer', 'systems builder', 'automation obsessive', 'founding engineer']
+const ROLES = ['AI agent builder', 'automation obsessive', 'systems operator', 'software engineer']
 
 const CHANNELS = [
   { href: 'https://github.com/AyroEscobar',           Icon: FaGithub,    code: 'GH', label: 'GitHub'    },
@@ -93,10 +93,11 @@ export default function Hero() {
             className="mt-6 text-dim max-w-[460px]"
             style={{ fontSize: '14px', lineHeight: 1.85 }}
           >
-            Currently shipping at <span className="text-ink">MD7</span>. Interned at{' '}
-            <span className="text-ink">RBC</span> in New York, headed to{' '}
-            <span className="text-ink">JP Morgan</span> this summer. Building software that
-            outlasts me, and a life where my family never worries about money.
+            I build <span className="text-cyan">AI agents</span> that do real work, not
+            demos. A system of them runs around the clock on the Mac Mini in my room,
+            handling my money, my health, and the briefing I wake up to. Twenty years old,
+            moving fast, building toward a life where{' '}
+            <span className="text-ink">the people I love never think about money</span>.
           </motion.p>
 
           <motion.div

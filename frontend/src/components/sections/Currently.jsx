@@ -4,10 +4,10 @@ import { Panel } from '../ui/Panel'
 const DOT = { green: '#6ee7a3', cyan: '#6dd5ff', amber: '#ffb86b', dim: '#6b7689' }
 
 const STATUS = [
-  { k: 'DEPLOYMENT', v: 'MD7 · SWE Intern', dot: 'green' },
-  { k: 'NEXT OP',    v: 'JP Morgan · Summer 2026',  dot: 'cyan'  },
-  { k: 'BASE',       v: 'Plano, Texas',             dot: 'dim'   },
-  { k: 'SEEKING',    v: 'hard problems',            dot: 'amber' },
+  { k: 'FOCUS',   v: 'AI agents that ship',  dot: 'cyan'  },
+  { k: 'RUNNING', v: 'a 24/7 agent system',  dot: 'green' },
+  { k: 'MINDSET', v: 'everything compounds', dot: 'amber' },
+  { k: 'BASE',    v: 'Plano, Texas',         dot: 'dim'   },
 ]
 
 export default function Currently() {

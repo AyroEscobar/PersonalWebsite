@@ -24,12 +24,13 @@ export default function About() {
               timeline is not a slow walk. It is back to back internships I refused to skip.
             </p>
             <p>
-              I went <span className="text-ink">RBC New York</span> →{' '}
-              <span className="text-ink">MD7</span> → <span className="text-ink">JP Morgan</span>{' '}
-              before I turned twenty one. Alongside that I built a 24/7 multi-agent system
-              that runs my life: finances, health, the news I read, the briefing I wake up
-              to. It runs on Claude and the OpenClaw runtime, so I can spend my attention on
-              the work that actually moves things.
+              What I actually do is build <span className="text-cyan">AI agents</span> and
+              the systems they live in. At RBC I shipped one on every trading desk I rotated
+              through. At home, a system of more than twenty agents runs my finances, my
+              health, and the news I read. The internships, <span className="text-ink">RBC</span>{' '}
+              then <span className="text-ink">MD7</span> then{' '}
+              <span className="text-ink">JP Morgan</span>, are the resume. The building is
+              the person.
             </p>
             <p>
               I want to be financially free, take care of my family, and ship things that
