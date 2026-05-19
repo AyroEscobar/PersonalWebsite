@@ -61,20 +61,20 @@ export default function Hero() {
         <div>
           <motion.div
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="flex items-center gap-3 mb-6"
+            className="flex items-center gap-2.5 mb-6"
           >
             <span className="eyebrow text-cyan" style={{ letterSpacing: '0.2em' }}>OPERATOR</span>
-            <span className="w-8 h-px bg-border" />
-            <span className="eyebrow">PLANO, TX · UTD CS 2027</span>
+            <span className="text-muted">//</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-green" style={{ boxShadow: '0 0 8px #6ee7a3' }} />
+            <span className="eyebrow text-green" style={{ letterSpacing: '0.18em' }}>ONLINE</span>
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.6 }}
-            className="display"
+          <h1
+            className="display glitch-in"
             style={{ fontSize: 'clamp(44px, 7.4vw, 86px)', lineHeight: 0.97, color: '#eef3f9' }}
           >
             AYRO<br />ESCOBAR
-          </motion.h1>
+          </h1>
 
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.42 }}
@@ -105,9 +105,7 @@ export default function Hero() {
             className="mt-6 flex items-center gap-2.5"
           >
             <span className="w-2 h-2 rounded-full bg-green" style={{ boxShadow: '0 0 10px #6ee7a3' }} />
-            <span className="eyebrow text-green" style={{ letterSpacing: '0.16em' }}>ONLINE</span>
-            <span className="text-muted">·</span>
-            <span className="eyebrow">building in public</span>
+            <span className="eyebrow text-green" style={{ letterSpacing: '0.16em' }}>BUILDING IN PUBLIC</span>
           </motion.div>
 
           <motion.div
