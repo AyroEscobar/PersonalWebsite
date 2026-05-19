@@ -146,17 +146,6 @@ body::after {
 }
 .btn-ghost:hover { color:var(--ink); border-color:#2b3447; }
 
-/* ─── Tech tag ──────────────────────────────────────────────── */
-.tag {
-  display:inline-block;
-  font-size:10.5px; letter-spacing:0.06em;
-  color:var(--dim);
-  border:1px solid var(--line);
-  background:var(--panel-hi);
-  padding:3px 8px; border-radius:2px;
-  white-space:nowrap;
-}
-
 /* ─── Form field ────────────────────────────────────────────── */
 .field {
   width:100%;

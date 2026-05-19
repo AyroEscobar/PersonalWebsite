@@ -1,10 +1,8 @@
 import { motion } from 'framer-motion'
-import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa'
 import { useProjects } from '../../hooks/useFirestore'
 import { PROJECTS } from '../../data/projects'
 import Section from '../ui/Section'
 import { Panel } from '../ui/Panel'
-import Tag from '../ui/Tag'
 
 const FEATURED = {
   name: '24/7 Multi-Agent System',
@@ -13,20 +11,34 @@ const FEATURED = {
     'A 24/7 multi-agent system I built and run on a Mac Mini M4 Pro. It watches my ' +
     'finances, tracks my health, curates the news I read, files my notes, and writes the ' +
     'briefing I wake up to. It runs on Claude and the OpenClaw runtime, orchestrated ' +
-    'through agents I wrote and schedule myself. It carries the operational overhead of ' +
-    'my life so I can spend my attention on the work that moves things.',
+    'through agents I wrote and schedule myself, so I can spend my attention on the work ' +
+    'that moves things.',
   bullets: [
     'Always on, 20+ scheduled agents and services',
     'Autonomous finance tracking, from bank email to dashboard',
     'Health, news, and research agents reporting in daily',
     'A briefing on my phone before 8am, every morning',
   ],
-  tech: ['Claude', 'OpenClaw', 'Python', 'PostgreSQL', 'LaunchAgents', 'Telegram'],
+  tech: ['Claude', 'OpenClaw', 'Python', 'PostgreSQL', 'LaunchAgents'],
 }
 
 const STATUS_COLOR = {
   LIVE: '#6ee7a3', SHIPPED: '#6ee7a3', BUILDING: '#ffb86b',
   HACKATHON: '#d99cff', TOOL: '#6dd5ff', ARCHIVED: '#6b7689',
+}
+
+// Tech shown as a clean inline readout, no chips.
+function TechLine({ items }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono" style={{ fontSize: '11.5px' }}>
+      {items.map((t, i) => (
+        <span key={t} className="flex items-center gap-x-2.5">
+          <span style={{ color: '#8b97a8' }}>{t}</span>
+          {i < items.length - 1 && <span className="text-muted">·</span>}
+        </span>
+      ))}
+    </div>
+  )
 }
 
 export default function Projects() {
@@ -46,8 +58,8 @@ export default function Projects() {
   })()
 
   return (
-    <Section id="projects" code="SECTION 04 // BUILD.LOG" title="Build log" intro="THINGS I HAVE SHIPPED">
-      {/* Featured — OpenClaw */}
+    <Section id="projects" code="SECTION 04 // BUILD.LOG" title="Build log" intro="SELECTED WORK">
+      {/* Featured */}
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -67,9 +79,7 @@ export default function Projects() {
               <p className="text-dim mb-5" style={{ fontSize: '13.5px', lineHeight: 1.8 }}>
                 {FEATURED.body}
               </p>
-              <div className="flex flex-wrap gap-2">
-                {FEATURED.tech.map((t) => <Tag key={t}>{t}</Tag>)}
-              </div>
+              <TechLine items={FEATURED.tech} />
             </div>
             <ul className="space-y-2.5 md:border-l border-border md:pl-6">
               {FEATURED.bullets.map((b) => (
@@ -87,6 +97,7 @@ export default function Projects() {
       <div className="grid md:grid-cols-2 gap-5">
         {grid.map((p, i) => {
           const col = STATUS_COLOR[p.status] || '#6b7689'
+          const link = p.live || p.github
           return (
             <motion.div
               key={p.id || p.title}
@@ -114,44 +125,31 @@ export default function Projects() {
               </div>
 
               <div className="p-5 flex flex-col flex-1">
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <div>
-                    <span className="eyebrow">{p.year} · {p.category}</span>
-                    {p.tagline && (
-                      <p className="text-cyan mt-1" style={{ fontSize: '13px' }}>{p.tagline}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 pt-1 shrink-0">
-                    {p.github && (
-                      <a href={p.github} target="_blank" rel="noopener noreferrer"
-                         aria-label={`${p.title} on GitHub`} className="text-dim hover:text-cyan transition-colors">
-                        <FaGithub size={15} />
-                      </a>
-                    )}
-                    {p.live && (
-                      <a href={p.live} target="_blank" rel="noopener noreferrer"
-                         aria-label={`${p.title} live`} className="text-dim hover:text-cyan transition-colors">
-                        <FaExternalLinkAlt size={11} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-                <p className="text-dim flex-1 mb-4" style={{ fontSize: '12.5px', lineHeight: 1.75 }}>
+                <span className="eyebrow">{p.year} · {p.category}</span>
+                {p.tagline && (
+                  <p className="text-cyan mt-1.5" style={{ fontSize: '13px' }}>{p.tagline}</p>
+                )}
+                <p className="text-dim flex-1 mt-3 mb-4" style={{ fontSize: '12.5px', lineHeight: 1.75 }}>
                   {p.description}
                 </p>
-                <div className="flex flex-wrap gap-1.5 mt-auto">
-                  {(p.tech || []).map((t) => <Tag key={t}>{t}</Tag>)}
+                <div className="flex items-center justify-between gap-3 mt-auto pt-3 border-t border-line">
+                  <TechLine items={p.tech || []} />
+                  {link && (
+                    <a
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 flex items-center gap-1 font-mono text-dim hover:text-cyan transition-colors"
+                      style={{ fontSize: '10.5px', letterSpacing: '0.1em' }}
+                    >
+                      {p.live ? 'VISIT' : 'GITHUB'} <span style={{ fontSize: '11px' }}>↗</span>
+                    </a>
+                  )}
                 </div>
               </div>
             </motion.div>
           )
         })}
-      </div>
-
-      <div className="mt-10 text-center">
-        <a href="https://github.com/AyroEscobar" target="_blank" rel="noopener noreferrer" className="btn-term">
-          ▸ Full Repository Index
-        </a>
       </div>
     </Section>
   )

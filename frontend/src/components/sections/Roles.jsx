@@ -134,18 +134,13 @@ function RoleCard({ r, index }) {
               transition={{ duration: 0.25 }}
               className="overflow-hidden"
             >
-              <div className="mt-4 ml-8 space-y-3 border-l border-border pl-4">
-                {r.detail.map(([desk, body], i) => (
+              <div className="mt-4 ml-8 space-y-4 border-l border-border pl-5">
+                {r.detail.map(([desk, body]) => (
                   <div key={desk}>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono" style={{ fontSize: '9.5px', color: r.accent }}>
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <span className="eyebrow" style={{ color: '#a9b4c6', letterSpacing: '0.1em' }}>
-                        {desk}
-                      </span>
+                    <div className="font-mono" style={{ fontSize: '11px', color: r.accent }}>
+                      {desk}
                     </div>
-                    <p className="mt-1 text-dim" style={{ fontSize: '12px', lineHeight: 1.7 }}>
+                    <p className="mt-1.5 text-dim" style={{ fontSize: '12px', lineHeight: 1.7 }}>
                       {body}
                     </p>
                   </div>
