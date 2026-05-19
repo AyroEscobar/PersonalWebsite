@@ -8,7 +8,7 @@ export default function Testimonials() {
   if (loading || error || testimonials.length === 0) return null
 
   return (
-    <Section id="testimonials" code="SECTION 07 // SIGNAL" title="Inbound signal" intro="WHAT PEOPLE SAY">
+    <Section id="testimonials" code="SECTION 05 // SIGNAL" title="Inbound signal" intro="WHAT PEOPLE SAY">
       <div className="grid md:grid-cols-2 gap-5">
         {testimonials.slice(0, 4).map((t, i) => (
           <motion.div

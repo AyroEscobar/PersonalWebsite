@@ -10,9 +10,8 @@ const FEATURED = {
   body:
     'A 24/7 multi-agent system I built and run on a Mac Mini M4 Pro. It watches my ' +
     'finances, tracks my health, curates the news I read, files my notes, and writes the ' +
-    'briefing I wake up to. It runs on Claude and the OpenClaw runtime, orchestrated ' +
-    'through agents I wrote and schedule myself, so I can spend my attention on the work ' +
-    'that moves things.',
+    'briefing I wake up to. Every agent is one I wrote and scheduled myself, built on ' +
+    'Claude, so I can spend my attention on the work that moves things.',
   bullets: [
     'Always on, 20+ scheduled agents and services',
     'Autonomous finance tracking, from bank email to dashboard',

@@ -79,13 +79,6 @@ export default function Navbar() {
               {l.label}
             </button>
           ))}
-          <Link
-            to="/hackathons"
-            className="px-3 py-1.5 font-mono text-dim hover:text-cyan transition-colors"
-            style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.14em' }}
-          >
-            FIELD.OPS
-          </Link>
         </div>
 
         <div className="hidden md:flex items-center gap-5">
@@ -121,13 +114,6 @@ export default function Navbar() {
                   {l.label}
                 </button>
               ))}
-              <button
-                onClick={() => { setOpen(false); window.location.href = '/hackathons' }}
-                className="text-left px-3 py-3 font-mono text-ink hover:text-cyan transition-colors"
-                style={{ fontSize: '13px', letterSpacing: '0.12em' }}
-              >
-                FIELD.OPS
-              </button>
               <a
                 href="https://github.com/AyroEscobar"
                 target="_blank"

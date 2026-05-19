@@ -4,7 +4,7 @@ import { Panel } from '../ui/Panel'
 
 export default function Contact() {
   return (
-    <Section id="contact" code="SECTION 08 // CHANNEL" title="Open channel" intro="REACH THE OPERATOR">
+    <Section id="contact" code="SECTION 06 // CHANNEL" title="Open channel" intro="REACH THE OPERATOR">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
