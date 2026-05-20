@@ -1,78 +1,196 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// Tracks live in /public/audio/. Drop MP3s with these filenames or edit this list.
-// First track that successfully loads is the default.
+// Drop more MP3s in /public/audio/ and add them here to extend.
 const TRACKS = [
-  { src: '/audio/lofi.mp3',     title: 'Lo-fi Loop',     artist: 'Ambient'    },
-  { src: '/audio/jazz.mp3',     title: 'Late Jazz',      artist: 'Standards'  },
-  { src: '/audio/piano.mp3',    title: 'Soft Piano',     artist: 'Solo'       },
-  { src: '/audio/ambient.mp3',  title: 'Warm Pad',       artist: 'Ambient'    },
+  {
+    src: '/audio/the-perfect-pair-slowed.mp3',
+    title: 'the perfect pair (slowed)',
+    artist: 'ola.wav × beabadoobee',
+  },
+  {
+    src: '/audio/timeless-lv.mp3',
+    title: 'timeless (lv version)',
+    artist: 'the weeknd · playboi carti · giorgio armani',
+  },
 ]
 
-const LS_KEY = 'ayro.musicplayer.v1'
+const LS_KEY = 'ayro.musicplayer.v3'
+const DEFAULT_VOLUME = 0.15
+const BAR_COUNT = 5
 
 export default function MusicPlayer() {
-  const audioRef = useRef(null)
+  const audioRef    = useRef(null)
+  const audioCtxRef = useRef(null)
+  const analyserRef = useRef(null)
+  const gainRef     = useRef(null)
+  const dataRef     = useRef(null)
+  const rafRef      = useRef(null)
+  const barsRef     = useRef([])
+  const pulseRef    = useRef(null)
+
   const [open, setOpen]         = useState(false)
   const [playing, setPlaying]   = useState(false)
-  const [volume, setVolume]     = useState(0.4)
+  const [muted, setMuted]       = useState(true)
+  const [volume, setVolume]     = useState(DEFAULT_VOLUME)
   const [trackIdx, setTrackIdx] = useState(0)
-  const [available, setAvail]   = useState(null) // null = unknown, true/false after probe
 
-  // Restore persisted prefs
+  const t = TRACKS[trackIdx]
+
+  // Restore volume + trackIdx (always start muted)
   useEffect(() => {
     try {
       const raw = localStorage.getItem(LS_KEY)
       if (!raw) return
       const s = JSON.parse(raw)
-      if (typeof s.volume === 'number')   setVolume(s.volume)
-      if (typeof s.trackIdx === 'number') setTrackIdx(Math.min(s.trackIdx, TRACKS.length - 1))
-    } catch {}
+      if (typeof s.volume === 'number') setVolume(s.volume)
+      if (typeof s.trackIdx === 'number' && s.trackIdx < TRACKS.length) setTrackIdx(s.trackIdx)
+    } catch { /* noop */ }
   }, [])
 
-  // Persist on change
+  // Persist
   useEffect(() => {
-    try { localStorage.setItem(LS_KEY, JSON.stringify({ volume, trackIdx })) } catch {}
+    try { localStorage.setItem(LS_KEY, JSON.stringify({ volume, trackIdx })) } catch { /* noop */ }
   }, [volume, trackIdx])
 
-  // Apply volume to audio
+  // Apply mute/volume — via gain node once Web Audio is wired, otherwise element-level
   useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume
-  }, [volume])
+    const a = audioRef.current
+    const gain = gainRef.current
+    const ctx = audioCtxRef.current
+    if (!a) return
+    if (gain && ctx) {
+      gain.gain.setTargetAtTime(muted ? 0 : volume, ctx.currentTime, 0.02)
+    } else {
+      a.volume = volume
+      a.muted = muted
+    }
+  }, [volume, muted])
 
-  // Probe whether the current track exists; mark unavailable if it doesn't
+  // Auto-start muted on mount
   useEffect(() => {
-    let cancelled = false
-    setAvail(null)
-    fetch(TRACKS[trackIdx].src, { method: 'HEAD' })
-      .then(r => { if (!cancelled) setAvail(r.ok) })
-      .catch(() => { if (!cancelled) setAvail(false) })
-    return () => { cancelled = true }
+    const a = audioRef.current
+    if (!a) return
+    a.muted = true
+    a.play().then(() => setPlaying(true)).catch(() => setPlaying(false))
+  }, [])
+
+  // Reload + replay on track change
+  useEffect(() => {
+    const a = audioRef.current
+    if (!a) return
+    const wasPlaying = !a.paused
+    a.load()
+    if (wasPlaying) a.play().catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackIdx])
 
-  const toggle = async () => {
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      const ctx = audioCtxRef.current
+      if (ctx && ctx.state !== 'closed') ctx.close().catch(() => {})
+    }
+  }, [])
+
+  const ensureWebAudio = async () => {
+    if (!audioCtxRef.current) {
+      const Ctx = window.AudioContext || window.webkitAudioContext
+      if (!Ctx || !audioRef.current) return
+      try {
+        const ctx = new Ctx()
+        const source = ctx.createMediaElementSource(audioRef.current)
+        const analyser = ctx.createAnalyser()
+        analyser.fftSize = 256
+        analyser.smoothingTimeConstant = 0.72
+        const gain = ctx.createGain()
+        gain.gain.value = muted ? 0 : volume
+        source.connect(analyser)
+        analyser.connect(gain)
+        gain.connect(ctx.destination)
+        audioCtxRef.current = ctx
+        analyserRef.current = analyser
+        gainRef.current = gain
+        dataRef.current = new Uint8Array(analyser.frequencyBinCount)
+        audioRef.current.muted = false
+        audioRef.current.volume = 1
+        startRaf()
+      } catch { /* setup failed */ }
+    }
+    const ctx = audioCtxRef.current
+    if (ctx && ctx.state === 'suspended') {
+      try { await ctx.resume() } catch { /* noop */ }
+    }
+  }
+
+  const startRaf = () => {
+    const tick = () => {
+      rafRef.current = requestAnimationFrame(tick)
+      const analyser = analyserRef.current
+      const data = dataRef.current
+      const bars = barsRef.current
+      const pulse = pulseRef.current
+      if (!analyser || !data) return
+      analyser.getByteFrequencyData(data)
+
+      const halfN = data.length >> 1
+      for (let i = 0; i < BAR_COUNT; i++) {
+        const start = Math.floor((i / BAR_COUNT) * halfN)
+        const end   = Math.floor(((i + 1) / BAR_COUNT) * halfN)
+        let sum = 0
+        for (let j = start; j < end; j++) sum += data[j]
+        const avg = (sum / Math.max(end - start, 1)) / 255
+        const scaled = 0.18 + avg * 0.82
+        const bar = bars[i]
+        if (bar) bar.style.transform = `scaleY(${scaled})`
+      }
+
+      const bass = (data[1] + data[2] + data[3] + data[4] + data[5]) / 5 / 255
+      if (pulse) pulse.style.opacity = String(Math.min(bass * 1.0, 0.25))
+    }
+    tick()
+  }
+
+  const togglePlay = async () => {
+    await ensureWebAudio()
     const a = audioRef.current
     if (!a) return
     if (playing) {
       a.pause()
       setPlaying(false)
-      return
-    }
-    try {
-      await a.play()
-      setPlaying(true)
-    } catch {
-      setPlaying(false)
+    } else {
+      try { await a.play(); setPlaying(true) } catch { /* blocked */ }
     }
   }
 
-  const next = () => {
-    setPlaying(false)
-    setTrackIdx(i => (i + 1) % TRACKS.length)
+  const toggleMute = async () => {
+    await ensureWebAudio()
+    const a = audioRef.current
+    if (!a) return
+    const willBeMuted = !muted
+    if (!willBeMuted && !playing) {
+      try { await a.play(); setPlaying(true) } catch { /* noop */ }
+    }
+    setMuted(willBeMuted)
   }
 
-  const t = TRACKS[trackIdx]
+  const nextTrack = async () => {
+    await ensureWebAudio()
+    setTrackIdx((i) => (i + 1) % TRACKS.length)
+  }
+
+  const onVolumeChange = (e) => {
+    // Update state synchronously so the controlled slider tracks the drag without snap-back.
+    setVolume(parseFloat(e.target.value))
+    // Lazy-init Web Audio on first interaction (fire-and-forget — no await).
+    if (!audioCtxRef.current) ensureWebAudio()
+  }
+
+  const liveColor   = '#6ee7a3'
+  const idleColor   = '#ffb86b'
+  const activeColor = muted ? idleColor : liveColor
+  const trackLabel  = `${String(trackIdx + 1).padStart(2, '0')} / ${String(TRACKS.length).padStart(2, '0')}`
 
   return (
     <>
@@ -80,141 +198,187 @@ export default function MusicPlayer() {
         ref={audioRef}
         src={t.src}
         loop
-        preload="none"
+        preload="auto"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
-        onEnded={() => setPlaying(false)}
-        onError={() => { setPlaying(false); setAvail(false) }}
+        onError={() => setPlaying(false)}
       />
 
-      <div className="fixed bottom-5 right-5 z-50 select-none">
+      <div
+        ref={pulseRef}
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0"
+        style={{
+          background: 'radial-gradient(ellipse 80% 42% at 50% 0%, rgba(109,213,255,0.5), transparent 70%)',
+          opacity: 0,
+          zIndex: 5,
+          mixBlendMode: 'screen',
+        }}
+      />
+
+      <div className="fixed top-[72px] right-5 z-40 select-none">
         <AnimatePresence>
           {open && (
             <motion.div
-              initial={{ opacity: 0, y: 8, scale: 0.96 }}
+              initial={{ opacity: 0, y: -6, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.96 }}
-              transition={{ duration: 0.18 }}
-              className="mb-3 rounded-sm overflow-hidden"
-              style={{
-                width: '260px',
-                background: 'linear-gradient(145deg, rgba(235,223,197,0.98), rgba(220,207,176,0.94))',
-                border: '1px solid rgba(74,53,38,0.18)',
-                boxShadow: '0 18px 40px rgba(74,53,38,0.18), 0 0 0 1px rgba(74,53,38,0.04)',
-                backdropFilter: 'blur(8px)',
-              }}
+              exit={{ opacity: 0, y: -6, scale: 0.97 }}
+              transition={{ duration: 0.16 }}
+              className="absolute right-0"
+              style={{ top: 44, width: 290 }}
             >
-              <div className="px-4 py-3">
-                <p
-                  className="smallcaps mb-2"
-                  style={{ fontSize: '11px', letterSpacing: '0.22em', color: '#6b5645' }}
+            <div
+              className="panel font-mono"
+              style={{ background: 'rgba(12,14,20,0.96)', backdropFilter: 'blur(8px)' }}
+            >
+              {/* Header */}
+              <div className="flex items-center gap-2.5 px-4 h-9 border-b border-border">
+                <span
+                  className="text-cyan"
+                  style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.18em' }}
                 >
-                  Now Playing
-                </p>
-                <p
-                  className="text-[#2a1f15] truncate"
+                  NOW.PLAYING
+                </span>
+                <span className="flex-1 h-px bg-line" />
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
                   style={{
-                    fontFamily: "'Fraunces', serif",
-                    fontWeight: 600,
-                    fontSize: '17px',
-                    lineHeight: 1.1,
+                    background: activeColor,
+                    boxShadow: `0 0 7px ${activeColor}`,
+                    animation: muted ? 'none' : 'blink 1.4s ease-in-out infinite',
                   }}
+                />
+                <span
+                  className="eyebrow"
+                  style={{ letterSpacing: '0.14em', color: activeColor }}
                 >
+                  {muted ? 'MUTED' : 'LIVE'}
+                </span>
+              </div>
+
+              {/* Body */}
+              <div className="p-4">
+                <p className="text-ink truncate" style={{ fontSize: '13.5px', fontWeight: 600, letterSpacing: '0.005em' }}>
                   {t.title}
                 </p>
-                <p
-                  className="text-[#6b5645] truncate"
-                  style={{
-                    fontFamily: "'Fraunces', serif",
-                    fontStyle: 'italic',
-                    fontSize: '13px',
-                    marginTop: '2px',
-                  }}
-                >
-                  {available === false ? 'drop an MP3 in /public/audio/' : t.artist}
+                <p className="text-dim truncate" style={{ fontSize: '11.5px', marginTop: 3 }}>
+                  {t.artist}
                 </p>
 
-                <div className="flex items-center justify-between mt-4 mb-2">
+                {/* Controls row */}
+                <div className="flex items-center gap-2 mt-4">
                   <button
-                    onClick={toggle}
-                    disabled={available === false}
+                    onClick={togglePlay}
                     aria-label={playing ? 'Pause' : 'Play'}
-                    className="flex items-center justify-center transition-all"
-                    style={{
-                      width: 36, height: 36,
-                      borderRadius: '50%',
-                      background: available === false ? 'rgba(74,53,38,0.12)' : '#9e451d',
-                      color: available === false ? '#9c8a72' : '#f3ead6',
-                      cursor: available === false ? 'not-allowed' : 'pointer',
-                    }}
+                    className="flex items-center justify-center text-cyan border border-cyan/40 hover:bg-cyan/10 transition-colors shrink-0"
+                    style={{ width: 32, height: 32, borderRadius: 3 }}
                   >
                     {playing ? <PauseIcon /> : <PlayIcon />}
                   </button>
                   <button
-                    onClick={next}
-                    aria-label="Next track"
-                    className="text-[#6b5645] hover:text-[#2a1f15] transition-colors px-2"
-                    style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '13px' }}
+                    onClick={toggleMute}
+                    className="font-mono h-8 border transition-colors flex-1"
+                    style={{
+                      fontSize: '10.5px',
+                      letterSpacing: '0.16em',
+                      color: activeColor,
+                      borderColor: muted ? 'rgba(255,184,107,0.4)' : 'rgba(110,231,163,0.4)',
+                      background: muted ? 'rgba(255,184,107,0.05)' : 'rgba(110,231,163,0.05)',
+                      borderRadius: 3,
+                    }}
                   >
-                    skip →
+                    {muted ? 'UNMUTE' : 'MUTE'}
+                  </button>
+                  <button
+                    onClick={nextTrack}
+                    aria-label="Next track"
+                    title="Next track"
+                    className="font-mono h-8 px-3 border border-border text-dim hover:text-cyan hover:border-cyan/40 transition-colors shrink-0"
+                    style={{ fontSize: '10.5px', letterSpacing: '0.14em', borderRadius: 3 }}
+                  >
+                    {trackLabel} <span style={{ marginLeft: 2 }}>→</span>
                   </button>
                 </div>
 
-                <label className="flex items-center gap-2 mt-1">
-                  <span
-                    className="text-[#9c8a72]"
-                    style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '11px' }}
-                  >
-                    vol
-                  </span>
+                {/* Volume slider */}
+                <div className="flex items-center gap-3 mt-4">
                   <input
                     type="range"
                     min="0" max="1" step="0.01"
                     value={volume}
-                    onChange={e => setVolume(parseFloat(e.target.value))}
+                    onChange={onVolumeChange}
                     aria-label="Volume"
-                    className="flex-1 accent-[#9e451d]"
-                    style={{ accentColor: '#9e451d' }}
+                    className="mp-slider flex-1 cursor-pointer"
                   />
-                </label>
+                  <span
+                    className="font-mono"
+                    style={{
+                      fontSize: '10.5px',
+                      letterSpacing: '0.1em',
+                      color: muted ? idleColor : '#aeb9c9',
+                      minWidth: '4ch',
+                      textAlign: 'right',
+                    }}
+                  >
+                    {muted ? '— —' : `${Math.round(volume * 100)}%`}
+                  </span>
+                </div>
               </div>
+            </div>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Trigger pill */}
         <button
-          onClick={() => setOpen(o => !o)}
-          aria-label={open ? 'Close music player' : 'Open music player'}
-          className="flex items-center gap-2.5 pl-2.5 pr-3.5 py-2 rounded-full transition-all hover:-translate-y-0.5"
+          onClick={() => setOpen((o) => !o)}
+          aria-label={open ? 'Close audio panel' : 'Open audio panel'}
+          className="flex items-center gap-2 px-3 py-2 transition-colors hover:bg-[rgba(109,213,255,0.04)]"
           style={{
-            background: 'rgba(235,223,197,0.92)',
-            border: '1px solid rgba(74,53,38,0.20)',
-            boxShadow: '0 8px 22px rgba(74,53,38,0.12)',
-            backdropFilter: 'blur(6px)',
+            background: 'rgba(12,14,20,0.92)',
+            border: '1px solid rgba(109,213,255,0.32)',
+            borderRadius: 3,
+            backdropFilter: 'blur(8px)',
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-            <circle cx="7" cy="7" r="6.4" fill="none" stroke="#9e451d" strokeWidth="1.1" opacity="0.55" />
-            <circle cx="7" cy="7" r="3" fill="none" stroke="#9e451d" strokeWidth="0.8" opacity="0.45" />
-            <circle
-              cx="7" cy="7" r="1.4"
-              fill="#9e451d"
-              style={{
-                transformOrigin: '7px 7px',
-                animation: playing ? 'spin 3.5s linear infinite' : 'none',
-                opacity: playing ? 1 : 0.7,
-              }}
-            />
-          </svg>
           <span
-            className="text-[#4f3d2e]"
-            style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '13.5px' }}
+            aria-hidden="true"
+            style={{
+              color: '#6dd5ff',
+              fontSize: '13px',
+              lineHeight: 1,
+              transform: 'translateY(-1px)',
+              display: 'inline-block',
+              filter: `drop-shadow(0 0 6px ${muted ? 'transparent' : 'rgba(109,213,255,0.55)'})`,
+              transition: 'filter 0.2s',
+            }}
           >
-            {playing ? 'on the air' : 'tune in'}
+            ♫
+          </span>
+          <div className="flex items-end gap-[2px]" style={{ height: 12, width: 18 }}>
+            {Array.from({ length: BAR_COUNT }).map((_, i) => (
+              <div
+                key={i}
+                ref={(el) => (barsRef.current[i] = el)}
+                style={{
+                  width: 2,
+                  height: '100%',
+                  background: muted ? 'rgba(109,213,255,0.45)' : '#6dd5ff',
+                  transformOrigin: 'bottom',
+                  transform: 'scaleY(0.2)',
+                  borderRadius: 1,
+                  transition: 'background 0.25s',
+                }}
+              />
+            ))}
+          </div>
+          <span
+            className="font-mono"
+            style={{ fontSize: '10.5px', letterSpacing: '0.16em', color: activeColor }}
+          >
+            {muted ? 'MUTED' : 'LIVE'}
           </span>
         </button>
-        <style>{`@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }`}</style>
       </div>
     </>
   )
@@ -222,17 +386,17 @@ export default function MusicPlayer() {
 
 function PlayIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-      <path d="M3 1.5 L12 7 L3 12.5 Z" />
+    <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
+      <path d="M3 1.5 L10 6 L3 10.5 Z" />
     </svg>
   )
 }
 
 function PauseIcon() {
   return (
-    <svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor">
-      <rect x="1" y="1" width="3" height="12" />
-      <rect x="8" y="1" width="3" height="12" />
+    <svg width="10" height="11" viewBox="0 0 10 12" fill="currentColor">
+      <rect x="1" y="1" width="2.5" height="10" />
+      <rect x="6.5" y="1" width="2.5" height="10" />
     </svg>
   )
 }

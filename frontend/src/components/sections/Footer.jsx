@@ -1,5 +1,6 @@
 import { FaGithub, FaLinkedin, FaInstagram } from 'react-icons/fa'
 import { MdEmail } from 'react-icons/md'
+import PingDot from '../ui/PingDot'
 
 const CHANNELS = [
   { href: 'https://github.com/AyroEscobar', Icon: FaGithub, label: 'GitHub' },
@@ -14,7 +15,7 @@ export default function Footer() {
       <div className="max-w-[1120px] mx-auto">
         <div className="h-px bg-border mb-5" />
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <span className="text-cyan" style={{ fontSize: '12px' }}>◇</span>
             <span className="eyebrow" style={{ letterSpacing: '0.14em' }}>
               OPERATOR.AYRO
@@ -22,6 +23,7 @@ export default function Footer() {
             <span className="text-muted">·</span>
             <span className="eyebrow">BUILD v2.0</span>
             <span className="text-muted">·</span>
+            <PingDot color="green" size={6} pulse ariaLabel="Ping status" />
             <span className="eyebrow text-green" style={{ letterSpacing: '0.14em' }}>ONLINE</span>
           </div>
 

@@ -126,6 +126,52 @@ body::after {
 }
 .glitch-in { animation:glitch-in 0.6s linear 0.25s both; }
 
+/* Quick re-glitch for things that switch (typed words, rotating role) */
+@keyframes glitch-flash {
+  0%   { opacity:0.55; clip-path:inset(0 0 65% 0); transform:translateX(-2px); text-shadow:2px 0 var(--cyan), -2px 0 var(--red); }
+  30%  { opacity:1;    clip-path:inset(45% 0 0 0); transform:translateX(2px);  text-shadow:-2px 0 var(--cyan), 2px 0 var(--magenta); }
+  55%  { clip-path:inset(0 0 0 0); transform:translateX(-1px); text-shadow:1px 0 var(--cyan), -1px 0 var(--red); }
+  100% { clip-path:inset(0 0 0 0); transform:translateX(0);    text-shadow:none; }
+}
+.glitch-flash { display:inline-block; animation:glitch-flash 0.32s linear both; }
+
+/* Music-player volume slider — thicker track + glowing thumb so it doesn't get lost */
+.mp-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(to right,
+    rgba(109,213,255,0.65) 0%,
+    rgba(109,213,255,0.65) var(--mp-pct, 0%),
+    rgba(109,213,255,0.10) var(--mp-pct, 0%),
+    rgba(109,213,255,0.10) 100%);
+  border: 1px solid rgba(109,213,255,0.22);
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+}
+.mp-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #6dd5ff;
+  border: 2px solid #07080d;
+  box-shadow: 0 0 8px rgba(109,213,255,0.65);
+  cursor: pointer;
+}
+.mp-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #6dd5ff;
+  border: 2px solid #07080d;
+  box-shadow: 0 0 8px rgba(109,213,255,0.65);
+  cursor: pointer;
+}
+
 /* ─── Buttons ───────────────────────────────────────────────── */
 .btn-term {
   display:inline-flex; align-items:center; gap:9px;

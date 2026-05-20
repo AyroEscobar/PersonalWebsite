@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import BackToTop from './components/BackToTop'
 import ScrollProgress from './components/ScrollProgress'
 import Boot from './components/Boot'
+import MusicPlayer from './components/MusicPlayer'
 
 function App() {
   const location = useLocation()
@@ -24,6 +25,7 @@ function App() {
       <Navbar />
       <Outlet />
       {showChrome && <BackToTop />}
+      {showChrome && <MusicPlayer />}
     </div>
   )
 }

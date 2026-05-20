@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiX, HiMenu } from 'react-icons/hi'
+import PingDot from './ui/PingDot'
 
 const LINKS = [
   { label: 'ABOUT',      id: 'about'    },
@@ -20,8 +21,8 @@ function Clock() {
     return () => clearInterval(id)
   }, [])
   return (
-    <span className="hidden lg:flex items-center gap-2 eyebrow" style={{ letterSpacing: '0.12em' }}>
-      <span className="w-1.5 h-1.5 rounded-full bg-green" style={{ boxShadow: '0 0 8px #6ee7a3' }} />
+    <span className="hidden lg:flex items-center gap-1 eyebrow" style={{ letterSpacing: '0.12em' }}>
+      <PingDot color="green" size={6} ariaLabel="Ping uptime" />
       {t} CT
     </span>
   )

@@ -1,10 +1,82 @@
 import { useState, useEffect, Suspense } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { FaLinkedin, FaGithub, FaInstagram } from 'react-icons/fa'
 import { MdEmail } from 'react-icons/md'
 import Globe from '../Globe'
+import PingDot from '../ui/PingDot'
 
-const ROLES = ['AI agent builder', 'automation obsessive', 'systems operator', 'software engineer']
+function OperatorBadge() {
+  const [pings, setPings] = useState([])
+  const [flashKey, setFlashKey] = useState(0)
+
+  const ping = (e) => {
+    e?.preventDefault?.()
+    const id = Date.now() + Math.random()
+    setPings((arr) => [...arr, id])
+    setFlashKey((k) => k + 1)
+    setTimeout(() => setPings((arr) => arr.filter((x) => x !== id)), 1300)
+  }
+
+  return (
+    <button
+      onClick={ping}
+      aria-label="Ping operator"
+      className="group relative inline-flex items-center gap-2.5 cursor-pointer"
+      style={{ background: 'transparent', border: 0, padding: 0 }}
+    >
+      <span
+        key={flashKey}
+        className="eyebrow text-cyan glitch-flash group-hover:text-ink transition-colors"
+        style={{ letterSpacing: '0.2em' }}
+      >
+        OPERATOR
+      </span>
+      <span className="text-muted">//</span>
+      <span className="relative inline-flex items-center justify-center" style={{ width: 10, height: 10 }}>
+        <span
+          className="absolute inset-0 m-auto rounded-full bg-green transition-transform"
+          style={{ width: 6, height: 6, boxShadow: '0 0 8px #6ee7a3' }}
+        />
+        <AnimatePresence>
+          {pings.map((id) => (
+            <motion.span
+              key={id}
+              initial={{ scale: 1, opacity: 0.7 }}
+              animate={{ scale: 28, opacity: 0 }}
+              transition={{ duration: 1.2, ease: 'easeOut' }}
+              className="absolute rounded-full"
+              style={{
+                width: 6, height: 6,
+                border: '1px solid #6ee7a3',
+                background: 'transparent',
+                pointerEvents: 'none',
+              }}
+            />
+          ))}
+        </AnimatePresence>
+      </span>
+      <span
+        className="eyebrow text-green group-hover:tracking-[0.22em] transition-all"
+        style={{ letterSpacing: '0.18em' }}
+      >
+        ONLINE
+      </span>
+      <span
+        className="eyebrow text-muted opacity-0 group-hover:opacity-60 transition-opacity"
+        style={{ fontSize: '9.5px', letterSpacing: '0.18em', marginLeft: 4 }}
+      >
+        ◂ TAP TO PING
+      </span>
+    </button>
+  )
+}
+
+const ROLES = [
+  'automation obsessive',
+  'full stack engineer',
+  'builder, shipper',
+  'software engineer',
+]
 
 const CHANNELS = [
   { href: 'https://github.com/AyroEscobar',           Icon: FaGithub,    code: 'GH', label: 'GitHub'    },
@@ -18,11 +90,13 @@ function useTyped(words, speed = 62, erase = 30, hold = 1600) {
   const [display, setDisplay] = useState('')
   const [wordIdx, setWordIdx] = useState(0)
   const [deleting, setDeleting] = useState(false)
+  const [flashKey, setFlashKey] = useState(0)
 
   useEffect(() => {
     const word = words[wordIdx % words.length]
     let to
     if (!deleting && display === word) {
+      setFlashKey((k) => k + 1)
       to = setTimeout(() => setDeleting(true), hold)
     } else if (deleting && display === '') {
       setDeleting(false)
@@ -35,7 +109,7 @@ function useTyped(words, speed = 62, erase = 30, hold = 1600) {
     return () => clearTimeout(to)
   }, [display, deleting, wordIdx, words, speed, erase, hold])
 
-  return display
+  return { display, flashKey }
 }
 
 function Corner({ pos }) {
@@ -49,7 +123,7 @@ function Corner({ pos }) {
 }
 
 export default function Hero() {
-  const typed = useTyped(ROLES)
+  const { display: typed, flashKey } = useTyped(ROLES)
 
   return (
     <section
@@ -61,12 +135,9 @@ export default function Hero() {
         <div>
           <motion.div
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="flex items-center gap-2.5 mb-6"
+            className="mb-6"
           >
-            <span className="eyebrow text-cyan" style={{ letterSpacing: '0.2em' }}>OPERATOR</span>
-            <span className="text-muted">//</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-green" style={{ boxShadow: '0 0 8px #6ee7a3' }} />
-            <span className="eyebrow text-green" style={{ letterSpacing: '0.18em' }}>ONLINE</span>
+            <OperatorBadge />
           </motion.div>
 
           <h1
@@ -84,7 +155,7 @@ export default function Hero() {
             <span className="text-green">$</span>
             <span className="text-dim">whoami</span>
             <span className="text-cyan">▸</span>
-            <span className="text-ink">{typed}</span>
+            <span key={flashKey} className="text-ink glitch-flash">{typed}</span>
             <span className="blink text-cyan">▋</span>
           </motion.div>
 
@@ -102,9 +173,9 @@ export default function Hero() {
 
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.62 }}
-            className="mt-6 flex items-center gap-2.5"
+            className="mt-6 flex items-center gap-1.5"
           >
-            <span className="w-2 h-2 rounded-full bg-green" style={{ boxShadow: '0 0 10px #6ee7a3' }} />
+            <PingDot color="green" size={8} ariaLabel="Ping building status" />
             <span className="eyebrow text-green" style={{ letterSpacing: '0.16em' }}>BUILDING IN PUBLIC</span>
           </motion.div>
 
