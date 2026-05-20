@@ -39,7 +39,7 @@ export default function Currently() {
     },
     {
       tag: 'OK', href: 'about',
-      segs: [['label', 'base'], ['op', '·'], ['mono', 'plano, tx'], ['op', '→'], ['mono', 'nyc'], ['op', '→'], ['mono', 'dallas']],
+      segs: [['label', 'base'], ['op', '·'], ['mono', 'tx']],
     },
     {
       tag: 'OK', href: 'roles',
@@ -55,7 +55,7 @@ export default function Currently() {
     },
     {
       tag: '..', pending: true, href: 'about',
-      segs: [['label', 'mission'], ['op', '·'], ['ink', 'ship things that outlast me, by 25']],
+      segs: [['label', 'mission'], ['op', '·'], ['ink', 'ship things that outlast me']],
     },
   ]
 

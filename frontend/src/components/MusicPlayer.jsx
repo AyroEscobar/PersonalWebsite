@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { setAnalyser } from '../lib/audioBus'
 
 // Drop more MP3s in /public/audio/ and add them here to extend.
 const TRACKS = [
@@ -115,6 +116,7 @@ export default function MusicPlayer() {
         dataRef.current = new Uint8Array(analyser.frequencyBinCount)
         audioRef.current.muted = false
         audioRef.current.volume = 1
+        setAnalyser(analyser)   // publish for other visualizers (AudioWave, etc.)
         startRaf()
       } catch { /* setup failed */ }
     }

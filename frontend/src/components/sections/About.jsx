@@ -2,12 +2,12 @@ import Section from '../ui/Section'
 import { Panel } from '../ui/Panel'
 import pfp from '../../assets/pfp-web.jpg'
 
-const FACTS = [
-  { k: 'AGE',    v: '20' },
-  { k: 'ORIGIN', v: 'Plano, Texas' },
-  { k: 'EDU',    v: 'UT Dallas · CS · 2027' },
-  { k: 'LANGS',  v: 'English · Spanish' },
-  { k: 'STATUS', v: 'US Citizen' },
+const VITALS = [
+  { k: 'LANGS',    v: 'English · Spanish' },
+  { k: 'STATUS',   v: 'US Citizen' },
+  { k: 'FOCUS',    v: 'ai · automation' },
+  { k: 'MUSIC',    v: 'always on' },
+  { k: 'LEARNING', v: 'whatever’s next' },
 ]
 
 export default function About() {
@@ -18,32 +18,30 @@ export default function About() {
           <div className="space-y-4 text-dim" style={{ fontSize: '14px', lineHeight: 1.85 }}>
             <p>
               <span className="text-cyan">▸ </span>
-              I'm a software engineer out of <span className="text-ink">Plano, Texas</span>,
-              twenty years old, studying Computer Science at{' '}
-              <span className="text-ink">UT Dallas</span> with a 2027 graduation. The long
-              timeline is not a slow walk. It is back to back internships I refused to skip.
+              the hunger came from realizing how much of the world runs on
+              invisible systems. somebody wrote the code that settles every
+              trade, gets your food to the door, routes messages around the
+              world, and tells an ambulance which street to take to your
+              house. that's the part i fell in love with.
             </p>
             <p>
-              What I actually do is build <span className="text-cyan">AI agents</span> and
-              the systems they live in. At RBC I shipped one on every trading desk I rotated
-              through. At home, a system of more than twenty agents runs my finances, my
-              health, and the news I read. The internships, <span className="text-ink">RBC</span>{' '}
-              then <span className="text-ink">MD7</span> then{' '}
-              <span className="text-ink">JP Morgan</span>, are the resume. The building is
-              the person.
+              i'm trying to be the kind of engineer who can build that. work
+              that quietly holds itself up, doesn't need a human in the loop,
+              doesn't sleep when i do.{' '}
+              <span className="text-ink">that's the level i'm aiming at.</span>
             </p>
             <p>
-              I want to be financially free, take care of my family, and ship things that
-              outlast me, all before I turn twenty five. That sentence is the whole map.
-              Every role, every hour, gets weighed against it.
+              outside of code: music while i work, and a stubborn need to
+              learn whatever i don't know yet. when i'm burnt out, i recover
+              on minecraft videos, anime, or the Distractible podcast.
             </p>
           </div>
 
           <div className="mt-6 border-l-2 border-cyan/40 pl-4 py-1">
             <p className="text-ink" style={{ fontSize: '13.5px', lineHeight: 1.75 }}>
-              "The cost of doing the work is doing the work. There is no shortcut."
+              "the world runs on systems. someone has to build them."
             </p>
-            <p className="eyebrow mt-2">LOG ENTRY · MAY 2026</p>
+            <p className="eyebrow mt-2">FIELD NOTE · MAY 2026</p>
           </div>
         </Panel>
 
@@ -64,7 +62,7 @@ export default function About() {
 
           <Panel title="VITALS" accent="amber">
             <div className="space-y-2.5">
-              {FACTS.map((f) => (
+              {VITALS.map((f) => (
                 <div key={f.k} className="flex items-center gap-3">
                   <span className="eyebrow">{f.k}</span>
                   <span className="flex-1 border-b border-dashed border-line" />
@@ -75,6 +73,7 @@ export default function About() {
           </Panel>
         </div>
       </div>
+
     </Section>
   )
 }

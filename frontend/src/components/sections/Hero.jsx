@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaLinkedin, FaGithub, FaInstagram } from 'react-icons/fa'
 import { MdEmail } from 'react-icons/md'
@@ -209,7 +209,7 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* ─── Globe column ─── */}
+        {/* ─── Right column: interactive globe ─── */}
         <motion.div
           initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.35, duration: 0.8 }}
@@ -217,13 +217,13 @@ export default function Hero() {
         >
           <Corner pos="tl" /><Corner pos="tr" /><Corner pos="bl" /><Corner pos="br" />
           <div className="absolute inset-0">
-            <Suspense fallback={null}><Globe /></Suspense>
+            <Globe />
           </div>
           <div
-            className="absolute bottom-3 left-1/2 -translate-x-1/2 eyebrow whitespace-nowrap"
-            style={{ opacity: 0.5 }}
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 eyebrow whitespace-nowrap pointer-events-none"
+            style={{ opacity: 0.5, letterSpacing: '0.24em' }}
           >
-            ◇ OPERATOR MESH · LIVE
+            ◇ OPERATOR MESH · DRAG · CLICK · UNMUTE
           </div>
         </motion.div>
       </div>
