@@ -5,7 +5,7 @@ import pfp from '../../assets/pfp-web.jpg'
 const VITALS = [
   { k: 'LANGS',    v: 'English · Spanish' },
   { k: 'STATUS',   v: 'US Citizen' },
-  { k: 'FOCUS',    v: 'ai · automation' },
+  { k: 'FOCUS',    v: 'ai · automation · full stack' },
   { k: 'MUSIC',    v: 'always on' },
   { k: 'LEARNING', v: 'whatever’s next' },
 ]
@@ -37,12 +37,6 @@ export default function About() {
             </p>
           </div>
 
-          <div className="mt-6 border-l-2 border-cyan/40 pl-4 py-1">
-            <p className="text-ink" style={{ fontSize: '13.5px', lineHeight: 1.75 }}>
-              "the world runs on systems. someone has to build them."
-            </p>
-            <p className="eyebrow mt-2">FIELD NOTE · MAY 2026</p>
-          </div>
         </Panel>
 
         <div className="space-y-6">

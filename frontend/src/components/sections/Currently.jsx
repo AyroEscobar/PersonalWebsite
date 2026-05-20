@@ -51,7 +51,7 @@ export default function Currently() {
     },
     {
       tag: 'OK', href: 'projects',
-      segs: [['label', 'home stack'], ['op', '·'], ['mono', '22 services'], ['op', '·'], ['ok', 'always on']],
+      segs: [['label', 'home stack'], ['op', '·'], ['mono', 'agents + tools'], ['op', '·'], ['ok', 'always on']],
     },
     {
       tag: '..', pending: true, href: 'about',

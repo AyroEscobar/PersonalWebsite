@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#6dd5ff" stroke-opacity="0.025"/>
+    </pattern>
+    <radialGradient id="glow" cx="50%" cy="0%" r="58%">
+      <stop offset="0%" stop-color="#6dd5ff" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#6dd5ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.55"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#07080d"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#vignette)"/>
+
+  <g stroke="#6dd5ff" stroke-width="1.5" fill="none" opacity="0.4">
+    <path d="M40 80 L40 40 L80 40"/>
+    <path d="M1160 80 L1160 40 L1120 40"/>
+    <path d="M40 550 L40 590 L80 590"/>
+    <path d="M1160 550 L1160 590 L1120 590"/>
+  </g>
+
+  <g transform="translate(525, 145)">
+    <circle cx="0" cy="-5" r="5" fill="#6ee7a3"/>
+    <circle cx="0" cy="-5" r="10" fill="none" stroke="#6ee7a3" stroke-opacity="0.35" stroke-width="1"/>
+    <text x="20" y="0" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="14" letter-spacing="4" fill="#6dd5ff" font-weight="600">OPERATOR // ONLINE</text>
+  </g>
+
+  <text x="600" y="340" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="124" font-weight="800" fill="#eef3f9" text-anchor="middle" letter-spacing="-3">ayro escobar</text>
+
+  <text x="600" y="400" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="20" fill="#aeb9c9" text-anchor="middle" letter-spacing="2">software engineer  ·  cs '27  ·  ut dallas</text>
+
+  <g transform="translate(600, 510)" stroke="#6dd5ff" fill="none" stroke-width="2">
+    <path d="M-26 0 L0 -26 L26 0 L0 26 Z" stroke-linejoin="round"/>
+    <circle cx="0" cy="0" r="12" stroke-width="1" stroke-opacity="0.3"/>
+    <circle cx="0" cy="0" r="5" fill="#6ee7a3" stroke="none"/>
+  </g>
+
+  <text x="600" y="590" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="14" letter-spacing="3" fill="#6b7689" text-anchor="middle">AYROESCOBAR.COM</text>
+</svg>

@@ -11,6 +11,11 @@ const STACK = [
   { cat: 'CLOUD & DATA', accent: 'amber',   items: ['AWS', 'PostgreSQL', 'Firebase', 'Supabase', 'Kafka', 'GraphQL'] },
 ]
 
+const CERTS = [
+  { name: 'AWS Certified Cloud Practitioner',    status: 'ACTIVE', icon: '✓' },
+  { name: 'AWS Solutions Architect Associate',   status: 'NEXT',   icon: '◯' },
+]
+
 export default function Skills() {
   return (
     <Section id="skills" code="SECTION 03 // STACK" title="Stack matrix" intro="WHAT I BUILD WITH">
@@ -20,38 +25,73 @@ export default function Skills() {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        <Panel title="STACK.MATRIX" accent="cyan" meta="4 LAYERS">
+        {/* 2×2 grid of category cards — vertical lists for readability */}
+        <div className="grid sm:grid-cols-2 gap-4 mb-4">
+          {STACK.map((g) => (
+            <Panel key={g.cat} title={g.cat} accent={g.accent} meta={`${g.items.length} ITEMS`}>
+              <ul className="space-y-1.5 font-mono" style={{ fontSize: '13px' }}>
+                {g.items.map((it) => (
+                  <li key={it} className="flex items-center gap-2.5">
+                    <span
+                      className="rounded-full shrink-0"
+                      style={{
+                        width: 4, height: 4,
+                        background: ACCENT[g.accent],
+                        boxShadow: `0 0 5px ${ACCENT[g.accent]}`,
+                        opacity: 0.85,
+                      }}
+                    />
+                    <span style={{ color: '#aeb9c9' }}>{it}</span>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          ))}
+        </div>
+
+        {/* Certifications — dedicated panel, status-tagged rows */}
+        <Panel title="CERTIFICATIONS" accent="amber" meta={`${CERTS.length} TRACKED`}>
           <div className="divide-y divide-line">
-            {STACK.map((g) => (
-              <div
-                key={g.cat}
-                className="grid sm:grid-cols-[156px_1fr] gap-y-2 sm:gap-x-7 py-4 first:pt-0 last:pb-0"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="w-[3px] h-3.5 rounded-sm" style={{ background: ACCENT[g.accent] }} />
+            {CERTS.map((c) => {
+              const isActive = c.status === 'ACTIVE'
+              const col = isActive ? '#6ee7a3' : '#ffb86b'
+              return (
+                <div key={c.name} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                   <span
-                    className="font-mono"
-                    style={{ fontSize: '10.5px', letterSpacing: '0.18em', color: ACCENT[g.accent] }}
+                    className="font-mono shrink-0"
+                    style={{
+                      fontSize: '14px',
+                      color: col,
+                      minWidth: '1.6ch',
+                      textAlign: 'center',
+                    }}
                   >
-                    {g.cat}
+                    {c.icon}
+                  </span>
+                  <span
+                    className="text-ink flex-1"
+                    style={{ fontSize: '13.5px', letterSpacing: '0.005em' }}
+                  >
+                    {c.name}
+                  </span>
+                  <span
+                    className="font-mono px-2 py-0.5 rounded-sm shrink-0"
+                    style={{
+                      fontSize: '9.5px',
+                      letterSpacing: '0.16em',
+                      color: col,
+                      border: `1px solid ${col}55`,
+                      background: `${col}0f`,
+                    }}
+                  >
+                    {c.status}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                  {g.items.map((it, idx) => (
-                    <span key={it} className="flex items-center gap-x-3">
-                      <span className="font-mono" style={{ fontSize: '13px', color: '#aeb9c9' }}>{it}</span>
-                      {idx < g.items.length - 1 && <span className="text-muted">·</span>}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </Panel>
       </motion.div>
-      <p className="mt-5 eyebrow" style={{ opacity: 0.5 }}>
-        ▸ AWS Certified Cloud Practitioner · Solutions Architect next
-      </p>
     </Section>
   )
 }
