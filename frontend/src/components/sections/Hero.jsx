@@ -161,14 +161,15 @@ export default function Hero() {
 
           <motion.p
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.52 }}
-            className="mt-6 text-dim max-w-[460px]"
+            className="mt-6 text-dim max-w-[480px]"
             style={{ fontSize: '14px', lineHeight: 1.85 }}
           >
-            I am twenty years old and{' '}
-            <span className="text-ink">I love this</span>. Not the idea of it, the actual
-            work, the late nights deep in a problem until it finally gives. I am hungry, I
-            do not slow down, and I am not here to be good.{' '}
-            <span className="text-cyan">I am here to win.</span>
+            twenty, in cs at ut dallas. trying to live this all the way out. take
+            the engineering as far as i can, build as much as i can, stay curious
+            about anything that gets made. mostly that's software, but the rest
+            counts too. just trying to be{' '}
+            <span className="text-ink">a good engineer</span> and put together
+            work i'd be proud to show.
           </motion.p>
 
           <motion.div
