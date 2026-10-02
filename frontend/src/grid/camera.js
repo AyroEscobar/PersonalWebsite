@@ -43,7 +43,7 @@ export const FRAMES = {
 // Phones and tablets: the US-75 corridor as the spine, Allen to Richardson.
 export const HERO_FRAMES = {
   phone: { at: [N.plano[0] + 125, N.plano[1]], z: 0.36 },
-  tablet: { at: [N.plano[0] + 170, N.plano[1] + 90], z: 0.52 },
+  tablet: { at: [N.plano[0] + 292, N.plano[1] + 24], z: 0.5 },
 }
 
 const px = (n) => `${-Math.round(n)}px`

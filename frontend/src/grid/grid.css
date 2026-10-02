@@ -125,7 +125,21 @@
 .ng-scrim {
   background:
     linear-gradient(to bottom, color-mix(in oklab, var(--night) 70%, transparent) 0, transparent var(--topbar-h)),
-    linear-gradient(to bottom, transparent 64%, color-mix(in oklab, var(--night) 70%, transparent) 82%, var(--night) 98%);
+    linear-gradient(to bottom, transparent 68%, color-mix(in oklab, var(--night) 70%, transparent) 84%, var(--night) 98%);
+}
+
+/* Short phones: the same ground, a little further out, so Allen clears the ping plate. */
+@media (max-width: 719.98px) and (max-height: 760px) {
+  .ng {
+    --ng-ay: 47%;
+    --ng-zk: 0.8;
+  }
+}
+@media (max-width: 719.98px) and (max-height: 600px) {
+  .ng {
+    --ng-ay: 49%;
+    --ng-zk: 0.68;
+  }
 }
 
 /* ---------- tablets: still the hero block, a little wider ---------- */
@@ -135,6 +149,19 @@
     --ng-ax: 62%;
     --ng-ay: 44%;
   }
+}
+/* Landscape tablets: a taller block, the cluster right of the name. */
+@media (min-width: 720px) and (max-width: 1099.98px) and (orientation: landscape) {
+  :root {
+    --ng-h: 78svh;
+  }
+  .ng {
+    --ng-ax: 70%;
+    --ng-ay: 46%;
+    --ng-zk: 0.92;
+  }
+}
+@media (min-width: 720px) {
   .ng-cam {
     --ng-cx: var(--ng-cx-t);
     --ng-cy: var(--ng-cy-t);
@@ -358,8 +385,12 @@
   --ng-hl-fill: var(--sodium);
 }
 .ng-node .ng-ring {
-  stroke-width: calc(1px + var(--ng-hl, 0) * 1px);
+  stroke-width: calc(1px + var(--ng-hl, 0) * 0.6px);
   stroke-opacity: calc(0.45 + var(--ng-hl, 0) * 0.55);
+  transform: scale(calc(1 + var(--ng-hl, 0) * 0.8));
+}
+.ng[data-hl] .ng-node .ng-ring {
+  stroke: var(--ng-hl-fill, var(--led));
 }
 .ng-node[style] .ng-label {
   fill: var(--ng-hl-fill, var(--led));
