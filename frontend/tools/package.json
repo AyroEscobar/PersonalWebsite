@@ -1,0 +1,12 @@
+{
+  "name": "ayroescobar-site-tools",
+  "private": true,
+  "description": "Local-only tools for the site scripts (QA, images, OG, grid data). Not installed by Vercel. Install with: npm run tools",
+  "type": "module",
+  "dependencies": {
+    "axe-core": "4.13.0",
+    "lighthouse": "13.5.0",
+    "mapshaper": "0.7.72",
+    "sharp": "0.35.5"
+  }
+}
