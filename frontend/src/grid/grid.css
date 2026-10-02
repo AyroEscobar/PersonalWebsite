@@ -1,0 +1,509 @@
+/*
+  NightGrid, GridPoster, OffGridLink and NodeTag styles (PLAN.md 2.4, 4.1 to 4.4).
+  Owned by A. Colors are tokens only; motion lives inside both gates.
+*/
+
+/* The camera and the counter-scaled labels animate from the same three numbers. */
+@property --ng-cx {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+@property --ng-cy {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+@property --ng-z {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+@property --ng-hz {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+
+/* ---------- frame: phones (the hero block) ---------- */
+
+/* The map block's height, shared with the hero (src/hero/hero.css). */
+:root {
+  --ng-h: 70svh;
+}
+@media (min-width: 720px) {
+  :root {
+    --ng-h: 64svh;
+  }
+}
+@media (min-width: 1100px) {
+  :root {
+    --ng-h: 100svh;
+  }
+}
+
+.ng {
+  --ng-ax: 50%;
+  --ng-ay: 40%;
+  --ng-zk: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--ng-h);
+  z-index: 0;
+  pointer-events: none;
+  touch-action: pan-y;
+}
+
+.ng-view {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  contain: layout paint;
+}
+
+.ng-layers,
+.ng-svg,
+.ng-canvas,
+.ng-scrim {
+  position: absolute;
+  inset: 0;
+}
+
+.ng-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.ng-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ng-cam {
+  --ng-cx: var(--ng-cx-m);
+  --ng-cy: var(--ng-cy-m);
+  --ng-z: var(--ng-z-m);
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transform: translate(var(--ng-ax), var(--ng-ay)) scale(calc(var(--ng-z) * var(--ng-zk))) translate(var(--ng-cx), var(--ng-cy));
+}
+
+/* Labels, dots and arrowheads stay the same size at every zoom. */
+.ng-fix {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transform: scale(calc(1 / (var(--ng-z) * var(--ng-zk))));
+}
+
+/* Phones: fade into the page under the name, and under the top bar. */
+.ng-scrim {
+  background:
+    linear-gradient(to bottom, color-mix(in oklab, var(--night) 70%, transparent) 0, transparent var(--topbar-h)),
+    linear-gradient(to bottom, transparent 64%, color-mix(in oklab, var(--night) 70%, transparent) 82%, var(--night) 98%);
+}
+
+/* ---------- tablets: still the hero block, a little wider ---------- */
+
+@media (min-width: 720px) {
+  .ng {
+    --ng-ax: 62%;
+    --ng-ay: 44%;
+  }
+  .ng-cam {
+    --ng-cx: var(--ng-cx-t);
+    --ng-cy: var(--ng-cy-t);
+    --ng-z: var(--ng-z-t);
+  }
+}
+
+/* ---------- desktop: full bleed, then a sticky layer on the right ---------- */
+
+@media (min-width: 1100px) {
+  .ng {
+    --ng-ax: 74%;
+    --ng-ay: 40%;
+    bottom: 0;
+    height: auto;
+  }
+  .ng-view {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+  }
+  .ng-cam {
+    --ng-cx: var(--ng-cx-d);
+    --ng-cy: var(--ng-cy-d);
+    --ng-z: var(--ng-z-d);
+  }
+  /* Two scrims: a soft one for the hero, a firmer one for the reading column. */
+  .ng-scrim {
+    background: none;
+  }
+  .ng-scrim::before,
+  .ng-scrim::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .ng-scrim::before {
+    background:
+      linear-gradient(90deg, var(--night) 0, var(--night) 28%, color-mix(in oklab, var(--night) 84%, transparent) 46%, color-mix(in oklab, var(--night) 40%, transparent) 58%, transparent 68%),
+      linear-gradient(to top, var(--night) 0, transparent 20%);
+  }
+  .ng-scrim::after {
+    background: linear-gradient(90deg, var(--night) 0, var(--night) 50%, color-mix(in oklab, var(--night) 55%, transparent) 60%, transparent 74%);
+    opacity: 0;
+  }
+  .ng:not([data-focus='origin']) .ng-scrim::after {
+    opacity: 1;
+  }
+  .ng:not([data-focus='origin']) .ng-layers {
+    opacity: 0.62;
+  }
+}
+
+/* Bigger screens see about the same ground, not more of it. */
+@media (min-width: 1600px) {
+  .ng {
+    --ng-zk: 1.16;
+  }
+}
+@media (min-width: 2000px) {
+  .ng {
+    --ng-zk: 1.4;
+  }
+}
+@media (min-width: 2400px) {
+  .ng {
+    --ng-zk: 1.7;
+  }
+}
+
+/* A poster outside NightGrid (the 404) frames itself; GridPoster sets its vars. */
+.ng-svg[data-standalone] {
+  --ng-ax: 50%;
+  --ng-ay: 50%;
+  --ng-zk: 1;
+}
+.ng-svg[data-standalone] .ng-cam {
+  --ng-cx: var(--ng-cx-s);
+  --ng-cy: var(--ng-cy-s);
+  --ng-z: var(--ng-z-s);
+}
+
+/* ---------- horizon: the sky over Plano, as a thin tint ---------- */
+
+.ng-horizon {
+  --ng-hz: var(--horizon, transparent);
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 160px;
+  background: linear-gradient(to bottom, var(--ng-hz), transparent);
+}
+
+/* ---------- the artwork ---------- */
+
+.ng-halo,
+.ng-road,
+.ng-spine,
+.ng-offgrid,
+.ng-spurs {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --k is 1 near Plano and 0 far away, --p the sodium share (posterArt.js). */
+.ng-road use {
+  stroke: color-mix(in oklab, var(--sodium) var(--p), var(--trace-lit));
+  stroke-opacity: calc(0.28 + var(--k) * 0.72);
+  stroke-width: calc(1px + var(--k) * 0.45px);
+}
+
+.ng-halo use {
+  stroke: var(--sodium);
+  stroke-opacity: calc(var(--k) * var(--k) * 0.2);
+  stroke-width: 6px;
+}
+
+.ng-spine-core {
+  stroke: var(--led);
+  stroke-width: 1.6px;
+}
+.ng-spine-glow {
+  stroke: var(--led);
+  stroke-opacity: 0.12;
+  stroke-width: 10px;
+}
+
+.ng-off-line {
+  stroke: var(--sodium);
+  stroke-width: 1.25px;
+  stroke-dasharray: 1 6;
+  stroke-opacity: 0.8;
+}
+.ng-off-head {
+  stroke: var(--sodium);
+  stroke-width: 1.5px;
+}
+
+.ng-spur {
+  stroke: var(--led);
+  stroke-width: 1px;
+  stroke-dasharray: 1 4;
+  stroke-opacity: 0.55;
+}
+
+.ng-stop-led {
+  stop-color: var(--led);
+}
+.ng-stop-dim {
+  stop-color: var(--dim);
+}
+
+.ng-dot {
+  fill: var(--led);
+}
+.ng-ring {
+  fill: none;
+  stroke: var(--led);
+  stroke-width: 1px;
+  stroke-opacity: 0.45;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ng-node[data-state='dim'] .ng-dot {
+  fill: var(--dim);
+}
+.ng-node[data-state='dim'] .ng-ring {
+  stroke: var(--dim);
+  stroke-opacity: 0.3;
+}
+
+.ng-label {
+  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  fill: var(--led);
+  paint-order: stroke;
+  stroke: var(--night);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.ng-node[data-state='dim'] .ng-label {
+  fill: var(--dim);
+}
+.ng-off .ng-label {
+  fill: var(--sodium);
+}
+
+/* ---------- focus: what each section lights (desktop) ---------- */
+
+@media (min-width: 1100px) {
+  .ng:not([data-focus='origin']) .ng-node .ng-label,
+  .ng:not([data-focus='origin']) .ng-off {
+    opacity: 0.5;
+  }
+  .ng[data-lit~='plano'] .ng-node[data-node='plano'] .ng-label,
+  .ng[data-lit~='richardson'] .ng-node[data-node='richardson'] .ng-label,
+  .ng[data-lit~='allen'] .ng-node[data-node='allen'] .ng-label,
+  .ng[data-lit~='dallas'] .ng-node[data-node='dallas'] .ng-label,
+  .ng[data-off~='nyc'] .ng-off[data-node='nyc'],
+  .ng[data-off~='waterloo'] .ng-off[data-node='waterloo'],
+  .ng[data-focus='builds'] .ng-node .ng-label,
+  .ng[data-focus='builds'] .ng-off {
+    opacity: 1;
+  }
+  .ng[data-lit~='plano'] .ng-node[data-node='plano'] .ng-ring,
+  .ng[data-lit~='richardson'] .ng-node[data-node='richardson'] .ng-ring,
+  .ng[data-lit~='allen'] .ng-node[data-node='allen'] .ng-ring {
+    stroke-opacity: 0.9;
+  }
+}
+
+/* ---------- a ping without a wave: the nearest node lights (600 ms) ---------- */
+
+.ng[data-hl='plano'] .ng-node[data-node='plano'],
+.ng[data-hl='richardson'] .ng-node[data-node='richardson'],
+.ng[data-hl='allen'] .ng-node[data-node='allen'],
+.ng[data-hl='dallas'] .ng-node[data-node='dallas'] {
+  --ng-hl: 1;
+  --ng-hl-fill: var(--sodium);
+}
+.ng-node .ng-ring {
+  stroke-width: calc(1px + var(--ng-hl, 0) * 1px);
+  stroke-opacity: calc(0.45 + var(--ng-hl, 0) * 0.55);
+}
+.ng-node[style] .ng-label {
+  fill: var(--ng-hl-fill, var(--led));
+}
+.ng-node[data-state='dim'] .ng-label {
+  fill: var(--ng-hl-fill, var(--dim));
+}
+
+/* ---------- motion: camera, dimming, the first paint ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='reduced']) .ng-cam {
+    transition:
+      --ng-cx var(--dur-camera) var(--ease-out),
+      --ng-cy var(--dur-camera) var(--ease-out),
+      --ng-z var(--dur-camera) var(--ease-out);
+  }
+  html:not([data-motion='reduced']) .ng-layers,
+  html:not([data-motion='reduced']) .ng-scrim::after,
+  html:not([data-motion='reduced']) .ng-off,
+  html:not([data-motion='reduced']) .ng-node .ng-label {
+    transition: opacity var(--dur-camera) var(--ease-out);
+  }
+  html:not([data-motion='reduced']) .ng-horizon {
+    transition: --ng-hz 600ms var(--ease);
+  }
+
+  /* First paint (PLAN.md 5): the grid lights from Plano outward, band by
+     band, around content that is already readable. 23 x 28 ms + 520 ms. */
+  html[data-boot='run']:not([data-motion='reduced']) .ng-road use {
+    animation: ng-light 520ms var(--ease) both;
+    animation-delay: calc(var(--b) * 28ms);
+  }
+  html[data-boot='run']:not([data-motion='reduced']) .ng-halo use {
+    animation: ng-crest 520ms var(--ease) both;
+    animation-delay: calc(var(--b) * 28ms);
+  }
+  html[data-boot='run']:not([data-motion='reduced']) .ng-spine,
+  html[data-boot='run']:not([data-motion='reduced']) .ng-offgrid,
+  html[data-boot='run']:not([data-motion='reduced']) .ng-spurs {
+    animation: ae-fade-in 400ms var(--ease) both;
+    animation-delay: 240ms;
+  }
+  html[data-boot='run']:not([data-motion='reduced']) .ng-node .ng-ring,
+  html[data-boot='run']:not([data-motion='reduced']) .ng-node .ng-glow {
+    animation: ng-node-on 600ms var(--ease-out) both;
+    animation-delay: calc(var(--b, 0) * 28ms + 120ms);
+  }
+}
+
+/* Only opacities animate: the road comes up, and its halo crests in sodium on the way. */
+@keyframes ng-light {
+  0% {
+    stroke-opacity: 0.05;
+  }
+  30% {
+    stroke-opacity: 1;
+  }
+}
+@keyframes ng-crest {
+  0% {
+    stroke-opacity: 0;
+  }
+  30% {
+    stroke-opacity: 0.5;
+  }
+}
+
+@keyframes ng-node-on {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+/* ---------- elsewhere ---------- */
+
+@media (forced-colors: active) {
+  .ng-canvas,
+  .ng-horizon,
+  .ng-scrim,
+  .ng-halo,
+  .ng-glow,
+  .ng-spine-glow {
+    display: none;
+  }
+}
+
+@media print {
+  .ng {
+    display: none !important;
+  }
+}
+
+/* ---------- NodeTag (PLAN.md 4.4) ---------- */
+
+.node-tag {
+  --tag: var(--led);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  vertical-align: middle;
+  line-height: 1;
+}
+.node-tag[data-state='lit-past'] {
+  --tag: var(--sodium);
+}
+.node-tag[data-state='dim'] {
+  --tag: var(--dim);
+}
+
+.node-tag-map {
+  flex: none;
+  display: block;
+  overflow: hidden;
+  background: var(--night);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+
+.node-tag-roads,
+.node-tag-exit {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.node-tag-roads {
+  stroke: var(--trace-lit);
+  stroke-width: 10;
+}
+.node-tag-exit {
+  stroke: var(--sodium);
+  stroke-width: 12;
+  stroke-dasharray: 8 26;
+}
+.node-tag-dot {
+  fill: var(--tag);
+}
+.node-tag-halo {
+  fill: var(--tag);
+  opacity: 0.2;
+}
+.node-tag-from {
+  fill: var(--dim);
+}
+
+.node-tag-name {
+  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--tag);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .node-tag-map {
+    display: none;
+  }
+}
+
+/* Phones: Allen's name sits left of its dot, so the New York route label has the right side. */
+@media (max-width: 719.98px) {
+  .ng-node[data-node='allen'] .ng-label {
+    text-anchor: end;
+    transform: translateX(-24px);
+  }
+}
