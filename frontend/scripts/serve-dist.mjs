@@ -7,11 +7,13 @@
     - cleanUrls: /404 and /404.html both serve 404.html
     - unknown paths serve 404.html with status 404 (no SPA fallback)
     - right MIME types for robots.txt and sitemap.xml
+    - brotli or gzip for text, like Vercel's edge (Lighthouse numbers depend on it)
 
   Usage: node scripts/serve-dist.mjs [--port 4173] [--root dist]
   As a module: const { server, port, url } = await serveDist({ port: 0 })
 */
 import { createServer } from 'node:http'
+import { brotliCompressSync, gzipSync, constants as zc } from 'node:zlib'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -53,6 +55,14 @@ function vercelHeaderRules() {
 
 export function serveDist({ port = 0, root = path.join(ROOT, 'dist'), host = '127.0.0.1', log = false } = {}) {
   const rules = vercelHeaderRules()
+  const packed = new Map()
+  const compress = (file, buf, enc) => {
+    const key = `${enc}:${file}:${buf.length}`
+    if (!packed.has(key)) {
+      packed.set(key, enc === 'br' ? brotliCompressSync(buf, { params: { [zc.BROTLI_PARAM_QUALITY]: 11 } }) : gzipSync(buf, { level: 9 }))
+    }
+    return packed.get(key)
+  }
   const resolve = (urlPath) => {
     let p = decodeURIComponent(urlPath.split('?')[0].split('#')[0])
     if (p.includes('..')) return null
@@ -81,8 +91,19 @@ export function serveDist({ port = 0, root = path.join(ROOT, 'dist'), host = '12
     res.setHeader('Content-Type', MIME[path.extname(file).toLowerCase()] || 'application/octet-stream')
     if (!res.hasHeader('Cache-Control')) res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate')
     if (log) console.log(status, req.method, urlPath)
+    let body = readFileSync(file)
+    const accept = String(req.headers['accept-encoding'] || '')
+    if (/\.(html|js|mjs|css|json|svg|xml|txt)$/i.test(file) && body.length > 1024) {
+      const enc = /\bbr\b/.test(accept) ? 'br' : /\bgzip\b/.test(accept) ? 'gzip' : null
+      if (enc) {
+        body = compress(file, body, enc)
+        res.setHeader('Content-Encoding', enc)
+        res.setHeader('Vary', 'Accept-Encoding')
+      }
+    }
+    res.setHeader('Content-Length', body.length)
     if (req.method === 'HEAD') return res.end()
-    res.end(readFileSync(file))
+    res.end(body)
   })
   return new Promise((ok, bad) => {
     server.once('error', bad)
