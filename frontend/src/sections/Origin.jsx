@@ -1,13 +1,19 @@
-import { Section, SectionHeading } from '../ui/Section.jsx'
+import { Section } from '../ui/Section.jsx'
 import { ORIGIN } from '../content/identity.js'
 import { HEADSHOT } from '../media/headshot.js'
+import StopHead from './StopHead.jsx'
+import { Highlight } from './text.jsx'
 
 /*
-  PLACEHOLDER by FOUNDATION. Owned by C (PLAN.md 3.3). Replace this file.
-
-  Contract: default export Origin({ id, children }). Renders the #origin
-  <Section>, with children (A's Hero) first, then the origin body.
+  origin (PLAN.md 3.3). A's Hero comes in as children, first. Then his own
+  words: the paragraph, the "whole map" sentence set large with its middle
+  line lit, the no-shortcut line as a road sign, the off-hours line, and
+  the vitals beside the duotone photo.
 */
+
+// The line inside the pull quote that gets the light. Styling only; the text is verbatim.
+const MAP_LINE = 'That sentence is the whole map.'
+
 export default function Origin({ id, children }) {
   return (
     <Section id={id}>
@@ -15,34 +21,39 @@ export default function Origin({ id, children }) {
       <div className="page">
         <div className="page-grid">
           <div className="text-col">
-            <SectionHeading id={id} />
-            <p className="t-body measure mt-8">{ORIGIN.paragraph.text}</p>
-            <blockquote className="t-h3 measure mt-8">{ORIGIN.pull.text}</blockquote>
-            <p className="t-body measure mt-6">{ORIGIN.closer.text}</p>
-            <p className="t-body measure mt-6 text-dim">{ORIGIN.offHours.text}</p>
-            <div className="mt-8 flex flex-wrap items-start gap-8">
-              <dl className="mono grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
-                {ORIGIN.vitals.map((v) => (
-                  <div key={v.id} className="contents">
-                    <dt className="text-dim">{v.label}</dt>
-                    <dd>{v.value}</dd>
-                  </div>
-                ))}
-              </dl>
-              <picture>
-                <source type="image/avif" srcSet={HEADSHOT.avif} sizes={HEADSHOT.sizes} />
-                <img
-                  src={HEADSHOT.src}
-                  srcSet={HEADSHOT.webp}
-                  sizes={HEADSHOT.sizes}
-                  width={HEADSHOT.width}
-                  height={HEADSHOT.height}
-                  alt={HEADSHOT.alt}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-auto w-[180px] rounded-sm"
-                />
-              </picture>
+            <StopHead id={id} />
+            <div className="origin-body">
+              <p className="t-lead origin-para">{ORIGIN.paragraph.text}</p>
+              <blockquote className="origin-pull">
+                <p>
+                  <Highlight text={ORIGIN.pull.text} phrase={MAP_LINE} className="lit" />
+                </p>
+              </blockquote>
+              <p className="sign">{ORIGIN.closer.text}</p>
+              <p className="origin-off">{ORIGIN.offHours.text}</p>
+              <div className="origin-id">
+                <picture className="origin-photo">
+                  <source type="image/avif" srcSet={HEADSHOT.avif} sizes="(min-width: 720px) 200px, 112px" />
+                  <img
+                    src={HEADSHOT.src}
+                    srcSet={HEADSHOT.webp}
+                    sizes="(min-width: 720px) 200px, 112px"
+                    width={HEADSHOT.width}
+                    height={HEADSHOT.height}
+                    alt={HEADSHOT.alt}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <dl className="vitals">
+                  {ORIGIN.vitals.map((v) => (
+                    <div key={v.id}>
+                      <dt className="label">{v.label}</dt>
+                      <dd>{v.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
             </div>
           </div>
         </div>
