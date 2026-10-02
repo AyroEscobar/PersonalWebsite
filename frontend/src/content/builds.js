@@ -128,8 +128,8 @@ export const BUILDS = {
     {
       id: 'build-request',
       title: 'ReQuest',
-      meta: 'acm utd projects, 2025',
-      facts: ['prj-request'],
+      meta: 'acm utd projects, team build',
+      facts: ['prj-request', 'prj-team-builds'],
       body: [
         item(
           'request-what',
@@ -145,8 +145,8 @@ export const BUILDS = {
     {
       id: 'build-gaia',
       title: 'Gaia',
-      meta: 'hackai 2025',
-      facts: ['prj-gaia'],
+      meta: 'hackai 2025, with a team',
+      facts: ['prj-gaia', 'prj-team-builds'],
       body: [
         item(
           'gaia-what',
