@@ -52,7 +52,8 @@ export default function Origin({ id, children }) {
                 </picture>
                 <dl className="vitals">
                   {ORIGIN.vitals.map((v) => (
-                    <div key={v.id}>
+                    // UT Dallas is in Richardson: the map flares it as the row reaches the reading line.
+                    <div key={v.id} data-flare={v.id === 'vital-school' ? 'richardson' : undefined}>
                       <dt className="label">{v.label}</dt>
                       <dd>{v.value}</dd>
                     </div>

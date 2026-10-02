@@ -19,7 +19,8 @@ import { Figures, MonthSpan } from './text.jsx'
   public sentence in content/work.js makes it a full plate again.
 
   The article carries the plate id (plate-md7 ...) so B's JumpList can land
-  on it.
+  on it, and its place (data-flare) so the desktop map flares that city as
+  the plate reaches the reading line (r2 U6).
 */
 export default function ReleasePlate({ plate: p, desksLabel }) {
   const h = `${p.id}-h`
@@ -28,7 +29,7 @@ export default function ReleasePlate({ plate: p, desksLabel }) {
 
   if (compact) {
     return (
-      <article id={p.id} aria-labelledby={h} className="rp rp--row">
+      <article id={p.id} aria-labelledby={h} className="rp rp--row" data-flare={p.node || undefined}>
         <p className="rp-when mono" aria-hidden="true">
           {p.dates}
         </p>
@@ -47,7 +48,7 @@ export default function ReleasePlate({ plate: p, desksLabel }) {
   }
 
   return (
-    <article id={p.id} aria-labelledby={h} className="rp">
+    <article id={p.id} aria-labelledby={h} className="rp" data-flare={p.node || undefined}>
       <p className="rp-when mono" aria-hidden="true">
         {p.dates}
       </p>

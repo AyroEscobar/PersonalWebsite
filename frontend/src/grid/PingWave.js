@@ -770,6 +770,13 @@ export async function createEngine(canvas, opts) {
     ping,
     resize,
     destroy,
+    /** A lone arrival flare on a node (r2 U6: a plate reached the reading line). */
+    flare(node) {
+      if (!grid.nodes[node] || !readCamera()) return
+      const [x, y] = grid.nodes[node]
+      flares.push({ x, y, t0: performance.now() })
+      kick()
+    },
     setHeroVisible(v) {
       heroVisible = v
       if (v) return kick()

@@ -59,6 +59,7 @@ export default function GridCanvas() {
         engine = e
         live.canvas = true
         offs.push(on('ping', (p) => engine.ping(p, p.id)))
+        offs.push(on('flare', (node) => engine.flare(node)))
         if (typeof ResizeObserver !== 'undefined') {
           const ro = new ResizeObserver(() => engine.resize())
           ro.observe(canvas)

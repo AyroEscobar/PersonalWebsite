@@ -284,6 +284,32 @@ export default function NightGrid() {
     }
   }, [])
 
+  // Desktop reading (r2 U6): as a plate or row with a place reaches the 42%
+  // reading line, that place flares once on the sticky map (Allen for MD7,
+  // Plano for JPMorgan, the New York exit for RBC, Richardson for UT Dallas).
+  // Once per element per visit; never under reduced motion or quiet mode.
+  useEffect(() => {
+    if (motion === 'reduced' || typeof IntersectionObserver === 'undefined' || !window.matchMedia?.('(min-width: 1100px)').matches) return undefined
+    const fired = new WeakSet()
+    const io = new IntersectionObserver(
+      (es) => {
+        for (const e of es) {
+          if (!e.isIntersecting || fired.has(e.target)) continue
+          fired.add(e.target)
+          const node = e.target.dataset.flare
+          if (MAP_META.offgrid[node]) emit('offgridReached', node)
+          else if (MAP_META.nodes[node]) {
+            emit('flare', node)
+            pulseNode(node)
+          }
+        }
+      },
+      { rootMargin: '-42% 0px -58% 0px' },
+    )
+    for (const el of document.querySelectorAll('main [data-flare]')) io.observe(el)
+    return () => io.disconnect()
+  }, [motion])
+
   useEffect(() => {
     const off1 = on('ping', (p) => {
       if (live.canvas) return
