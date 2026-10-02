@@ -1,33 +1,48 @@
-import { useState, useCallback } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
-import Navbar from './components/Navbar'
-import BackToTop from './components/BackToTop'
-import ScrollProgress from './components/ScrollProgress'
-import Boot from './components/Boot'
-import MusicPlayer from './components/MusicPlayer'
+import NightGrid from './grid/NightGrid.jsx'
+import Hero from './hero/Hero.jsx'
+import TopBar from './chrome/TopBar.jsx'
+import RouteRail from './chrome/RouteRail.jsx'
+import Footer from './chrome/Footer.jsx'
+import Origin from './sections/Origin.jsx'
+import Now from './sections/Now.jsx'
+import Work from './sections/Work.jsx'
+import Builds from './sections/Builds.jsx'
+import Crew from './sections/Crew.jsx'
+import Signal from './sections/Signal.jsx'
+import Announcer from './ui/Announcer.jsx'
+import { SKIP } from './content/identity.js'
 
-function App() {
-  const location = useLocation()
-  const showChrome = location.pathname !== '/admin'
+/*
+  The page (PLAN.md 3, 8, 11). Owned by FOUNDATION; builders own the slots.
 
-  const [booted, setBooted] = useState(() => {
-    try { return sessionStorage.getItem('oc_booted') === '1' } catch { return false }
-  })
-  const finishBoot = useCallback(() => {
-    try { sessionStorage.setItem('oc_booted', '1') } catch { /* sessionStorage unavailable */ }
-    setBooted(true)
-  }, [])
+  Landmark and focus order: skip link, <header> (TopBar), <nav> (RouteRail),
+  <main> (NightGrid first, then the six sections in scroll order), <footer>.
+  The hero lives inside #origin, before the origin body.
 
+  Slot contract: each import path above is fixed and default-exports a
+  component. Sections take { id }. Origin also takes children (the hero).
+*/
+export default function App() {
   return (
-    <div className="min-h-screen w-full flex flex-col relative">
-      {showChrome && !booted && <Boot onDone={finishBoot} />}
-      {showChrome && <ScrollProgress />}
-      <Navbar />
-      <Outlet />
-      {showChrome && <BackToTop />}
-      {showChrome && <MusicPlayer />}
-    </div>
+    <>
+      <a className="skip-link" href="#main">
+        {SKIP.text}
+      </a>
+      <TopBar />
+      <RouteRail />
+      <main id="main" tabIndex={-1} className="relative outline-none">
+        <NightGrid />
+        <Origin id="origin">
+          <Hero />
+        </Origin>
+        <Now id="now" />
+        <Work id="work" />
+        <Builds id="builds" />
+        <Crew id="crew" />
+        <Signal id="signal" />
+      </main>
+      <Footer />
+      <Announcer />
+    </>
   )
 }
-
-export default App
