@@ -4,10 +4,10 @@ import { kb, secs } from '../lib/format.js'
 import { afterLoad } from '../lib/idle.js'
 
 /*
-  VisitStamp (PLAN.md 4.14). "this visit: 184 KB, first paint 0.6 s on your
-  device", measured on this visit by this browser: the transfer size of the
-  document and every resource it pulled, and the first-contentful-paint
-  entry. It keeps counting what the visit loads later (opening search pulls
+  VisitStamp (PLAN.md 4.14). "this visit: 184 KB, first paint 1.2 s on your
+  device", or "first paint 640 ms" under a second. Measured on this visit by
+  this browser: the transfer size of the document and every resource it
+  pulled, and the first-contentful-paint entry. It keeps counting what the visit loads later (opening search pulls
   a small chunk), at most once a second. If either number is unavailable
   (no Resource Timing sizes, no Paint Timing, everything served from cache)
   the line is simply not there. Never a live region.
@@ -23,6 +23,9 @@ function measure() {
   if (!bytes) return null
   return { bytes, fcp: fcp.startTime }
 }
+
+// Under a second, milliseconds read better than "0.0 s".
+const paint = (ms) => (ms < 1000 ? `${Math.max(1, Math.round(ms))} ms` : secs(ms))
 
 export default function VisitStamp({ className = '' }) {
   const [m, setM] = useState(null)
@@ -60,7 +63,7 @@ export default function VisitStamp({ className = '' }) {
     <p className={`stamp visit-stamp ${className}`.trim()}>
       {m && (
         <>
-          <span className="stamp-key">{FOOTER.visitPrefix.text}</span> {kb(m.bytes)}, {FOOTER.visitPaint.text} {secs(m.fcp)}{' '}
+          <span className="stamp-key">{FOOTER.visitPrefix.text}</span> {kb(m.bytes)}, {FOOTER.visitPaint.text} {paint(m.fcp)}{' '}
           {FOOTER.visitSuffix.text}
         </>
       )}
