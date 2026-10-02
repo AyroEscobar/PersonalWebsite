@@ -1080,11 +1080,23 @@
 }
 .via-lamps {
   display: flex;
-  justify-content: space-between;
+  align-items: flex-start;
+  gap: 28px;
   align-self: center;
-  max-width: 360px;
+  max-width: 400px;
   width: 100%;
   margin-inline: auto;
+}
+.via-named {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+}
+/* The tier viaere.com does not name: dim, unlabeled, set apart, never lit. */
+.via-unnamed {
+  padding-left: 28px;
+  border-left: 1px solid var(--hairline);
+  opacity: 0.5;
 }
 .via-lamp {
   display: grid;
@@ -1117,16 +1129,23 @@
   background: var(--lamp);
   opacity: 0;
 }
-/* green and the unnamed tier read LED; amber is a lower sodium; red, the
-   hottest, is full sodium, never the beacon (the site's live light). */
-.lamp[data-tier='fourth'] {
-  --lamp: color-mix(in oklab, var(--led) 60%, var(--trace-lit));
-}
+/* Each lamp lights in the color its word says (r2 N2): green in LED, amber
+   in sodium, red in the beacon as a 10px light, the one named exception to
+   the beacon being reserved for live status (PLAN 13.23). */
 .lamp[data-tier='amber'] {
-  --lamp: color-mix(in oklab, var(--sodium) 62%, var(--trace-lit));
+  --lamp: var(--sodium);
 }
 .lamp[data-tier='red'] {
-  --lamp: var(--sodium);
+  --lamp: var(--beacon);
+}
+.lamp[data-tier='red']::after {
+  inset: 5px;
+}
+.lamp[data-tier='red']::before {
+  inset: -6px;
+}
+.via-lamp[data-lit] .lamp[data-tier='red'] {
+  outline-color: color-mix(in oklab, var(--beacon) 50%, var(--trace-lit));
 }
 .via-lamp[data-lit] {
   color: var(--ink);
@@ -1183,7 +1202,8 @@
   top: 0;
   width: 100%;
   pointer-events: none;
-  transform: translateX(calc(var(--x) * 100%));
+  /* An overdue marker runs past the end, but never out of the frame (r2 N2). */
+  transform: translateX(min(calc(var(--x) * 100%), calc(100% + 12px)));
 }
 .via-mark > span {
   position: absolute;
@@ -1205,9 +1225,6 @@
   background: var(--tier-c, var(--led));
   outline: 1px solid var(--tier-c, var(--led));
   outline-offset: 2px;
-}
-.via-mark[data-tier='fourth'] {
-  --tier-c: color-mix(in oklab, var(--led) 60%, var(--trace-lit));
 }
 .via-mark[data-tier='amber'] {
   --tier-c: color-mix(in oklab, var(--sodium) 62%, var(--trace-lit));

@@ -33,17 +33,18 @@ export const W = {
 */
 export const SPEC = {
   viaere: {
-    // r1 T10: the lamps use only the tier words viaere.com prints on its own
-    // morning board (ven-viaere-tiers); the fourth tier has no public name, so
-    // its lamp has no label. Red can light: an aircraft past its window.
+    // r1 T10, r2 N2: the lamps use only the tier words viaere.com prints on
+    // its own morning board (ven-viaere-tiers) and light in those colors. The
+    // fourth tier has no public name or place, so its lamp stays dark and
+    // unlabeled. Red can light: an aircraft past its window.
     label: item(
       'spec-viaere-label',
-      'Illustration: four status lamps, green, an unnamed tier, amber and red, above a 100-hour window with three aircraft marked A, B and C.',
+      'Illustration: status lamps green, amber and red, plus a fourth tier left dark, above a 100-hour window with three aircraft marked A, B and C.',
       ['ven-viaere-product', 'ven-viaere-tiers'],
     ),
     words: item(
       'spec-viaere-words',
-      'An illustration, not real data. Four lamps for the four tiers, three of them in the words viaere.com uses: green, amber and red. Below them, a 100-hour window holds three aircraft, A, B and C. Bunched together, all three come due at once and one runs past its window, so red lights. Rebalance spreads them evenly across the window, the way the spacing engine does, so they come due one at a time and nothing is red.',
+      'An illustration, not real data. Three lamps in the words viaere.com uses, green, amber and red, and a fourth tier it does not name, so that lamp stays dark. Below them, a 100-hour window holds three aircraft, A, B and C. Bunched together, all three come due at once and one runs past its window, so red lights. Rebalance spreads them evenly across the window, the way the spacing engine does, so they come due one at a time and all three read green.',
       ['ven-viaere-product', 'ven-viaere-tiers'],
     ),
     lamps: {
