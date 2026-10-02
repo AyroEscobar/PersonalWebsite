@@ -33,6 +33,7 @@ import { staticScan } from './static.mjs'
 import { runLighthouse, TARGETS } from './lighthouse.mjs'
 import * as P from './page-checks.mjs'
 import { writeReport } from './report.mjs'
+import { r2Checks } from './r2-checks.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const REPO = path.resolve(ROOT, '..')
@@ -596,6 +597,19 @@ try {
       await page.close()
     }
   }
+
+  // ---------- 10c. r2 regressions (triage U1 to U8, N15, N17) ----------
+  log('r2 checks')
+  await r2Checks({
+    cdp,
+    url,
+    check,
+    sleep,
+    SECTION_IDS,
+    shot: async (page, name) => {
+      if (!NO_SHOTS) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, name))))
+    },
+  })
 
   // ---------- 11. Lighthouse ----------
   if (!FAST) {
