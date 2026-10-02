@@ -51,6 +51,8 @@ export const CHROME = {
   sectionsNav: ui('nav-sections', 'Sections'),
   stopsSheet: ui('stops-sheet', 'all stops'),
   next: ui('stop-next', 'next'),
+  nextStop: ui('stop-next-stop', 'next stop'),
+  contact: ui('topbar-contact', 'contact'),
   close: ui('close', 'close'),
   sky: {
     night: ui('sky-night', 'night'),
@@ -68,7 +70,7 @@ export const FOOTER = {
   visitPaint: ui('footer-visit-paint', 'first paint'),
   visitSuffix: ui('footer-visit-suffix', 'on your device'),
   noTracking: ui('footer-no-tracking', 'no cookies, no analytics.'),
-  print: ui('footer-print', 'print'),
+  print: ui('footer-print', 'print as resume'),
   source: ui('footer-source', 'source'),
 }
 
@@ -96,6 +98,8 @@ export const JUMP = {
     sections: ui('jump-group-sections', 'sections'),
     roles: ui('jump-group-roles', 'roles'),
     builds: ui('jump-group-builds', 'builds'),
+    crew: ui('jump-group-crew', 'crew'),
+    stack: ui('jump-group-stack', 'stack'),
     channels: ui('jump-group-channels', 'channels'),
     commands: ui('jump-group-commands', 'commands'),
   },
@@ -103,7 +107,7 @@ export const JUMP = {
     ping: ui('cmd-ping', 'ping the grid'),
     quietOn: ui('cmd-quiet-on', 'quiet mode on'),
     quietOff: ui('cmd-quiet-off', 'quiet mode off'),
-    print: ui('cmd-print', 'print'),
+    print: ui('cmd-print', 'print as resume'),
     copyEmail: ui('cmd-copy-email', 'copy email'),
     viewSource: ui('cmd-view-source', 'view source'),
     shortcutsOff: ui('cmd-shortcuts-off', 'keyboard shortcuts: off'),

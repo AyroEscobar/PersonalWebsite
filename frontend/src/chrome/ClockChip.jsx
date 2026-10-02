@@ -6,7 +6,8 @@ import { syncBeacons } from './time.js'
 
 /*
   The top bar's clock chip (PLAN.md 3.1, 4.7). "plano · 10:41 pm cdt" with
-  the obstruction light beside it, the highest light on the page. Pressing
+  a steady red dot: the obstruction light itself blinks once on the site,
+  over Plano on the map (r1 M4). Pressing
   it opens the NowBoard as a popover under the bar: the present tense from
   anywhere on the page, and on phones the board's only home above the fold.
 
@@ -97,7 +98,7 @@ export default function ClockChip({ className = '' }) {
         onClick={onClick}
         data-chrome="clock"
       >
-        <span className="beacon clock-beacon" aria-hidden="true" />
+        <span className="clock-beacon" aria-hidden="true" />
         <LocalClock place />
       </button>
       <div

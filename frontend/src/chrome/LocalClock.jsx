@@ -18,9 +18,9 @@ export default function LocalClock({ place = false, className = '' }) {
     <span className={`clock ${className}`.trim()}>
       {place && (
         <>
-          <span className="clock-place">{CHROME.clockPlace.text}</span>
+          <span className="clock-place">{CHROME.clockPlace.text} </span>
           <span className="clock-sep" aria-hidden="true">
-            {' · '}
+            {'· '}
           </span>
         </>
       )}
