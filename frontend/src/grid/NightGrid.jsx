@@ -249,6 +249,8 @@ export default function NightGrid() {
     const v = view.current
     if (!v) return undefined
     measure()
+    // Once the mono face has arrived, the signs have their real widths.
+    document.fonts?.ready?.then(() => measure()).catch(() => {})
     if (typeof ResizeObserver === 'undefined') return undefined
     const ro = new ResizeObserver(() => measure())
     ro.observe(v)
