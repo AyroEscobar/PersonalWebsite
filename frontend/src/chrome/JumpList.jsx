@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { SECTIONS } from '../content/sections.js'
-import { WORK } from '../content/work.js'
+import { STACK, WORK } from '../content/work.js'
+import { CREW } from '../content/crew.js'
 import { BUILDS } from '../content/builds.js'
 import { SIGNAL } from '../content/signal.js'
 import { CHROME, JUMP } from '../content/meta.js'
@@ -39,10 +40,17 @@ const ALIASES = {
   work: ['experience', 'jobs', 'roles', 'career', 'internships', 'resume'],
   builds: ['projects', 'portfolio', 'code', 'repos', 'apps'],
   crew: ['community', 'hackathons', 'volunteering', 'speaking', 'talks'],
-  signal: ['contact', 'email', 'reach', 'message', 'hello', 'socials'],
+  signal: ['signal', 'email', 'reach', 'message', 'hello', 'socials', 'linkedin', 'github'],
 }
 
-const GROUP_ORDER = ['recent', 'sections', 'roles', 'builds', 'channels', 'commands']
+// Extra words for a role, so a short query finds it.
+const ROLE_ALIASES = {
+  'plate-mlh': ['mlh', 'hackcon', 'global hack week'],
+  'plate-jpm': ['jpm', 'jp morgan', 'chase', 'bank'],
+  'plate-rbc': ['rbc', 'aidenedge', 'trading', 'bank', 'new york'],
+}
+
+const GROUP_ORDER = ['recent', 'sections', 'roles', 'builds', 'crew', 'stack', 'channels', 'commands']
 const RECENT_MAX = 4
 
 const host = (href) => href.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')
@@ -203,10 +211,11 @@ export default function JumpList({ base = '' }) {
 
   // ---------- the items ----------
   const items = useMemo(() => {
+    // From the 404 there is no page to look in: go to the home page at that id (r1 M5).
     const go = (id, fallback) => () => {
       if (onHome) {
         if (!goTo(id)) goTo(fallback)
-      } else window.location.assign(`${base}#${document.getElementById(id) ? id : fallback}`)
+      } else window.location.assign(`${base}#${id}`)
     }
     const nav = (href) => () => window.location.assign(href)
     const list = []
@@ -229,7 +238,7 @@ export default function JumpList({ base = '' }) {
         title: p.org,
         sub: p.role,
         hint: p.dates,
-        keywords: [p.place, ...(p.desks || []).map((d) => d.name)].filter(Boolean),
+        keywords: [p.place, ...(ROLE_ALIASES[p.id] || []), ...(p.desks || []).map((d) => d.name)].filter(Boolean),
         lamp: p.state === 'now' ? 'now' : 'past',
         run: go(p.id, 'work'),
       })
@@ -244,6 +253,31 @@ export default function JumpList({ base = '' }) {
         keywords: [c.stack].filter(Boolean),
         lamp: 'build',
         run: go(c.id, 'builds'),
+      })
+    }
+
+    for (const e of CREW.entries) {
+      const title = e.title || e.text.split(' · ')[0]
+      list.push({
+        id: `crew-${e.id}`,
+        group: 'crew',
+        title: title.length > 72 ? `${title.slice(0, 70).replace(/\s+\S*$/, '')} ...` : title,
+        sub: e.dates,
+        keywords: [e.text],
+        lamp: 'past',
+        run: go(e.id, 'crew'),
+      })
+    }
+
+    for (const r of STACK.rows) {
+      list.push({
+        id: `stack-${r.id}`,
+        group: 'stack',
+        title: r.label,
+        sub: r.value,
+        keywords: [r.value],
+        lamp: 'build',
+        run: go('stack', 'work'),
       })
     }
 
@@ -388,7 +422,12 @@ export default function JumpList({ base = '' }) {
   const show = useCallback(({ instant: fast = false, opener = null } = {}) => {
     const d = dialogRef.current
     if (!d) return
-    openerRef.current = opener && opener !== document.body ? opener : null
+    // Opened from inside a popover (the now board): the popover closes as the
+    // palette opens, so focus returns to the control that opened it (r1 M6).
+    let from = opener && opener !== document.body ? opener : null
+    const pop = from?.closest?.('[popover]')
+    if (pop?.id) from = document.querySelector(`[popovertarget="${pop.id}"]`) || from
+    openerRef.current = from
     // Set on the element before it opens, so the entrance reads it on the first frame.
     d.toggleAttribute('data-instant', fast)
     setQ('')
@@ -497,8 +536,8 @@ export default function JumpList({ base = '' }) {
             type="text"
             role="combobox"
             aria-label={label}
-            aria-expanded="true"
-            aria-controls={`${uid}-list`}
+            aria-expanded={count > 0}
+            aria-controls={count > 0 ? `${uid}-list` : undefined}
             aria-autocomplete="list"
             aria-activedescendant={activeIndex >= 0 ? optId(flat[activeIndex]) : undefined}
             placeholder={JUMP.placeholder.text}
@@ -519,13 +558,17 @@ export default function JumpList({ base = '' }) {
           </button>
         </div>
 
-        <div ref={listRef} id={`${uid}-list`} className="jl-list" role="listbox" aria-label={label}>
-          {count === 0 ? (
-            <div className="jl-empty" role="presentation">
-              <span className="jl-empty-mark" aria-hidden="true" />
-              {JUMP.empty.text}
-            </div>
-          ) : (
+        {count === 0 && (
+          <div className="jl-empty">
+            <span className="jl-empty-mark" aria-hidden="true" />
+            {JUMP.empty.text}
+          </div>
+        )}
+        {/* The listbox exists only with options in it (axe: aria-required-children),
+            and is never a Tab stop of its own: focus stays in the input (r1 M1, M2). */}
+        {count > 0 && (
+        <div ref={listRef} id={`${uid}-list`} className="jl-list" role="listbox" aria-label={label} tabIndex={-1}>
+          {(
             groups.map((g) => (
               <div key={g.id} role="group" aria-labelledby={`${uid}-g-${g.id}`} className="jl-group">
                 <div id={`${uid}-g-${g.id}`} className="jl-group-label label" role="presentation">
@@ -565,6 +608,7 @@ export default function JumpList({ base = '' }) {
             ))
           )}
         </div>
+        )}
         {Array.isArray(JUMP.hints) && (
           <p className="jl-foot mono" aria-hidden="true">
             {JUMP.hints.map((h) => (
