@@ -49,6 +49,7 @@ export const CHROME = {
   quietMode: ui('quiet-mode', 'quiet mode'),
   search: ui('search', 'search'),
   searchShortcut: ui('search-shortcut', '⌘K'),
+  searchShortcutCtrl: ui('search-shortcut-ctrl', 'ctrl K'),
   sectionsNav: ui('nav-sections', 'Sections'),
   stopsSheet: ui('stops-sheet', 'all stops'),
   next: ui('stop-next', 'next'),
@@ -86,7 +87,14 @@ export const JUMP = {
   placeholder: ui('jump-placeholder', 'type to search'),
   empty: ui('jump-empty', 'nothing lit for that'),
   results: ui('jump-results', 'results'),
+  result: ui('jump-result', 'result'),
+  hints: [
+    ui('jump-hint-move', 'move', { keys: ['↑', '↓'] }),
+    ui('jump-hint-run', 'run', { keys: ['enter'] }),
+    ui('jump-hint-close', 'close', { keys: ['esc'] }),
+  ],
   groups: {
+    recent: ui('jump-group-recent', 'recent'),
     sections: ui('jump-group-sections', 'sections'),
     roles: ui('jump-group-roles', 'roles'),
     builds: ui('jump-group-builds', 'builds'),
