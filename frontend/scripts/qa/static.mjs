@@ -84,6 +84,20 @@ export async function staticScan(ROOT) {
     .map(([n]) => n)
   push('removed-deps', gone.length ? 'fail' : 'pass', gone.length ? `still in dist: ${gone.join(', ')}` : 'no Firebase, Mapbox, three.js, framer-motion or react-router')
 
+  // Sound policy (PLAN.md 6.6): the site makes no sound. No Web Audio, no media
+  // element, no speech, no vibration. Opt-in ticks would have to change this rule first.
+  const htmlText = html.map((f) => readFileSync(f, 'utf8')).join('\n')
+  const sound = [
+    ['Web Audio', /\b(webkit)?AudioContext\b/.test(jsText)],
+    ['new Audio()', /\bnew Audio\(/.test(jsText)],
+    ['speech synthesis', /speechSynthesis/.test(jsText)],
+    ['vibration', /\.vibrate\(/.test(jsText)],
+    ['<audio> or <video>', /<(audio|video)\b/i.test(htmlText)],
+  ]
+    .filter(([, hit]) => hit)
+    .map(([n]) => n)
+  push('sound', sound.length ? 'fail' : 'pass', sound.length ? `makes sound: ${sound.join(', ')}` : 'silent: no Web Audio, media elements, speech or vibration')
+
   // Copy invariants on the prerendered page.
   const pageText = index.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ' ').replace(/<[^>]+>/g, ' ')
   const closers = (pageText.match(/Onto what(&#x27;|')s next\./g) || []).length
