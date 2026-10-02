@@ -277,6 +277,24 @@
   .hero-ping {
     flex-direction: row-reverse;
   }
+  /* Scrolled up into the top half, where the sticky map's labels are: out
+     of the way (Hero.jsx sets data-away, r2 U1). */
+  .hero-side[data-away] {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@media (min-width: 1100px) and (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='reduced']) .hero-side {
+    transition:
+      opacity var(--dur-ui-slow) var(--ease),
+      visibility 0s linear 0s;
+  }
+  html:not([data-motion='reduced']) .hero-side[data-away] {
+    transition:
+      opacity var(--dur-ui-slow) var(--ease),
+      visibility 0s linear var(--dur-ui-slow);
+  }
 }
 
 /* Very short laptop screens: the paragraph waits below the fold rather than crowding the name. */

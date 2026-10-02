@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { HERO } from '../content/identity.js'
 import { MAP, NODES } from '../content/places.js'
 import { ping } from '../lib/store.js'
@@ -60,6 +60,26 @@ function Name({ text }) {
 
 export default function Hero() {
   const down = useRef(null)
+  const side = useRef(null)
+
+  // Desktop: the map stays put while the hero scrolls, so the key and the
+  // ping would slide up across the sticky city's labels. Once they rise into
+  // the upper half of the screen they step out of the way (r2 U1); hero.css
+  // applies it from 1100 px only.
+  useEffect(() => {
+    const el = side.current
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined
+    const io = new IntersectionObserver(
+      ([e]) => {
+        const up = e.isIntersecting || e.boundingClientRect.bottom < 0
+        if (up) el.dataset.away = ''
+        else delete el.dataset.away
+      },
+      { rootMargin: '0px 0px -48% 0px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
 
   const onPointerDown = (e) => {
     if (e.button !== 0) return
@@ -126,7 +146,7 @@ export default function Hero() {
             </ul>
           </div>
 
-          <div className="hero-side">
+          <div className="hero-side" ref={side}>
             <ul className="hero-key mono" aria-label={MAP.legend.text}>
               <li data-light="then">
                 <span className="hero-key-swatch" aria-hidden="true" />

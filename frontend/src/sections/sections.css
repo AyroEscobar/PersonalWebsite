@@ -968,11 +968,11 @@
 
 /* ---------- specimen frame ---------- */
 
-/* Plain night: no frame, no dot grid (r1 T10). */
+/* No frame, no dot grid, no fill (r1 T10): a specimen sits on whatever is
+   behind it, which under builds is the night the map fades to (r2 U1). */
 .spec-frame {
   position: relative;
   border-radius: var(--radius);
-  background: var(--night);
   overflow: hidden;
 }
 

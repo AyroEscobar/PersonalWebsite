@@ -235,6 +235,22 @@
   .ng[data-reading] .ng-layers {
     opacity: 0.62;
   }
+  /* Builds runs its feature rows and index full width, over the map's half
+     (r1 T10). While builds is the stop, night comes across the whole frame
+     (solid to 88%, then 70% night at the edge), over the roads, the cities
+     and the exit signs alike; at crew it lifts again (r2 U1). A layer of its
+     own on the view, so it fades on opacity alone. */
+  .ng-view::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, var(--night) 0, var(--night) 88%, color-mix(in oklab, var(--night) 70%, transparent) 100%);
+    opacity: 0;
+  }
+  .ng[data-focus='builds'][data-reading] .ng-view::after {
+    opacity: 1;
+  }
 }
 
 /* Bigger screens see about the same ground, not more of it. */
@@ -415,15 +431,18 @@
   .ng[data-lit~='allen'] .ng-node[data-node='allen'] .ng-label:not(.ng-label-hot),
   .ng[data-lit~='dallas'] .ng-node[data-node='dallas'] .ng-label:not(.ng-label-hot),
   .ng[data-off~='nyc'] :is(.ng-exit, .ng-exit-road)[data-node='nyc'],
-  .ng[data-off~='waterloo'] :is(.ng-exit, .ng-exit-road)[data-node='waterloo'],
-  .ng[data-focus='builds'] .ng-node .ng-label:not(.ng-label-hot),
-  .ng[data-focus='builds'] :is(.ng-exit, .ng-exit-road) {
+  .ng[data-off~='waterloo'] :is(.ng-exit, .ng-exit-road)[data-node='waterloo'] {
     opacity: 1;
   }
   .ng[data-lit~='plano'] .ng-node[data-node='plano'] .ng-ring,
   .ng[data-lit~='richardson'] .ng-node[data-node='richardson'] .ng-ring,
   .ng[data-lit~='allen'] .ng-node[data-node='allen'] .ng-ring {
     stroke-opacity: 0.9;
+  }
+  /* Under builds the names and the exit signs go with the map (r2 U1). */
+  .ng[data-focus='builds'][data-reading] .ng-node .ng-label:not(.ng-label-hot),
+  .ng[data-focus='builds'][data-reading] .ng-exits {
+    opacity: 0;
   }
 }
 
@@ -471,6 +490,9 @@
   html:not([data-motion='reduced']) .ng-exit,
   html:not([data-motion='reduced']) .ng-exit-road {
     transition: opacity var(--dur-ui-slow) var(--ease);
+  }
+  html:not([data-motion='reduced']) .ng-view::after {
+    transition: opacity 300ms var(--ease);
   }
   html:not([data-motion='reduced']) .ng-exit-hot,
   html:not([data-motion='reduced']) .ng-exit-road {
@@ -540,6 +562,7 @@
 /* ---------- elsewhere ---------- */
 
 @media (forced-colors: active) {
+  .ng-view::after,
   .ng-canvas,
   .ng-horizon,
   .ng-scrim,
