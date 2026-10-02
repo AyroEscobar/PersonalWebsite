@@ -1,6 +1,6 @@
 import DeferredMount from '../ui/DeferredMount.jsx'
 import { BUILDS } from '../content/builds.js'
-import { SPEC, W } from './words.js'
+import { SPEC, W } from '../content/sections-ui.js'
 import { Dotted } from './text.jsx'
 
 /*

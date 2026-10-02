@@ -1,16 +1,14 @@
-import { ui } from '../content/item.js'
+import { ui } from './item.js'
 
 /*
   UI words for the content sections and the specimens (PLAN.md 3.3 to 3.8,
-  4.8 to 4.11). Owned by C.
+  4.8 to 4.11). Written by C, kept here so check-content covers them like
+  every other string (ids, ui flags, dashes, banned words, the denylist).
 
   Every string here is a label or a description of an illustration. None of
   them is a claim about Ayro: claims live in src/content/*.js with fact ids.
   Specimen descriptions only restate what the build card's own fact already
   says, and the Viaere one says out loud that it is an illustration.
-
-  Built with ui() so this file can move into src/content/ unchanged
-  (requests-C.md asks FOUNDATION to fold it in or add it to check-content).
 */
 
 export const W = {

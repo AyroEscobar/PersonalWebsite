@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PROGRAM } from '../content/now.js'
 import { BUILD_DATE } from '../lib/build.js'
 import { monthLong, monthYear, monthsBetween } from '../lib/format.js'
-import { W } from './words.js'
+import { W } from '../content/sections-ui.js'
 
 /*
   ProgramStrip (PLAN.md 3.4, 4.10): what ran at the same time, January 2025

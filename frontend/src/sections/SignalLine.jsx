@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { SIGNAL } from '../content/signal.js'
 import { announce } from '../lib/announce.js'
 import { useReducedMotion } from '../lib/mode.js'
-import { W } from './words.js'
+import { W } from '../content/sections-ui.js'
 
 /*
   SignalLine (PLAN.md 4.11). The address as big visible text (a mailto link,

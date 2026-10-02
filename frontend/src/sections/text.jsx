@@ -1,5 +1,5 @@
 import { monthLong, monthRange, monthYear } from '../lib/format.js'
-import { W } from './words.js'
+import { W } from '../content/sections-ui.js'
 
 /*
   Small renderers for content strings. None of them changes a word: they
