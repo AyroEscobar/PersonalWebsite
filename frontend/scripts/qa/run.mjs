@@ -469,6 +469,32 @@ try {
       await page.close()
     }
 
+    // T15: on a tablet the rail's names never touch the copy, at any stop.
+    {
+      const page = await cdp.newPage({ width: 768, height: 1024 })
+      await page.goto(`${url}/`, { settle: 1000 })
+      const hits = []
+      for (const id of SECTION_IDS) {
+        await page.eval(`document.getElementById(${JSON.stringify(id)}).scrollIntoView({ behavior: 'instant' })`)
+        await sleep(350)
+        const h = await page.eval(`(() => {
+          const labels = [...document.querySelectorAll('.rail-label')].filter((l) => Number(getComputedStyle(l).opacity) > 0.05).map((l) => l.getBoundingClientRect())
+          const out = []
+          const walker = document.createTreeWalker(document.querySelector('main'), NodeFilter.SHOW_TEXT)
+          for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+            if (!n.textContent.trim() || n.parentElement.closest('svg, .sr-only, .ng')) continue
+            const range = document.createRange()
+            range.selectNodeContents(n)
+            for (const r of range.getClientRects()) for (const l of labels) if (r.left < l.right && l.left < r.right && r.top < l.bottom && l.top < r.bottom) out.push(n.textContent.trim().slice(0, 24))
+          }
+          return out
+        })()`)
+        if (h.length) hits.push(`${id}: ${h.slice(0, 3).join(', ')}`)
+      }
+      check('r1', 'T15 rail names clear of the copy @768', hits.length ? 'fail' : 'pass', hits.join(' | ') || 'checked at all six stops')
+      await page.close()
+    }
+
     // T13: the map scrolls and pinch-zooms; neither pings.
     {
       const page = await cdp.newPage({ width: 390, height: 844, dpr: 2, mobile: true })
