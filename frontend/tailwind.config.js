@@ -32,6 +32,8 @@ export default {
       trace: token('trace'),
       'trace-lit': token('trace-lit'),
       hairline: 'var(--hairline)',
+      // Only so Tailwind's preflight placeholder color resolves to a token. Do not use gray-400.
+      gray: { 400: 'var(--dim)' },
     },
     fontFamily: {
       sans: ['"Overpass Variable"', '"Overpass Fallback"', 'system-ui', 'sans-serif'],

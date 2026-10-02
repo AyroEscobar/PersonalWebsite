@@ -22,6 +22,9 @@
   .no-print,
   canvas,
   button,
+  nav,
+  header,
+  dialog,
   .skip-link {
     display: none !important;
   }
