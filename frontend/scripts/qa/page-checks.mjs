@@ -90,7 +90,9 @@ export function linksList() {
 
 /** Hash links whose target id does not exist. */
 export function hashTargets() {
-  return [...document.querySelectorAll('a[href^="#"], a[href^="/#"]')]
+  // "/#id" points at the home page: it is a same-page anchor only when this is the home page.
+  const home = location.pathname === '/' || location.pathname === '/index.html'
+  return [...document.querySelectorAll(home ? 'a[href^="#"], a[href^="/#"]' : 'a[href^="#"]')]
     .map((a) => a.getAttribute('href').replace(/^\/?#/, ''))
     .filter((id) => id && !document.getElementById(decodeURIComponent(id)))
 }
