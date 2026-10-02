@@ -11,6 +11,10 @@ dist-ssr
 .vite
 **/.vite
 
+# Build reports (manifest, budget) and QA scratch
+.build
+**/.build
+
 # Logs
 logs
 *.log
