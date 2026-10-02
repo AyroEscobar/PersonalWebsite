@@ -1626,13 +1626,13 @@
 /* ---------- motion: interactions (both gates) ---------- */
 
 @media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion='reduced']) .spec-btn,
-  html:not([data-motion='reduced']) .sl-btn {
-    transition: transform 160ms var(--ease-out), background-color var(--dur-ui) var(--ease), border-color var(--dur-ui) var(--ease);
-  }
-  html:not([data-motion='reduced']) .spec-btn:active,
-  html:not([data-motion='reduced']) .sl-btn:active {
-    transform: scale(0.97);
+  /* Buttons press with the shared rule in styles/motion.css (.btn-text). */
+
+  /* A specimen arrives after load into a frame that already holds its place:
+     the drawing fades up instead of popping in. */
+  html:not([data-motion='reduced']) .spec-frame > .spec-stage > *,
+  html:not([data-motion='reduced']) .spec-frame > .spec-bar > * {
+    animation: ae-fade-in var(--dur-ui-slow) var(--ease) both;
   }
 
   html:not([data-motion='reduced']) .desks > summary svg {

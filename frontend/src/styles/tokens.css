@@ -47,12 +47,18 @@
   --section-gap: 96px;
   --radius: 2px;
 
-  /* motion (PLAN.md section 6) */
+  /* motion (PLAN.md section 6). One vocabulary for the whole page:
+     press 120 (anything pressable gives under the finger), overlays 160
+     (search, the now popover), UI states 180, lit states 220, sheets 240 on
+     the drawer curve, camera 800, the wave 1600, the first paint 1200. */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease: ease;
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-press: 120ms;
   --dur-ui: 180ms;
   --dur-ui-fast: 160ms;
   --dur-ui-slow: 220ms;
+  --dur-sheet: 240ms;
   --dur-camera: 800ms;
   --dur-wave: 1600ms;
   --dur-boot: 1200ms;

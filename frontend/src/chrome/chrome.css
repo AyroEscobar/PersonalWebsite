@@ -13,7 +13,6 @@
 :root {
   /* The rail's line: the center of the name's node in the top bar. */
   --rail-x: calc(var(--page-pad) + 8px);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --mono: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
 }
 
@@ -575,19 +574,7 @@ html[data-mode='quiet'] .quiet-lamp {
   cursor: pointer;
 }
 
-/* Every pressable thing in the chrome answers the press. */
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion='reduced']) :is(.clock-btn, .btn-text, .search-chip, .bb-stop, .bb-next, .nf-home) {
-    transition:
-      transform 120ms var(--ease-out),
-      background-color var(--dur-ui) var(--ease),
-      border-color var(--dur-ui) var(--ease),
-      color var(--dur-ui) var(--ease);
-  }
-  html:not([data-motion='reduced']) :is(.clock-btn, .btn-text, .search-chip, .bb-stop, .bb-next, .nf-home):active {
-    transform: scale(0.97);
-  }
-}
+/* Every pressable thing answers the press: the shared rule lives in styles/motion.css. */
 
 /* ================================================================ route rail */
 
@@ -1276,12 +1263,12 @@ html[data-dialog] .bottombar {
   }
 }
 
-/* Entrances. Keyboard opens are instant; pointer opens take 140ms. */
+/* Entrances. Keyboard opens are instant; pointer opens take the overlay 160ms. */
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-motion='reduced']) .jumplist[open]:not([data-instant]) {
     transition:
-      opacity 140ms var(--ease-out),
-      transform 140ms var(--ease-out);
+      opacity var(--dur-ui-fast) var(--ease-out),
+      transform var(--dur-ui-fast) var(--ease-out);
   }
   @starting-style {
     html:not([data-motion='reduced']) .jumplist[open]:not([data-instant]) {
@@ -1291,7 +1278,7 @@ html[data-dialog] .bottombar {
   }
 
   html:not([data-motion='reduced']) .stops-sheet[open] {
-    transition: transform 240ms var(--ease-drawer);
+    transition: transform var(--dur-sheet) var(--ease-drawer);
   }
   @starting-style {
     html:not([data-motion='reduced']) .stops-sheet[open] {
@@ -1302,8 +1289,8 @@ html[data-dialog] .bottombar {
   html:not([data-motion='reduced']) .nowpop:popover-open,
   html:not([data-motion='reduced']) .nowpop[data-open] {
     transition:
-      opacity 160ms var(--ease-out),
-      transform 160ms var(--ease-out);
+      opacity var(--dur-ui-fast) var(--ease-out),
+      transform var(--dur-ui-fast) var(--ease-out);
   }
   @starting-style {
     html:not([data-motion='reduced']) .nowpop:popover-open,
@@ -1316,7 +1303,7 @@ html[data-dialog] .bottombar {
 
 /* Reduced motion keeps a short fade for orientation (PLAN.md 6.7). */
 html[data-motion='reduced'] :is(.jumplist[open]:not([data-instant]), .stops-sheet[open]) {
-  transition: opacity 120ms linear;
+  transition: opacity var(--dur-fade-reduced) linear;
 }
 @starting-style {
   html[data-motion='reduced'] :is(.jumplist[open]:not([data-instant]), .stops-sheet[open]) {

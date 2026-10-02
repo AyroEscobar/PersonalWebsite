@@ -56,9 +56,21 @@
     animation: ae-beacon 3.2s var(--ease) infinite;
   }
 
-  html:not([data-motion="reduced"]) .plate-hover,
-  html:not([data-motion="reduced"]) .btn-text {
+  html:not([data-motion="reduced"]) .plate-hover {
     transition: background-color var(--dur-ui) var(--ease), border-color var(--dur-ui) var(--ease);
+  }
+
+  /* Every pressable control on the page answers the press the same way:
+     text buttons and chips everywhere, plus the bars' own controls. */
+  html:not([data-motion="reduced"]) :is(.btn-text, .clock-btn, .search-chip, .bb-stop, .bb-next, .nf-home) {
+    transition:
+      transform var(--dur-press) var(--ease-out),
+      background-color var(--dur-ui) var(--ease),
+      border-color var(--dur-ui) var(--ease),
+      color var(--dur-ui) var(--ease);
+  }
+  html:not([data-motion="reduced"]) :is(.btn-text, .clock-btn, .search-chip, .bb-stop, .bb-next, .nf-home):active {
+    transform: scale(0.97);
   }
 
   html:not([data-motion="reduced"]) .rule-l::after {
