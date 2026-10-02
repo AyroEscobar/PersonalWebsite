@@ -80,10 +80,10 @@ export default function Reticle({ spec }) {
         </div>
       </div>
       <div className="spec-bar">
-        <p className="spec-state mono" aria-live="polite">
+        <p className="spec-state" aria-live="polite">
           {state}
         </p>
-        <button type="button" className="btn-text spec-btn mono" onClick={scan}>
+        <button type="button" className="btn-fill spec-btn" onClick={scan}>
           {spec.scan.text}
         </button>
       </div>

@@ -1,4 +1,4 @@
-import { ui } from './item.js'
+import { item, ui } from './item.js'
 
 /*
   UI words for the content sections and the specimens (PLAN.md 3.3 to 3.8,
@@ -21,6 +21,7 @@ export const W = {
   from: ui('w-from', 'from'),
   until: ui('w-until', 'until'),
   inWords: ui('w-in-words', 'in words'),
+  seeIt: ui('w-see-it', 'see it'),
   copySelected: ui('w-copy-selected', 'selected'),
   copySelectedStatus: ui('w-copy-selected-status', 'email selected, press command or control C to copy'),
   stripScroll: ui('w-strip-scroll', 'timeline, scrolls sideways'),
@@ -32,26 +33,30 @@ export const W = {
 */
 export const SPEC = {
   viaere: {
-    label: ui(
+    // r1 T10: the lamps use only the tier words viaere.com prints on its own
+    // morning board (ven-viaere-tiers); the fourth tier has no public name, so
+    // its lamp has no label. Red can light: an aircraft past its window.
+    label: item(
       'spec-viaere-label',
-      'Illustration: four status lamps, ok, soon, due and red, above a 100-hour window with three aircraft marked A, B and C.',
+      'Illustration: four status lamps, green, an unnamed tier, amber and red, above a 100-hour window with three aircraft marked A, B and C.',
+      ['ven-viaere-product', 'ven-viaere-tiers'],
     ),
-    words: ui(
+    words: item(
       'spec-viaere-words',
-      'An illustration, not real data. Four lamps read ok, soon, due and red. Below them, a 100-hour window holds three aircraft, A, B and C. Bunched together, all three come due at the same time. Rebalance spreads them evenly across the window, the way the spacing engine does, so they come due one at a time. Nothing is red.',
+      'An illustration, not real data. Four lamps for the four tiers, three of them in the words viaere.com uses: green, amber and red. Below them, a 100-hour window holds three aircraft, A, B and C. Bunched together, all three come due at once and one runs past its window, so red lights. Rebalance spreads them evenly across the window, the way the spacing engine does, so they come due one at a time and nothing is red.',
+      ['ven-viaere-product', 'ven-viaere-tiers'],
     ),
     lamps: {
-      ok: ui('spec-viaere-ok', 'ok'),
-      soon: ui('spec-viaere-soon', 'soon'),
-      due: ui('spec-viaere-due', 'due'),
-      red: ui('spec-viaere-red', 'red'),
+      green: item('spec-viaere-green', 'green', ['ven-viaere-tiers']),
+      amber: item('spec-viaere-amber', 'amber', ['ven-viaere-tiers']),
+      red: item('spec-viaere-red', 'red', ['ven-viaere-tiers']),
     },
     marks: [ui('spec-viaere-a', 'A'), ui('spec-viaere-b', 'B'), ui('spec-viaere-c', 'C')],
     start: ui('spec-viaere-start', '0 h'),
     end: ui('spec-viaere-end', '100 h'),
     rebalance: ui('spec-viaere-rebalance', 'rebalance'),
     reset: ui('spec-viaere-reset', 'reset'),
-    bunched: ui('spec-viaere-bunched', 'bunched: all three due together'),
+    bunched: ui('spec-viaere-bunched', 'bunched: all three due together, one past its window'),
     spread: ui('spec-viaere-spread', 'rebalanced: spread across the window'),
   },
   'circle-method': {
@@ -84,27 +89,6 @@ export const SPEC = {
     hint: ui('spec-hint-hint', 'hint'),
     again: ui('spec-hint-again', 'start over'),
   },
-  meters: {
-    label: ui('spec-meters-label', 'A still waveform of a spoken answer above three unnumbered meters: pace, filler words and structure.'),
-    words: ui(
-      'spec-meters-words',
-      'A still waveform of a spoken answer, with three meters under it for pace, filler words and structure. The meters carry no numbers. Illustration only.',
-    ),
-    meters: [ui('spec-meters-pace', 'pace'), ui('spec-meters-filler', 'filler words'), ui('spec-meters-structure', 'structure')],
-  },
-  route: {
-    label: ui('spec-route-label', 'A route line with four stops, the last one a phone.'),
-    words: ui(
-      'spec-route-words',
-      'A route line with four stops: food, an activity, a reservation, and a phone at the end for the voice AI that calls ahead.',
-    ),
-    stops: [
-      ui('spec-route-food', 'food'),
-      ui('spec-route-activity', 'activity'),
-      ui('spec-route-reserve', 'reserve'),
-      ui('spec-route-call', 'call ahead'),
-    ],
-  },
   reticle: {
     label: ui('spec-reticle-label', 'A camera reticle over an item, with four routes it can resolve to: recycle, sell, donate and dispose.'),
     words: ui(
@@ -121,10 +105,5 @@ export const SPEC = {
     scanning: ui('spec-reticle-scanning', 'scanning'),
     result: ui('spec-reticle-result', 'route:'),
     scan: ui('spec-reticle-scan', 'scan'),
-  },
-  'week-strip': {
-    label: ui('spec-week-label', 'Seven dim dots, one for each day of the week.'),
-    words: ui('spec-week-words', 'Seven days of the week as dim dots. Illustration only.'),
-    days: ['m', 't', 'w', 't', 'f', 's', 's'].map((d, i) => ui(`spec-week-${i}`, d)),
   },
 }

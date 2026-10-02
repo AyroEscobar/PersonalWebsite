@@ -75,12 +75,12 @@ export default function CircleMethod({ spec }) {
             {Array.from({ length: RING }, (_, i) => {
               const p = at(i, 47.5)
               return (
-                <span key={i} className="spec-label mono" style={{ left: `${p.x}%`, top: `${p.y}%` }} aria-hidden="true">
+                <span key={i} className="spec-label cm-player" style={{ left: `${p.x}%`, top: `${p.y}%` }} aria-hidden="true">
                   {name(i)}
                 </span>
               )
             })}
-            <span className="spec-label mono cm-hub" style={{ left: '50%', top: '50%' }} aria-hidden="true">
+            <span className="spec-label cm-player cm-hub" style={{ left: '50%', top: '50%' }} aria-hidden="true">
               {name(HUB)}
             </span>
           </div>
@@ -100,26 +100,26 @@ export default function CircleMethod({ spec }) {
               })}
             </div>
             {done ? (
-              <p className="cm-met cm-ok mono">
+              <p className="cm-met cm-ok">
                 <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
                   <path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" strokeWidth="1.6" />
                 </svg>
                 {spec.allMet.text}
               </p>
             ) : (
-              <p className="cm-met mono">{metText}</p>
+              <p className="cm-met">{metText}</p>
             )}
           </div>
         </div>
       </div>
       <div className="spec-bar">
-        <p className="spec-state mono" aria-live="polite">
+        <p className="spec-state" aria-live="polite">
           {roundText}
           <span className="sr-only">
             {`: ${pairText.join(', ')}. ${done ? spec.allMet.text : metText}.`}
           </span>
         </p>
-        <button type="button" className="btn-text spec-btn mono" onClick={() => setTurn((t) => t + 1)}>
+        <button type="button" className="btn-fill spec-btn" onClick={() => setTurn((t) => t + 1)}>
           {round === RING - 1 ? spec.again.text : spec.next.text}
         </button>
       </div>

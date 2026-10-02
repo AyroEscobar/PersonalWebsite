@@ -49,10 +49,10 @@ export default function HintLadder({ spec }) {
         </div>
       </div>
       <div className="spec-bar">
-        <p className="spec-state mono" aria-live="polite">
+        <p className="spec-state" aria-live="polite">
           {state}
         </p>
-        <button type="button" className="btn-text spec-btn mono" onClick={() => setLevel((l) => (l === LEVELS ? 0 : l + 1))}>
+        <button type="button" className="btn-fill spec-btn" onClick={() => setLevel((l) => (l === LEVELS ? 0 : l + 1))}>
           {atTop ? spec.again.text : spec.hint.text}
         </button>
       </div>

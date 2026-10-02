@@ -5,7 +5,9 @@ import { INTERVIEW_LENS, REPO, VIAERE } from './constants.js'
   The builds section (PLAN.md 3.6). Rendered by C as BuildCards, in this order.
   Card fields inherit the card's facts. `links` use visible words only
   ('visit', 'source'). `specimen` names the file in src/sections/specimens/.
-  `layout: 'wide'` spans the full grid on desktop.
+  `layout: 'wide'` is a feature row (Viaere, the pool scheduler); the rest
+  are rows of the departures-board index (r1 T10). Only true diagrams keep a
+  specimen: no specimen for the 24/7 system until questions.md #5.
 
   Never shown: the forked repo, the do-not-feature repos, and any private
   repo (facts.json prj-*). No counts on Viaere, ever.
@@ -88,7 +90,7 @@ export const BUILDS = {
       ],
       stack: null,
       links: [visit(INTERVIEW_LENS)],
-      specimen: 'meters',
+      specimen: null,
       layout: 'half',
     },
     {
@@ -105,7 +107,7 @@ export const BUILDS = {
       ],
       stack: null,
       links: [],
-      specimen: 'week-strip',
+      specimen: null,
       layout: 'half',
     },
     {
@@ -122,7 +124,7 @@ export const BUILDS = {
       ],
       stack: 'Next.js, Firebase, Google Maps API, Cua with the Anthropic API',
       links: [source('https://github.com/AyroEscobar/HTN2025')],
-      specimen: 'route',
+      specimen: null,
       layout: 'half',
     },
     {

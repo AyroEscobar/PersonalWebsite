@@ -4,35 +4,46 @@ import { SPEC, W } from '../content/sections-ui.js'
 import { Dotted } from './text.jsx'
 
 /*
-  BuildCard (PLAN.md 4.9): title, meta, body, stack, and links as visible
-  words ("visit", "source"), never a stretched whole-card link. Hover and
-  focus-within raise the plate and light its rule; nothing tilts.
+  Builds, in two tiers (PLAN.md 4.9, r1 T10).
 
-  The specimen is a tiny true diagram of what the thing does. Its code is a
-  lazy chunk (all seven are about 5 KB gz) that mounts on the first idle
-  moment after load, so a keyboard user never tabs past a control that has
-  not arrived yet. Until then a frame of the exact same size holds the
-  space, so nothing shifts. Its text equivalent ("in words") is always in
-  the HTML.
+    <BuildFeature card />   Viaere and the pool scheduler: a full-width row,
+                            the words on the left and a big specimen on the
+                            right, on plain night (no frame, no dot grid)
+    <BuildRow card />       the other six as a departures board: title,
+                            meta, one line, links; a row whose specimen is a
+                            true diagram opens it under the row ("see it")
+
+  Links are visible words ("visit", "source"), never a stretched whole-row
+  link. A specimen's code is a lazy chunk that mounts on the first idle
+  moment after load; until then a frame of the same size holds its place,
+  so nothing shifts. Its text equivalent is always in the HTML.
 */
 
 const LOADERS = {
   viaere: () => import('./specimens/Viaere.jsx'),
   'circle-method': () => import('./specimens/CircleMethod.jsx'),
   'hint-ladder': () => import('./specimens/HintLadder.jsx'),
-  meters: () => import('./specimens/Meters.jsx'),
-  route: () => import('./specimens/Route.jsx'),
   reticle: () => import('./specimens/Reticle.jsx'),
-  'week-strip': () => import('./specimens/WeekStrip.jsx'),
 }
 
-// Specimens with a control bar under the drawing (the bar is part of the reserved size).
-const INTERACTIVE = new Set(['viaere', 'circle-method', 'hint-ladder', 'reticle'])
+function Links({ links, h }) {
+  if (!links.length) return null
+  return (
+    <p className="build-links">
+      {links.map((l) => (
+        <a key={l.href} href={l.href} aria-describedby={h}>
+          {l.label}
+          <Arrow />
+        </a>
+      ))}
+    </p>
+  )
+}
 
-export default function BuildCard({ card: c }) {
+export function BuildFeature({ card: c }) {
   const h = `${c.id}-h`
   return (
-    <article id={c.id} aria-labelledby={h} data-layout={c.layout} className="build plate plate-hover rule-l state-past">
+    <article id={c.id} aria-labelledby={h} tabIndex={-1} className="build build--feature rule-l state-past">
       <div className="build-text">
         <h3 id={h} className="build-title">
           {c.title}
@@ -53,23 +64,50 @@ export default function BuildCard({ card: c }) {
             <span className="mono">{c.stack}</span>
           </p>
         )}
-        {c.links.length > 0 && (
-          <p className="build-links mono">
-            {c.links.map((l) => (
-              <a key={l.href} href={l.href} aria-describedby={h}>
-                {l.label}
-                <Arrow />
-              </a>
-            ))}
-          </p>
-        )}
+        <Links links={c.links} h={h} />
       </div>
-      {c.specimen && LOADERS[c.specimen] && <Specimen kind={c.specimen} />}
+      {c.specimen && LOADERS[c.specimen] && <Specimen kind={c.specimen} title={c.title} />}
     </article>
   )
 }
 
-function Specimen({ kind }) {
+export function BuildRow({ card: c }) {
+  const h = `${c.id}-h`
+  const spec = c.specimen && LOADERS[c.specimen] ? c.specimen : null
+  return (
+    <article id={c.id} aria-labelledby={h} tabIndex={-1} className="ix-row">
+      <div className="ix-name">
+        <h3 id={h} className="ix-title">
+          {c.title}
+        </h3>
+        <p className="ix-meta mono">
+          <Dotted text={c.meta} />
+        </p>
+      </div>
+      <div className="ix-what">
+        {c.body.map((b) => (
+          <p key={b.id}>{b.text}</p>
+        ))}
+        {c.stack && <p className="ix-stack mono">{c.stack}</p>}
+      </div>
+      <Links links={c.links} h={h} />
+      {spec && (
+        <details className="ix-see">
+          <summary>
+            {W.seeIt.text}
+            <span className="sr-only">: {c.title}</span>
+          </summary>
+          <Specimen kind={spec} title={c.title} />
+        </details>
+      )}
+    </article>
+  )
+}
+
+// Specimens with a control bar under the drawing (the bar is part of the reserved size).
+const INTERACTIVE = new Set(['viaere', 'circle-method', 'hint-ladder', 'reticle'])
+
+function Specimen({ kind, title }) {
   const spec = SPEC[kind]
   const frame = (
     <>
@@ -79,16 +117,12 @@ function Specimen({ kind }) {
   )
   return (
     <figure className="spec build-spec" data-spec={kind}>
-      <DeferredMount
-        as="div"
-        className="spec-frame"
-        when="load"
-        load={LOADERS[kind]}
-        fallback={frame}
-        props={{ spec }}
-      />
+      <DeferredMount as="div" className="spec-frame" when="load" load={LOADERS[kind]} fallback={frame} props={{ spec }} />
       <details className="spec-words">
-        <summary className="mono">{W.inWords.text}</summary>
+        <summary>
+          {W.inWords.text}
+          <span className="sr-only">: {title}</span>
+        </summary>
         <p>{spec.words.text}</p>
       </details>
     </figure>
