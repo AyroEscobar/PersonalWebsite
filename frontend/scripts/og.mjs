@@ -20,6 +20,10 @@ try {
   const cdp = await connect(chrome.wsUrl)
   const page = await cdp.newPage({ width: 1200, height: 630, dpr: 1 })
   await page.goto(`${url}/og/og.html`, { settle: 200 })
+  // og.js fetches the built page and sets body[data-ready] once the map (or the fallback rings) is in.
+  await page.eval("new Promise(r => { let n = 0; const t = () => (document.body.dataset.ready || ++n > 80) ? r() : setTimeout(t, 50); t() })")
+  const map = await page.eval('document.body.dataset.map || null')
+  if (map !== 'grid') console.warn('og: no build found, the card uses the fallback rings (run npm run build first)')
   await page.eval('document.fonts.ready.then(() => document.fonts.size)')
   const fonts = await page.eval("[...document.fonts].filter(f => f.status === 'loaded').map(f => f.family)")
   if (!fonts.some((f) => /Overpass/.test(f))) throw new Error(`og: Overpass did not load (${fonts.join(', ')})`)
