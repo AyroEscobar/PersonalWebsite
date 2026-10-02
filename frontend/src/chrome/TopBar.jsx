@@ -17,15 +17,15 @@ export default function TopBar() {
   return (
     <header className="fixed inset-x-0 top-0 z-bar h-topbar bg-night/90 hair-b">
       <div className="flex h-full items-center justify-between gap-4 px-pad">
-        <a href="#origin" className="link-quiet font-bold">
+        <a href="#origin" className="link-quiet whitespace-nowrap font-bold">
           {HERO.name.text}
         </a>
         <div className="flex items-center gap-3">
-          <span className="mono text-dim">
+          <span className="mono whitespace-nowrap text-dim">
             {CHROME.clockPlace.text} ·{' '}
             {t ? <time dateTime={t.datetime}>{t.text}</time> : <span>{CHROME.clockPlaceholder.text}</span>}
           </span>
-          <button type="button" className="btn-text target-44" aria-pressed={quiet} onClick={toggleQuiet}>
+          <button type="button" className="btn-text target-44 hidden md:inline-flex" aria-pressed={quiet} onClick={toggleQuiet}>
             {quiet ? CHROME.quietOn.text : CHROME.quiet.text}
           </button>
         </div>
