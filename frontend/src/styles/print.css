@@ -1,14 +1,21 @@
 /*
   Print (PLAN.md 4.13). Owned by B.
 
-  White paper, night ink, Overpass, one column. What prints: the masthead
-  (name, deck line, every channel written out), now, work with the six RBC
-  desks, builds (title, meta, the first line, the URL in parentheses), crew,
-  and signal with full URLs. What never prints: the map, the hero, the rail
-  and bars, dialogs, specimens, buttons, decoration, the live clock. One US
-  Letter page at 100%, two at most with the desks.
+  White paper, night ink, Overpass. A resume-dense page: the masthead runs
+  full width (name, deck line, every channel written out), then the
+  sections flow in two columns. What prints: now, work with the six RBC
+  desks, the stack, builds (title, meta, the first line, the URL in
+  parentheses), crew, and signal. What never prints: the map, the hero and
+  origin, the rail and bars, dialogs, specimens, the program strip, buttons,
+  decoration, the live clock. One US Letter page at 100%, two at most.
 
-  Hooks any builder can use, so nothing here depends on private markup:
+  The screen layout is flattened rather than restyled piece by piece:
+  inside the sections every box loses its padding, margins, minimum
+  heights, grid and decoration, then a few rules put back just enough
+  spacing and the type scale. That keeps the printout stable when a
+  section's screen markup changes.
+
+  Hooks any builder can use:
     [data-print="skip"]   never print this
     [data-print="keep"]   print this even inside something hidden
     .no-print, .deco, [data-deco]   never print (shared contract)
@@ -21,7 +28,7 @@
 
 @page {
   size: letter;
-  margin: 0.5in 0.55in 0.5in;
+  margin: 0.45in 0.5in 0.5in;
 }
 
 @media print {
@@ -36,14 +43,14 @@
     --beacon: #0b1226;
     --trace: #5a6c96;
     --trace-lit: #5a6c96;
-    --hairline: rgba(11, 18, 38, 0.22);
-    --t-display: 26pt;
-    --t-h2: 13pt;
-    --t-h3: 10.5pt;
-    --t-lead: 9.5pt;
-    --t-body: 9.5pt;
-    --t-small: 8.5pt;
-    --t-mono: 8pt;
+    --hairline: rgba(11, 18, 38, 0.2);
+    --t-display: 24pt;
+    --t-h2: 11pt;
+    --t-h3: 9pt;
+    --t-lead: 8.5pt;
+    --t-body: 8.5pt;
+    --t-small: 8pt;
+    --t-mono: 7.5pt;
     --page-pad: 0px;
     --rail-w: 0px;
     --topbar-h: 0px;
@@ -56,8 +63,8 @@
   body {
     background: #ffffff !important;
     color: #0b1226 !important;
-    font-size: 9.5pt;
-    line-height: 1.38;
+    font-size: 8.5pt;
+    line-height: 1.35;
   }
 
   *,
@@ -85,15 +92,8 @@
   dialog,
   [popover],
   [role='img'],
-  [data-specimen],
-  .specimen,
   figure,
-  .spec,
-  .ps,
-  .build-stack,
-  .desk-no,
-  .rp-dot,
-  .closer-road,
+  .sr-only,
   .skip-link,
   .rail,
   .bottombar,
@@ -106,14 +106,25 @@
   .ft-promise,
   .ft-node,
   #origin,
-  #main > :not(section) {
+  #main > :not(section),
+  .stop-line,
+  .c-intro,
+  .builds-after,
+  .build-stack,
+  .build-tagline,
+  .desks > summary,
+  .desk-no,
+  .desk-dot,
+  .rp-dot,
+  .sl-row,
+  .sl-road,
+  .closer-road {
     display: none !important;
   }
 
   [data-print='keep'] {
     display: revert !important;
   }
-
   .print-only {
     display: block !important;
   }
@@ -125,209 +136,203 @@
     background: none !important;
   }
   .print-masthead {
-    margin: 0 0 14pt;
-    padding: 0 0 10pt;
-    border-bottom: 1.5pt solid #0b1226;
+    margin: 0 0 12pt;
+    padding: 0 0 9pt;
+    border-bottom: 1.25pt solid #0b1226;
   }
   .pm-name {
     margin: 0;
-    font-size: 26pt;
+    font-size: 24pt;
     font-weight: 900;
     line-height: 1;
     letter-spacing: -0.03em;
   }
-  .pm-deck {
+  .pm-deck,
+  .pm-contact {
     margin: 5pt 0 0;
     font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-    font-size: 9pt;
+    font-size: 8pt;
     letter-spacing: 0.02em;
   }
   .pm-contact {
     display: flex;
     flex-wrap: wrap;
     gap: 2pt 14pt;
-    margin: 6pt 0 0;
-    font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-    font-size: 8pt;
+    margin-top: 4pt;
     color: #5a6c96;
   }
 
-  /* ---------- layout flattens to one column ---------- */
+  /* ---------- flatten the screen layout ---------- */
   #root,
-  main,
-  .page,
-  .page-grid,
-  .text-col,
-  section {
+  main {
     display: block !important;
     position: static !important;
     width: auto !important;
     max-width: none !important;
     min-height: 0 !important;
-    height: auto !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow: visible !important;
   }
-  [style*='sticky'],
-  .sticky {
+  /* Two columns for everything under the masthead. */
+  main {
+    column-count: 2;
+    column-gap: 24pt;
+  }
+  main section,
+  main section :is(div, ul, ol, li, dl, dt, dd, p, article, blockquote, h2, h3, h4, a, span, time, code) {
     position: static !important;
-  }
-  main section {
-    margin: 0 0 12pt !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-width: none !important;
+    width: auto !important;
+    margin: 0 !important;
     padding: 0 !important;
-  }
-  /* Grids inside sections (cards, rows) keep their flow but lose columns. */
-  main section [class*='grid'] {
-    display: block !important;
-  }
-
-  h2 {
-    margin: 0 0 6pt !important;
-    padding: 0 0 3pt;
-    border-bottom: 0.75pt solid rgba(11, 18, 38, 0.22);
-    font-size: 13pt !important;
-    line-height: 1.1 !important;
-    letter-spacing: -0.01em;
-    break-after: avoid;
-  }
-  h3 {
-    margin: 0 !important;
-    font-size: 10.5pt !important;
-    line-height: 1.25 !important;
-    break-after: avoid;
-  }
-  h4 {
-    margin: 0 !important;
-    font-size: 9pt !important;
-    break-after: avoid;
-  }
-  p,
-  li,
-  dd,
-  dt {
-    orphans: 2;
-    widows: 2;
-  }
-  p {
-    margin-block: 2pt !important;
-  }
-  ul,
-  ol {
-    margin-block: 2pt !important;
-  }
-
-  /* Small things stay whole; long plates may break between their parts. */
-  li,
-  .nb-row,
-  .crew-row,
-  .desk,
-  .build {
-    break-inside: avoid;
-  }
-  h3 + p,
-  .rp-head,
-  .rp-role {
-    break-before: avoid;
-  }
-
-  .plate {
     border: 0 !important;
     background: none !important;
-    padding: 0 !important;
+    transform: none !important;
+    opacity: 1 !important;
+    overflow: visible !important;
   }
-  article {
-    margin: 0 0 7pt !important;
-    padding: 0 !important;
+  main section :is(div, ul, ol, li, dl, article) {
+    display: block !important;
   }
-
-  .mono,
-  code,
-  time {
-    font-size: 8pt !important;
+  main section :is(ul, ol) {
+    list-style: none !important;
   }
-
-  /* Status chips print as words. */
-  .chip {
-    border: 0 !important;
-    padding: 0 !important;
-    min-height: 0 !important;
-    font-size: 7.5pt !important;
-    text-transform: uppercase;
-  }
-
-  /* Lit rules and lamps fall back to a quiet hairline. */
-  .rule-l::before,
-  .rule-l::after,
-  .nb-row::before {
+  main section *::before,
+  main section *::after {
     display: none !important;
   }
-  .rule-l {
-    padding-left: 0 !important;
+
+  /* ---------- the type scale ---------- */
+  main section :is(p, li, dd, dt, div, h4, blockquote) {
+    font-size: 8.5pt !important;
+    line-height: 1.35 !important;
+    letter-spacing: 0 !important;
+  }
+  main section :is(.mono, .label, code, time, .chip) {
+    font-size: 7.5pt !important;
+    letter-spacing: 0.02em !important;
+    text-transform: none !important;
+    color: #5a6c96 !important;
+  }
+  main section h2 {
+    margin: 0 0 4pt !important;
+    padding: 0 0 2pt !important;
+    border-bottom: 0.75pt solid #0b1226 !important;
+    font-size: 11pt !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.01em !important;
+    break-after: avoid;
+  }
+  main section h3 {
+    font-size: 9pt !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    break-after: avoid;
+  }
+  main section h4 {
+    font-weight: 700 !important;
+    break-after: avoid;
+  }
+  main section {
+    break-inside: auto;
+    margin: 0 0 10pt !important;
+  }
+  .desk,
+  .nb-row,
+  .crew-row,
+  .build,
+  .stack-row {
+    break-inside: avoid;
   }
 
   /* ---------- now ---------- */
-  .nowboard {
-    border: 0 !important;
-  }
-  .nb-lines {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 18pt;
-    padding: 0 !important;
+  .nowboard,
+  .nb-lines,
+  .nb-row {
+    display: block !important;
   }
   .nb-row {
-    padding: 2pt 0 !important;
-    border: 0 !important;
+    margin: 0 0 2pt !important;
   }
-  .nb-mission,
-  .nb-stamp {
-    padding: 2pt 0 0 !important;
-    border: 0 !important;
+  .nb-org,
+  .nb-role {
+    display: inline !important;
   }
-  .nb-mission-mark {
-    display: none;
+  .nb-org::after {
+    display: inline !important;
+    content: ', ';
   }
-
-  /* ---------- links: paper has no links ---------- */
-  a {
-    color: inherit !important;
-    text-decoration: none !important;
-  }
-  #builds a[href^='http']::after,
-  #work a[href^='http']::after,
-  #crew a[href^='http']::after {
-    content: ' (' attr(href) ')';
-    font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-    font-size: 7.5pt;
-    color: #5a6c96;
-    word-break: break-all;
-  }
-
-  /* ---------- work: the six desks in two columns ---------- */
-  .desks > summary {
+  .nb-meta {
     display: none !important;
   }
-  .desk-line {
-    columns: 2;
-    column-gap: 18pt;
-    margin-top: 4pt !important;
-    padding: 0 !important;
-    list-style: none;
+  .nb-mission {
+    margin-top: 3pt !important;
+    font-weight: 700;
+  }
+  .nb-mission-mark,
+  .nb-stamp {
+    display: none !important;
+  }
+
+  /* ---------- work ---------- */
+  .release {
+    margin: 0 0 7pt !important;
+  }
+  .rp-head {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8pt;
+  }
+  .rp-role {
+    font-weight: 600;
+  }
+  .rp-debrief,
+  .rp-origin {
+    margin-top: 2pt !important;
+  }
+  .desks {
+    display: block !important;
+    margin: 4pt 0 0 !important;
   }
   .desk {
-    margin: 0 0 4pt !important;
-    padding: 0 !important;
+    margin: 0 0 3pt !important;
   }
-  .desk-text {
-    margin: 0 !important;
-    font-size: 8.5pt;
+  .desk-text,
+  .rp-debrief,
+  .rp-debrief p,
+  .rp-origin,
+  .build-body p,
+  .crew-body,
+  .signal-para {
+    color: #0b1226 !important;
+  }
+
+  /* stack: label and value on one line */
+  .stack {
+    margin: 2pt 0 0 !important;
+  }
+  .stack h3 {
+    margin-bottom: 2pt !important;
+  }
+  .stack-row {
+    display: grid !important;
+    grid-template-columns: 8em minmax(0, 1fr);
+    gap: 6pt;
+    margin: 0 0 1.5pt !important;
+  }
+  .stack-row dd {
+    font-family: inherit !important;
   }
 
   /* ---------- builds: title, meta, the first line, the URL ---------- */
+  .build {
+    margin: 0 0 6pt !important;
+  }
   .build-body > p:not(:first-child) {
     display: none !important;
   }
@@ -335,34 +340,71 @@
     display: -webkit-box !important;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    overflow: hidden;
+    overflow: hidden !important;
   }
-  .build {
-    margin: 0 0 6pt !important;
-  }
-  .build-links {
-    margin: 0 !important;
+  .build-links a {
+    margin-right: 6pt !important;
   }
 
-  /* ---------- signal: the channels already show their host ---------- */
+  /* ---------- crew ---------- */
+  .crew-row {
+    margin: 0 0 5pt !important;
+  }
+  .crew-when {
+    display: block !important;
+  }
+
+  /* ---------- signal ---------- */
+  .signal-para {
+    margin: 0 0 3pt !important;
+  }
+  .sl-addr {
+    font-weight: 700;
+    font-size: 9pt !important;
+  }
   .channels {
     display: flex !important;
     flex-wrap: wrap;
-    gap: 2pt 14pt;
-    padding: 0 !important;
-    list-style: none;
+    gap: 1pt 12pt;
+    margin: 3pt 0 !important;
   }
-  .ch {
-    display: inline-flex !important;
-    gap: 6pt;
-    padding: 0 !important;
+  .ch,
+  .ch-text {
+    display: inline !important;
+  }
+  .ch-name {
+    font-size: 8.5pt !important;
+    font-weight: 700;
+  }
+  .ch-name::after {
+    display: inline !important;
+    content: ' ';
+  }
+  .closer {
+    margin-top: 4pt !important;
+    font-weight: 800;
+    font-size: 9pt !important;
+  }
+
+  /* ---------- links: paper has no links ---------- */
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+  :is(#builds, #work, #crew) a[href^='http']::after {
+    display: inline !important;
+    content: ' (' attr(href) ')';
+    font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+    font-size: 7pt;
+    color: #5a6c96;
+    word-break: break-all;
   }
 
   /* ---------- footer ---------- */
   .footer {
-    margin: 12pt 0 0 !important;
-    padding: 6pt 0 0 !important;
-    border-top: 0.75pt solid rgba(11, 18, 38, 0.22) !important;
+    margin: 10pt 0 0 !important;
+    padding: 5pt 0 0 !important;
+    border-top: 0.75pt solid rgba(11, 18, 38, 0.2) !important;
   }
   .ft-inner {
     display: flex !important;
@@ -370,13 +412,13 @@
     padding: 0 !important;
     max-width: none !important;
   }
-  .ft-name {
-    font-size: 8pt !important;
+  .ft-name,
+  .ft-host {
+    margin: 0;
+    font-size: 7.5pt !important;
     font-weight: 600 !important;
   }
   .ft-host {
-    margin: 0;
     font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-    font-size: 8pt;
   }
 }
