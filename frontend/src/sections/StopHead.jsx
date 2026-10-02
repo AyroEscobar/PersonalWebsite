@@ -24,9 +24,7 @@ export default function StopHead({ id, children }) {
   return (
     <div className="stop-head">
       <div className="stop-line" aria-hidden="true">
-        <span className="stop-no mono">
-          {STOP_EXIT.text} {String(i + 1).padStart(2, '0')}
-        </span>
+        <span className="stop-no mono">{`${STOP_EXIT.text} ${String(i + 1).padStart(2, '0')}`}</span>
         {s?.heading && <span className="stop-alias mono">{s.label.text}</span>}
         {road && (
           <span className="stop-road">
