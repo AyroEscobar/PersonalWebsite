@@ -112,6 +112,10 @@
   .builds-after,
   .build-stack,
   .build-tagline,
+  .ix-stack,
+  .ix-see,
+  .ps-fold,
+  .stop-alias,
   .desks > summary,
   .desk-no,
   .desk-dot,
@@ -245,6 +249,7 @@
   .nb-row,
   .crew-row,
   .build,
+  .ix-row,
   .stack-row {
     break-inside: avoid;
   }
@@ -266,7 +271,7 @@
     display: inline !important;
     content: ', ';
   }
-  .nb-meta {
+  .nb-dates {
     display: none !important;
   }
   .nb-mission {
@@ -330,8 +335,15 @@
   }
 
   /* ---------- builds: title, meta, the first line, the URL ---------- */
-  .build {
+  .build,
+  .ix-row {
+    display: block !important;
     margin: 0 0 6pt !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+  .ix-title {
+    font-size: var(--t-h3);
   }
   .build-body > p:not(:first-child) {
     display: none !important;
