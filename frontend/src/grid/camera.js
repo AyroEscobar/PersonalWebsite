@@ -46,7 +46,7 @@ export const FRAMES = {
 // Phones frame the whole lit cluster, Allen to Richardson, in the band
 // above the name (r1 T6): further out, so more of the city reads as light.
 export const HERO_FRAMES = {
-  phone: { at: [N.plano[0] + 160, N.plano[1] + 56], z: 0.2 },
+  phone: { at: [N.plano[0] + 160, N.plano[1] + 56], z: 0.174 },
   tablet: { at: [N.plano[0] + 292, N.plano[1] + 60], z: 0.32 },
 }
 

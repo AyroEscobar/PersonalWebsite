@@ -110,9 +110,24 @@ export default function NightGrid() {
         else b.t = a.t + SIGN_H + 8
       }
     }
+    // Never on top of a city's dot or name: step along the edge until clear.
+    const avoid = [...v.querySelectorAll('.ng-cam[data-variant="hero"] .ng-node')].map((node) => {
+      const parts = [...node.querySelectorAll('.ng-dot, .ng-label:not(.ng-label-hot)')].map((e) => e.getBoundingClientRect())
+      return {
+        l: Math.min(...parts.map((b) => b.left)) - r.left - 6,
+        t: Math.min(...parts.map((b) => b.top)) - r.top - 6,
+        r: Math.max(...parts.map((b) => b.right)) - r.left + 6,
+        b: Math.max(...parts.map((b) => b.bottom)) - r.top + 6,
+      }
+    })
+    const blocked = (s) => avoid.some((a) => s.l < a.r && a.l < s.l + s.w && s.t < a.b && a.t < s.t + SIGN_H)
     for (const s of out) {
       s.l = Math.max(inset.left, Math.min(r.width - inset.right - s.w, s.l))
       s.t = Math.max(0, Math.min(r.height - SIGN_H, s.t))
+      for (let step = 0; step < 24 && blocked(s); step++) {
+        if (along(s)) s.l = Math.max(inset.left, s.l - 8)
+        else s.t = Math.min(r.height - SIGN_H, s.t + 8)
+      }
     }
     setExits(out)
   }, [])
