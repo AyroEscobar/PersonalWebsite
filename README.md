@@ -32,8 +32,10 @@ npm run preview    # serves dist the way Vercel does (headers, 404, compression)
 | `frontend/scripts/` | Build, prerender, content checks, budgets, image and OG pipelines, QA |
 | `frontend/tools/` | Local-only tooling (Lighthouse, axe, sharp, mapshaper); `npm run tools` |
 
-Rules are code, not good intentions. The build fails on copy with no source, en or em dashes, banned words, private details, off-palette colors, contrast under the floor, or a blown bundle budget. `node scripts/qa.mjs` from the repo root runs the full headless check: every route at 390, 768, 1440 and 1920, axe, keyboard order, reduced motion, Lighthouse and the bundle report.
+Rules are code, not good intentions. The build fails on copy with no source, en or em dashes, banned words, private details, off-palette colors, contrast under the floor, or a blown bundle budget. `npm run qa` in `frontend/` runs the full headless check: every route at 390, 768, 1440 and 1920, axe, keyboard order, reduced motion, Lighthouse and the bundle report (`npm run qa -- --fast` skips Lighthouse).
 
 Quiet mode (`?quiet`, or the `quiet` button) is the same page with the motion off and the contrast up.
+
+The page makes no sound: no audio files, no Web Audio, nothing that plays. QA fails if any of it shows up.
 
 Road data: US Census Bureau TIGER/Line 2024, public domain. Fonts: SIL Open Font License, licenses in `frontend/src/assets/fonts/`.
