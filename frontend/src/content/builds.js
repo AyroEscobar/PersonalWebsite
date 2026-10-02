@@ -95,13 +95,13 @@ export const BUILDS = {
     },
     {
       id: 'build-system',
-      title: 'A system that runs my days',
+      title: 'A system I built to run my days',
       meta: 'private · built on claude',
       facts: ['prj-247-system'],
       body: [
         item(
           'system-what',
-          'A personal multi-agent system on a Mac mini. It watches my finances, tracks my health, curates news, files notes and writes the briefing I wake up to.',
+          'A personal multi-agent system I built on a Mac mini to watch my finances, track my health, curate news, file notes and write the briefing I wake up to.',
           ['prj-247-system'],
         ),
       ],
