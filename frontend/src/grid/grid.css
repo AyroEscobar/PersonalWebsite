@@ -349,6 +349,49 @@
   .ng {
     --ng-zk: 1.4;
   }
+  /* Very wide screens: the camera anchors in the centered content frame, the
+     same frame the copy, the bar, the key and the exit signs keep to, so the
+     city does not drift off toward the screen edge (r2 U2). */
+  .ng-cam {
+    --ng-ax: calc(50% + (var(--ng-axf-d, 0.74) - 0.5) * 1432px);
+  }
+  /* The roads run on under the left gutter at about 30% instead of stopping
+     at flat night (r2 N14); night is solid from the rail to the copy. */
+  .ng-scrim::before {
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--night) 70%, transparent) 0,
+        color-mix(in oklab, var(--night) 70%, transparent) calc(50% - 760px),
+        var(--night) calc(50% - 644px),
+        var(--night) calc(50% - 315px),
+        color-mix(in oklab, var(--night) 84%, transparent) calc(50% - 57px),
+        color-mix(in oklab, var(--night) 40%, transparent) calc(50% + 115px),
+        transparent calc(50% + 258px)
+      ),
+      linear-gradient(to top, var(--night) 0, transparent 20%);
+  }
+  .ng-scrim::after {
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--night) 70%, transparent) 0,
+      color-mix(in oklab, var(--night) 70%, transparent) calc(50% - 760px),
+      var(--night) calc(50% - 644px),
+      var(--night) calc(50% + 157px),
+      color-mix(in oklab, var(--night) 60%, transparent) calc(50% + 243px),
+      transparent calc(50% + 372px)
+    );
+  }
+  .ng-view::after {
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--night) 70%, transparent) 0,
+      color-mix(in oklab, var(--night) 70%, transparent) calc(50% - 760px),
+      var(--night) calc(50% - 644px),
+      var(--night) calc(50% + 690px),
+      color-mix(in oklab, var(--night) 70%, transparent) calc(50% + 760px)
+    );
+  }
 }
 @media (min-width: 2400px) {
   .ng {
