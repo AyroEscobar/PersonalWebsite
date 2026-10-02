@@ -2,14 +2,12 @@
   "name": "personal-website",
   "version": "1.0.0",
   "private": true,
-  "description": "Ayro's Personal Website - Monorepo",
+  "description": "ayroescobar.com. The app lives in frontend/.",
   "scripts": {
     "dev": "npm run dev --prefix frontend",
     "build": "npm run build --prefix frontend",
     "preview": "npm run preview --prefix frontend",
-    "lint": "npm run lint --prefix frontend",
-    "install:frontend": "npm install --prefix frontend",
-    "install:backend": "npm install --prefix backend",
-    "install:all": "npm run install:frontend && npm run install:backend"
+    "check": "npm run check --prefix frontend",
+    "qa": "node scripts/qa.mjs"
   }
 }
