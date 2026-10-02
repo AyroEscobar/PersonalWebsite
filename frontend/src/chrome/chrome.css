@@ -1139,6 +1139,13 @@ html[data-dialog] .bottombar {
 .jl-close {
   display: none;
 }
+/* Any touch screen gets a visible way out, not only narrow ones (r2 N17). */
+@media (pointer: coarse) {
+  .jl-close {
+    display: inline-flex;
+    min-height: 44px;
+  }
+}
 
 .jl-list {
   flex: 1 1 auto;
@@ -1312,6 +1319,14 @@ html[data-dialog] .bottombar {
   }
   .jl-option {
     min-height: 52px;
+  }
+  /* Phones: a row may take two lines before it trims (r2 N17). */
+  .jl-title,
+  .jl-sub {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
   }
   .jl-hint,
   .jl-foot {

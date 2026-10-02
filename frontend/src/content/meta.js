@@ -71,7 +71,8 @@ export const FOOTER = {
   visitSuffix: ui('footer-visit-suffix', 'on your device'),
   noTracking: ui('footer-no-tracking', 'no cookies, no analytics.'),
   print: ui('footer-print', 'print as resume'),
-  source: ui('footer-source', 'source'),
+  // Says whose source it is, on its own and to a screen reader (r2 N17).
+  source: ui('footer-source', 'site source'),
 }
 
 export const NOT_FOUND = {
