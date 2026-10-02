@@ -37,9 +37,10 @@
 
 /* ---------- frame: phones (the hero block) ---------- */
 
-/* The map block's height, shared with the hero (src/hero/hero.css). */
+/* The map block's height, shared with the hero (src/hero/hero.css). Phones
+   keep 60svh: the name sits over its lower half (r1 T6). */
 :root {
-  --ng-h: 70svh;
+  --ng-h: 60svh;
 }
 @media (min-width: 720px) {
   :root {
@@ -54,7 +55,7 @@
 
 .ng {
   --ng-ax: 50%;
-  --ng-ay: 40%;
+  --ng-ay: 31%;
   --ng-zk: 1;
   position: absolute;
   top: 0;
@@ -63,7 +64,7 @@
   height: var(--ng-h);
   z-index: 0;
   pointer-events: none;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 
 .ng-view {
@@ -88,11 +89,12 @@
   overflow: hidden;
 }
 
-/* Vertical swipes that start on the map always scroll the page. */
+/* Vertical swipes that start on the map always scroll the page, and a pinch
+   always zooms it (a pinch cancels the pointer, so it never pings). */
 .ng-svg,
 .ng-canvas,
 .ng-canvas canvas {
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 
 .ng-canvas-host {
@@ -121,24 +123,31 @@
   transform: scale(calc(1 / (var(--ng-z) * var(--ng-zk))));
 }
 
-/* Phones: fade into the page under the name, and under the top bar. */
+/* Phones: the city in the upper half, then the night comes down over the
+   roads before the name (hero.css --hero-name-at 0.52), so the words never
+   sit on a lit road. Under the top bar, a little shade for the bar. */
 .ng-scrim {
   background:
     linear-gradient(to bottom, color-mix(in oklab, var(--night) 70%, transparent) 0, transparent var(--topbar-h)),
-    linear-gradient(to bottom, transparent 68%, color-mix(in oklab, var(--night) 70%, transparent) 84%, var(--night) 98%);
+    linear-gradient(
+      to bottom,
+      transparent 41%,
+      color-mix(in oklab, var(--night) 55%, transparent) 47%,
+      color-mix(in oklab, var(--night) 86%, transparent) 52%,
+      color-mix(in oklab, var(--night) 96%, transparent) 60%,
+      var(--night) 70%
+    );
 }
 
-/* Short phones: the same ground, a little further out, so Allen clears the ping plate. */
-@media (max-width: 719.98px) and (max-height: 760px) {
+/* Short phones: the same ground, a little further out. */
+@media (max-width: 719.98px) and (max-height: 800px) {
   .ng {
-    --ng-ay: 47%;
-    --ng-zk: 0.8;
+    --ng-zk: 0.88;
   }
 }
 @media (max-width: 719.98px) and (max-height: 600px) {
   .ng {
-    --ng-ay: 49%;
-    --ng-zk: 0.68;
+    --ng-zk: 0.7;
   }
 }
 
@@ -147,7 +156,19 @@
 @media (min-width: 720px) {
   .ng {
     --ng-ax: 62%;
-    --ng-ay: 44%;
+    --ng-ay: 40%;
+  }
+  /* Tablets: the name sits at 72% of the block (hero.css). */
+  .ng-scrim {
+    background:
+      linear-gradient(to bottom, color-mix(in oklab, var(--night) 70%, transparent) 0, transparent var(--topbar-h)),
+      linear-gradient(
+        to bottom,
+        transparent 60%,
+        color-mix(in oklab, var(--night) 62%, transparent) 66%,
+        color-mix(in oklab, var(--night) 88%, transparent) 71%,
+        var(--night) 84%
+      );
   }
 }
 /* Landscape tablets: a taller block, the cluster right of the name. */
@@ -260,24 +281,51 @@
 .ng-halo,
 .ng-road,
 .ng-spine,
-.ng-offgrid,
 .ng-spurs {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-/* --k is 1 near Plano and 0 far away, --p the sodium share (posterArt.js). */
+/* posterArt.js sets, per band and road class: --p the sodium share, --o the
+   light, --w the width (freeways brightest, state roads about 45%), --ho the
+   halo under freeways and tollways. --k is 1 near Plano and 0 far away. */
 .ng-road use {
   stroke: color-mix(in oklab, var(--sodium) var(--p), var(--trace-lit));
-  stroke-opacity: calc(0.28 + var(--k) * 0.72);
-  stroke-width: calc(1px + var(--k) * 0.45px);
+  stroke-opacity: var(--o, calc(0.28 + var(--k) * 0.72));
+  stroke-width: var(--w, calc(1px + var(--k) * 0.45px));
 }
 
 .ng-halo use {
   stroke: var(--sodium);
-  stroke-opacity: calc(var(--k) * var(--k) * 0.2);
-  stroke-width: 6px;
+  stroke-opacity: var(--ho, calc(var(--k) * var(--k) * 0.2));
+  stroke-width: var(--hw, 6px);
+}
+
+/* City glows and interchange hot spots: pre-blurred gradients, light sources only. */
+.ng-city-glow {
+  opacity: var(--a, 1);
+}
+.ng-stop-sodium {
+  stop-color: var(--sodium);
+}
+.ng-stop-ink {
+  stop-color: var(--ink);
+}
+.ng-stop-beacon {
+  stop-color: var(--beacon);
+}
+
+/* Home carries the one live light: an obstruction beacon over Plano. */
+.ng-beacon {
+  fill: var(--beacon);
+}
+/* The 404's dark grid: nothing is lit but home, and nothing is live. */
+.ng-svg[data-standalone] .ng-city-glow:not([data-node='plano']),
+.ng-svg[data-standalone] .ng-hubs,
+.ng-svg[data-standalone] .ng-beacon,
+.ng-svg[data-standalone] .ng-beacon-glow {
+  display: none;
 }
 
 .ng-spine-core {
@@ -290,16 +338,6 @@
   stroke-width: 10px;
 }
 
-.ng-off-line {
-  stroke: var(--sodium);
-  stroke-width: 1.25px;
-  stroke-dasharray: 1 6;
-  stroke-opacity: 0.8;
-}
-.ng-off-head {
-  stroke: var(--sodium);
-  stroke-width: 1.5px;
-}
 
 .ng-spur {
   stroke: var(--led);
@@ -348,25 +386,29 @@
 .ng-node[data-state='dim'] .ng-label {
   fill: var(--dim);
 }
-.ng-off .ng-label {
-  fill: var(--sodium);
+/* The arrival flare: an ink copy of the label over the lit one, faded in by live.js. */
+.ng-node .ng-label-hot {
+  fill: var(--ink);
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ---------- focus: what each section lights (desktop) ---------- */
 
 @media (min-width: 1100px) {
-  .ng[data-reading] .ng-node .ng-label,
-  .ng[data-reading] .ng-off {
+  .ng[data-reading] .ng-node .ng-label:not(.ng-label-hot),
+  .ng[data-reading] .ng-exit,
+  .ng[data-reading] .ng-exit-road {
     opacity: 0.5;
   }
-  .ng[data-lit~='plano'] .ng-node[data-node='plano'] .ng-label,
-  .ng[data-lit~='richardson'] .ng-node[data-node='richardson'] .ng-label,
-  .ng[data-lit~='allen'] .ng-node[data-node='allen'] .ng-label,
-  .ng[data-lit~='dallas'] .ng-node[data-node='dallas'] .ng-label,
-  .ng[data-off~='nyc'] .ng-off[data-node='nyc'],
-  .ng[data-off~='waterloo'] .ng-off[data-node='waterloo'],
-  .ng[data-focus='builds'] .ng-node .ng-label,
-  .ng[data-focus='builds'] .ng-off {
+  .ng[data-lit~='plano'] .ng-node[data-node='plano'] .ng-label:not(.ng-label-hot),
+  .ng[data-lit~='richardson'] .ng-node[data-node='richardson'] .ng-label:not(.ng-label-hot),
+  .ng[data-lit~='allen'] .ng-node[data-node='allen'] .ng-label:not(.ng-label-hot),
+  .ng[data-lit~='dallas'] .ng-node[data-node='dallas'] .ng-label:not(.ng-label-hot),
+  .ng[data-off~='nyc'] :is(.ng-exit, .ng-exit-road)[data-node='nyc'],
+  .ng[data-off~='waterloo'] :is(.ng-exit, .ng-exit-road)[data-node='waterloo'],
+  .ng[data-focus='builds'] .ng-node .ng-label:not(.ng-label-hot),
+  .ng[data-focus='builds'] :is(.ng-exit, .ng-exit-road) {
     opacity: 1;
   }
   .ng[data-lit~='plano'] .ng-node[data-node='plano'] .ng-ring,
@@ -413,9 +455,17 @@
   }
   html:not([data-motion='reduced']) .ng-layers,
   html:not([data-motion='reduced']) .ng-scrim::after,
-  html:not([data-motion='reduced']) .ng-off,
-  html:not([data-motion='reduced']) .ng-node .ng-label {
+  html:not([data-motion='reduced']) .ng-node .ng-label:not(.ng-label-hot) {
     transition: opacity var(--dur-camera) var(--ease-out);
+  }
+  html:not([data-motion='reduced']) .ng-exits,
+  html:not([data-motion='reduced']) .ng-exit,
+  html:not([data-motion='reduced']) .ng-exit-road {
+    transition: opacity var(--dur-ui-slow) var(--ease);
+  }
+  html:not([data-motion='reduced']) .ng-exit-hot,
+  html:not([data-motion='reduced']) .ng-exit-road {
+    transition: opacity var(--dur-ui-slow) var(--ease), stroke-opacity var(--dur-ui-slow) var(--ease);
   }
   html:not([data-motion='reduced']) .ng-horizon {
     transition: --ng-hz 600ms var(--ease);
@@ -432,10 +482,19 @@
     animation-delay: calc(var(--b) * 28ms);
   }
   html[data-boot='run']:not([data-motion='reduced']) .ng-spine,
-  html[data-boot='run']:not([data-motion='reduced']) .ng-offgrid,
+  html[data-boot='run']:not([data-motion='reduced']) .ng-exits,
   html[data-boot='run']:not([data-motion='reduced']) .ng-spurs {
     animation: ae-fade-in 400ms var(--ease) both;
     animation-delay: 240ms;
+  }
+  /* The cities come up with the roads, the interchanges last: 700 ms in, done by 1.2 s. */
+  html[data-boot='run']:not([data-motion='reduced']) .ng-city,
+  html[data-boot='run']:not([data-motion='reduced']) .ng-hubs {
+    animation: ae-fade-in 500ms var(--ease) both;
+    animation-delay: 160ms;
+  }
+  html[data-boot='run']:not([data-motion='reduced']) .ng-hubs {
+    animation-delay: 700ms;
   }
   html[data-boot='run']:not([data-motion='reduced']) .ng-node .ng-ring,
   html[data-boot='run']:not([data-motion='reduced']) .ng-node .ng-glow {
@@ -476,7 +535,10 @@
   .ng-horizon,
   .ng-scrim,
   .ng-halo,
+  .ng-city,
+  .ng-hubs,
   .ng-glow,
+  .ng-beacon-glow,
   .ng-spine-glow {
     display: none;
   }
@@ -485,6 +547,93 @@
 @media print {
   .ng {
     display: none !important;
+  }
+}
+
+/* ---------- off-grid exits (r1 M15): the last stretch and a level sign ---------- */
+
+.ng-exits {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ng-exits[data-moving] {
+  opacity: 0;
+}
+html:not([data-js]) .ng-exits {
+  display: none;
+}
+
+.ng-exit-roads {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.ng-exit-road {
+  stroke: var(--sodium);
+  stroke-width: 1.5px;
+  stroke-linecap: round;
+  stroke-dasharray: 1 5;
+  stroke-opacity: 0.7;
+}
+.ng-exit-road[data-lit] {
+  stroke-opacity: 1;
+}
+
+/* The sign: the city name level at the edge, a chevron at the true bearing. */
+.ng-exit {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px 1px 6px;
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--night) 72%, transparent);
+  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.ng-exit-name {
+  grid-area: 1 / 1;
+  color: var(--sodium);
+}
+/* Lit: an ink copy over the sodium name fades in (only opacity animates). */
+.ng-exit-hot {
+  color: var(--ink);
+  opacity: 0;
+}
+.ng-exit[data-lit] .ng-exit-hot {
+  opacity: 1;
+}
+.ng-exit-chev {
+  grid-area: 1 / 2;
+  width: 12px;
+  height: 12px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--sodium);
+  stroke-width: 1.6px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: rotate(var(--deg));
+}
+
+@media (forced-colors: active) {
+  .ng-exit {
+    background: Canvas;
+  }
+}
+@media print {
+  .ng-exits {
+    display: none;
   }
 }
 
