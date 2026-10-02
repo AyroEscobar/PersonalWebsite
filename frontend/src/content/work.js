@@ -10,7 +10,7 @@ import { item, ui } from './item.js'
 */
 
 export const WORK = {
-  intro: ui('work-intro', 'dated, newest first.'),
+  intro: ui('work-intro', 'dated.'),
   statusWords: {
     active: ui('status-active', 'active'),
     complete: ui('status-complete', 'complete'),
