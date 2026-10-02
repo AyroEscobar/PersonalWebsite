@@ -5,16 +5,32 @@ import { NODES } from '../content/places.js'
 import { emit, endPing, getState, on, setTier, useStore } from '../lib/store.js'
 import { detectTier, markWebGLUnavailable } from '../lib/tier.js'
 import { MAP_META, cameraVars, focusLights, heroVars, mapToClient, nearestNode } from './camera.js'
-import { bearingVec, exitInsets, exitOf } from './exits.js'
+import { ROW_BELOW, bearingVec, crossAt, exitInsets, exitOf, lineHitsBox, stretchFor } from './exits.js'
 import { live, pulseNode } from './live.js'
 import './grid.css'
 
 const EXIT_HOLD = 1500 // ms an exit sign stays lit after the spark reaches the edge
 const CAMERA_MS = 860 // the camera pan (800 ms) plus a frame or two
-// An exit sign's box: 12px mono at 0.06em is 8.1 px a character, plus padding and the arrow.
-const SIGN_CH = 8.1
-const SIGN_PAD = 30
-const SIGN_H = 19
+const GAP = 8 // px between two signs, and between a sign and what it steps off
+const PASSES = 8 // placement passes before giving up on a perfect fit
+const ARROW = 16 // px from a sign's right edge to the middle of its arrow
+const OFFGRID = Object.keys(MAP_META.offgrid)
+
+/* US-75 between Richardson and Allen (the LED spine), as view px [x, y, ...]. */
+function spinePoints(v, r) {
+  const path = v.querySelector('[id$="-spine"]')
+  if (!path?.getTotalLength) return []
+  const len = path.getTotalLength()
+  const out = []
+  for (let i = 0; i <= 48; i++) {
+    const q = path.getPointAtLength((len * i) / 48)
+    const c = mapToClient(q.x, q.y)
+    if (c) out.push(c.x - r.left, c.y - r.top)
+  }
+  return out
+}
+
+const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
 
 /*
   NightGrid (PLAN.md 4.1). Owned by A. The map behind the page.
@@ -70,47 +86,38 @@ export default function NightGrid() {
     return () => io.disconnect()
   }, [])
 
-  // Exit signs: where each off-grid line meets the frame, in .ng-view px.
-  // Each sign sits just inside the edge it leaves through, its corner on the
-  // line's end; two signs that would touch step apart along their edge.
+  // Exit signs (r2 U2): where each off-grid line meets the frame, in .ng-view
+  // px. Each sign is measured as rendered (text spacing changes its width).
+  // Its arrow sits at the line's end on the frame edge with the name just
+  // inside; under 480px wide there are no lines and the two signs share one
+  // row along the map's top edge. Then, until nothing moves (8 passes at
+  // most): keep inside the frame, step off city dots, names and US-75, and
+  // step apart from each other (a second top-edge sign that cannot fit drops
+  // one row). A line that would cross US-75 starts past it instead.
   const measure = useCallback(() => {
     const v = view.current
     if (!v) return
     const r = v.getBoundingClientRect()
-    if (r.width < 1 || r.height < 1) return
-    const inset = exitInsets()
-    const out = []
-    for (const [id, { from, deg }] of Object.entries(MAP_META.offgrid)) {
-      const n = MAP_META.nodes[from]
-      const p = n && mapToClient(n[0], n[1])
-      if (!p) continue
-      const [ux, uy] = bearingVec(deg)
-      const e = exitOf(p.x - r.left, p.y - r.top, ux, uy, r.width, r.height, inset)
-      if (!e) continue
-      const w = NODES[id].text.length * SIGN_CH + SIGN_PAD
-      const box =
-        e.side === 'left'
-          ? { l: e.x - 4, t: e.y - 6 - SIGN_H }
-          : e.side === 'top'
-            ? { l: e.x - w + 8, t: e.y - 2 - SIGN_H }
-            : e.side === 'bottom'
-              ? { l: e.x - w + 4, t: e.y - 10 - SIGN_H }
-              : { l: e.x - w + 4, t: e.y - 6 - SIGN_H }
-      out.push({ id, deg, ...e, w, ...box })
+    const W = r.width
+    const H = r.height
+    if (W < 1 || H < 1) return
+    const inset = exitInsets(W)
+    const bar = inset.top - 22
+    const row = W < ROW_BELOW
+    const size = {}
+    for (const el of v.querySelectorAll('.ng-exit')) size[el.dataset.node] = { w: el.offsetWidth, h: el.offsetHeight }
+    const spine = spinePoints(v, r)
+
+    // City labels near the right edge read to the left of their dot (r2 N14).
+    for (const node of v.querySelectorAll('.ng-cam[data-variant="hero"] .ng-node')) {
+      const dot = node.querySelector('.ng-dot')?.getBoundingClientRect()
+      const label = node.querySelector('.ng-label:not(.ng-label-hot)')?.getBoundingClientRect()
+      if (!dot || !label || !dot.width) continue
+      const flip = dot.right + 9 + label.width > r.right - 8 && dot.left - 9 - label.width > r.left + 8
+      if (flip) node.dataset.flip = ''
+      else delete node.dataset.flip
     }
-    const along = (s) => s.side === 'top' || s.side === 'bottom'
-    out.sort((a, b) => (along(a) ? b.l - a.l : a.t - b.t))
-    for (let i = 1; i < out.length; i++) {
-      for (let j = 0; j < i; j++) {
-        const a = out[j]
-        const b = out[i]
-        const hit = a.l < b.l + b.w + 10 && b.l < a.l + a.w + 10 && a.t < b.t + SIGN_H + 8 && b.t < a.t + SIGN_H + 8
-        if (!hit) continue
-        if (along(b)) b.l = a.l - b.w - 10
-        else b.t = a.t + SIGN_H + 8
-      }
-    }
-    // Never on top of a city's dot or name: step along the edge until clear.
+
     const avoid = [...v.querySelectorAll('.ng-cam[data-variant="hero"] .ng-node')].map((node) => {
       const parts = [...node.querySelectorAll('.ng-dot, .ng-label:not(.ng-label-hot)')].map((e) => e.getBoundingClientRect())
       return {
@@ -120,15 +127,121 @@ export default function NightGrid() {
         b: Math.max(...parts.map((b) => b.bottom)) - r.top + 6,
       }
     })
-    const blocked = (s) => avoid.some((a) => s.l < a.r && a.l < s.l + s.w && s.t < a.b && a.t < s.t + SIGN_H)
-    for (const s of out) {
-      s.l = Math.max(inset.left, Math.min(r.width - inset.right - s.w, s.l))
-      s.t = Math.max(0, Math.min(r.height - SIGN_H, s.t))
-      for (let step = 0; step < 24 && blocked(s); step++) {
-        if (along(s)) s.l = Math.max(inset.left, s.l - 8)
-        else s.t = Math.min(r.height - SIGN_H, s.t + 8)
+
+    const out = []
+    for (const id of OFFGRID) {
+      const { from, deg } = MAP_META.offgrid[id]
+      const n = MAP_META.nodes[from]
+      const p = n && mapToClient(n[0], n[1])
+      if (!p) continue
+      const px0 = p.x - r.left
+      const py0 = p.y - r.top
+      const [ux, uy] = bearingVec(deg)
+      const e = exitOf(px0, py0, ux, uy, W, H, inset, stretchFor(W))
+      if (!e) continue
+      const { w, h } = size[id] ?? { w: 120, h: 19 }
+      let line = null
+      if (!row) {
+        line = { sx: e.sx, sy: e.sy, x: e.x, y: e.y }
+        let cut = -1
+        for (let i = 0; i + 3 < spine.length; i += 2) cut = Math.max(cut, crossAt(line.sx, line.sy, line.x, line.y, spine[i], spine[i + 1], spine[i + 2], spine[i + 3]))
+        if (cut >= 0) {
+          const len = Math.hypot(line.x - line.sx, line.y - line.sy)
+          const k = Math.min(1, cut + 12 / Math.max(len, 1))
+          line.sx += (line.x - line.sx) * k
+          line.sy += (line.y - line.sy) * k
+          if (Math.hypot(line.x - line.sx, line.y - line.sy) < 24) line = null
+        }
       }
+      const left = e.side === 'left'
+      out.push({
+        id,
+        deg,
+        side: e.side,
+        line,
+        w,
+        h,
+        ex: e.x,
+        // The ray's distance from its node to the drawn stretch, for the spark (PingWave).
+        run: line ? [Math.hypot(line.sx - px0, line.sy - py0), Math.hypot(line.x - px0, line.y - py0)] : null,
+        edge: e.t,
+        l: left ? e.x - ARROW + 6 : e.x - w + ARROW,
+        t: e.y - h / 2,
+      })
     }
+
+    // Candidates for each sign, best first: its arrow on the line's end, then
+    // a step at a time along the edge, then one row in from the edge. The
+    // first candidate inside the frame and clear of the city dots and names,
+    // of US-75 and of the signs already placed wins. Under 480px wide the
+    // signs share one row under the bar instead (no lines).
+    const touches = (a, b, pad) => a.l < b.l + b.w + pad && b.l < a.l + a.w + pad && a.t < b.t + b.h + pad && b.t < a.t + a.h + pad
+    // A sign may reach past the line's inset by its arrow (the arrow sits on the line's end), never off the frame.
+    const fr = { l: Math.max(4, inset.left - ARROW), r: W - Math.max(4, inset.right - ARROW), t: bar + 4, b: H - Math.max(4, inset.bottom - ARROW) }
+    const inFrame = (c) => c.l >= fr.l - 0.5 && c.l + c.w <= fr.r + 0.5 && c.t >= fr.t - 0.5 && c.t + c.h <= fr.b + 0.5
+    const onCity = (c) => avoid.some((a) => c.l < a.r && a.l < c.l + c.w && c.t < a.b && a.t < c.t + c.h)
+    const onRoad = (c) => spine.length > 3 && lineHitsBox(spine, { l: c.l - 3, t: c.t - 3, r: c.l + c.w + 3, b: c.t + c.h + 3 })
+    const placed = []
+    // Pass 0 wants 6px of night around every city; each later pass gives up 2px of it.
+    const nearCity = (c, give) => avoid.some((a) => c.l < a.r - give && a.l + give < c.l + c.w && c.t < a.b - give && a.t + give < c.t + c.h)
+    // Nor on the other exit's line.
+    const onLine = (c, id) =>
+      out.some((o) => o.id !== id && o.line && lineHitsBox([o.line.sx, o.line.sy, o.line.x, o.line.y], { l: c.l - 3, t: c.t - 3, r: c.l + c.w + 3, b: c.t + c.h + 3 }))
+    // What a pass may give up, in order: a little night around the cities,
+    // then the other exit's line, then US-75, then the cities. Never the
+    // frame, never the other sign.
+    const clear = (c, pass, id) =>
+      inFrame(c) &&
+      !placed.some((q) => touches(c, q, GAP)) &&
+      (pass >= 5 || !onRoad(c)) &&
+      (pass >= 4 || !onLine(c, id)) &&
+      (pass >= 6 || !(pass ? nearCity(c, 2 * Math.min(pass, 3)) : onCity(c)))
+    const candidates = (s) => {
+      const out2 = []
+      const at = (l, t) => out2.push({ l: clamp(l, fr.l, fr.r - s.w), t: clamp(t, fr.t, fr.b - s.h) })
+      const onTop = row || s.side === 'top' || s.side === 'bottom'
+      if (onTop) {
+        // Along the edge first; a sign that cannot fit there drops a row.
+        for (const dy of [0, s.h + GAP, 2 * (s.h + GAP)])
+          for (let k = 0; k <= 12; k++) {
+            at(s.l - k * GAP, s.t + (s.side === 'bottom' ? -dy : dy))
+            if (k) at(s.l + k * GAP, s.t + (s.side === 'bottom' ? -dy : dy))
+          }
+      } else
+        for (let k = 0; k <= 16; k++) {
+          at(s.l, s.t + k * GAP)
+          if (k) at(s.l, s.t - k * GAP)
+        }
+      return out2
+    }
+    if (row) {
+      out.sort((a, b) => a.ex - b.ex)
+      let x = W - inset.right
+      for (let i = out.length - 1; i >= 0; i--) {
+        out[i].l = x - out[i].w
+        out[i].t = bar + 6
+        x = out[i].l - 2 * GAP
+      }
+      out.reverse()
+    } else out.sort((a, b) => b.ex - a.ex || a.t - b.t)
+    for (const s of out) {
+      const keep = { l: s.l, t: s.t }
+      let best = null
+      for (let pass = 0; pass < PASSES && !best; pass++) {
+        for (const c of candidates(s)) {
+          const cand = { ...c, w: s.w, h: s.h }
+          if (clear(cand, pass, s.id)) {
+            best = cand
+            break
+          }
+        }
+      }
+      const pick = best ?? { l: clamp(keep.l, fr.l, fr.r - s.w), t: clamp(keep.t, fr.t, fr.b - s.h) }
+      s.l = pick.l
+      s.t = pick.t
+      placed.push(s)
+    }
+    live.exits = Object.fromEntries(out.map((s) => [s.id, { run: s.run, edge: s.edge }]))
     setExits(out)
   }, [])
 
@@ -224,27 +337,44 @@ export default function NightGrid() {
         <div className="ng-exits" aria-hidden="true" data-moving={moving || !exits ? '' : undefined}>
           {exits && (
             <svg className="ng-exit-roads" focusable="false">
-              {exits.map((e) => (
-                <line key={e.id} className="ng-exit-road" data-node={e.id} data-lit={lit[e.id] ? '' : undefined} x1={e.sx} y1={e.sy} x2={e.x} y2={e.y} />
-              ))}
+              {exits
+                .filter((e) => e.line)
+                .map((e) => (
+                  <line
+                    key={e.id}
+                    className="ng-exit-road"
+                    data-node={e.id}
+                    data-lit={lit[e.id] ? '' : undefined}
+                    x1={e.line.sx}
+                    y1={e.line.sy}
+                    x2={e.line.x}
+                    y2={e.line.y}
+                  />
+                ))}
             </svg>
           )}
-          {exits?.map((e) => (
-            <span
-              key={e.id}
-              className="ng-exit"
-              data-node={e.id}
-              data-side={e.side}
-              data-lit={lit[e.id] ? '' : undefined}
-              style={{ '--x': `${Math.round(e.l)}px`, '--y': `${Math.round(e.t)}px` }}
-            >
-              <span className="ng-exit-name">{NODES[e.id].text}</span>
-              <span className="ng-exit-name ng-exit-hot">{NODES[e.id].text}</span>
-              <svg className="ng-exit-chev" viewBox="-8 -8 16 16" focusable="false" style={{ '--deg': `${e.deg - 90}deg` }}>
-                <path d="M-6 0H5M1 -4L5 0L1 4" />
-              </svg>
-            </span>
-          ))}
+          {/* Rendered from the start (hidden until placed), so each sign can be measured. */}
+          {OFFGRID.map((id) => {
+            const e = exits?.find((x) => x.id === id)
+            const deg = MAP_META.offgrid[id].deg
+            return (
+              <span
+                key={id}
+                className="ng-exit"
+                data-node={id}
+                data-side={e?.side}
+                data-placed={e ? '' : undefined}
+                data-lit={lit[id] ? '' : undefined}
+                style={{ '--x': `${Math.round(e?.l ?? 0)}px`, '--y': `${Math.round(e?.t ?? 0)}px` }}
+              >
+                <span className="ng-exit-name">{NODES[id].text}</span>
+                <span className="ng-exit-name ng-exit-hot">{NODES[id].text}</span>
+                <svg className="ng-exit-chev" viewBox="-8 -8 16 16" focusable="false" style={{ '--deg': `${deg - 90}deg` }}>
+                  <path d="M-6 0H5M1 -4L5 0L1 4" />
+                </svg>
+              </span>
+            )
+          })}
         </div>
       </div>
       <ul className="sr-only">

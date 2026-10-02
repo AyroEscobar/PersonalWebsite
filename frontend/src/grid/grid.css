@@ -610,6 +610,10 @@
 .ng-exits[data-moving] {
   opacity: 0;
 }
+/* A sign whose line never reaches this frame's edge stays unplaced and unseen. */
+.ng-exit:not([data-placed]) {
+  visibility: hidden;
+}
 html:not([data-js]) .ng-exits {
   display: none;
 }
@@ -632,11 +636,14 @@ html:not([data-js]) .ng-exits {
   stroke-opacity: 1;
 }
 
-/* The sign: the city name level at the edge, a chevron at the true bearing. */
+/* The sign: the city name level at the edge, a chevron at the true bearing.
+   Placed with a transform, so a camera move never counts as a layout shift
+   (r2 N12). */
 .ng-exit {
   position: absolute;
-  left: var(--x);
-  top: var(--y);
+  left: 0;
+  top: 0;
+  transform: translate(var(--x), var(--y));
   display: inline-grid;
   grid-template-columns: auto auto;
   align-items: center;
@@ -662,6 +669,16 @@ html:not([data-js]) .ng-exits {
 }
 .ng-exit[data-lit] .ng-exit-hot {
   opacity: 1;
+}
+/* A line that leaves to the left: the arrow first, then the name. */
+.ng-exit[data-side='left'] {
+  padding: 2px 6px 1px 4px;
+}
+.ng-exit[data-side='left'] .ng-exit-name {
+  grid-area: 1 / 2;
+}
+.ng-exit[data-side='left'] .ng-exit-chev {
+  grid-area: 1 / 1;
 }
 .ng-exit-chev {
   grid-area: 1 / 2;
@@ -754,10 +771,10 @@ html:not([data-js]) .ng-exits {
   }
 }
 
-/* Phones: Allen's name sits left of its dot, so the New York route label has the right side. */
-@media (max-width: 719.98px) {
-  .ng-node[data-node='allen'] .ng-label {
-    text-anchor: end;
-    transform: translateX(-24px);
-  }
+/* A name that would run off the frame's right edge reads to the left of its
+   dot instead (NightGrid sets data-flip, r2 N14). Phones no longer flip
+   Allen by hand: their exit signs sit in a row under the bar, off the city. */
+.ng-node[data-flip] .ng-label {
+  text-anchor: end;
+  transform: translateX(-24px);
 }

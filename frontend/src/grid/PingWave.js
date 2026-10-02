@@ -1,5 +1,6 @@
 import { buildGraph, nearestVertex, pathBetween, shortestFrom } from './graph.js'
-import { STRETCH, bearingVec, exitInsets, exitOf } from './exits.js'
+import { bearingVec } from './exits.js'
+import { live } from './live.js'
 
 /*
   PingWave (PLAN.md 4.2, 5, 6.9). Owned by A. The signature, in raw WebGL2.
@@ -607,7 +608,7 @@ export async function createEngine(canvas, opts) {
       const f = Math.min(1, t / SPARK_RUN)
       const head = sp.from + sp.run * f
       const fadeOut = t > SPARK_RUN ? 1 - (t - SPARK_RUN) / 0.25 : 1
-      for (let j = 0; j < 8; j++) {
+      for (let j = 0; j < 8 && !sp.unseen; j++) {
         const d = head - (j * 5) / scale
         if (d < sp.from) break
         pushPt(sp.line.x + sp.line.ux * d, sp.line.y + sp.line.uy * d, j ? HOT : CORE, fadeOut * (1 - j / 8), j ? 6 : 10, 0)
@@ -662,14 +663,16 @@ export async function createEngine(canvas, opts) {
   }
 
   // The spark leaves when the wave reaches the node, crosses the unseen part
-  // of the line at the wave's own speed, then runs the drawn stretch.
+  // of the line at the wave's own speed, then runs the stretch NightGrid drew
+  // (live.exits, in px along the ray from the node). Where no line is drawn
+  // (a phone's row of signs), nothing runs, and the sign still lights when
+  // the light would have reached the edge.
   function launchSpark(line, now, pxPerSec) {
-    const [sx, sy] = toScreen(line.x, line.y)
-    const e = exitOf(sx, sy, line.ux, line.uy, cssW, cssH, exitInsets())
-    if (!e) return
-    const run = Math.min(STRETCH, e.t)
-    const delay = Math.max(0, e.t - run) / Math.max(pxPerSec, 400)
-    sparks.push({ line, t0: now + delay * 1000, from: (e.t - run) / scale, run: run / scale, done: false })
+    const ex = live.exits?.[line.id]
+    if (!ex) return
+    const [a, b] = ex.run ?? [ex.edge, ex.edge]
+    const delay = Math.max(0, a) / Math.max(pxPerSec, 400)
+    sparks.push({ line, t0: now + delay * 1000, from: a / scale, run: Math.max(0, b - a) / scale, unseen: !ex.run, done: false })
   }
 
   const smooth = (a, b, t) => {
