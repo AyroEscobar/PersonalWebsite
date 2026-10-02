@@ -470,7 +470,16 @@ html:not([data-js]) .js-only {
   margin: 0;
   padding: 4px 16px 12px 32px;
   color: var(--dim);
-  font-size: 12px;
+  /* One face, one size, one baseline: the stamp is data (r2 N18). */
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+}
+.nb-stamp .mono {
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
 }
 
 /* Floating, the board needs a firmer edge than a plate on the page. */
@@ -1446,6 +1455,13 @@ html[data-motion='reduced'] :is(.jumplist[open]:not([data-instant]), .stops-shee
   margin: 10px 0 0 26px;
   color: var(--dim);
 }
+/* Phones: the promise and the stamps share one left edge, the name's, with
+   the node hanging in the margin (r2 N18). */
+@media (max-width: 719.98px) {
+  .ft-data {
+    padding-left: 26px;
+  }
+}
 .ft-data {
   display: flex;
   flex-direction: column;
@@ -1500,6 +1516,26 @@ html[data-motion='reduced'] :is(.jumplist[open]:not([data-instant]), .stops-shee
 }
 
 /* ================================================================ 404 */
+
+/* Whose site this is, top left, the way every page of it starts (r2 N18). */
+.nf-brand {
+  position: absolute;
+  z-index: 3;
+  top: max(14px, env(safe-area-inset-top, 0px));
+  left: max(var(--page-pad), env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+.nf-brand:hover {
+  color: var(--ink);
+}
 
 .nf {
   position: relative;
@@ -1717,14 +1753,11 @@ html[data-motion='reduced'] :is(.jumplist[open]:not([data-instant]), .stops-shee
     height: 40px;
     background: linear-gradient(to bottom, var(--sodium), transparent);
   }
+  /* The same break mark as on wide screens, two short bars, so it never
+     reads as a menu icon (r2 N18). */
   .nf-break {
-    left: -1px;
-    top: 50px;
-    width: 14px;
-    height: 6px;
-    border: 0;
-    border-top: 1px solid var(--trace-lit);
-    border-bottom: 1px solid var(--trace-lit);
+    left: 4px;
+    top: 46px;
   }
   .nf-stops {
     flex-direction: column;

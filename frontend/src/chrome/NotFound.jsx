@@ -1,12 +1,13 @@
 import './chrome.css'
 import { NOT_FOUND, CHROME } from '../content/meta.js'
-import { SKIP } from '../content/identity.js'
+import { HERO, SKIP } from '../content/identity.js'
 import { SECTIONS } from '../content/sections.js'
 import Announcer from '../ui/Announcer.jsx'
 import ClientOnly from '../ui/ClientOnly.jsx'
 import GridPoster from '../grid/GridPoster.jsx'
 import JumpHost from './JumpHost.jsx'
 import SearchChip from './SearchChip.jsx'
+import NodeMark from './NodeMark.jsx'
 
 /*
   NotFound (PLAN.md 3.10). Owned by B. Prerendered to dist/404.html and
@@ -44,6 +45,10 @@ export default function NotFound() {
         {SKIP.text}
       </a>
       <main id="main" tabIndex={-1} className="nf">
+        <a href="/" className="nf-brand">
+          <NodeMark />
+          <span>{HERO.name.text}</span>
+        </a>
         <div className="nf-sky" aria-hidden="true" />
         <div className="nf-map" aria-hidden="true">
           <GridPoster variant="404" frame="signal" className="nf-poster" />
