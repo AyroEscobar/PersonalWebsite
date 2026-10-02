@@ -52,9 +52,9 @@ export function BuildFeature({ card: c }) {
           <Dotted text={c.meta} />
         </p>
         <div className="build-body">
-          {c.body.map((b) => (
+          {c.body.map((b, i) => (
             <p key={b.id} className={b.id.endsWith('-tagline') ? 'build-tagline' : undefined}>
-              {b.text}
+              {i === 0 ? <FirstSentence text={b.text} /> : b.text}
             </p>
           ))}
         </div>
@@ -134,5 +134,18 @@ function Arrow() {
     <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
       <path d="M2 8 8 2M3.5 2H8v4.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
     </svg>
+  )
+}
+
+/* The first paragraph, split after its first sentence so print can stop there
+   (print.css, r2 N19). On screen it reads as one paragraph. */
+function FirstSentence({ text }) {
+  const m = text.match(/^(.+?[.!?])\s+(?=[A-Z])/)
+  if (!m) return text
+  return (
+    <>
+      <span className="first">{m[1]}</span>
+      <span className="rest"> {text.slice(m[0].length)}</span>
+    </>
   )
 }

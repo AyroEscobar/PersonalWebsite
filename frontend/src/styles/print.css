@@ -159,6 +159,16 @@
     font-size: 8pt;
     letter-spacing: 0.02em;
   }
+  .pm-proof {
+    margin: 4pt 0 0;
+    font-size: 9pt;
+    line-height: 1.35;
+  }
+  .pm-school {
+    margin: 3pt 0 0;
+    font-size: 9pt;
+    font-weight: 700;
+  }
   .pm-contact {
     display: flex;
     flex-wrap: wrap;
@@ -349,11 +359,9 @@
   .build-body > p:not(:first-child) {
     display: none !important;
   }
-  .build-body > p:first-child {
-    display: -webkit-box !important;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden !important;
+  /* The first full sentence, never a line cut mid-word (r2 N19). */
+  .build-body > p:first-child .rest {
+    display: none !important;
   }
   .build-links a {
     margin-right: 6pt !important;
