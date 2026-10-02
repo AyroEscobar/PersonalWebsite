@@ -6,7 +6,8 @@ import { W } from '../content/sections-ui.js'
 
 /*
   SignalLine (PLAN.md 4.11). The address as big visible text (a mailto link,
-  so a tap on a phone opens mail), a copy button and a write link.
+  so a tap on a phone opens mail), a copy button (the filled primary action,
+  r1 T9) and a write link.
 
   Copy sends a 6px sodium packet down a short stretch of road to a node
   labeled "plano, tx", linear, 720ms; the node lights when it lands, the
@@ -88,13 +89,13 @@ export default function SignalLine() {
       <div className="sl-row">
         <button
           type="button"
-          className="btn-text sl-btn sl-copy mono no-js:hidden"
+          className="btn-fill sl-btn sl-copy no-js:hidden"
           onClick={onCopy}
           data-done={phase === 'copied' ? '' : undefined}
         >
           {label}
         </button>
-        <a className="btn-text sl-btn mono" href={SIGNAL.email.mailto}>
+        <a className="sl-write" href={SIGNAL.email.mailto}>
           {SIGNAL.write.text}
         </a>
         <span className="sl-road" aria-hidden="true">
