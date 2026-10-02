@@ -6,7 +6,7 @@
 html {
   background: var(--night);
   color: var(--ink);
-  font-family: 'Overpass Variable', 'Overpass Fallback', system-ui, sans-serif;
+  font-family: 'Overpass Dot', 'Overpass Variable', 'Overpass Fallback', system-ui, sans-serif;
   font-size: 100%;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;

@@ -36,8 +36,8 @@ export default {
       gray: { 400: 'var(--dim)' },
     },
     fontFamily: {
-      sans: ['"Overpass Variable"', '"Overpass Fallback"', 'system-ui', 'sans-serif'],
-      display: ['"Overpass Variable"', '"Overpass Fallback"', 'system-ui', 'sans-serif'],
+      sans: ['"Overpass Dot"', '"Overpass Variable"', '"Overpass Fallback"', 'system-ui', 'sans-serif'],
+      display: ['"Overpass Dot"', '"Overpass Variable"', '"Overpass Fallback"', 'system-ui', 'sans-serif'],
       mono: ['"Overpass Mono Variable"', '"Overpass Mono Fallback"', 'ui-monospace', 'monospace'],
     },
     fontSize: {

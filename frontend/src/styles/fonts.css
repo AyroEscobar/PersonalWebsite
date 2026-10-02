@@ -45,3 +45,17 @@
   descent-override: 37.31%;
   line-gap-override: 0%;
 }
+
+/*
+  Overpass ships U+00B7, the middle dot this site uses as its separator, with
+  zero advance width, so " · " drew the dot over the following space
+  ("Ayro Escobar ·Plano"). This face covers only that one character with a
+  system sans whose dot is centered. Listed first in every sans stack, so all
+  other characters still fall through to Overpass. Nothing is downloaded.
+  Mono text is unaffected (Overpass Mono's dot is fine).
+*/
+@font-face {
+  font-family: 'Overpass Dot';
+  src: local('Helvetica Neue'), local('HelveticaNeue'), local('Arial'), local('ArialMT'), local('Helvetica'), local('Roboto'), local('Segoe UI'), local('DejaVu Sans');
+  unicode-range: U+00B7;
+}
