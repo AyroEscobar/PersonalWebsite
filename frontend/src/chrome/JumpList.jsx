@@ -40,14 +40,15 @@ const ALIASES = {
   work: ['experience', 'jobs', 'roles', 'career', 'internships', 'resume'],
   builds: ['projects', 'portfolio', 'code', 'repos', 'apps'],
   crew: ['community', 'hackathons', 'volunteering', 'speaking', 'talks'],
-  signal: ['signal', 'email', 'reach', 'message', 'hello', 'socials', 'linkedin', 'github'],
+  // r2 N17: what a hiring reader types. Never displayed and claims nothing.
+  signal: ['signal', 'email', 'reach', 'message', 'hello', 'socials', 'linkedin', 'github', 'hire', 'contact', 'work with', 'availability'],
 }
 
 // Extra words for a role, so a short query finds it.
 const ROLE_ALIASES = {
   'plate-mlh': ['mlh', 'hackcon', 'global hack week'],
   'plate-jpm': ['jpm', 'jp morgan', 'chase', 'bank'],
-  'plate-rbc': ['rbc', 'aidenedge', 'trading', 'bank', 'new york'],
+  'plate-rbc': ['rbc', 'aidenedge', 'trading', 'bank', 'new york', 'desks'],
 }
 
 const GROUP_ORDER = ['recent', 'sections', 'roles', 'builds', 'crew', 'stack', 'channels', 'commands']
@@ -123,7 +124,8 @@ async function copyText(text) {
   word of the query must begin a word there. Returns null or { score, at }
   with the matched title positions for highlighting.
 */
-const WORD_BREAK = /[\s,.·/()@_-]/
+// Quotes break words too, so "planning for chaos" finds the talk (r2 N17).
+const WORD_BREAK = /[\s,.·/()@_"'“”‘’-]/
 
 function fuzzy(q, text) {
   if (!text) return null
@@ -163,7 +165,10 @@ function prefixes(q, text) {
 function match(q, item) {
   const title = fuzzy(q, item.title)
   let best = title ? { score: title.score * 1.25, at: title.at } : null
-  for (const s of [item.sub, ...(item.keywords || [])]) {
+  // Every word of the query may come from a different field: "mlh coach"
+  // finds the MLH role through its alias and its title together (r2 N17).
+  const all = [item.title, item.sub, ...(item.keywords || [])].filter(Boolean).join(' ')
+  for (const s of [item.sub, ...(item.keywords || []), all]) {
     const m = prefixes(q, s)
     if (m && (!best || m.score > best.score)) best = { score: m.score, at: title ? title.at : [] }
   }
