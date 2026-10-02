@@ -3,8 +3,11 @@
   the prerender (GridPoster) and the lazy WebGL layer (PingWave) share it.
 
     decodeChains(grid)            absolute polylines [[x, y, x, y, ...], ...]
-    buildGraph(grid)              { n, x, y, start, nbr, w, edges, chains }
-                                  CSR adjacency; chains hold vertex ids
+    buildGraph(grid)              { n, x, y, start, nbr, w, edges, edgeCls, chains, chainCls }
+                                  CSR adjacency; chains hold vertex ids;
+                                  edgeCls is each edge's road class (1 freeway,
+                                  2 tollway, 3 state road), chainCls the same
+                                  per chain step (grid.cls, from build-grid)
     nearestVertex(g, x, y)        the closest vertex id, by straight distance
     shortestFrom(g, sources)      Float64Array of road distances (Infinity if unreachable)
                                   sources: [[vertex, startDistance], ...]
@@ -52,9 +55,17 @@ export function buildGraph(grid) {
     return c
   })
 
+  const chainCls = chains.map((c, j) => {
+    const str = grid.cls?.[j] ?? ''
+    const out = new Uint8Array(Math.max(0, c.length - 1))
+    for (let i = 0; i < out.length; i++) out[i] = Number(str[i]) || 1
+    return out
+  })
+
   const seen = new Set()
   const edges = []
-  for (const c of chains) {
+  const ecls = []
+  chains.forEach((c, j) => {
     for (let i = 1; i < c.length; i++) {
       const a = c[i - 1]
       const b = c[i]
@@ -63,8 +74,9 @@ export function buildGraph(grid) {
       if (seen.has(k)) continue
       seen.add(k)
       edges.push(a, b)
+      ecls.push(chainCls[j][i - 1])
     }
-  }
+  })
 
   const n = xs.length
   const deg = new Int32Array(n + 1)
@@ -92,7 +104,9 @@ export function buildGraph(grid) {
     nbr,
     w,
     edges: Int32Array.from(edges),
+    edgeCls: Uint8Array.from(ecls),
     chains,
+    chainCls,
   }
 }
 

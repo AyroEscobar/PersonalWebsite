@@ -14,18 +14,32 @@
     GRID_SCRATCH), never into the repo.
 
   What survives
-    Only geometry. Every limited-access road (MTFCC S1100) and every
-    secondary road (S1200) that carries an interstate, US or state route
-    number, clipped to lon -97.05 to -96.45, lat 32.65 to 33.25, simplified
-    with Visvalingam. No names, no route numbers, no feature classes. City
-    points are rounded to 2 decimals before they are projected.
+    Only geometry and a road class. Every limited-access road (MTFCC S1100)
+    and every secondary road (S1200) that carries an interstate, US or state
+    route number, clipped to lon -97.05 to -96.45, lat 32.65 to 33.25,
+    simplified with Visvalingam. No names and no route numbers: names are
+    read here only to sort each road into one of three classes and to find
+    four interchanges, and neither the names nor the route numbers are
+    written out. City points are rounded to 2 decimals before they are
+    projected.
+
+  Road classes (the poster's brightness, r1 T3)
+    1  freeways and interstates (limited access, not tolled)
+    2  tollways (Dallas North Tollway, Bush Turnpike, Sam Rayburn)
+    3  state and US routes that are not limited access
 
   Output (all coordinates in UNIT meter steps, origin at the bbox's north-west
   corner, y pointing south)
-    dfw-grid.json      { v, src, unit, size, bbox, nodes, offgrid, chains }
+    dfw-grid.json      { v, src, unit, size, bbox, nodes, offgrid, chains, cls, hubs, extent }
                        chains: delta-encoded polylines (see encodeChains) that
                        meet at shared integer vertices, so the road graph can be
                        rebuilt by exact coordinate match (src/grid/graph.js).
+                       cls: one string per chain, one class digit per step.
+                       hubs: four interchange points (US-75 by I-635, US-75 by
+                       the Bush Turnpike, the Tollway by the Bush Turnpike,
+                       the Tollway by I-635), unlabeled.
+                       extent: each Texas node's land area as the radius of a
+                       circle of the same area, in map units (Gazetteer ALAND).
                        offgrid: { from, deg } the Texas node a line leaves
                        from and its bearing to the city, in degrees.
     dfw-nodes.json     { unit, size, nodes, offgrid, tags } the small file the
@@ -156,14 +170,14 @@ function douglasPeucker(pts, tol) {
   edges, drop tiny islands, then walk maximal chains between junctions.
 */
 function buildChains(lines, { minIsland = 60 } = {}) {
-  // 1. Segments.
+  // 1. Segments, each with its road's class.
   const segs = []
-  for (const line of lines) {
+  for (const { pts: line, cls } of lines) {
     for (let i = 1; i < line.length; i++) {
       const [ax, ay] = line[i - 1]
       const [bx, by] = line[i]
       if (ax === bx && ay === by) continue
-      segs.push({ ax, ay, bx, by, cuts: [] })
+      segs.push({ ax, ay, bx, by, cls, cuts: [] })
     }
   }
 
@@ -219,16 +233,19 @@ function buildChains(lines, { minIsland = 60 } = {}) {
   }
   const edgeSet = new Set()
   const edges = []
-  const addEdge = (a, b) => {
+  // An edge two roads share (a concurrency) takes the brighter class.
+  const edgeCls = new Map()
+  const addEdge = (a, b, cls) => {
     if (a === b) return
     const k = a < b ? `${a}:${b}` : `${b}:${a}`
+    edgeCls.set(k, Math.min(edgeCls.get(k) ?? 9, cls))
     if (edgeSet.has(k)) return
     edgeSet.add(k)
     edges.push([a, b])
   }
   for (const s of segs) {
     const pts = [[0, s.ax, s.ay], ...s.cuts.sort((m, n) => m[0] - n[0]), [1, s.bx, s.by]]
-    for (let i = 1; i < pts.length; i++) addEdge(vertex(pts[i - 1][1], pts[i - 1][2]), vertex(pts[i][1], pts[i][2]))
+    for (let i = 1; i < pts.length; i++) addEdge(vertex(pts[i - 1][1], pts[i - 1][2]), vertex(pts[i][1], pts[i][2]), s.cls)
   }
 
   // 4. Adjacency and islands.
@@ -301,7 +318,8 @@ function buildChains(lines, { minIsland = 60 } = {}) {
   for (let v = 0; v < vx.length; v++) if (alive(v)) while (free(v).length) chains.push(walk(v))
 
   const islands = compLen.filter((l) => l < minIsland).length
-  return { chains: chains.map((c) => c.map((v) => [vx[v], vy[v]])), vertices: vx.length, edges: edges.length, islands }
+  const chainCls = chains.map((c) => c.slice(1).map((v, i) => edgeCls.get(ek(c[i], v))).join(''))
+  return { chains: chains.map((c) => c.map((v) => [vx[v], vy[v]])), chainCls, vertices: vx.length, edges: edges.length, islands }
 }
 
 /*
@@ -342,16 +360,38 @@ try {
   process.exit(1)
 }
 
-// Roads: filter, clip, simplify. Only MTFCC is kept, for the privacy check below.
+// Roads: filter, clip, simplify. MTFCC is kept for the privacy check below;
+// RTTYP and FULLNAME only sort roads into classes and find the interchanges,
+// and never reach the output.
 const KEEP = "MTFCC == 'S1100' || (MTFCC == 'S1200' && (RTTYP == 'I' || RTTYP == 'U' || RTTYP == 'S'))"
 const cmd = [
   `-i "${shp}"`,
   `-filter "${KEEP}"`,
   `-clip bbox=${BBOX.join(',')}`,
   `-simplify visvalingam ${SIMPLIFY} keep-shapes`,
-  '-filter-fields MTFCC',
+  '-filter-fields MTFCC,RTTYP,FULLNAME',
   '-o format=geojson precision=0.000001 roads.json',
 ].join(' ')
+
+// Class 2: the tollways (the Bush Turnpike is also signed SH-190 and SH-161,
+// the Sam Rayburn Tollway SH-121). Class 1: every other limited-access road.
+// Class 3: secondary roads.
+const TOLL = /Tollway|Tpke|George Bush|^State Hwy (190|161|121)$|^[NSEW] State Hwy 121$/
+const roadClass = (p) => (p.MTFCC === 'S1200' ? 3 : TOLL.test(p.FULLNAME || '') ? 2 : 1)
+
+// The four interchanges the poster lights (unlabeled), as pairs of name tests.
+const ROADS = {
+  us75: /US Hwy 75$|Central Expy$/,
+  i635: /^I- 635$|Lyndon B Johnson Fwy|^I-635 Hov$/,
+  pgbt: /George Bush|^State Hwy 190$/,
+  dnt: /^Dallas North Tollway$/,
+}
+const HUBS = [
+  ['us75', 'i635'],
+  ['us75', 'pgbt'],
+  ['dnt', 'pgbt'],
+  ['dnt', 'i635'],
+]
 const out = await mapshaper.applyCommands(cmd)
 const roads = JSON.parse(out['roads.json'])
 
@@ -362,9 +402,12 @@ const fail = (msg) => {
 
 const lines = []
 const primary = []
+const named = Object.fromEntries(Object.keys(ROADS).map((k) => [k, []]))
 for (const f of roads.features) {
   const cls = f.properties?.MTFCC
   if (cls !== 'S1100' && cls !== 'S1200') fail(`feature class ${cls} is below secondary road`)
+  const rc = roadClass(f.properties)
+  const tags = Object.entries(ROADS).filter(([, re]) => re.test(f.properties.FULLNAME || '')).map(([k]) => k)
   const g = f.geometry
   if (!g) continue
   const parts = g.type === 'LineString' ? [g.coordinates] : g.type === 'MultiLineString' ? g.coordinates : []
@@ -377,13 +420,34 @@ for (const f of roads.features) {
       if (!last || last[0] !== p[0] || last[1] !== p[1]) pts.push(p)
     }
     if (pts.length > 1) {
-      lines.push(pts)
+      lines.push({ pts, cls: rc })
       if (cls === 'S1100') primary.push(pts)
+      for (const t of tags) named[t].push(pts)
     }
   }
 }
 
 const graph = buildChains(lines)
+
+// Interchanges: where two named roads cross (a divided highway crosses in
+// several places, so the crossings are averaged), else their closest approach.
+function hubOf(a, b) {
+  const hits = []
+  let best = null
+  for (const p of named[a])
+    for (const q of named[b])
+      for (let i = 1; i < p.length; i++)
+        for (let j = 1; j < q.length; j++) {
+          const h = segIntersect(p[i - 1][0], p[i - 1][1], p[i][0], p[i][1], q[j - 1][0], q[j - 1][1], q[j][0], q[j][1])
+          if (h) hits.push(h)
+          const d = Math.hypot(p[i][0] - q[j][0], p[i][1] - q[j][1])
+          if (!best || d < best[0]) best = [d, (p[i][0] + q[j][0]) / 2, (p[i][1] + q[j][1]) / 2]
+        }
+  if (hits.length) return [Math.round(hits.reduce((s, h) => s + h[0], 0) / hits.length), Math.round(hits.reduce((s, h) => s + h[1], 0) / hits.length)]
+  if (best && best[0] < 60) return [Math.round(best[1]), Math.round(best[2])]
+  fail(`interchange ${a} by ${b} not found`)
+}
+const hubs = HUBS.map(([a, b]) => hubOf(a, b))
 
 // Places: Census Gazetteer internal points, rounded to city level.
 const gazRows = readFileSync(gaz, 'utf8').split('\n').map((l) => l.split('\t').map((s) => s.trim()))
@@ -391,8 +455,10 @@ const header = gazRows[0]
 const iName = header.indexOf('NAME')
 const iLat = header.indexOf('INTPTLAT')
 const iLon = header.indexOf('INTPTLONG')
+const iLand = header.indexOf('ALAND')
 const nodes = {}
 const nodeLatLon = {}
+const extent = {}
 for (const [id, name] of Object.entries(PLACES)) {
   const row = gazRows.find((r) => r[iName] === name)
   if (!row) fail(`place "${name}" not found in the gazetteer`)
@@ -401,6 +467,8 @@ for (const [id, name] of Object.entries(PLACES)) {
   if (decimals(lat) > 2 || decimals(lon) > 2) fail(`${id} has more than 2 decimals`)
   nodeLatLon[id] = [lat, lon]
   nodes[id] = project(lon, lat).map((n) => Math.round(n))
+  // Land area as the radius of a circle of the same area, in map units.
+  extent[id] = Math.round(Math.sqrt(Number(row[iLand]) / Math.PI) / UNIT)
 }
 const offgrid = {}
 for (const [id, { at, from }] of Object.entries(OFFGRID)) {
@@ -418,6 +486,9 @@ const gridJson = {
   nodes,
   offgrid,
   chains: encodeChains(graph.chains),
+  cls: graph.chainCls,
+  hubs,
+  extent,
 }
 
 // NodeTag sprites: one tiny crop of the limited-access roads per node, already
@@ -485,7 +556,7 @@ for (const id of [...Object.keys(PLACES), ...Object.keys(OFFGRID)]) {
 const nodesJson = { unit: UNIT, size: SIZE, nodes, offgrid, tags }
 
 // Privacy: the only strings allowed are the known keys, node ids and the source line.
-const ALLOWED = new Set(['v', 'src', 'unit', 'size', 'bbox', 'nodes', 'offgrid', 'chains', 'tags', 'w', 'h', 'scale', 'paths', 'from', 'deg', ...Object.keys(PLACES), ...Object.keys(OFFGRID), SRC])
+const ALLOWED = new Set(['v', 'src', 'unit', 'size', 'bbox', 'nodes', 'offgrid', 'chains', 'cls', 'hubs', 'extent', 'tags', 'w', 'h', 'scale', 'paths', 'from', 'deg', ...Object.keys(PLACES), ...Object.keys(OFFGRID), SRC])
 const strings = (o, acc = []) => {
   if (typeof o === 'string') acc.push(o)
   else if (Array.isArray(o)) o.forEach((x) => strings(x, acc))
@@ -493,7 +564,7 @@ const strings = (o, acc = []) => {
   return acc
 }
 for (const json of [gridJson, { ...nodesJson, tags: { ...tags, paths: Object.keys(tags.paths) } }]) {
-  for (const s of strings(json)) if (!ALLOWED.has(s)) fail(`unexpected string "${s.slice(0, 40)}"`)
+  for (const s of strings(json)) if (!ALLOWED.has(s) && !/^[123]+$/.test(s)) fail(`unexpected string "${s.slice(0, 40)}"`)
 }
 
 const gridText = JSON.stringify(gridJson)
@@ -512,4 +583,6 @@ console.log(
 if (STATS) {
   console.log(`  size ${SIZE.join(' x ')} units of ${UNIT} m, nodes ${JSON.stringify(nodes)}, offgrid ${JSON.stringify(offgrid)}`)
   console.log(`  graph: ${graph.vertices} vertices, ${graph.edges} edges before chaining`)
+  const steps = graph.chainCls.join('')
+  console.log(`  classes: ${[1, 2, 3].map((c) => `${c}: ${steps.split(String(c)).length - 1}`).join(', ')} steps; hubs ${JSON.stringify(hubs)}; extent ${JSON.stringify(extent)}`)
 }
