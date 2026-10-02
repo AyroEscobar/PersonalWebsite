@@ -47,6 +47,9 @@ export const SECTIONS = [
 
 export const SECTION_IDS = SECTIONS.map((s) => s.id)
 
+// The filled tab on each stop head reads like a highway exit: exit 01 (r2 U6).
+export const STOP_EXIT = ui('stop-exit', 'exit')
+
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id)
 
 // Heading element id for a section: <h2 id={headingId(id)}>, aria-labelledby on the <section>.
