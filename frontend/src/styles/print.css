@@ -365,7 +365,8 @@
   .channels {
     display: flex !important;
     flex-wrap: wrap;
-    gap: 1pt 12pt;
+    /* sections.css loads after this file and sets its own gap */
+    gap: 1pt 12pt !important;
     margin: 3pt 0 !important;
   }
   .ch,
