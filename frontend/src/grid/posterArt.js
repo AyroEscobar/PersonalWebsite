@@ -27,6 +27,7 @@ import { NODES } from '../content/places.js'
     spur     a dotted leader from each Texas node to the road it meets
     node     dot, glow and label (labels counter-scaled to stay 12px); Plano,
              home, carries the site's one live light, the obstruction beacon
+             (a 5 px core in an 18 px pre-blurred halo, r2 N13)
 */
 
 export const BANDS = 24
@@ -177,7 +178,7 @@ export function posterArt(grid, { id = 'hero' } = {}) {
       `<g class="ng-node" data-node="${node}" data-state="${info.state}" style="--b:${band(dist[v])}" transform="translate(${x} ${y})">` +
         `<g class="ng-fix">` +
         `<circle class="ng-glow" r="${home ? 44 : 28}" fill="url(#${p}-glow-${info.state === 'dim' ? 'dim' : 'led'})"/>` +
-        (home ? `<circle class="ng-beacon-glow beacon" cx="0" cy="-13" r="12" fill="url(#${p}-glow-beacon)"/><circle class="ng-beacon beacon" cx="0" cy="-13" r="2.6"/>` : '') +
+        (home ? `<circle class="ng-beacon-glow beacon" cx="0" cy="-13" r="9" fill="url(#${p}-beacon-halo)"/><circle class="ng-beacon beacon" cx="0" cy="-13" r="2.5"/>` : '') +
         `<circle class="ng-ring" r="7"/>` +
         `<circle class="ng-dot" r="3.5"/>` +
         `<text class="ng-label" x="${l.x}" y="${l.y}" text-anchor="${l.anchor}">${esc(info.text)}</text>` +
@@ -208,7 +209,7 @@ export function posterArt(grid, { id = 'hero' } = {}) {
     `</radialGradient>`
 
   return (
-    `<defs>${glow('led')}${glow('dim')}${glow('beacon')}${haze('city-led', 'led', 0.34)}${haze('city-sodium', 'sodium', 0.28)}${haze('hub-halo', 'sodium', 0.38)}${haze('hub-core', 'ink', 0.6)}${defs.join('')}</defs>` +
+    `<defs>${glow('led')}${glow('dim')}${haze('beacon-halo', 'beacon', 0.85)}${haze('city-led', 'led', 0.34)}${haze('city-sodium', 'sodium', 0.28)}${haze('hub-halo', 'sodium', 0.38)}${haze('hub-core', 'ink', 0.6)}${defs.join('')}</defs>` +
     `<g class="ng-city">${cities.join('')}</g>` +
     `<g class="ng-halo">${halos.join('')}</g>` +
     `<g class="ng-road">${roads.join('')}</g>` +

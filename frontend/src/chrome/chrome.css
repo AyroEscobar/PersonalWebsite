@@ -183,22 +183,16 @@ html:not([data-js]) .js-only {
 
 /* ================================================================ beacon */
 
-/* The clock's steady red dot. The one blinking obstruction light is over
-   Plano on the map (grid.css .ng-beacon, .beacon in motion.css, gated). */
+/* The clock's steady dot, in dim: the one live light on the page is the
+   obstruction beacon over Plano on the map (grid.css .ng-beacon, .beacon in
+   motion.css, gated), and nothing in the bar competes with it (r2 N13). */
 .clock-beacon {
   position: relative;
   flex: none;
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--beacon);
-}
-.clock-beacon::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in oklab, var(--beacon) 45%, transparent), transparent);
+  background: var(--dim);
 }
 
 /* ================================================================ clock chip */
