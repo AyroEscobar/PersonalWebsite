@@ -202,6 +202,14 @@
 .hero-lead {
   margin-top: 28px;
 }
+/* His invisible-systems paragraph: a step below the deck and the proof line
+   (the deck stays at 20px in LED), dim, a shorter measure (r2 N10). */
+.hero-lead.t-lead {
+  max-width: 52ch;
+  color: var(--dim);
+  font-size: 1.125rem;
+  line-height: 1.55;
+}
 
 @media (min-width: 720px) {
   .hero {
