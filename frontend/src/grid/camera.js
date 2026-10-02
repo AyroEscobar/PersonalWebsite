@@ -9,8 +9,8 @@ import { SECTIONS } from '../content/sections.js'
 
     translate(anchor) scale(z * zk) translate(-center)
 
-  anchor  where the framed point sits on screen, in % of the map viewport,
-          per breakpoint (grid.css)
+  anchor  where the framed point sits on screen, in % of the map viewport:
+          per frame on desktop, fixed per breakpoint elsewhere (grid.css)
   z       px per map unit at a 1440 px desktop; zk steps it up on larger
           screens (grid.css) so the frame shows about the same ground
   center  the framed point, in map units
@@ -29,13 +29,15 @@ const mid = (...ids) => [
 ]
 
 // Desktop frames, one per section (sections.js focus.frame). z at 1440 px.
+// In the hero the lit cluster sits right of the name; while you read, it
+// moves further right, past the plates the sections lay over it.
 export const FRAMES = {
-  origin: { at: [N.plano[0] + 60, N.plano[1] + 40], z: 0.5 },
-  now: { at: mid('allen', 'plano', 'richardson'), z: 0.82 },
-  work: { at: [N.plano[0] + 260, N.plano[1] - 120], z: 0.48 },
-  builds: { at: [N.plano[0] - 60, N.plano[1] + 640], z: 0.3 },
-  crew: { at: [N.richardson[0] + 220, N.richardson[1] - 200], z: 0.5 },
-  signal: { at: [N.plano[0] + 40, N.plano[1] + 20], z: 1.05 },
+  origin: { at: [N.plano[0] + 60, N.plano[1] + 40], z: 0.5, ax: 74, ay: 40 },
+  now: { at: mid('allen', 'plano', 'richardson'), z: 0.7, ax: 84, ay: 48 },
+  work: { at: [N.plano[0] + 230, N.plano[1] - 90], z: 0.46, ax: 82, ay: 50 },
+  builds: { at: [N.plano[0] + 20, N.plano[1] + 520], z: 0.3, ax: 84, ay: 46 },
+  crew: { at: [N.richardson[0] + 170, N.richardson[1] - 170], z: 0.5, ax: 84, ay: 52 },
+  signal: { at: [N.plano[0] + 30, N.plano[1] + 60], z: 1, ax: 84, ay: 42 },
 }
 
 // Phones and tablets: the US-75 corridor as the spine, Allen to Richardson.
@@ -53,6 +55,8 @@ export function cameraVars(focus) {
     '--ng-cx-d': px(f.at[0]),
     '--ng-cy-d': px(f.at[1]),
     '--ng-z-d': f.z,
+    '--ng-ax-d': `${f.ax}%`,
+    '--ng-ay-d': `${f.ay}%`,
   }
 }
 
