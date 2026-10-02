@@ -352,7 +352,18 @@ try {
     // Enter on a rail stop lands the heading below the top bar.
     const rail = await page.eval(`!!document.querySelector('nav a[href="#work"]')`)
     if (rail) {
-      await page.eval(`window.scrollTo(0,0); document.querySelector('nav a[href="#work"]').focus()`)
+      // The tab walk can end with a focus scroll still in flight: jump to the top
+      // without animation and wait for scrollY to hold still before pressing Enter.
+      await page.eval(`new Promise((done) => {
+        window.scrollTo({ top: 0, behavior: 'instant' })
+        let last = -1, still = 0
+        const t = setInterval(() => {
+          still = window.scrollY === last ? still + 1 : 0
+          last = window.scrollY
+          if (still >= 4) { clearInterval(t); done() }
+        }, 25)
+      })`)
+      await page.eval(`document.querySelector('nav a[href="#work"]').focus({ preventScroll: true })`)
       await page.key('Enter')
       await sleep(1300)
       const pos = await page.eval(`(() => { const h = document.getElementById('work-h').getBoundingClientRect(); const bar = document.querySelector('header'); const b = bar ? bar.getBoundingClientRect().bottom : 0; const cur = document.querySelector('nav [aria-current]'); return { top: Math.round(h.top), bar: Math.round(b), vh: innerHeight, current: cur ? cur.textContent.trim() : null } })()`)
