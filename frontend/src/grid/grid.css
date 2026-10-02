@@ -203,8 +203,9 @@
       linear-gradient(90deg, var(--night) 0, var(--night) 28%, color-mix(in oklab, var(--night) 84%, transparent) 46%, color-mix(in oklab, var(--night) 40%, transparent) 58%, transparent 68%),
       linear-gradient(to top, var(--night) 0, transparent 20%);
   }
+  /* While reading, columns 1 to 7 sit on plain night (the reading column ends near 60%). */
   .ng-scrim::after {
-    background: linear-gradient(90deg, var(--night) 0, var(--night) 50%, color-mix(in oklab, var(--night) 55%, transparent) 60%, transparent 74%);
+    background: linear-gradient(90deg, var(--night) 0, var(--night) 61%, color-mix(in oklab, var(--night) 60%, transparent) 67%, transparent 76%);
     opacity: 0;
   }
   .ng:not([data-focus='origin']) .ng-scrim::after {
