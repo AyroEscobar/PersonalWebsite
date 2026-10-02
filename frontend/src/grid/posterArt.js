@@ -221,3 +221,22 @@ export function posterArt(grid, { id = 'hero' } = {}) {
     `<g class="ng-nodes">${nodes.join('')}</g>`
   )
 }
+
+/*
+  The closing band (r2 U6): the same roads again, unlit, as <use> references
+  to the hero poster's paths, so the page ends on the city for a few hundred
+  bytes. Prerender only, like posterArt; PosterBand reads it back.
+*/
+export function bandArt(grid, { id = 'hero' } = {}) {
+  const g = buildGraph(grid)
+  const { dist, maxD } = lightField(g, grid)
+  const band = (d) => (Number.isFinite(d) ? Math.min(BANDS - 1, Math.floor((d / maxD) * BANDS)) : BANDS - 1)
+  const keys = new Set()
+  g.chains.forEach((chain, j) => {
+    for (let i = 1; i < chain.length; i++) keys.add(band(Math.min(dist[chain[i - 1]], dist[chain[i]])) * 3 + (g.chainCls[j][i - 1] - 1))
+  })
+  return [...keys]
+    .sort((a, b) => a - b)
+    .map((k) => `<use href="#ng-${id}-b${k}" class="cb-c${(k % 3) + 1}"/>`)
+    .join('')
+}

@@ -122,7 +122,8 @@
   .rp-dot,
   .sl-row,
   .sl-road,
-  .closer-road {
+  .cb-map,
+  .cb-beacon {
     display: none !important;
   }
 

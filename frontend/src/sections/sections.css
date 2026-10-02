@@ -1672,42 +1672,12 @@
   color: var(--sodium);
 }
 
-/* The last road on the page, lit end to end, into a lit node. */
-.closer-road {
-  position: relative;
-  display: block;
-  height: 1px;
-  margin-top: 104px;
-  margin-right: 8px;
-  background: var(--trace);
-}
-.closer-road::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, color-mix(in oklab, var(--sodium) 35%, transparent), var(--sodium));
-  transform-origin: left center;
-}
-.closer-road::after {
-  content: '';
-  position: absolute;
-  right: -8px;
-  top: -8px;
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--sodium) 0 22%, color-mix(in oklab, var(--sodium) 35%, transparent) 30%, transparent 70%);
-}
 .closer {
-  margin-top: 28px;
+  position: relative;
   font-size: clamp(40px, 5vw, 72px);
   line-height: 0.95;
   font-weight: 900;
   letter-spacing: -0.04em;
-}
-@media (max-width: 719.98px) {
-  .closer-road { margin-top: 72px; }
-  .closer { margin-top: 20px; }
 }
 
 /* ---------- motion: interactions (both gates) ---------- */

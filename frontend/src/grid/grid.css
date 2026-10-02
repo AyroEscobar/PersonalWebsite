@@ -822,3 +822,88 @@ html:not([data-js]) .ng-exits {
   text-anchor: end;
   transform: translateX(-24px);
 }
+
+/* ---------- the closing band (PosterBand, r2 U6) ---------- */
+
+/* The last shot is the city again: every road unlit, and the beacon over
+   Plano the only light. The closer sits across its lower left, where the
+   roads fade out. */
+.closer-band {
+  --cb-z: 0.3;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: clamp(200px, 26vw, 300px);
+  margin-top: 88px;
+}
+.cb-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  -webkit-mask-image: radial-gradient(ellipse 62% 70% at 68% 42%, var(--ink) 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 62% 70% at 68% 42%, var(--ink) 30%, transparent 100%);
+}
+.cb-cam {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transform: translate(68%, 42%) scale(var(--cb-z)) translate(var(--cb-x), var(--cb-y));
+}
+.cb-cam use {
+  stroke: var(--trace-lit);
+  stroke-opacity: 0.5;
+  stroke-width: 1px;
+}
+.cb-cam .cb-c3 {
+  stroke-opacity: 0.28;
+}
+/* The beacon: a 5px core in an 18px pre-blurred halo, the same light as the hero's (r2 N13). */
+.cb-beacon {
+  position: absolute;
+  left: 68%;
+  top: 42%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: var(--beacon);
+}
+.cb-beacon::before {
+  content: '';
+  position: absolute;
+  inset: -6.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklab, var(--beacon) 55%, transparent), transparent 70%);
+}
+@media (max-width: 719.98px) {
+  .closer-band {
+    --cb-z: 0.22;
+    margin-top: 64px;
+  }
+}
+/* Desktop: at the last stop the sticky map steps back like it does under
+   builds, so the band is the one city on screen. */
+@media (min-width: 1100px) {
+  .ng[data-focus='signal'][data-reading] .ng-view::after {
+    opacity: 1;
+  }
+  .ng[data-focus='signal'][data-reading] .ng-node .ng-label:not(.ng-label-hot),
+  .ng[data-focus='signal'][data-reading] .ng-exits {
+    opacity: 0;
+  }
+}
+@media print {
+  .cb-map,
+  .cb-beacon {
+    display: none;
+  }
+  .closer-band {
+    display: block;
+    min-height: 0;
+    margin-top: 12pt;
+  }
+}
