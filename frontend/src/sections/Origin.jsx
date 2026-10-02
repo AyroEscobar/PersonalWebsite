@@ -6,9 +6,10 @@ import { Highlight } from './text.jsx'
 
 /*
   origin (PLAN.md 3.3). A's Hero comes in as children, first. Then his own
-  words: the paragraph, the "whole map" sentence set large with its middle
-  line lit, the no-shortcut line as a road sign, the off-hours line, and
-  the vitals beside the duotone photo.
+  words: the paragraph, the line about the level he is aiming at (moved here
+  from the hero in r1, T16), the "whole map" sentence set large with its
+  middle line lit, the no-shortcut line as the one real highway sign on the
+  site (T9), the off-hours line, and the vitals beside the duotone photo.
 */
 
 // The line inside the pull quote that gets the light. Styling only; the text is verbatim.
@@ -24,12 +25,15 @@ export default function Origin({ id, children }) {
             <StopHead id={id} />
             <div className="origin-body">
               <p className="t-lead origin-para">{ORIGIN.paragraph.text}</p>
+              <p className="t-lead origin-para origin-level">{ORIGIN.level.text}</p>
               <blockquote className="origin-pull">
                 <p>
                   <Highlight text={ORIGIN.pull.text} phrase={MAP_LINE} className="lit" />
                 </p>
               </blockquote>
-              <p className="sign">{ORIGIN.closer.text}</p>
+              <p className="sign">
+                <span>{ORIGIN.closer.text}</span>
+              </p>
               <p className="origin-off">{ORIGIN.offHours.text}</p>
               <div className="origin-id">
                 <picture className="origin-photo">
