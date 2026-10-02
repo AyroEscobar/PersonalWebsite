@@ -28,14 +28,17 @@
   /* horizon band, written by SkyWord from the sun over Plano */
   --horizon: transparent;
 
-  /* type scale (desktop values; base.css swaps the mobile ones) */
-  --t-display: clamp(56px, 9vw, 128px);
-  --t-h2: clamp(34px, 4vw, 56px);
-  --t-h3: 24px;
-  --t-lead: 20px;
-  --t-body: 17px;
-  --t-small: 14px;
-  --t-mono: 13px;
+  /* type scale (desktop values; the phone ones are below). In rem, so a
+     reader's larger default font size scales the page; the display sizes keep
+     their vw middle term (r1 M20). At 16px: 56 to 128, 34 to 56, 24, 20, 17,
+     14, 13. */
+  --t-display: clamp(3.5rem, 9vw, 8rem);
+  --t-h2: clamp(2.125rem, 4vw, 3.5rem);
+  --t-h3: 1.5rem;
+  --t-lead: 1.25rem;
+  --t-body: 1.0625rem;
+  --t-small: 0.875rem;
+  --t-mono: 0.8125rem;
 
   /* layout */
   --page-pad: 40px;
@@ -74,9 +77,9 @@
 /* Phones: 16px gutters, 56px bottom bar, smaller body. */
 @media (max-width: 719.98px) {
   :root {
-    --t-h3: 22px;
-    --t-lead: 18px;
-    --t-body: 16px;
+    --t-h3: 1.375rem;
+    --t-lead: 1.125rem;
+    --t-body: 1rem;
     --page-pad: 16px;
     --gutter: 16px;
     --rail-w: 0px;
@@ -86,9 +89,19 @@
   }
 }
 
+/* Tablets: the rail shows its current stop's name, so the column starts
+   24px further right than the rail alone needs (r1 T15). */
 @media (min-width: 720px) and (max-width: 1099.98px) {
   :root {
     --page-pad: 32px;
+    --rail-w: 96px;
+  }
+}
+
+/* Wide screens: the name grows to about 168px, so the hero reads as a poster (r1 M16). */
+@media (min-width: 1600px) {
+  :root {
+    --t-display: clamp(3.5rem, 9vw, 10.5rem);
   }
 }
 

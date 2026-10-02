@@ -593,6 +593,17 @@ html[data-mode='quiet'] .quiet-lamp {
     display: block;
   }
 }
+/* Wide screens: the rail, the name above it and the copy share one centered
+   frame instead of drifting apart (r1 M16). */
+@media (min-width: 1600px) {
+  .rail {
+    left: max(0px, calc(50% - (var(--page-max) + var(--rail-w)) / 2));
+  }
+  .topbar-row {
+    max-width: calc(var(--page-max) + var(--rail-w));
+    margin-inline: auto;
+  }
+}
 
 /* The line hangs from the name's node and fades before the bottom edge. */
 .rail-line {
