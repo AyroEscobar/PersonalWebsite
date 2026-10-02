@@ -767,6 +767,22 @@ html[data-mode='quiet'] .quiet-lamp {
   }
 }
 
+/* Tablets: the margin is 32px narrower, so the stops tighten and the
+   labels drop their backing to clear the reading column. */
+@media (max-width: 1099.98px) {
+  .rail-stops {
+    padding-left: calc(var(--rail-x) - 12px);
+  }
+  .rail-stop {
+    gap: 6px;
+    padding: 0 6px;
+  }
+  .rail-label {
+    padding: 4px 0 3px;
+    background: none;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-motion='reduced']) .rail-fill {
     transition: transform 160ms var(--ease-out);
