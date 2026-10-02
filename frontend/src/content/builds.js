@@ -152,7 +152,7 @@ export const BUILDS = {
       body: [
         item(
           'gaia-what',
-          'An AI journaling app for women in unsafe relationships. It tracks emotional change over time and gives a safety read from a risk model built on the DSM-5.',
+          'An AI journaling app for women in unsafe relationships. It tracks emotional change over time and gives a safety read informed by DSM-5 criteria.',
           ['prj-gaia'],
         ),
       ],
