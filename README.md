@@ -1,54 +1,39 @@
-# Ayro Escobar // Personal Website
+# ayroescobar.com
 
-Personal site and portfolio. Currently being redesigned on the `retro-revamp` branch.
+My personal site. One page, prerendered, built around a night map of the Dallas highway grid: past work glows sodium, current work glows LED white, and you can ping the grid.
 
-## Status: work in progress
+## Stack
 
-`retro-revamp` is an active rebuild of the site into a dark mission control theme called OPERATOR. It is not finished and it is not merged to `master`. Production at ayroescobar.com still runs the previous design.
+- React 19.3, Vite 7, Tailwind 3.4
+- Prerendered with `react-dom/static`, so the page paints before any script runs
+- Raw WebGL2 for the one animated layer, lazy and optional; no three.js
+- Overpass and Overpass Mono, self-hosted variable fonts
+- No cookies, no analytics, no third-party requests
 
-**Done**
-
-- Full theme rebuild: dark OPERATOR look, JetBrains Mono and Space Grotesk
-- Boot sequence intro
-- Hero: glitch in name, live status eyebrow, personal brand paragraph
-- Home sections rebuilt as console panels: profile, status, experience with the expandable RBC desk log, stack matrix, build log, contact
-- Content rewritten from the resume and verified info
-
-**In progress and next**
-
-- Personal section (DISPATCH) is pulled, waiting on real content
-- Command palette, deeper polish, OG image, favicon
-- Remaining routes (`/review`, `/admin`) still on the old theme
-- Do not merge to `master` until the redesign is approved
-
-## Tech
-
-- Frontend: React 19, Vite, Tailwind CSS, Framer Motion, Three.js
-- Backend: Firebase Firestore
-
-## Run it locally
+## Run it
 
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev        # http://localhost:5173
+npm run build      # check-content, vite build, ssr build, prerender, budget
+npm run preview    # serves dist the way Vercel does (headers, 404, compression)
 ```
 
-Serves on http://localhost:5173
+## How it holds together
 
-## Picking this up on another machine
+| Path | What lives there |
+|---|---|
+| `frontend/src/content/` | Every visible string, each one tagged with where the fact comes from |
+| `frontend/src/styles/tokens.css` | The palette, type scale and motion timings |
+| `frontend/src/lib/` | Store, render tiers, quiet mode, Plano clock, sun position, formatting |
+| `frontend/src/ui/` | Shared pieces: section contract, status chip, lazy mount, announcer |
+| `frontend/src/grid`, `hero`, `chrome`, `sections` | The map, the hero, the navigation and live panels, the sections |
+| `frontend/scripts/` | Build, prerender, content checks, budgets, image and OG pipelines, QA |
+| `frontend/tools/` | Local-only tooling (Lighthouse, axe, sharp, mapshaper); `npm run tools` |
 
-```bash
-git fetch origin
-git checkout retro-revamp
-cd frontend && npm install
-npm run dev
-```
+Rules are code, not good intentions. The build fails on copy with no source, en or em dashes, banned words, private details, off-palette colors, contrast under the floor, or a blown bundle budget. `node scripts/qa.mjs` from the repo root runs the full headless check: every route at 390, 768, 1440 and 1920, axe, keyboard order, reduced motion, Lighthouse and the bundle report.
 
-## Environment variables
+Quiet mode (`?quiet`, or the `quiet` button) is the same page with the motion off and the contrast up.
 
-Copy `frontend/.env.example` to `frontend/.env` and fill in the Firebase credentials.
-
----
-
-Built by Ayro Escobar
+Road data: US Census Bureau TIGER/Line 2024, public domain. Fonts: SIL Open Font License, licenses in `frontend/src/assets/fonts/`.
