@@ -50,6 +50,13 @@
   /* Overpass 900 at display size sits a touch right of the mono eyebrow. */
   margin-left: -0.04em;
 }
+/* Phones keep the name on one line at the foot of the map (it fits from 320 px up). */
+@media (max-width: 719.98px) {
+  .hero-name {
+    font-size: min(var(--t-display), 14.6vw);
+    white-space: nowrap;
+  }
+}
 
 .hero-bottom {
   grid-area: 2 / 1;
@@ -78,7 +85,7 @@
   position: absolute;
   z-index: 1;
   top: calc(var(--topbar-h) + 14px);
-  left: var(--page-pad);
+  left: calc(var(--page-pad) + var(--rail-w));
   right: var(--page-pad);
   display: flex;
   justify-content: flex-start;
@@ -102,6 +109,12 @@
 
 .hero-hint {
   color: var(--dim);
+  white-space: nowrap;
+}
+@media (max-width: 359.98px) {
+  .hero-hint {
+    letter-spacing: 0;
+  }
 }
 
 .hero-ping-btn {
