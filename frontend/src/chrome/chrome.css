@@ -10,38 +10,11 @@
   and animates transform and opacity, plus lit-state colors on stations.
 */
 
-/*
-  Overpass Variable ships U+00B7 (the middle dot this site uses as its
-  separator) with zero advance width, so " · " renders as " ·Plano". This
-  face covers only that one character with a system sans whose dot is
-  centered; listed first in a font stack, every other character still falls
-  through to Overpass. Nothing is downloaded. Used on the chrome's
-  proportional text; requests-B.md asks FOUNDATION to apply it site wide.
-*/
-@font-face {
-  font-family: 'Overpass Dot';
-  src:
-    local('Helvetica Neue'), local('HelveticaNeue'), local('Arial'), local('ArialMT'), local('Helvetica'), local('Roboto'),
-    local('Segoe UI'), local('DejaVu Sans');
-  unicode-range: U+00B7;
-}
-
 :root {
   /* The rail's line: the center of the name's node in the top bar. */
   --rail-x: calc(var(--page-pad) + 8px);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --mono: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-  --sans-dot: 'Overpass Dot', 'Overpass Variable', 'Overpass Fallback', system-ui, sans-serif;
-}
-
-.topbar,
-.nowboard,
-.jumplist,
-.stops-sheet,
-.bottombar,
-.footer,
-.nf {
-  font-family: var(--sans-dot);
 }
 
 .print-only {
