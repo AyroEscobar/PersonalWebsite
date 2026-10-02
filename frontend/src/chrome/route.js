@@ -8,7 +8,7 @@ import { setFocus } from '../lib/store.js'
 
     useRoute()  { index, progress }
                 index     the current stop (0 to 5), the section under the
-                          reading line at 30% of the viewport
+                          reading line at 42% of the viewport
                 progress  0 to 1 along the whole line, continuous: it reaches
                           stop k exactly when section k reaches the reading line
 
@@ -26,7 +26,9 @@ import { setFocus } from '../lib/store.js'
 */
 
 const N = SECTION_IDS.length
-const LINE = 0.3
+// The reading line: a stop becomes current when its section's top passes 42%
+// of the viewport, so the rail never lags a heading you are already reading (r1 M9).
+const LINE = 0.42
 
 let state = { index: 0, progress: 0 }
 const SERVER = state
