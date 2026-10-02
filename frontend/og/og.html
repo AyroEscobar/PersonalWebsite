@@ -1,0 +1,49 @@
+<!doctype html>
+<!--
+  OG image template (PLAN.md 9). Owned by B. scripts/og.mjs screenshots this
+  page at 1200 by 630 and writes public/og.png. Lives outside public/ so it is
+  never deployed as a page. Uses the real tokens and fonts.
+  PROVISIONAL by FOUNDATION: typographic card with one lit node. B replaces
+  the motif with the lit grid from src/data/dfw-grid.json, then asks
+  FOUNDATION to switch the og:image:alt in src/content/meta.js.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>og</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/src/styles/tokens.css" />
+    <link rel="stylesheet" href="/src/styles/fonts.css" />
+    <style>
+      html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: var(--night); }
+      body { position: relative; font-family: 'Overpass Variable', 'Overpass Fallback', sans-serif; color: var(--ink); }
+      .horizon { position: absolute; inset: 0 0 auto 0; height: 160px; background: linear-gradient(to bottom, color-mix(in oklab, var(--led) 7%, transparent), transparent); }
+      .copy { position: absolute; left: 88px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; gap: 22px; }
+      .mono { font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', monospace; letter-spacing: 0.04em; }
+      .eyebrow { font-size: 28px; color: var(--dim); }
+      h1 { margin: 0; font-size: 132px; line-height: 0.92; font-weight: 900; letter-spacing: -0.03em; }
+      .host { position: absolute; left: 88px; bottom: 64px; font-size: 26px; color: var(--sodium); }
+      svg { position: absolute; right: 0; top: 0; }
+    </style>
+  </head>
+  <body>
+    <div class="horizon"></div>
+    <svg width="460" height="630" viewBox="0 0 460 630" aria-hidden="true">
+      <defs>
+        <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stop-color="var(--sodium)" stop-opacity="0.55" />
+          <stop offset="1" stop-color="var(--sodium)" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <path d="M-20 470 C 120 430, 200 400, 300 330 S 420 250, 520 230" fill="none" stroke="var(--trace)" stroke-width="3" stroke-linecap="round" />
+      <path d="M190 660 C 230 520, 260 430, 300 330 S 380 90, 420 -30" fill="none" stroke="var(--trace-lit)" stroke-width="4" stroke-linecap="round" />
+      <circle cx="300" cy="330" r="96" fill="url(#glow)" />
+      <circle cx="300" cy="330" r="15" fill="var(--sodium)" />
+    </svg>
+    <div class="copy">
+      <p class="mono eyebrow">software engineer · plano, texas</p>
+      <h1>Ayro Escobar</h1>
+    </div>
+    <p class="mono host">ayroescobar.com</p>
+  </body>
+</html>
