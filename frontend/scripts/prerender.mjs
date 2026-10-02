@@ -9,6 +9,9 @@
   vercel.json in sync: locally it rewrites the hash and tells you to commit it;
   on CI (VERCEL or CI set) a stale hash fails the build.
 
+  The CSS is inlined into both pages (INLINE_CSS=0 turns it off) because it
+  is small and it is the only render-blocking request.
+
   Also asserts the contract QA relies on: one h1, the six section h2s, no
   em or en dashes in the HTML.
 */
@@ -19,14 +22,30 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DIST = path.join(ROOT, 'dist')
+const INLINE_CSS = process.env.INLINE_CSS !== '0'
+
+async function inlineCss(html) {
+  const links = [...html.matchAll(/<link rel="stylesheet"[^>]*href="(\/assets\/[^"]+\.css)"[^>]*>/g)]
+  for (const [tag, href] of links) {
+    const css = (await readFile(path.join(DIST, href), 'utf8')).replace(/<\/style/gi, '<\\/style')
+    html = html.replace(tag, `<style data-href="${href}">${css}</style>`)
+  }
+  return html
+}
 
 export async function prerender() {
   const { render } = await import(pathToFileURL(path.join(ROOT, 'dist-ssr/entry-server.js')))
   const { NOT_FOUND } = await import(pathToFileURL(path.join(ROOT, 'src/content/meta.js')))
   const { SECTION_IDS, headingId } = await import(pathToFileURL(path.join(ROOT, 'src/content/sections.js')))
 
-  const template = await readFile(path.join(DIST, 'index.html'), 'utf8')
+  let template = await readFile(path.join(DIST, 'index.html'), 'utf8')
   if (!template.includes('<div id="root"></div>')) throw new Error('prerender: #root placeholder not found in dist/index.html')
+
+  // Inline the stylesheet: one page, one small CSS file, and it removes the only
+  // render-blocking request (about 0.4 s of mobile FCP in Lighthouse's model).
+  if (INLINE_CSS) {
+    template = await inlineCss(template)
+  }
 
   const home = await render('home')
   const notFound = await render('404')

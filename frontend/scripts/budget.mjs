@@ -137,7 +137,8 @@ export function measure() {
   const initial =
     htmlGz +
     entryGz +
-    [...cssFiles].reduce((s, f) => s + fileGz(path.join(DIST, f)), 0) +
+    // Inlined stylesheets already ride in the HTML (scripts/prerender.mjs).
+    [...cssFiles].filter((f) => !indexHtml.includes(`data-href="/${f}"`)).reduce((s, f) => s + fileGz(path.join(DIST, f)), 0) +
     fontBytes +
     eagerImgs.reduce((s, f) => s + raw(path.join(DIST, f)), 0) +
     (existsSync(path.join(DIST, 'favicon.svg')) ? fileGz(path.join(DIST, 'favicon.svg')) : 0)
