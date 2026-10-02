@@ -106,7 +106,9 @@
   line-height: 1.5;
 }
 
-/* Contact, first screen (r1 T2): small, dim, unmistakably links. */
+/* Contact, first screen (r1 T2): body size in ink, the address written out
+   (r2 U8). The filled ping is a toy; this row is the way to reach him, so it
+   is never the quietest text in the hero. */
 .hero-contact {
   display: flex;
   flex-wrap: wrap;
@@ -115,7 +117,7 @@
   margin: 18px 0 0;
   padding: 0;
   list-style: none;
-  font-size: var(--t-small);
+  font-size: var(--t-body);
   line-height: 1.5;
 }
 .hero-contact li {
@@ -131,8 +133,8 @@
   display: inline-flex;
   align-items: center;
   min-height: 24px;
-  color: var(--dim);
-  text-decoration-color: color-mix(in oklab, var(--dim) 40%, transparent);
+  color: var(--ink);
+  text-decoration-color: color-mix(in oklab, var(--ink) 35%, transparent);
 }
 .hero-contact a:hover {
   color: var(--ink);

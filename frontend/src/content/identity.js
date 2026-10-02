@@ -31,7 +31,8 @@ export const HERO = {
   ),
   contactLabel: ui('hero-contact-label', 'reach me'),
   contact: [
-    { id: 'hero-contact-email', label: 'email', href: `mailto:${EMAIL}`, facts: ['ln-email'] },
+    // The address itself, so it can be read and copied without a mail client (r2 U8).
+    { id: 'hero-contact-email', label: EMAIL, href: `mailto:${EMAIL}`, facts: ['ln-email'] },
     { id: 'hero-contact-linkedin', label: 'LinkedIn', href: LINKEDIN, facts: ['ln-linkedin'] },
     { id: 'hero-contact-github', label: 'GitHub', href: GITHUB, facts: ['ln-github'] },
     { id: 'hero-contact-work', label: 'see the work', href: '#work', ui: true },
