@@ -50,9 +50,15 @@ export default function StopsSheet({ ref, index }) {
       if (back?.isConnected) back.focus({ preventScroll: true })
     }
     d.addEventListener('close', onClose)
-    // Wide enough for the rail: the bar is gone, so is its sheet.
+    // Wide enough for the rail: the bar is gone, so is its sheet. Focus goes
+    // to the rail's current stop, not to the page (r2 N16).
     const mq = window.matchMedia?.('(min-width: 720px)')
-    const onWide = () => mq.matches && d.open && d.close()
+    const onWide = () => {
+      if (!mq.matches || !d.open) return
+      opener.current = null
+      d.close()
+      document.querySelector('.rail-stop[aria-current]')?.focus({ preventScroll: true })
+    }
     mq?.addEventListener?.('change', onWide)
     return () => {
       d.removeEventListener('close', onClose)
