@@ -268,12 +268,21 @@
 
 /* ---------- horizon: the sky over Plano, as a thin tint ---------- */
 
+/* Shorter than before and eased over five stops, so a wide screen shows no
+   bands (r1 M17). No noise or dither layer: grain is off the palette. */
 .ng-horizon {
   --ng-hz: var(--horizon, transparent);
   position: absolute;
   inset: 0 0 auto 0;
-  height: 160px;
-  background: linear-gradient(to bottom, var(--ng-hz), transparent);
+  height: 120px;
+  background: linear-gradient(
+    to bottom,
+    var(--ng-hz),
+    color-mix(in oklab, var(--ng-hz) 72%, transparent) 22%,
+    color-mix(in oklab, var(--ng-hz) 42%, transparent) 46%,
+    color-mix(in oklab, var(--ng-hz) 16%, transparent) 72%,
+    transparent
+  );
 }
 
 /* ---------- the artwork ---------- */
