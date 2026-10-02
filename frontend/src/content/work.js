@@ -1,12 +1,13 @@
 import { item, ui } from './item.js'
 
 /*
-  The work section (PLAN.md 3.5): ReleasePlates newest first, the RBC
-  DeskBranch, and the StackPlate. Rendered by C.
+  The work section (PLAN.md 3.5): ReleasePlates (MD7, JPMorgan, RBC, MLH),
+  the RBC DeskBranch, and the StackPlate. Rendered by C.
 
   Plate fields inherit the plate's facts. `status` is the visible word,
   `state` picks the light: 'now' is LED, 'past' is sodium.
-  JPMorgan has no debrief on purpose (questions.md #1, #6).
+  JPMorgan's debrief is his own published farewell sentence (r2 N1), past
+  tense and with no team name (questions.md #1, #6).
 */
 
 export const WORK = {
@@ -49,7 +50,16 @@ export const WORK = {
       state: 'past',
       node: 'plano',
       facts: ['exp-jpm-2026'],
-      debrief: [],
+      // His own published sentence from the Aug 21 farewell post, verbatim, no
+      // team name (questions.md #42 default; #6 keeps the team out).
+      debrief: [
+        item(
+          'jpm-debrief',
+          'What I found was a team that trusted me with real work, pushed me when I needed it, and taught me more than I expected to learn in one summer.',
+          ['voice-jpm-farewell'],
+          { verbatim: 'voice-jpm-farewell' },
+        ),
+      ],
     },
     {
       id: 'plate-rbc',
