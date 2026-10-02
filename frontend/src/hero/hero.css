@@ -221,6 +221,19 @@
   }
 }
 
+/* A phone on its side: the map is the whole first screen, the name across
+   its lower edge, under the cluster (grid.css, r2 U2). */
+@media (max-width: 1099.98px) and (max-height: 480px) and (orientation: landscape) {
+  .hero {
+    --hero-name-at: 0.74;
+  }
+}
+@media (max-width: 719.98px) and (max-height: 480px) and (orientation: landscape) {
+  .hero {
+    --hero-name-at: 0.58;
+  }
+}
+
 /* ---------- desktop: the map full bleed behind, copy in the reading column ---------- */
 
 @media (min-width: 1100px) {

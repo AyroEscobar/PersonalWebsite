@@ -52,6 +52,17 @@ export const HERO_FRAMES = {
 
 const px = (n) => `${-Math.round(n)}px`
 
+/*
+  The hero frame's top inset (r2 U2): how far the highest lit city sits above
+  the frame's anchor, in px at zk 1. grid.css keeps that city's dot at least
+  the top bar plus one sign row (36px) below the top edge on every tier, so
+  no name ever sits under the bar or under the exit signs:
+
+    --ng-ay: max(<the breakpoint's anchor>, topbar + 36px + rise * zk)
+*/
+const LIT = ['plano', 'richardson', 'allen']
+const rise = (at, z) => `${Math.round(Math.max(0, ...LIT.map((id) => at[1] - N[id][1])) * z * 10) / 10}px`
+
 /** Inline custom properties for the wrapper: the desktop frame for `focus`. */
 export function cameraVars(focus) {
   const f = FRAMES[focus] ?? FRAMES.origin
@@ -60,7 +71,10 @@ export function cameraVars(focus) {
     '--ng-cy-d': px(f.at[1]),
     '--ng-z-d': f.z,
     '--ng-ax-d': `${f.ax}%`,
+    '--ng-axf-d': f.ax / 100,
     '--ng-ay-d': `${f.ay}%`,
+    // Only the hero frame holds the cities clear of the bar; reading frames are dimmed and sticky.
+    '--ng-rise-d': focus === 'origin' ? rise(f.at, f.z) : '0px',
   }
 }
 
@@ -71,9 +85,11 @@ export function heroVars() {
     '--ng-cx-m': px(p.at[0]),
     '--ng-cy-m': px(p.at[1]),
     '--ng-z-m': p.z,
+    '--ng-rise-m': rise(p.at, p.z),
     '--ng-cx-t': px(t.at[0]),
     '--ng-cy-t': px(t.at[1]),
     '--ng-z-t': t.z,
+    '--ng-rise-t': rise(t.at, t.z),
   }
 }
 

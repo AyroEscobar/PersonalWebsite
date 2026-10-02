@@ -54,8 +54,12 @@
 }
 
 .ng {
+  /* The top inset (r2 U2): the highest lit city stays below the bar plus
+     one row for the exit signs (camera.js writes the rise). */
+  --ng-rise: var(--ng-rise-m, 0px);
+  --ng-top: calc(var(--topbar-h) + 44px + var(--ng-rise) * var(--ng-zk));
   --ng-ax: 50%;
-  --ng-ay: 31%;
+  --ng-ay: max(31%, var(--ng-top));
   --ng-zk: 1;
   position: absolute;
   top: 0;
@@ -139,15 +143,32 @@
     );
 }
 
-/* Short phones: the same ground, a little further out. */
+/* Short phones: the same ground, further out, so Allen clears the bar and
+   the exit row while Richardson stays above the name (r2 U2: 320x568,
+   360x640, 375x667, and Safari or in-app browsers with their toolbars). */
 @media (max-width: 719.98px) and (max-height: 800px) {
   .ng {
     --ng-zk: 0.88;
   }
 }
-@media (max-width: 719.98px) and (max-height: 600px) {
+@media (max-width: 719.98px) and (max-height: 720px) {
+  .ng {
+    --ng-zk: 0.75;
+  }
+}
+@media (max-width: 719.98px) and (max-height: 680px) {
   .ng {
     --ng-zk: 0.7;
+  }
+}
+@media (max-width: 719.98px) and (max-height: 650px) {
+  .ng {
+    --ng-zk: 0.62;
+  }
+}
+@media (max-width: 719.98px) and (max-height: 600px) {
+  .ng {
+    --ng-zk: 0.5;
   }
 }
 
@@ -155,8 +176,9 @@
 
 @media (min-width: 720px) {
   .ng {
+    --ng-rise: var(--ng-rise-t, 0px);
     --ng-ax: 62%;
-    --ng-ay: 40%;
+    --ng-ay: max(40%, var(--ng-top));
   }
   /* Tablets: the name sits at 72% of the block (hero.css). */
   .ng-scrim {
@@ -178,8 +200,54 @@
   }
   .ng {
     --ng-ax: 70%;
-    --ng-ay: 46%;
+    --ng-ay: max(46%, var(--ng-top));
     --ng-zk: 0.92;
+  }
+}
+/* A phone on its side (under 480px tall): the map takes the whole first
+   screen, the cluster in its upper right, the name across the bottom where
+   the night has come down, so the bar never sits on a city (r2 U2). */
+@media (max-width: 1099.98px) and (max-height: 480px) and (orientation: landscape) {
+  :root {
+    --ng-h: 100svh;
+  }
+  .ng {
+    --ng-ax: 68%;
+    --ng-ay: max(46%, var(--ng-top));
+    --ng-zk: 1;
+  }
+  .ng-scrim {
+    background:
+      linear-gradient(to bottom, color-mix(in oklab, var(--night) 70%, transparent) 0, transparent var(--topbar-h)),
+      linear-gradient(
+        to bottom,
+        transparent 66%,
+        color-mix(in oklab, var(--night) 70%, transparent) 72%,
+        var(--night) 82%
+      );
+  }
+}
+@media (min-width: 720px) and (max-width: 1099.98px) and (max-height: 480px) and (orientation: landscape) {
+  .ng {
+    --ng-zk: 0.6;
+  }
+}
+/* Under 720px the bottom bar is up too: the name comes in higher, the
+   cluster a little smaller above it. */
+@media (max-width: 719.98px) and (max-height: 480px) and (orientation: landscape) {
+  .ng {
+    --ng-ay: max(40%, var(--ng-top));
+    --ng-zk: 0.8;
+  }
+  .ng-scrim {
+    background:
+      linear-gradient(to bottom, color-mix(in oklab, var(--night) 70%, transparent) 0, transparent var(--topbar-h)),
+      linear-gradient(
+        to bottom,
+        transparent 56%,
+        color-mix(in oklab, var(--night) 70%, transparent) 61%,
+        var(--night) 70%
+      );
   }
 }
 @media (min-width: 720px) {
@@ -204,7 +272,7 @@
   }
   .ng-cam {
     --ng-ax: var(--ng-ax-d, 74%);
-    --ng-ay: var(--ng-ay-d, 40%);
+    --ng-ay: max(var(--ng-ay-d, 40%), calc(var(--topbar-h) + 44px + var(--ng-rise-d, 0px) * var(--ng-zk)));
     --ng-cx: var(--ng-cx-d);
     --ng-cy: var(--ng-cy-d);
     --ng-z: var(--ng-z-d);
