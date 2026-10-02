@@ -69,16 +69,21 @@ export default function Hero() {
   useEffect(() => {
     const el = side.current
     if (!el || typeof IntersectionObserver === 'undefined') return undefined
-    const io = new IntersectionObserver(
-      ([e]) => {
-        const up = e.isIntersecting || e.boundingClientRect.bottom < 0
-        if (up) el.dataset.away = ''
-        else delete el.dataset.away
-      },
-      { rootMargin: '0px 0px -48% 0px' },
-    )
-    io.observe(el)
-    return () => io.disconnect()
+    // Two observers, one on the top half and one on the whole screen, so a
+    // jump straight back to the top (Home, a rail stop) is seen too.
+    const update = () => {
+      const up = el.getBoundingClientRect().top < window.innerHeight * 0.52
+      if (up) el.dataset.away = ''
+      else delete el.dataset.away
+    }
+    const half = new IntersectionObserver(update, { rootMargin: '0px 0px -48% 0px' })
+    const screen = new IntersectionObserver(update)
+    half.observe(el)
+    screen.observe(el)
+    return () => {
+      half.disconnect()
+      screen.disconnect()
+    }
   }, [])
 
   const onPointerDown = (e) => {
