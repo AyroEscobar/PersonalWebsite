@@ -1,4 +1,3 @@
-/* global __BUILD_SHA__, __BUILD_DATE__ */
 /*
   Build stamp values, injected by Vite `define` (vite.config.js) from the
   build environment: the short commit SHA and the UTC build date (YYYY-MM-DD).

@@ -60,8 +60,6 @@ export function subscribe(fn) {
   return () => subscribers.delete(fn)
 }
 
-const getServerState = () => SERVER_STATE
-
 /** Select a slice. Return primitives or stable references from the selector. */
 export function useStore(selector = (s) => s) {
   return useSyncExternalStore(

@@ -37,7 +37,7 @@ const MIME = {
   '.webmanifest': 'application/manifest+json',
 }
 
-function vercelHeaderRules(root) {
+function vercelHeaderRules() {
   const file = path.join(ROOT, 'vercel.json')
   if (!existsSync(file)) return []
   const config = JSON.parse(readFileSync(file, 'utf8'))
@@ -52,7 +52,7 @@ function vercelHeaderRules(root) {
 }
 
 export function serveDist({ port = 0, root = path.join(ROOT, 'dist'), host = '127.0.0.1', log = false } = {}) {
-  const rules = vercelHeaderRules(root)
+  const rules = vercelHeaderRules()
   const resolve = (urlPath) => {
     let p = decodeURIComponent(urlPath.split('?')[0].split('#')[0])
     if (p.includes('..')) return null
