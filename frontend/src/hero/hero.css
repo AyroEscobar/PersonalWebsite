@@ -180,7 +180,7 @@
   padding: 0;
   list-style: none;
   color: var(--dim);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .hero-key li {
   display: inline-flex;

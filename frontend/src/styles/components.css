@@ -60,7 +60,7 @@
 /* Uppercase is only for labels of three words or fewer (PLAN.md 2.2). */
 .label {
   font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.3;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -186,7 +186,7 @@
   border-radius: var(--radius);
   color: var(--state, var(--dim));
   font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.2;
   font-weight: 500;
   letter-spacing: 0.06em;
