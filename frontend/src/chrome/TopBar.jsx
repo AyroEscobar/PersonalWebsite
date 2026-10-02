@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import './chrome.css'
 import { HERO } from '../content/identity.js'
 import { CHROME } from '../content/meta.js'
@@ -21,11 +22,29 @@ import { onStopClick } from './route.js'
 
   Over the hero the bar is clear; it fills in over the first 96px of
   scroll (a scroll-driven opacity on a backing layer, where supported).
+  Under 480px tall it slides away once the hero is gone (r2 U3).
   Focus order (QA step 10): name, clock, contact, quiet, search.
 */
 export default function TopBar() {
+  const bar = useRef(null)
+
+  // Short screens only (chrome.css): once the hero has scrolled away, the bar
+  // slides up out of the reader's way. It stays position: fixed throughout,
+  // so turning a phone never resets the scroll (r2 U3).
+  useEffect(() => {
+    const el = bar.current
+    const hero = document.querySelector('.hero')
+    if (!el || !hero || typeof IntersectionObserver === 'undefined') return undefined
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) delete el.dataset.away
+      else el.dataset.away = ''
+    })
+    io.observe(hero)
+    return () => io.disconnect()
+  }, [])
+
   return (
-    <header className="topbar" data-chrome="topbar">
+    <header className="topbar" data-chrome="topbar" ref={bar}>
       <div className="topbar-row">
         <a href="#origin" className="tb-name" onClick={(e) => onStopClick(e, 'origin')}>
           <NodeMark className="tb-node" />

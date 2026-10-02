@@ -61,11 +61,32 @@ html:not([data-js]) .js-only {
   /* A fixed bar must never widen a phone's layout viewport. */
   overflow-x: clip;
 }
-/* Short screens (a phone on its side, 400% zoom): the top bar scrolls away
-   with the page, so the two bars never take a third of the screen (r1 M8). */
+/* Short screens (a phone on its side, 400% zoom): the bar stays fixed (a
+   switch to absolute on rotation reset the scroll to the top, r2 U3) and
+   slides up out of the way once the hero has scrolled past, so the two bars
+   never take a third of the screen (r1 M8). Hidden means hidden: after the
+   slide it is not a Tab stop either. TopBar.jsx sets data-away. */
 @media (max-height: 480px) {
-  .topbar {
-    position: absolute;
+  .topbar[data-away] {
+    translate: 0 -100%;
+    visibility: hidden;
+  }
+  /* The search dialog and the now board live in the header's DOM: opened
+     from a shortcut while the bar is away, they still show. */
+  .topbar[data-away] :is(dialog, [popover]) {
+    visibility: visible;
+  }
+}
+@media (max-height: 480px) and (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='reduced']) .topbar {
+    transition:
+      translate 200ms var(--ease),
+      visibility 0s linear 0s;
+  }
+  html:not([data-motion='reduced']) .topbar[data-away] {
+    transition:
+      translate 200ms var(--ease),
+      visibility 0s linear 200ms;
   }
 }
 
