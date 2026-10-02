@@ -4,6 +4,7 @@ import { CHROME } from '../content/meta.js'
 import { NODES } from '../content/places.js'
 import QuietToggle from './QuietToggle.jsx'
 import { goTo } from './route.js'
+import { openJump, prefetchJump } from './jump.js'
 
 /*
   StopsSheet (PLAN.md 4.5, phones). Every stop on the line in a native
@@ -61,6 +62,14 @@ export default function StopsSheet({ ref, index }) {
 
   const close = () => dialog.current?.open && dialog.current.close()
 
+  // Search lives here on phones (the bar's right slot is contact, r2 N15).
+  // The sheet closes first; the list hands focus back to the bar's stop button.
+  const search = () => {
+    opener.current = null
+    close()
+    openJump({ opener: document.querySelector('.bb-stop') })
+  }
+
   const choose = (e, id) => {
     e.preventDefault()
     // goTo lands focus on the heading; the close must not pull it back.
@@ -105,6 +114,13 @@ export default function StopsSheet({ ref, index }) {
           </ol>
         </div>
         <div className="ss-foot">
+          <button type="button" className="ss-search js-only" onPointerDown={prefetchJump} onClick={search}>
+            <svg className="search-mark" viewBox="0 0 16 16" aria-hidden="true">
+              <circle cx="7" cy="7" r="4.6" />
+              <path d="M10.4 10.4 14 14" />
+            </svg>
+            {CHROME.search.text}
+          </button>
           <QuietToggle variant="row" />
         </div>
       </div>

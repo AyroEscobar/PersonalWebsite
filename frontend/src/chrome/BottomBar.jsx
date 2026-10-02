@@ -1,17 +1,20 @@
 import { useRef } from 'react'
 import { SECTIONS } from '../content/sections.js'
 import { CHROME } from '../content/meta.js'
-import SearchChip from './SearchChip.jsx'
 import { onStopClick } from './route.js'
 
 /*
   BottomBar (PLAN.md 4.5, phones under 720px). The rail turned sideways:
   a thin sodium fill along the top edge shows how far down the line you
   are; below it, the stop you are at (opens every stop in a sheet), the next
-  stop as a link ("now >", read as "next stop, now"), and search. 56px tall
-  plus the home indicator's safe area. Hidden while any dialog is open. The
-  last stop's "next" is the first stop, with an up arrow, standing in for
-  back-to-top. The sheet itself lives beside the bar (RouteRail).
+  stop as a link ("now >", read as "next stop, now"), and contact, a
+  straight line to the signal stop (r2 N15: on a phone the way to reach him
+  is always one tap away; search moved into the stops sheet and stays on
+  Cmd+K). 56px tall plus the home indicator's safe area. Hidden while any
+  dialog is open. The last stop's "next" is the first stop, with an up
+  arrow, standing in for back-to-top. The sheet itself lives beside the bar
+  (RouteRail). Without JavaScript the bar is not drawn: its stop button
+  cannot open anything and its labels cannot follow the page.
 */
 function Chevron({ dir = 'right' }) {
   const d = dir === 'up' ? 'M4 10l4-4 4 4' : 'M6 4l4 4-4 4'
@@ -29,7 +32,7 @@ export default function BottomBar({ index, fill, onStops }) {
   const wrap = !next
 
   return (
-    <div className="bottombar" data-chrome="bottombar">
+    <div className="bottombar js-only" data-chrome="bottombar">
       <span className="bb-track" aria-hidden="true">
         <span className="bb-fill" style={{ transform: `scaleX(${fill})` }} />
       </span>
@@ -55,7 +58,9 @@ export default function BottomBar({ index, fill, onStops }) {
           <span className="bb-next-label">{wrap ? SECTIONS[0].label.text : next.label.text}</span>
           <Chevron dir={wrap ? 'up' : 'right'} />
         </a>
-        <SearchChip bare className="bb-search" />
+        <a className="bb-contact" href="#signal" onClick={(e) => onStopClick(e, 'signal')}>
+          {CHROME.contact.text}
+        </a>
       </div>
     </div>
   )

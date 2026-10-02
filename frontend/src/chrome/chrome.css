@@ -847,7 +847,8 @@ html[data-dialog] .bottombar {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  flex: 1 1 auto;
+  /* A zero basis, so the next link never slides as stop names change (r2 N15). */
+  flex: 1 1 0;
   min-width: 0;
   min-height: 44px;
   padding: 0 8px;
@@ -917,8 +918,19 @@ html[data-dialog] .bottombar {
 .bb-next:hover .bb-next-label {
   color: var(--sodium);
 }
-.bb-search {
+.bb-contact {
+  display: inline-flex;
+  align-items: center;
   flex: none;
+  min-height: 44px;
+  padding: 0 8px 0 12px;
+  color: var(--ink);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration-color: color-mix(in oklab, var(--ink) 35%, transparent);
+}
+.bb-contact:hover {
+  text-decoration-color: var(--sodium);
 }
 
 
@@ -1029,9 +1041,30 @@ html[data-dialog] .bottombar {
   text-align: right;
 }
 .ss-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--hairline);
+}
+.ss-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.ss-search:hover {
+  background: var(--deck-2);
 }
 
 /* ================================================================ jump list */
