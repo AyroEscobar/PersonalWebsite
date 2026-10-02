@@ -111,6 +111,8 @@ export async function connect(wsUrl) {
     page.addInitScript = (source) => s('Page.addScriptToEvaluateOnNewDocument', { source })
     page.key = async (key, { modifiers = 0, code, text } = {}) => {
       const keyCode = { Tab: 9, Enter: 13, Escape: 27, ArrowDown: 40, ArrowUp: 38, ' ': 32 }[key] ?? key.toUpperCase().charCodeAt(0)
+      // Enter and Space only activate links and buttons when the key event carries text.
+      if (text === undefined && !modifiers) text = { Enter: '\r', ' ': ' ' }[key]
       const base = { key, code: code ?? (key.length === 1 ? `Key${key.toUpperCase()}` : key), windowsVirtualKeyCode: keyCode, modifiers }
       await s('Input.dispatchKeyEvent', { type: text ? 'keyDown' : 'rawKeyDown', ...base, text })
       await s('Input.dispatchKeyEvent', { type: 'keyUp', ...base })
