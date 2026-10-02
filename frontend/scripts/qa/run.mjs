@@ -122,8 +122,11 @@ try {
   const decode = (s) => s.replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/<!-- -->/g, '')
   const plain = decode(homeHtml)
   const missingH2 = SECTION_IDS.filter((id) => !new RegExp(`<h2[^>]*id="${headingId(id)}"`).test(homeHtml))
-  check('prerender', 'h1 and h2s before JS', plain.includes(`>${HERO.name.text}</h1>`) && !missingH2.length ? 'pass' : 'fail', missingH2.length ? `missing ${missingH2.join(', ')}` : 'h1 and six h2s in the served HTML')
+  // The h1 sets each word in its own span from 1100 px up (r1 T12): compare its text, not its markup.
+  const h1Text = ((plain.match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1] || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+  check('prerender', 'h1 and h2s before JS', h1Text === HERO.name.text && !missingH2.length ? 'pass' : 'fail', missingH2.length ? `missing ${missingH2.join(', ')}` : `h1 "${h1Text}" and six h2s in the served HTML`)
   check('prerender', 'hero caption before JS', plain.includes(HERO.lead.text) ? 'pass' : 'fail', 'full hero caption in the served HTML')
+  check('prerender', 'proof line before JS', plain.includes(HERO.proof.text) ? 'pass' : 'fail', 'the JPMorgan and RBC line under the deck is in the served HTML (r1 T7)')
   const nf = await fetch(`${url}/nothing-here`)
   const nfHtml = await nf.text()
   check('http', '404 status', nf.status === 404 && nfHtml.includes(NOT_FOUND.heading.text) ? 'pass' : 'fail', `/nothing-here -> ${nf.status}, ${nfHtml.includes(NOT_FOUND.heading.text) ? 'themed' : 'not themed'}`)
@@ -238,21 +241,42 @@ try {
   const badInternal = R.links.internal.filter((l) => l.status !== 200)
   check('links', 'internal', badInternal.length ? 'fail' : 'pass', badInternal.map((l) => `${l.status} ${l.href}`).join(', ') || `${R.links.internal.length} same-origin links`)
   if (!FAST) {
+    // r1 M22: every link is logged as it is checked; the step has a hard
+    // deadline; a timeout or a 5xx from a host the site links on purpose is a
+    // warning (their outage is not our bug), a 4xx anywhere is a failure.
+    const KNOWN = /(^|\.)(github\.com|linkedin\.com|instagram\.com|viaere\.com|interview-lens\.com|ayroescobar\.com)$/
     const ext = [...allLinks.keys()].filter((h) => /^https?:/.test(h) && !h.startsWith(origin))
+    const deadline = Date.now() + 75000
     for (const href of ext) {
       let status = 0
-      try {
-        const ctl = AbortSignal.timeout(10000)
-        let r = await fetch(href, { method: 'HEAD', redirect: 'follow', signal: ctl, headers: { 'user-agent': 'Mozilla/5.0 (Macintosh) site-link-check' } })
-        if (r.status === 405 || r.status === 404) r = await fetch(href, { redirect: 'follow', signal: AbortSignal.timeout(10000), headers: { 'user-agent': 'Mozilla/5.0 (Macintosh) site-link-check' } })
-        status = r.status
-      } catch (e) {
-        status = `error ${e.name}`
+      if (Date.now() > deadline) {
+        status = 'skipped (step deadline)'
+      } else {
+        try {
+          const ctl = AbortSignal.timeout(10000)
+          let r = await fetch(href, { method: 'HEAD', redirect: 'follow', signal: ctl, headers: { 'user-agent': 'Mozilla/5.0 (Macintosh) site-link-check' } })
+          if (r.status === 405 || r.status === 404) r = await fetch(href, { redirect: 'follow', signal: AbortSignal.timeout(10000), headers: { 'user-agent': 'Mozilla/5.0 (Macintosh) site-link-check' } })
+          status = r.status
+        } catch (e) {
+          status = `error ${e.name}`
+        }
       }
+      console.log(`    link ${status} ${href}`)
       R.links.external.push({ href, status })
     }
-    const unverifiable = R.links.external.filter((l) => [999, 403, 429].includes(l.status))
-    const broken = R.links.external.filter((l) => !(typeof l.status === 'number' && l.status < 400) && ![999, 403, 429].includes(l.status))
+    const hostOf = (h) => {
+      try {
+        return new URL(h).hostname
+      } catch {
+        return ''
+      }
+    }
+    const soft = (l) =>
+      [999, 403, 429].includes(l.status) ||
+      /^skipped/.test(String(l.status)) ||
+      (KNOWN.test(hostOf(l.href)) && (typeof l.status !== 'number' || l.status >= 500))
+    const unverifiable = R.links.external.filter(soft)
+    const broken = R.links.external.filter((l) => !soft(l) && !(typeof l.status === 'number' && l.status < 400))
     check('links', 'external', broken.length ? 'fail' : unverifiable.length ? 'warn' : 'pass', [...broken.map((l) => `${l.status} ${l.href}`), ...unverifiable.map((l) => `unverifiable ${l.status} ${l.href}`)].join(', ') || `${R.links.external.length} external links`)
   }
 
@@ -325,15 +349,17 @@ try {
       ['skip link', (f) => /skip/i.test(f.name)],
       ['name', (f) => f.name === 'Ayro Escobar'],
       ['clock chip', (f) => /plano/i.test(f.name) && f.tag !== 'a'],
+      ['contact', (f) => f.tag === 'a' && f.href === '#signal' && /^contact$/i.test(f.name)],
       ['quiet', (f) => /^quiet/i.test(f.name)],
       ['search', (f) => /^search/i.test(f.name)],
       ...SECTION_IDS.map((id) => [`rail ${id}`, (f) => f.href === `#${id}`]),
+      ['hero email', (f) => /^mailto:/.test(f.href || '')],
       ['ping', (f) => /^ping$/i.test(f.name)],
     ]
     let j = 0
     for (const f of seq) if (j < EXPECT.length && EXPECT[j][1](f)) j++
     const missing = EXPECT.filter(([, m]) => !seq.some(m)).map(([n]) => n)
-    check('keyboard', 'tab order spec', j === EXPECT.length ? 'pass' : missing.length ? 'pending' : 'fail', j === EXPECT.length ? 'skip, name, clock, quiet, search, six stops, ping' : missing.length ? `not built yet: ${missing.join(', ')}` : `out of order at "${EXPECT[j][0]}"`)
+    check('keyboard', 'tab order spec', j === EXPECT.length ? 'pass' : missing.length ? 'pending' : 'fail', j === EXPECT.length ? 'skip, name, clock, contact, quiet, search, six stops, hero email, ping' : missing.length ? `not built yet: ${missing.join(', ')}` : `out of order at "${EXPECT[j][0]}"`)
 
     // Cmd+K and Esc with focus return.
     const hasSearch = await page.eval(`!![...document.querySelectorAll('header button')].find(b => /^search/i.test(b.innerText.trim()))`)
@@ -408,6 +434,141 @@ try {
     const pr = await page.eval(`(() => { const vis = (s) => [...document.querySelectorAll(s)].filter(e => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().height > 0).length; return { canvas: vis('canvas'), buttons: vis('button'), nav: vis('nav'), bg: getComputedStyle(document.body).backgroundColor } })()`)
     check('print', 'print hides chrome', !pr.canvas && !pr.buttons && !pr.nav ? 'pass' : 'pending', `visible in print: canvas ${pr.canvas}, buttons ${pr.buttons}, nav ${pr.nav}; body ${pr.bg}`)
     await page.close()
+  }
+
+  // ---------- 10b. r1 regressions (triage T2, T5, T6, T8, T9, T11 to T14) ----------
+  log('r1 regressions')
+  {
+    // T2 and T6: a way to write to him on the first screen, the name high on a phone.
+    for (const [w, h] of [[390, 844], [360, 780], [1440, 900]]) {
+      const mobile = w < 720
+      const page = await cdp.newPage({ width: w, height: h, dpr: mobile ? 2 : 1, mobile })
+      await page.goto(`${url}/`, { settle: 1200 })
+      const c = await page.eval(`(() => {
+        const m = document.querySelector('main a[href^="mailto:"]')
+        const h1 = document.querySelector('h1')
+        const ok = (e) => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden'
+        const all = [...document.querySelectorAll('a[href], button, input, summary, [tabindex]:not([tabindex="-1"])')].filter(ok)
+        const after = all.filter((e) => h1.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING)
+        const first = after.find((e) => !e.closest('.hero-deck'))
+        const ping = document.querySelector('.hero-ping')
+        const bar = document.querySelector('header').getBoundingClientRect().bottom
+        return {
+          mail: m ? Math.round(m.getBoundingClientRect().top) : null,
+          vh: innerHeight,
+          first: first ? first.getAttribute('href') : null,
+          deck: after.filter((e) => e.closest('.hero-deck')).length,
+          h1: Math.round(h1.getBoundingClientRect().top),
+          hintUnderBar: !!ping && ping.getBoundingClientRect().top < bar + 40,
+          sw: document.documentElement.scrollWidth,
+          iw: innerWidth,
+        }
+      })()`)
+      check('r1', `T2 contact on the first screen @${w}x${h}`, c.mail != null && c.mail < c.vh && /^mailto:/.test(c.first || '') ? 'pass' : 'fail', `mailto top ${c.mail} of ${c.vh}; first stop after the h1${c.deck ? ` (past ${c.deck} inline deck link)` : ''}: ${c.first}`)
+      if (mobile) check('r1', `T6 name high on a phone @${w}x${h}`, c.h1 < 300 && !c.hintUnderBar && c.sw <= w && c.iw === w ? 'pass' : 'fail', `h1 top ${c.h1}, hint under the bar ${c.hintUnderBar}, scrollWidth ${c.sw}`)
+      await page.close()
+    }
+
+    // T13: the map scrolls and pinch-zooms; neither pings.
+    {
+      const page = await cdp.newPage({ width: 390, height: 844, dpr: 2, mobile: true })
+      await page.goto(`${url}/`, { settle: 600 })
+      const ta = await page.eval(`[...document.querySelectorAll('.hero-stage, .ng, svg.ng-svg')].map((e) => getComputedStyle(e).touchAction)`)
+      check('r1', 'T13 pinch zoom on the map', ta.length >= 2 && ta.every((t) => /pan-y/.test(t) && /pinch-zoom/.test(t)) ? 'pass' : 'fail', ta.join(' | '))
+      await page.close()
+    }
+
+    // T14: WCAG 1.4.12 text spacing at 320 and 390: no sideways scroll, the name never clips.
+    for (const w of [320, 390]) {
+      const page = await cdp.newPage({ width: w, height: 800, dpr: 2, mobile: true })
+      await page.goto(`${url}/`, { settle: 800 })
+      const r = await page.eval(`new Promise((done) => {
+        const s = document.createElement('style')
+        s.textContent = '* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }'
+        document.head.appendChild(s)
+        setTimeout(() => {
+          const h1 = document.querySelector('h1')
+          const b = h1.getBoundingClientRect()
+          const clock = document.querySelector('.clock-btn').getBoundingClientRect()
+          done({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, iw: innerWidth, h1Clip: h1.scrollWidth > h1.clientWidth + 1 || b.right > innerWidth + 1, clockRight: Math.round(clock.right) })
+        }, 400)
+      })`)
+      check('r1', `T14 text spacing @${w}`, r.sw === r.cw && r.iw === w && !r.h1Clip && r.clockRight <= w ? 'pass' : 'fail', `scrollWidth ${r.sw}, clientWidth ${r.cw}, layout ${r.iw}, h1 clipped ${r.h1Clip}, clock right edge ${r.clockRight}`)
+      await page.close()
+    }
+
+    // T8 and T9 at 1440, everything mounted: mono only for data, boxes only for plates.
+    {
+      const page = await cdp.newPage({ width: 1440, height: 900 })
+      await page.goto(`${url}/`, { settle: 1200 })
+      await page.eval(fn(P.scrollThrough))
+      const m = await page.eval(fn(P.monoShare))
+      const b = await page.eval(fn(P.borderedBoxes))
+      check('r1', 'T8 mono share at 1440', m.share <= 35 ? 'pass' : 'fail', `${m.mono} of ${m.total} visible text nodes (${m.share}%) are mono, limit 35%`)
+      check('r1', 'T9 bordered boxes at 1440', b.count < 40 ? 'pass' : 'fail', `${b.count} fully bordered elements in main (under 40): ${b.sample.join(', ')}`)
+      await page.close()
+    }
+
+    // T11: the phone stops sheet hands focus back, and closes when the screen turns wide.
+    {
+      const page = await cdp.newPage({ width: 390, height: 844, dpr: 2, mobile: true })
+      await page.goto(`${url}/`, { settle: 1000 })
+      await page.eval(`document.querySelector('.bb-stop').focus()`)
+      await page.key('Enter')
+      await sleep(350)
+      const opened = await page.eval(`!!document.querySelector('dialog.stops-sheet[open]')`)
+      await page.key('Escape')
+      await sleep(350)
+      const back = await page.eval(`document.activeElement === document.querySelector('.bb-stop')`)
+      await page.eval(`document.querySelector('.bb-stop').focus()`)
+      await page.key('Enter')
+      await sleep(350)
+      await page.setViewport({ width: 844, height: 390, dpr: 2, mobile: true })
+      await sleep(500)
+      const turned = await page.eval(`(() => { const d = document.querySelector('dialog.stops-sheet'); if (!d.open) return 'closed'; const r = d.getBoundingClientRect(); return r.width > 0 && r.height > 0 ? 'visible' : 'invisible' })()`)
+      check('r1', 'T11 stops sheet focus and rotation', opened && back && turned !== 'invisible' ? 'pass' : 'fail', `opened ${opened}, focus back on the stop button ${back}, after turning to 844x390 the sheet is ${turned}`)
+      await page.close()
+    }
+
+    // T12: fonts held back 500 ms on desktop must not move the page.
+    {
+      const slow = await serveDist({ port: 0, delay: (p) => (/\.woff2$/.test(p) ? 500 : 0) })
+      const shifts = []
+      for (const [w, h] of [[1280, 800], [1440, 900], [1920, 1080]]) {
+        const page = await cdp.newPage({ width: w, height: h })
+        await page.addInitScript(fn(P.clsInit))
+        await page.send('Storage.clearDataForOrigin', { origin: new URL(slow.url).origin, storageTypes: 'local_storage,session_storage' })
+        await page.goto(`${slow.url}/`, { settle: 2000 })
+        shifts.push([w, await page.eval('Math.round(window.__cls * 10000) / 10000')])
+        await page.close()
+      }
+      slow.server.close()
+      check('r1', 'T12 no shift when the fonts arrive late', shifts.every(([, v]) => v <= 0.02) ? 'pass' : 'fail', shifts.map(([w, v]) => `${w}: CLS ${v}`).join(', '))
+    }
+
+    // T5: the ping's frames, and the loop idle once the afterglow has cooled (4 s).
+    for (const w of [390, 1440]) {
+      const mobile = w < 720
+      const page = await cdp.newPage({ width: w, height: mobile ? 844 : 900, dpr: mobile ? 2 : 1, mobile })
+      await page.addInitScript(fn(P.rafCounterInit))
+      await page.send('Storage.clearDataForOrigin', { origin, storageTypes: 'local_storage,session_storage' })
+      await page.goto(`${url}/`, { settle: 2500 })
+      const tier = await page.eval('document.documentElement.dataset.tier || null')
+      await page.eval(`[...document.querySelectorAll('button')].find((b) => /^ping$/i.test(b.innerText.trim())).click()`)
+      const t0 = Date.now()
+      for (const t of [200, 600, 1000, 1600, 3000, 4000]) {
+        await sleep(Math.max(0, t - (Date.now() - t0)))
+        if (!NO_SHOTS) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, `after-state-${w}-ping-${t}ms.png`))))
+      }
+      await sleep(Math.max(0, 4100 - (Date.now() - t0)))
+      await page.eval('window.__qa.raf = 0')
+      await sleep(1000)
+      const raf = await page.eval('window.__qa.raf')
+      const said = await page.eval(`[...document.querySelectorAll('[role="status"]')].map((s) => s.textContent.trim()).join(' | ')`)
+      // Tier full keeps its ambient trails running until 20 s without input (by design); lite and static have none.
+      check('r1', `T5 ping settles by 4 s @${w}`, (tier === 'full' || raf === 0) && /pinged from plano/.test(said) ? 'pass' : 'fail', `tier ${tier}, rAF callbacks in the second after 4.1 s: ${raf}${tier === 'full' ? ' (ambient trails)' : ''}; status "${said}"`)
+      await page.close()
+    }
   }
 
   // ---------- 11. Lighthouse ----------

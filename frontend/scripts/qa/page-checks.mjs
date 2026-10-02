@@ -245,7 +245,8 @@ export function domFacts() {
       const m = document.querySelector('[data-map], svg[role="img"]')
       return m ? getComputedStyle(m).touchAction : null
     })(),
-    unnamedButtons: q('button').filter((b) => !(b.innerText.trim() || b.getAttribute('aria-label') || b.getAttribute('aria-labelledby'))).length,
+    // textContent too: a button inside a folded <details> is not rendered, so its innerText is empty, but it has a name.
+    unnamedButtons: q('button').filter((b) => !(b.innerText.trim() || b.textContent.trim() || b.getAttribute('aria-label') || b.getAttribute('aria-labelledby'))).length,
     perf: (() => {
       const n = performance.getEntriesByType('navigation')[0]
       const p = performance.getEntriesByType('paint').find((x) => x.name === 'first-contentful-paint')
@@ -293,5 +294,64 @@ export function focusInfo() {
     inView,
     obscured: inView && fixedOver,
     rect: { top: Math.round(r.top), left: Math.round(r.left), w: Math.round(r.width), h: Math.round(r.height) },
+  }
+}
+
+/**
+ * r1 T8: share of visible text nodes set in Overpass Mono. Text inside SVG,
+ * screen-reader-only text, closed dialogs, popovers and folded details (but
+ * their summaries) is not visible type, so it is not counted.
+ */
+export function monoShare() {
+  const shown = (el) => {
+    for (let p = el; p && p !== document.body; p = p.parentElement) {
+      const cs = getComputedStyle(p)
+      if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0) return false
+    }
+    const r = el.getBoundingClientRect()
+    return r.width > 0 && r.height > 0 && r.bottom > 0
+  }
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+  let total = 0
+  let mono = 0
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    if (!n.textContent.trim()) continue
+    const el = n.parentElement
+    if (!el || el.closest('svg, script, style, noscript, .sr-only, dialog:not([open]), [popover]:not(:popover-open)')) continue
+    const folded = el.closest('details:not([open])')
+    if (folded && !el.closest('summary')) continue
+    if (!shown(el)) continue
+    total++
+    if (/Overpass Mono/.test(getComputedStyle(el).fontFamily.split(',')[0])) mono++
+  }
+  return { total, mono, share: total ? Math.round((mono / total) * 1000) / 10 : 0 }
+}
+
+/** r1 T9: elements inside <main> with a visible border on all four sides. */
+export function borderedBoxes() {
+  const out = []
+  for (const el of document.querySelectorAll('main *')) {
+    const folded = el.closest('details:not([open])')
+    if (folded && folded !== el && !el.closest('summary')) continue
+    const cs = getComputedStyle(el)
+    if (cs.display === 'none' || cs.visibility === 'hidden') continue
+    const sides = ['Top', 'Right', 'Bottom', 'Left'].map(
+      (s) => parseFloat(cs[`border${s}Width`]) > 0 && cs[`border${s}Style`] !== 'none' && !/rgba\(\d+, \d+, \d+, 0\)|transparent/.test(cs[`border${s}Color`]),
+    )
+    const r = el.getBoundingClientRect()
+    if (sides.every(Boolean) && r.width > 0 && r.height > 0) out.push(String(el.className || el.tagName).slice(0, 40))
+  }
+  return { count: out.length, sample: out.slice(0, 12) }
+}
+
+/** r1 T12: layout shift collected from the very first paint. Install with addInitScript. */
+export function clsInit() {
+  window.__cls = 0
+  try {
+    new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) if (!e.hadRecentInput) window.__cls += e.value
+    }).observe({ type: 'layout-shift', buffered: true })
+  } catch {
+    /* no layout-shift entries in this browser */
   }
 }
