@@ -304,7 +304,8 @@ export default function NightGrid() {
           }
         }
       },
-      { rootMargin: '-42% 0px -58% 0px' },
+      // A band from the 42% reading line down to 50%, so a quick scroll cannot step over a short row.
+      { rootMargin: '-42% 0px -50% 0px' },
     )
     for (const el of document.querySelectorAll('main [data-flare]')) io.observe(el)
     return () => io.disconnect()

@@ -36,7 +36,8 @@ export default function Origin({ id, children }) {
                 <span>{ORIGIN.closer.text}</span>
               </p>
               <p className="origin-off">{ORIGIN.offHours.text}</p>
-              <div className="origin-id">
+              {/* UT Dallas is in Richardson: the map flares it as the vitals reach the reading line. */}
+              <div className="origin-id" data-flare="richardson">
                 <picture className="origin-photo">
                   <source type="image/avif" srcSet={HEADSHOT.avif} sizes="(min-width: 720px) 200px, 112px" />
                   <img
@@ -52,8 +53,7 @@ export default function Origin({ id, children }) {
                 </picture>
                 <dl className="vitals">
                   {ORIGIN.vitals.map((v) => (
-                    // UT Dallas is in Richardson: the map flares it as the row reaches the reading line.
-                    <div key={v.id} data-flare={v.id === 'vital-school' ? 'richardson' : undefined}>
+                    <div key={v.id}>
                       <dt className="label">{v.label}</dt>
                       <dd>{v.value}</dd>
                     </div>
