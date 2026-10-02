@@ -30,10 +30,19 @@ export async function scrollThrough() {
   return H()
 }
 
-/** Horizontal overflow and the elements that cause it. */
-export function overflowCheck() {
-  const vw = window.innerWidth
-  const sw = document.documentElement.scrollWidth
+/**
+ * Horizontal overflow and the elements that cause it. `expected` is the
+ * emulated viewport width. On a phone (mobile emulation) content that
+ * overflows widens the layout viewport itself, so innerWidth grows with it
+ * (a 390 phone laid out 529 wide reads innerWidth 529 and scrollWidth 529).
+ * So: the document must not scroll sideways (scrollWidth vs clientWidth),
+ * and the layout viewport must not be wider than the screen it was given.
+ */
+export function overflowCheck(expected = 0) {
+  const doc = document.documentElement
+  const vw = expected || window.innerWidth
+  const sw = doc.scrollWidth
+  const widened = expected > 0 && window.innerWidth > expected + 1
   const offenders = []
   const clipped = (el) => {
     for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
@@ -56,7 +65,7 @@ export function overflowCheck() {
       })
     }
   }
-  return { viewport: vw, scrollWidth: sw, overflow: sw > vw + 1, offenders: offenders.slice(0, 8), offenderCount: offenders.length }
+  return { viewport: vw, layout: window.innerWidth, scrollWidth: sw, overflow: sw > doc.clientWidth + 1 || widened, offenders: offenders.slice(0, 8), offenderCount: offenders.length }
 }
 
 /** Broken images (after a scroll-through) and missing alt. */

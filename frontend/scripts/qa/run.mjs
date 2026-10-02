@@ -180,7 +180,7 @@ try {
       if (!NO_SHOTS) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, `${tag}-fold.png`))))
       const height = await page.eval(fn(P.scrollThrough))
       const facts = await page.eval(fn(P.domFacts))
-      const overflow = await page.eval(fn(P.overflowCheck))
+      const overflow = await page.eval(fn(P.overflowCheck, w))
       const images = await page.eval(fn(P.imagesCheck))
       const contrastRes = await page.eval(fn(P.contrastCheck))
       const targets = await page.eval(fn(P.targetsCheck))
@@ -209,7 +209,7 @@ try {
       const p = { route: route.label, width: w, height, facts, overflow, images, contrast: contrastRes, targets, badHash, axe, consoleErrors, hydration, failedReqs, thirdParty, media, banned, bytes: page.requests.reduce((s, r) => s + (r.bytes || 0), 0) }
       R.pages.push(p)
       const at = `${route.label}@${w}`
-      check('page', `${at} overflow`, overflow.overflow || overflow.offenderCount ? 'fail' : 'pass', overflow.overflow || overflow.offenderCount ? `scrollWidth ${overflow.scrollWidth} > ${overflow.viewport}; ${overflow.offenders.map((o) => o.sel).join(', ')}` : '')
+      check('page', `${at} overflow`, overflow.overflow || overflow.offenderCount ? 'fail' : 'pass', overflow.overflow || overflow.offenderCount ? `laid out ${overflow.layout} wide, scrollWidth ${overflow.scrollWidth}, screen ${overflow.viewport}; ${overflow.offenders.map((o) => o.sel).join(', ')}` : '')
       check('page', `${at} console`, consoleErrors.length ? 'fail' : 'pass', consoleErrors.map((c) => c.text.slice(0, 120)).join(' | '))
       check('page', `${at} network`, failedReqs.length || thirdParty.length || media.length || banned.length ? 'fail' : 'pass', [...failedReqs.map((r) => `${r.status || r.failed} ${r.url}`), ...thirdParty.map((r) => `third-party ${r.url}`), ...media.map((r) => `media ${r.url}`)].join(' | ') || `${page.requests.length} requests, ${(p.bytes / 1024).toFixed(0)} KB`)
       check('page', `${at} images`, images.broken.length || images.noAlt.length ? 'fail' : 'pass', [...images.broken.map((s) => `broken ${s}`), ...images.noAlt.map((s) => `no alt ${s}`)].join(' | ') || `${images.total} images`)
