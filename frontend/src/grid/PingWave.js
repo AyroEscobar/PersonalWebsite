@@ -1,4 +1,5 @@
 import { buildGraph, nearestVertex, pathBetween, shortestFrom } from './graph.js'
+import { STRETCH, bearingVec, exitInsets, exitOf } from './exits.js'
 
 /*
   PingWave (PLAN.md 4.2, 5, 6.9). Owned by A. The signature, in raw WebGL2.
@@ -6,22 +7,30 @@ import { buildGraph, nearestVertex, pathBetween, shortestFrom } from './graph.js
   A ping runs Dijkstra from the road vertices nearest the tap (or nearest the
   node, for the `ping` button) and writes the road distance into a per-edge
   attribute. Every road edge is one instanced quad; the fragment shader lights
-  it where |distance - front| is small (sodium at the crest) and lets it cool
-  to --trace-lit behind. The front moves at a constant speed, so the wave
-  reaches the farthest visible road in about 1.35 s and is gone by 1.8 s.
-  When the front passes a node, `nodeReached` fires (RouteRail ticks, the
-  poster's ring pulses); when it passes the node an off-grid line leaves from,
-  a spark runs out along that line toward New York or Waterloo.
+  it where |distance - front| is small. The front moves at a constant speed,
+  so the crest reaches the farthest visible road in 1.35 s (r1 T5):
 
-  Ambient traffic (tier full only): a few lights moving along real shortest
-  paths, sodium beads on the LED US-75 spine and LED beads on the sodium roads
-  (each reads against its road), only while the hero is on screen and only
+    crest       a wide sodium halo with an LED white-hot core, like a tracer
+    afterglow   every road the crest has passed holds about 35% sodium and
+                cools to the night over 2.5 s, so the network blooms, then
+                settles; the last road is dark by about 3.9 s, then the loop
+                stops
+    arrivals    when the front passes a node, `nodeReached` fires (RouteRail
+                ticks, the poster's ring pulses and its label flares to ink)
+                and a 300 ms LED flare opens on the node
+    exits       when it passes the node an off-grid line leaves from, a spark
+                runs the line's last stretch to the frame edge (exits.js) and
+                `onExit` fires, so that city's sign holds lit for 1.5 s
+
+  Ambient traffic (tier full only): light trails on real shortest paths over
+  the freeways and tollways, 12 to 24 px long like a long exposure, LED one
+  way and dim sodium the other, only while the hero is on screen and only
   until 20 s pass without any input.
 
   One rAF loop, on demand: it runs while a wave, a spark or the traffic needs
   a frame and stops otherwise. It never runs with the tab hidden.
 
-    const engine = await createEngine(canvas, { gridUrl, cam, tier, onReached, onDone, isHeroVisible })
+    const engine = await createEngine(canvas, { gridUrl, cam, tier, onReached, onExit, onDone, isHeroVisible })
     engine.ping({ x, y } | { node }, id)   start a wave (3 at most, the oldest drops)
     engine.setHeroVisible(bool)
     engine.resize()
@@ -29,11 +38,17 @@ import { buildGraph, nearestVertex, pathBetween, shortestFrom } from './graph.js
 */
 
 const SLOTS = 3
-const WAVE_REACH = 1.35 // s for the front to reach the farthest visible road
-const WAVE_END = 1.8 // s, fully faded
+const WAVE_REACH = 1.35 // s for the crest to reach the farthest visible road
+const AFTERGLOW = 2.5 // s for a passed road to cool from 35% sodium to night
+const WAVE_END = WAVE_REACH + AFTERGLOW + 0.1 // s, everything dark: inside 4 s
+const FLARE = 0.3 // s, a node's arrival flare
+const SPARK_RUN = 0.45 // s, the spark along an exit's last stretch
 const FAR = 1e9
 const IDLE_AFTER = 20000 // ms without input before the traffic rests
 const LITE_FRAME = 1000 / 30 - 2
+const CARS = 16
+const TRAIL_MIN = 12 // px
+const TRAIL_MAX = 24 // px
 
 // ---------- shaders ----------
 
@@ -77,25 +92,30 @@ in vec3 vDB;
 in float vLen;
 uniform vec3 uFront;
 uniform vec3 uFade;
+uniform vec3 uSpeed;
 uniform float uBand;
-uniform float uTail;
+uniform float uCoreBand;
+uniform float uAfter;
 uniform vec3 uHot;
+uniform vec3 uCore;
 uniform vec3 uCool;
 uniform float uGlow;
 out vec4 o;
+float most(vec3 v) { return clamp(max(max(v.x, v.y), v.z), 0.0, 1.0); }
 void main() {
   float s = clamp(vS, 0.0, 1.0);
   vec3 d = min(vDA + s * vLen, vDB + (1.0 - s) * vLen);
   vec3 x = d - uFront;
-  vec3 crest = exp(-(x * x) / (uBand * uBand)) * uFade;
-  vec3 tail = exp(min(x, 0.0) / uTail) * step(x, vec3(0.0)) * uFade;
-  vec3 near = exp(min(x, 0.0) / (uTail * 0.3)) * step(x, vec3(0.0)) * uFade;
-  float h = clamp(crest.x + crest.y + crest.z, 0.0, 1.0);
-  float t = clamp(tail.x + tail.y + tail.z, 0.0, 1.0);
-  float w = clamp(near.x + near.y + near.z, 0.0, 1.0);
-  float light = max(h, t * 0.34);
+  // The crest: a wide sodium halo with a narrow white-hot core.
+  float h = most(exp(-(x * x) / (uBand * uBand)) * uFade);
+  float c = most(exp(-(x * x) / (uCoreBand * uCoreBand)) * uFade);
+  // Afterglow: seconds since the crest passed, cooling over uAfter.
+  vec3 since = max(-x, 0.0) / uSpeed;
+  float g = most((1.0 - smoothstep(0.0, uAfter, since)) * step(x, vec3(0.0)) * step(d, vec3(1e8)) * uFade);
+  float light = max(h, g * 0.35);
+  vec3 col = mix(uCool, uHot, clamp(max(h * 1.4, g), 0.0, 1.0));
+  if (uGlow < 0.5) col = mix(col, uCore, c * 0.9);
   float edge = uGlow > 0.5 ? exp(-vSide * vSide * 2.8) * (0.16 + 0.48 * h) : smoothstep(1.0, 0.4, abs(vSide));
-  vec3 col = mix(uCool, uHot, clamp(max(h * 1.4, w * 0.85), 0.0, 1.0));
   float a = light * edge;
   o = vec4(col * a, a);
 }`
@@ -195,7 +215,7 @@ function compile(gl, vs, fs) {
 // ---------- engine ----------
 
 export async function createEngine(canvas, opts) {
-  const { gridUrl, cam, tier, dprFor, onReached, onDone, onFail, heroInView = () => true } = opts
+  const { gridUrl, cam, tier, dprFor, onReached, onExit, onDone, onFail, heroInView = () => true } = opts
   const p3 = typeof matchMedia === 'function' && matchMedia('(color-gamut: p3)').matches
   const gl = canvas.getContext('webgl2', {
     alpha: true,
@@ -219,8 +239,8 @@ export async function createEngine(canvas, opts) {
   const nodeVerts = {}
   for (const [id, [x, y]] of Object.entries(grid.nodes)) nodeVerts[id] = nearestVertex(g, x, y)
   const offLines = Object.entries(grid.offgrid).map(([id, { from, deg }]) => {
-    const rad = (deg * Math.PI) / 180
-    return { id, from, x: grid.nodes[from][0], y: grid.nodes[from][1], ux: Math.sin(rad), uy: -Math.cos(rad) }
+    const [ux, uy] = bearingVec(deg)
+    return { id, from, x: grid.nodes[from][0], y: grid.nodes[from][1], ux, uy }
   })
 
   // Static instance data: one quad per road edge.
@@ -264,7 +284,7 @@ export async function createEngine(canvas, opts) {
   gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 0, 0)
   gl.vertexAttribDivisor(3, 1)
 
-  const MAX_PTS = 512
+  const MAX_PTS = 768
   const pts = new Float32Array(MAX_PTS * 8)
   const ptVao = gl.createVertexArray()
   gl.bindVertexArray(ptVao)
@@ -282,6 +302,10 @@ export async function createEngine(canvas, opts) {
   const HOT = tokenColor('--sodium', wideGamut)
   const LED = tokenColor('--led', wideGamut)
   const COOL = tokenColor('--trace-lit', wideGamut)
+  // The crest's core: LED pushed toward white, the hottest light on the map.
+  const CORE = LED.map((c) => c + (1 - c) * 0.55)
+  // Ambient trails the other way: sodium, dimmed.
+  const DIM_SODIUM = HOT.map((c) => c * 0.7)
 
   // ---------- state ----------
 
@@ -296,6 +320,7 @@ export async function createEngine(canvas, opts) {
   const waves = new Array(SLOTS).fill(null)
   let nextSlot = 0
   const sparks = []
+  const flares = []
   const traffic = tier === 'full' ? makeTraffic() : []
 
   // Map units to canvas css px, through the live camera (it may be mid-transition).
@@ -398,8 +423,15 @@ export async function createEngine(canvas, opts) {
 
   function makeTraffic() {
     const [px, py] = grid.nodes.plano
+    // Trails run where the light is: vertices on freeways and tollways near home.
+    const fast = new Uint8Array(g.n)
+    for (let e = 0; e < g.edgeCls.length; e++) {
+      if (g.edgeCls[e] > 2) continue
+      fast[g.edges[2 * e]] = 1
+      fast[g.edges[2 * e + 1]] = 1
+    }
     const local = []
-    for (let v = 0; v < g.n; v++) if (Math.hypot(g.x[v] - px, g.y[v] - py) < 1300) local.push(v)
+    for (let v = 0; v < g.n; v++) if (fast[v] && Math.hypot(g.x[v] - px, g.y[v] - py) < 1600) local.push(v)
     if (local.length < 2) return []
     const spine = pathBetween(g, nodeVerts.richardson, nodeVerts.allen)
     const routeOf = (path) => {
@@ -407,15 +439,16 @@ export async function createEngine(canvas, opts) {
       const ys = path.map((v) => g.y[v])
       const cum = [0]
       for (let i = 1; i < path.length; i++) cum.push(cum[i - 1] + Math.hypot(xs[i] - xs[i - 1], ys[i] - ys[i - 1]))
-      return { xs, ys, cum, len: cum[cum.length - 1] }
+      // Headed north reads LED, headed south reads sodium: two directions, two lights.
+      return { xs, ys, cum, len: cum[cum.length - 1], north: ys[ys.length - 1] < ys[0] }
     }
     const pick = () => local[(Math.random() * local.length) | 0]
-    const fresh = (onSpine) => {
+    const fresh = (onSpine, north) => {
       if (onSpine && spine.length > 1) {
-        const path = Math.random() < 0.5 ? spine : [...spine].reverse()
-        return routeOf(path)
+        const r = routeOf(spine)
+        return r.north === north ? r : routeOf([...spine].reverse())
       }
-      for (let tries = 0; tries < 6; tries++) {
+      for (let tries = 0; tries < 8; tries++) {
         const path = pathBetween(g, pick(), pick())
         if (path.length > 4) {
           const r = routeOf(path)
@@ -425,10 +458,18 @@ export async function createEngine(canvas, opts) {
       return null
     }
     const list = []
-    for (let i = 0; i < 9; i++) {
-      const onSpine = i < 3
-      const route = fresh(onSpine)
-      if (route) list.push({ route, s: Math.random() * route.len, v: 170 + Math.random() * 90, led: onSpine, fresh: () => fresh(onSpine) })
+    for (let i = 0; i < CARS; i++) {
+      const onSpine = i < 4
+      const north = i % 2 === 0
+      const route = fresh(onSpine, north)
+      if (route)
+        list.push({
+          route,
+          s: Math.random() * route.len,
+          v: 170 + Math.random() * 110,
+          trail: TRAIL_MIN + Math.random() * (TRAIL_MAX - TRAIL_MIN),
+          fresh: () => fresh(onSpine, Math.random() < 0.5),
+        })
     }
     return list
   }
@@ -450,7 +491,7 @@ export async function createEngine(canvas, opts) {
 
   // ---------- frame ----------
 
-  const needsFrame = () => waves.some(Boolean) || sparks.length > 0 || trafficOn() || traffic.some((c) => (c.a ?? 0) > 0.01)
+  const needsFrame = () => waves.some(Boolean) || sparks.length > 0 || flares.length > 0 || trafficOn() || traffic.some((c) => (c.a ?? 0) > 0.01)
 
   function kick() {
     if (!alive || raf || document.hidden || !needsFrame()) return
@@ -484,6 +525,7 @@ export async function createEngine(canvas, opts) {
     // Waves.
     const front = [-FAR, -FAR, -FAR]
     const fade = [0, 0, 0]
+    const speeds = [1, 1, 1]
     let anyWave = false
     n = 0
     for (let k = 0; k < SLOTS; k++) {
@@ -497,17 +539,20 @@ export async function createEngine(canvas, opts) {
       }
       anyWave = true
       front[k] = t * w.speed
-      fade[k] = 1 - smooth(1.15, WAVE_END, t)
+      speeds[k] = w.speed
+      fade[k] = 1 - smooth(WAVE_END - 0.3, WAVE_END, t)
       while (w.nodes.length && w.nodes[0].d <= front[k]) {
         const { node } = w.nodes.shift()
         onReached?.(node)
-        for (const line of offLines) if (line.from === node) sparks.push({ line, t0: now })
+        const [nx, ny] = grid.nodes[node]
+        flares.push({ x: nx, y: ny, t0: now })
+        for (const line of offLines) if (line.from === node) launchSpark(line, now, w.speed * scale)
       }
       // The tap itself: a ring that opens where the wave begins.
       if (t < 0.7) {
         const e = t / 0.7
         pushPt(w.origin[0], w.origin[1], HOT, (1 - e) * 0.9, 10 + 70 * (1 - (1 - e) ** 3), 1)
-        pushPt(w.origin[0], w.origin[1], HOT, (1 - e) * 0.8, 16, 0)
+        pushPt(w.origin[0], w.origin[1], CORE, (1 - e) * 0.8, 16, 0)
       }
     }
 
@@ -518,37 +563,58 @@ export async function createEngine(canvas, opts) {
       gl.uniform2f(u.uRes, cssW, cssH)
       gl.uniform3fv(u.uFront, front)
       gl.uniform3fv(u.uFade, fade)
-      gl.uniform1f(u.uBand, (tier === 'lite' ? 24 : 28) / scale)
-      gl.uniform1f(u.uTail, 170 / scale)
+      gl.uniform3fv(u.uSpeed, speeds)
+      gl.uniform1f(u.uBand, (tier === 'lite' ? 48 : 56) / scale)
+      gl.uniform1f(u.uCoreBand, 9 / scale)
+      gl.uniform1f(u.uAfter, AFTERGLOW)
       gl.uniform3fv(u.uHot, HOT)
+      gl.uniform3fv(u.uCore, CORE)
       gl.uniform3fv(u.uCool, COOL)
       gl.bindVertexArray(segVao)
       gl.uniform1f(u.uGlow, 1)
-      gl.uniform1f(u.uHalf, tier === 'lite' ? 6 : 7.5)
+      gl.uniform1f(u.uHalf, tier === 'lite' ? 7 : 9)
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, E)
       gl.uniform1f(u.uGlow, 0)
-      gl.uniform1f(u.uHalf, 1.4)
+      gl.uniform1f(u.uHalf, 1.6)
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, E)
     }
 
-    // Sparks out along the off-grid lines.
+    // Arrival flares: 300 ms of LED light opening on the node.
+    for (let i = flares.length - 1; i >= 0; i--) {
+      const f = flares[i]
+      const e = (now - f.t0) / 1000 / FLARE
+      if (e >= 1) {
+        flares.splice(i, 1)
+        continue
+      }
+      pushPt(f.x, f.y, CORE, (1 - e) * 0.95, 30 + 46 * e, 0)
+      pushPt(f.x, f.y, LED, (1 - e) * 0.7, 14 + 40 * e, 1)
+    }
+
+    // Sparks along each exit's last stretch, then the sign lights.
     for (let i = sparks.length - 1; i >= 0; i--) {
       const sp = sparks[i]
       const t = (now - sp.t0) / 1000
-      if (t > 1.1) {
+      if (t < 0) continue
+      if (t >= SPARK_RUN && !sp.done) {
+        sp.done = true
+        onExit?.(sp.line.id)
+      }
+      if (t > SPARK_RUN + 0.25) {
         sparks.splice(i, 1)
         continue
       }
-      const head = (t * 1100) / scale
-      for (let j = 0; j < 7; j++) {
-        const d = head - (j * 9) / scale
-        if (d < 0) break
-        const a = (1 - t / 1.1) * (1 - j / 7)
-        pushPt(sp.line.x + sp.line.ux * d, sp.line.y + sp.line.uy * d, HOT, a, j ? 6 : 9, 0)
+      const f = Math.min(1, t / SPARK_RUN)
+      const head = sp.from + sp.run * f
+      const fadeOut = t > SPARK_RUN ? 1 - (t - SPARK_RUN) / 0.25 : 1
+      for (let j = 0; j < 8; j++) {
+        const d = head - (j * 5) / scale
+        if (d < sp.from) break
+        pushPt(sp.line.x + sp.line.ux * d, sp.line.y + sp.line.uy * d, j ? HOT : CORE, fadeOut * (1 - j / 8), j ? 6 : 10, 0)
       }
     }
 
-    // Traffic.
+    // Traffic: light trails, LED headed north, dim sodium headed south.
     const moving = trafficOn()
     if (traffic.length) {
       const fadeIn = moving ? 1 : 0
@@ -563,13 +629,15 @@ export async function createEngine(canvas, opts) {
           }
         }
         if (car.a < 0.01) continue
-        const rgb = car.led ? HOT : LED
+        const rgb = car.route.north ? LED : DIM_SODIUM
         const edgeFade = Math.min(1, car.s / 120, (car.route.len - car.s) / 120)
-        for (let j = 0; j < 5; j++) {
-          const s = car.s - (j * 5) / scale
+        const steps = Math.max(6, Math.round(car.trail / 2))
+        for (let j = 0; j < steps; j++) {
+          const s = car.s - (j * car.trail) / steps / scale
           if (s < 0) break
           const [x, y] = along(car.route, s)
-          pushPt(x, y, rgb, car.a * edgeFade * (j ? 0.5 / j : 1), j ? 6 : 10, 0)
+          const k = 1 - j / steps
+          pushPt(x, y, rgb, car.a * edgeFade * (j ? 0.75 * k * k : 1), j ? 3.2 : 4.4, 0)
         }
       }
     }
@@ -589,8 +657,19 @@ export async function createEngine(canvas, opts) {
     gl.bindVertexArray(null)
 
     const fading = traffic.some((c) => (c.a ?? 0) > 0.01)
-    if (anyWave || sparks.length || moving || fading) raf = requestAnimationFrame(frame)
+    if (anyWave || sparks.length || flares.length || moving || fading) raf = requestAnimationFrame(frame)
     else last = 0
+  }
+
+  // The spark leaves when the wave reaches the node, crosses the unseen part
+  // of the line at the wave's own speed, then runs the drawn stretch.
+  function launchSpark(line, now, pxPerSec) {
+    const [sx, sy] = toScreen(line.x, line.y)
+    const e = exitOf(sx, sy, line.ux, line.uy, cssW, cssH, exitInsets())
+    if (!e) return
+    const run = Math.min(STRETCH, e.t)
+    const delay = Math.max(0, e.t - run) / Math.max(pxPerSec, 400)
+    sparks.push({ line, t0: now + delay * 1000, from: (e.t - run) / scale, run: run / scale, done: false })
   }
 
   const smooth = (a, b, t) => {
@@ -644,7 +723,7 @@ export async function createEngine(canvas, opts) {
       if (v) return kick()
       // Scrolled away: the traffic goes out at once, so the loop stops at once.
       for (const car of traffic) car.a = 0
-      if (!waves.some(Boolean) && !sparks.length) {
+      if (!waves.some(Boolean) && !sparks.length && !flares.length) {
         cancelAnimationFrame(raf)
         raf = 0
         last = 0

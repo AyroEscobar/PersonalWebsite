@@ -47,6 +47,7 @@ export default function GridCanvas() {
       tier: getState().tier,
       dprFor: () => (TIER_DPR[getState().tier] ?? TIER_DPR.lite)() || 1,
       onReached: (node) => emit('nodeReached', node),
+      onExit: (id) => emit('offgridReached', id),
       onDone: (id) => endPing(id),
       onFail: fail,
     })
