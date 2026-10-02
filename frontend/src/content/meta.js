@@ -102,6 +102,7 @@ export const JUMP = {
     commands: ui('jump-group-commands', 'commands'),
   },
   commands: {
+    ping: ui('cmd-ping', 'ping the grid'),
     quietOn: ui('cmd-quiet-on', 'quiet mode on'),
     quietOff: ui('cmd-quiet-off', 'quiet mode off'),
     print: ui('cmd-print', 'print'),
