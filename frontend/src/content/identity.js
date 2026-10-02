@@ -1,10 +1,15 @@
 import { item, ui } from './item.js'
-import { AGE } from './constants.js'
+import { AGE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
 
 /*
   Hero (PLAN.md 3.2, rendered by A) and the origin body (3.3, rendered by C).
   Final copy. Builders render it; they do not rewrite it. Changes go through
   requests-<X>.md.
+
+  r1 (Oct 2): the deck is sans in LED with viaere linked to its build card;
+  a proof line names the two banks under it; a contact row follows. His
+  "level" paragraph moved from the hero into origin, right before the pull
+  quote (triage T2, T7, T16).
 */
 
 export const HERO = {
@@ -14,18 +19,25 @@ export const HERO = {
     'hero-deck',
     'cs at ut dallas. co-founder, engineering, at viaere. software engineer at md7.',
     ['identity-student', 'ven-viaere-bio', 'exp-md7'],
+    { link: { phrase: 'viaere', href: '#build-viaere' } },
   ),
+  proof: item(
+    'hero-proof',
+    'Software Engineer Intern at JPMorgan Chase, CIB, summer 2026. Before that, RBC Capital Markets in New York, the inaugural AidenEdge cohort, six trading-floor desks in four months.',
+    ['exp-jpm-2026', 'exp-rbc'],
+  ),
+  contactLabel: ui('hero-contact-label', 'reach me'),
+  contact: [
+    { id: 'hero-contact-email', label: 'email', href: `mailto:${EMAIL}`, facts: ['ln-email'] },
+    { id: 'hero-contact-linkedin', label: 'LinkedIn', href: LINKEDIN, facts: ['ln-linkedin'] },
+    { id: 'hero-contact-github', label: 'GitHub', href: GITHUB, facts: ['ln-github'] },
+    { id: 'hero-contact-work', label: 'see the work', href: '#work', ui: true },
+  ],
   lead: item(
     'hero-lead',
     "the hunger came from realizing how much of the world runs on invisible systems. somebody wrote the code that settles every trade, gets your food to the door, routes messages around the world, and tells an ambulance which street to take to your house. that's the part i fell in love with.",
     ['voice-invisible-systems'],
     { verbatim: 'voice-invisible-systems' },
-  ),
-  level: item(
-    'hero-level',
-    "i'm trying to be the kind of engineer who can build that. work that quietly holds itself up, doesn't need a human in the loop, doesn't sleep when i do. that's the level i'm aiming at.",
-    ['voice-level'],
-    { verbatim: 'voice-level' },
   ),
 }
 
@@ -35,6 +47,12 @@ export const ORIGIN = {
     `${AGE}, in cs at ut dallas. trying to live this all the way out. take the engineering as far as i can, build as much as i can, stay curious about anything that gets made. mostly that's software, but the rest counts too. just trying to be a good engineer and put together work i'd be proud to show.`,
     ['voice-hero', 'identity-age'],
     { verbatim: 'voice-hero' },
+  ),
+  level: item(
+    'origin-level',
+    "i'm trying to be the kind of engineer who can build that. work that quietly holds itself up, doesn't need a human in the loop, doesn't sleep when i do. that's the level i'm aiming at.",
+    ['voice-level'],
+    { verbatim: 'voice-level' },
   ),
   pull: item(
     'origin-pull',

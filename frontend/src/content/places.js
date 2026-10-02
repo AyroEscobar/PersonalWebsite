@@ -52,6 +52,10 @@ export const ALLOWED_MAP_LABELS = Object.values(NODES).map((n) => n.text)
 export const MAP = {
   ariaLabel: ui('map-aria', 'Dallas area highway map with Plano, Richardson and Allen lit'),
   hint: ui('map-hint', 'tap the grid to ping it'),
+  // The map key: past light and present light (r1 T4).
+  legend: ui('map-legend', 'map key'),
+  then: ui('map-legend-then', 'then'),
+  now: ui('map-legend-now', 'now'),
   ping: ui('map-ping', 'ping'),
   pinged: ui('map-pinged', 'pinged from plano'),
   pingedFrom: ui('map-pinged-from', 'pinged from'),
