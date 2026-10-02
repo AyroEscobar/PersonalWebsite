@@ -2,16 +2,16 @@ import { useRef } from 'react'
 import { SECTIONS } from '../content/sections.js'
 import { CHROME } from '../content/meta.js'
 import SearchChip from './SearchChip.jsx'
-import StopsSheet from './StopsSheet.jsx'
 import { onStopClick } from './route.js'
 
 /*
   BottomBar (PLAN.md 4.5, phones under 720px). The rail turned sideways:
   a thin sodium fill along the top edge shows how far down the line you
   are; below it, the stop you are at (opens every stop in a sheet), the next
-  stop as a link, and search. 56px tall plus the home indicator's safe
-  area. Hidden while any dialog is open. The last stop's "next" is the
-  first stop, with an up arrow, standing in for back-to-top.
+  stop as a link ("now >", read as "next stop, now"), and search. 56px tall
+  plus the home indicator's safe area. Hidden while any dialog is open. The
+  last stop's "next" is the first stop, with an up arrow, standing in for
+  back-to-top. The sheet itself lives beside the bar (RouteRail).
 */
 function Chevron({ dir = 'right' }) {
   const d = dir === 'up' ? 'M4 10l4-4 4 4' : 'M6 4l4 4-4 4'
@@ -22,8 +22,7 @@ function Chevron({ dir = 'right' }) {
   )
 }
 
-export default function BottomBar({ index, fill }) {
-  const sheet = useRef(null)
+export default function BottomBar({ index, fill, onStops }) {
   const btn = useRef(null)
   const cur = SECTIONS[index]
   const next = SECTIONS[index + 1]
@@ -41,7 +40,7 @@ export default function BottomBar({ index, fill }) {
           className="bb-stop"
           aria-haspopup="dialog"
           aria-label={`${cur.label.text}, ${CHROME.stopsSheet.text}`}
-          onClick={() => sheet.current?.open(btn.current)}
+          onClick={() => onStops?.(btn.current)}
         >
           <span className="bb-station" aria-hidden="true" />
           <span className="bb-current">{cur.label.text}</span>
@@ -52,13 +51,12 @@ export default function BottomBar({ index, fill }) {
           href={`#${wrap ? SECTIONS[0].id : next.id}`}
           onClick={(e) => onStopClick(e, wrap ? SECTIONS[0].id : next.id)}
         >
-          {!wrap && <span className="bb-next-word">{CHROME.next.text}</span>}
+          {!wrap && <span className="sr-only">{CHROME.nextStop.text} </span>}
           <span className="bb-next-label">{wrap ? SECTIONS[0].label.text : next.label.text}</span>
           <Chevron dir={wrap ? 'up' : 'right'} />
         </a>
         <SearchChip bare className="bb-search" />
       </div>
-      <StopsSheet ref={sheet} index={index} />
     </div>
   )
 }

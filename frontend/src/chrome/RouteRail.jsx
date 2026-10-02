@@ -5,6 +5,7 @@ import { getState, on } from '../lib/store.js'
 import { useReducedMotion } from '../lib/mode.js'
 import { onStopClick, useRoute } from './route.js'
 import BottomBar from './BottomBar.jsx'
+import StopsSheet from './StopsSheet.jsx'
 
 /*
   RouteRail (PLAN.md 4.5). Owned by B. The navigation as a transit line: six
@@ -20,6 +21,12 @@ import BottomBar from './BottomBar.jsx'
   reaches a city, the stops that city belongs to flash once.
 
   Phones: the BottomBar (current stop, next stop, search) and the StopsSheet.
+  The sheet is a sibling of the bar, never inside it, so no hidden or
+  display: none ancestor can swallow the open dialog (r1 T11).
+
+  Desktop (1100 and up): all six names show at rest, dim, the current one in
+  ink (r1 T15). Tablets show the current name; the column sits 24px further
+  right so no name ever touches the copy.
 
   A real <nav> with an <ol> of links in DOM order, aria-current on the
   current stop, labels always in the accessible name. Reduced motion: the
@@ -29,6 +36,7 @@ export default function RouteRail() {
   const { index, progress } = useRoute()
   const reduced = useReducedMotion()
   const stations = useRef([])
+  const sheet = useRef(null)
   const last = SECTIONS.length - 1
   const fill = reduced ? index / last : progress
 
@@ -82,7 +90,8 @@ export default function RouteRail() {
           </ol>
         </div>
       </div>
-      <BottomBar index={index} fill={fill} />
+      <BottomBar index={index} fill={fill} onStops={(from) => sheet.current?.open(from)} />
+      <StopsSheet ref={sheet} index={index} />
     </nav>
   )
 }

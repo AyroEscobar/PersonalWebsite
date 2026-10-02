@@ -12,9 +12,12 @@ import { goTo } from './route.js'
   same nodes the map lights for it). Quiet mode lives here on phones.
 
   showModal() gives the focus trap, Esc and the inert page; a tap on the
-  dimmed page closes it (closedby="any", plus a backdrop fallback). Choosing
-  a stop closes the sheet, then scrolls and lands focus on that heading.
-  Slides up 220ms on the drawer curve; reduced motion fades instead.
+  dimmed page closes it (closedby="any", plus a backdrop fallback). Closing
+  it any other way hands focus back to the button that opened it, after the
+  bar is visible again (r1 T11). Choosing a stop closes the sheet, then
+  scrolls and lands focus on that heading. Turned to a wide screen (720px
+  and up, where the bar is gone), it closes itself. Slides up 220ms on the
+  drawer curve; reduced motion fades instead.
 */
 export default function StopsSheet({ ref, index }) {
   const dialog = useRef(null)
@@ -37,19 +40,31 @@ export default function StopsSheet({ ref, index }) {
 
   useEffect(() => {
     const d = dialog.current
-    if (!d) return
+    if (!d) return undefined
     const onClose = () => {
+      // The bar comes back first, so the button that opened the sheet can take focus.
       if (document.documentElement.dataset.dialog === 'stops') delete document.documentElement.dataset.dialog
+      const back = opener.current
       opener.current = null
+      if (back?.isConnected) back.focus({ preventScroll: true })
     }
     d.addEventListener('close', onClose)
-    return () => d.removeEventListener('close', onClose)
+    // Wide enough for the rail: the bar is gone, so is its sheet.
+    const mq = window.matchMedia?.('(min-width: 720px)')
+    const onWide = () => mq.matches && d.open && d.close()
+    mq?.addEventListener?.('change', onWide)
+    return () => {
+      d.removeEventListener('close', onClose)
+      mq?.removeEventListener?.('change', onWide)
+    }
   }, [])
 
   const close = () => dialog.current?.open && dialog.current.close()
 
   const choose = (e, id) => {
     e.preventDefault()
+    // goTo lands focus on the heading; the close must not pull it back.
+    opener.current = null
     close()
     goTo(id)
   }
