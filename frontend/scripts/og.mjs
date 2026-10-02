@@ -4,7 +4,7 @@
   (unique profile, killed and deleted after) and writes public/og.png,
   300 KB or less. Run by hand when the template changes: `npm run og`.
 */
-import { statSync } from 'node:fs'
+import { statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { serveDist } from './serve-dist.mjs'
@@ -32,7 +32,15 @@ try {
   if (errors.length) console.warn('og: console:', errors)
   await page.close()
   cdp.close()
-  const kb = statSync(OUT).size / 1024
+  let kb = statSync(OUT).size / 1024
+  // The lit city is soft gradients, which full-color PNG stores badly: a
+  // 256-color palette with dithering keeps the look well under the budget.
+  if (kb > 300) {
+    const sharp = (await import('../tools/sharp.mjs')).default
+    const buf = await sharp(OUT).png({ palette: true, colors: 256, dither: 0.6, compressionLevel: 9, effort: 10 }).toBuffer()
+    writeFileSync(OUT, buf)
+    kb = statSync(OUT).size / 1024
+  }
   if (kb > 300) throw new Error(`og: og.png is ${kb.toFixed(0)} KB, over 300 KB`)
   console.log(`og: wrote public/og.png (${kb.toFixed(1)} KB)`)
 } finally {
