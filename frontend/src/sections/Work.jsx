@@ -14,7 +14,7 @@ export default function Work({ id }) {
       <div className="page-grid">
         <div className="text-col">
           <StopHead id={id}>
-            <p className="mono c-intro">{WORK.intro.text}</p>
+            <p className="c-intro">{WORK.intro.text}</p>
           </StopHead>
           <ol reversed className="releases">
             {WORK.plates.map((p) => (

@@ -25,19 +25,16 @@ export default function DeskBranch({ desks, label }) {
 
   return (
     <details className="desks" open={open} onToggle={(e) => setOpen(e.currentTarget.open)}>
-      <summary className="mono">
+      <summary>
         <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
           <path d="M3 1.5 6.5 5 3 8.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
         </svg>
         {label}
       </summary>
       <ol className="desk-line">
-        {desks.map((d, i) => (
+        {desks.map((d) => (
           <li key={d.id} className="desk">
             <span className="desk-dot" aria-hidden="true" />
-            <span className="desk-no mono" aria-hidden="true">
-              {String(i + 1).padStart(2, '0')}
-            </span>
             <h4 className="desk-name">{d.name}</h4>
             <p className="desk-text">
               <Figures text={d.text} />
