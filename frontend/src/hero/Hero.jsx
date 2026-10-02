@@ -75,7 +75,7 @@ export default function Hero() {
             <p className="t-lead measure hero-lead">{HERO.level.text}</p>
           </div>
           <div className="hero-side">
-            <p className="hero-ping">
+            <p className="hero-ping js-only">
               <span className="mono hero-hint">{MAP.hint.text}</span>
               <button type="button" className="btn-text hero-ping-btn" onClick={onPing}>
                 <span className="hero-ping-dot" aria-hidden="true" />

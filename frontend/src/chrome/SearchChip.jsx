@@ -10,6 +10,8 @@ import { openJump, prefetchJump } from './jump.js'
 
     <SearchChip />               top bar chip with the shortcut
     <SearchChip bare />          bottom bar and 404: the word only
+
+  It needs JavaScript, so without it the chip is not drawn (.js-only).
 */
 const isMac = () => /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent || '')
 
@@ -23,7 +25,7 @@ export default function SearchChip({ bare = false, className = '' }) {
     <button
       ref={ref}
       type="button"
-      className={`search-chip ${bare ? 'is-bare' : 'btn-text target-44'} ${className}`.trim()}
+      className={`search-chip js-only ${bare ? 'is-bare' : 'btn-text target-44'} ${className}`.trim()}
       aria-haspopup="dialog"
       aria-keyshortcuts="Meta+K Control+K"
       onPointerDown={prefetchJump}

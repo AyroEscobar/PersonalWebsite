@@ -55,10 +55,10 @@ export default function Footer() {
           <p className="ft-attrib">{MAP.attribution.text}</p>
         </div>
         <ul className="ft-controls mono">
-          <li>
+          <li className="js-only">
             <QuietToggle variant="link" />
           </li>
-          <li>
+          <li className="js-only">
             <button type="button" className="ft-link" onClick={() => window.print()}>
               {FOOTER.print.text}
             </button>

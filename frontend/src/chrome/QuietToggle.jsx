@@ -19,12 +19,13 @@ import { useHydrated } from '../lib/hydrated.js'
 export default function QuietToggle({ variant = 'chip', className = '' }) {
   const quiet = useQuiet()
   const hydrated = useHydrated()
+  // Every variant needs JavaScript to do anything, so none is drawn without it (.js-only).
   const cls =
     variant === 'link'
-      ? 'quiet-toggle quiet-link'
+      ? 'quiet-toggle js-only quiet-link'
       : variant === 'row'
-        ? 'quiet-toggle quiet-row'
-        : 'quiet-toggle btn-text target-44 quiet-chip'
+        ? 'quiet-toggle js-only quiet-row'
+        : 'quiet-toggle js-only btn-text target-44 quiet-chip'
   return (
     <button
       type="button"
