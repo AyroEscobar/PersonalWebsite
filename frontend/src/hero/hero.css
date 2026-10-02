@@ -150,6 +150,19 @@
   text-decoration-color: var(--sodium);
 }
 
+/* Phones and tablets: the name and the lines under it sit over the stage's
+   lower half. A tap on the dimmed roads between the words reaches the stage
+   and pings, as the hint says; only the links keep their taps (r2 N11). */
+@media (max-width: 1099.98px) {
+  .hero-id > *,
+  .hero-copy {
+    pointer-events: none;
+  }
+  .hero-copy a {
+    pointer-events: auto;
+  }
+}
+
 /* The map key and the ping: one row under the contact line on phones. */
 .hero-side {
   display: flex;
