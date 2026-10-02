@@ -1,31 +1,382 @@
 /*
-  Print (PLAN.md 4.13). Owned by B. FOUNDATION ships only the minimum so the
-  page prints legibly before B's stylesheet lands.
+  Print (PLAN.md 4.13). Owned by B.
+
+  White paper, night ink, Overpass, one column. What prints: the masthead
+  (name, deck line, every channel written out), now, work with the six RBC
+  desks, builds (title, meta, the first line, the URL in parentheses), crew,
+  and signal with full URLs. What never prints: the map, the hero, the rail
+  and bars, dialogs, specimens, buttons, decoration, the live clock. One US
+  Letter page at 100%, two at most with the desks.
+
+  Hooks any builder can use, so nothing here depends on private markup:
+    [data-print="skip"]   never print this
+    [data-print="keep"]   print this even inside something hidden
+    .no-print, .deco, [data-deco]   never print (shared contract)
+    .print-only           print only (hidden on screen in chrome.css)
+
+  Hex here is allowed: check-content treats this file like tokens.css.
+  #0B1226 is --night (the ink), #5A6C96 is --trace-lit (secondary text on
+  white, 5.4:1).
 */
+
+@page {
+  size: letter;
+  margin: 0.5in 0.55in 0.5in;
+}
+
 @media print {
   :root {
-    --night: #FFFFFF;
-    --deck: #FFFFFF;
-    --deck-2: #FFFFFF;
-    --ink: #0B1226;
-    --dim: #0B1226;
-    --sodium: #0B1226;
-    --led: #0B1226;
-    --hairline: rgba(11, 18, 38, 0.25);
+    --night: #ffffff;
+    --deck: #ffffff;
+    --deck-2: #ffffff;
+    --ink: #0b1226;
+    --dim: #5a6c96;
+    --sodium: #0b1226;
+    --led: #0b1226;
+    --beacon: #0b1226;
+    --trace: #5a6c96;
+    --trace-lit: #5a6c96;
+    --hairline: rgba(11, 18, 38, 0.22);
+    --t-display: 26pt;
+    --t-h2: 13pt;
+    --t-h3: 10.5pt;
+    --t-lead: 9.5pt;
+    --t-body: 9.5pt;
+    --t-small: 8.5pt;
+    --t-mono: 8pt;
+    --page-pad: 0px;
+    --rail-w: 0px;
+    --topbar-h: 0px;
+    --bottombar-h: 0px;
+    --section-gap: 0px;
+    color-scheme: light;
   }
-  html, body {
-    background: #FFFFFF !important;
-    color: #0B1226 !important;
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #0b1226 !important;
+    font-size: 9.5pt;
+    line-height: 1.38;
   }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  /* ---------- never on paper ---------- */
   .deco,
   [data-deco],
   .no-print,
+  [data-print='skip'],
   canvas,
+  svg,
+  img,
+  picture,
+  video,
   button,
+  input,
   nav,
-  header,
   dialog,
-  .skip-link {
+  [popover],
+  [role='img'],
+  [data-specimen],
+  .specimen,
+  figure,
+  .spec,
+  .ps,
+  .build-stack,
+  .desk-no,
+  .rp-dot,
+  .closer-road,
+  .skip-link,
+  .rail,
+  .bottombar,
+  .topbar-row,
+  .topbar::before,
+  .nb-head,
+  .visit-stamp,
+  .ft-controls,
+  .ft-data,
+  .ft-promise,
+  .ft-node,
+  #origin,
+  #main > :not(section) {
     display: none !important;
+  }
+
+  [data-print='keep'] {
+    display: revert !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  /* ---------- the masthead (from the top bar) ---------- */
+  .topbar {
+    position: static !important;
+    height: auto !important;
+    background: none !important;
+  }
+  .print-masthead {
+    margin: 0 0 14pt;
+    padding: 0 0 10pt;
+    border-bottom: 1.5pt solid #0b1226;
+  }
+  .pm-name {
+    margin: 0;
+    font-size: 26pt;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .pm-deck {
+    margin: 5pt 0 0;
+    font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+    font-size: 9pt;
+    letter-spacing: 0.02em;
+  }
+  .pm-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2pt 14pt;
+    margin: 6pt 0 0;
+    font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+    font-size: 8pt;
+    color: #5a6c96;
+  }
+
+  /* ---------- layout flattens to one column ---------- */
+  #root,
+  main,
+  .page,
+  .page-grid,
+  .text-col,
+  section {
+    display: block !important;
+    position: static !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+  }
+  [style*='sticky'],
+  .sticky {
+    position: static !important;
+  }
+  main section {
+    margin: 0 0 12pt !important;
+    padding: 0 !important;
+  }
+  /* Grids inside sections (cards, rows) keep their flow but lose columns. */
+  main section [class*='grid'] {
+    display: block !important;
+  }
+
+  h2 {
+    margin: 0 0 6pt !important;
+    padding: 0 0 3pt;
+    border-bottom: 0.75pt solid rgba(11, 18, 38, 0.22);
+    font-size: 13pt !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.01em;
+    break-after: avoid;
+  }
+  h3 {
+    margin: 0 !important;
+    font-size: 10.5pt !important;
+    line-height: 1.25 !important;
+    break-after: avoid;
+  }
+  h4 {
+    margin: 0 !important;
+    font-size: 9pt !important;
+    break-after: avoid;
+  }
+  p,
+  li,
+  dd,
+  dt {
+    orphans: 2;
+    widows: 2;
+  }
+  p {
+    margin-block: 2pt !important;
+  }
+  ul,
+  ol {
+    margin-block: 2pt !important;
+  }
+
+  /* Small things stay whole; long plates may break between their parts. */
+  li,
+  .nb-row,
+  .crew-row,
+  .desk,
+  .build {
+    break-inside: avoid;
+  }
+  h3 + p,
+  .rp-head,
+  .rp-role {
+    break-before: avoid;
+  }
+
+  .plate {
+    border: 0 !important;
+    background: none !important;
+    padding: 0 !important;
+  }
+  article {
+    margin: 0 0 7pt !important;
+    padding: 0 !important;
+  }
+
+  .mono,
+  code,
+  time {
+    font-size: 8pt !important;
+  }
+
+  /* Status chips print as words. */
+  .chip {
+    border: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    font-size: 7.5pt !important;
+    text-transform: uppercase;
+  }
+
+  /* Lit rules and lamps fall back to a quiet hairline. */
+  .rule-l::before,
+  .rule-l::after,
+  .nb-row::before {
+    display: none !important;
+  }
+  .rule-l {
+    padding-left: 0 !important;
+  }
+
+  /* ---------- now ---------- */
+  .nowboard {
+    border: 0 !important;
+  }
+  .nb-lines {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 18pt;
+    padding: 0 !important;
+  }
+  .nb-row {
+    padding: 2pt 0 !important;
+    border: 0 !important;
+  }
+  .nb-mission,
+  .nb-stamp {
+    padding: 2pt 0 0 !important;
+    border: 0 !important;
+  }
+  .nb-mission-mark {
+    display: none;
+  }
+
+  /* ---------- links: paper has no links ---------- */
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+  #builds a[href^='http']::after,
+  #work a[href^='http']::after,
+  #crew a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+    font-size: 7.5pt;
+    color: #5a6c96;
+    word-break: break-all;
+  }
+
+  /* ---------- work: the six desks in two columns ---------- */
+  .desks > summary {
+    display: none !important;
+  }
+  .desk-line {
+    columns: 2;
+    column-gap: 18pt;
+    margin-top: 4pt !important;
+    padding: 0 !important;
+    list-style: none;
+  }
+  .desk {
+    margin: 0 0 4pt !important;
+    padding: 0 !important;
+  }
+  .desk-text {
+    margin: 0 !important;
+    font-size: 8.5pt;
+  }
+
+  /* ---------- builds: title, meta, the first line, the URL ---------- */
+  .build-body > p:not(:first-child) {
+    display: none !important;
+  }
+  .build-body > p:first-child {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .build {
+    margin: 0 0 6pt !important;
+  }
+  .build-links {
+    margin: 0 !important;
+  }
+
+  /* ---------- signal: the channels already show their host ---------- */
+  .channels {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 2pt 14pt;
+    padding: 0 !important;
+    list-style: none;
+  }
+  .ch {
+    display: inline-flex !important;
+    gap: 6pt;
+    padding: 0 !important;
+  }
+
+  /* ---------- footer ---------- */
+  .footer {
+    margin: 12pt 0 0 !important;
+    padding: 6pt 0 0 !important;
+    border-top: 0.75pt solid rgba(11, 18, 38, 0.22) !important;
+  }
+  .ft-inner {
+    display: flex !important;
+    justify-content: space-between;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  .ft-name {
+    font-size: 8pt !important;
+    font-weight: 600 !important;
+  }
+  .ft-host {
+    margin: 0;
+    font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+    font-size: 8pt;
   }
 }
