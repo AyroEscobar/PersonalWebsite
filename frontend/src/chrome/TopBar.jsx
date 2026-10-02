@@ -6,6 +6,7 @@ import SearchChip from './SearchChip.jsx'
 import JumpHost from './JumpHost.jsx'
 import NodeMark from './NodeMark.jsx'
 import PrintMasthead from './PrintMasthead.jsx'
+import { onStopClick } from './route.js'
 
 /*
   TopBar (PLAN.md 3.1). Owned by B. The one <header>.
@@ -24,7 +25,7 @@ export default function TopBar() {
   return (
     <header className="topbar" data-chrome="topbar">
       <div className="topbar-row">
-        <a href="#origin" className="tb-name">
+        <a href="#origin" className="tb-name" onClick={(e) => onStopClick(e, 'origin')}>
           <NodeMark className="tb-node" />
           <span>{HERO.name.text}</span>
         </a>

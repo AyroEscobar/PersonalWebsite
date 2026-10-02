@@ -3,6 +3,7 @@ import { CREW } from '../content/crew.js'
 import { BUILDS } from '../content/builds.js'
 import StopHead from './StopHead.jsx'
 import { Figures } from './text.jsx'
+import { onStopClick } from '../chrome/route.js'
 
 /*
   crew (PLAN.md 3.7): the people part, as a timetable. Dates in the left
@@ -44,7 +45,7 @@ function Linked({ text }) {
   for (const m of text.matchAll(CARD_IN_PARENS)) {
     out.push(text.slice(last, m.index), '(')
     out.push(
-      <a key={m.index} href={`#${cardId(m[1])}`}>
+      <a key={m.index} href={`#${cardId(m[1])}`} onClick={(e) => onStopClick(e, cardId(m[1]))}>
         {m[1]}
       </a>,
     )
