@@ -1,0 +1,28 @@
+/*
+  Print (PLAN.md 4.13). Owned by B. FOUNDATION ships only the minimum so the
+  page prints legibly before B's stylesheet lands.
+*/
+@media print {
+  :root {
+    --night: #FFFFFF;
+    --deck: #FFFFFF;
+    --deck-2: #FFFFFF;
+    --ink: #0B1226;
+    --dim: #0B1226;
+    --sodium: #0B1226;
+    --led: #0B1226;
+    --hairline: rgba(11, 18, 38, 0.25);
+  }
+  html, body {
+    background: #FFFFFF !important;
+    color: #0B1226 !important;
+  }
+  .deco,
+  [data-deco],
+  .no-print,
+  canvas,
+  button,
+  .skip-link {
+    display: none !important;
+  }
+}

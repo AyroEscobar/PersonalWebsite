@@ -1,0 +1,147 @@
+/*
+  Base: document, type defaults, focus, links, skip link.
+  Loaded after Tailwind's preflight (see index.css). Owned by FOUNDATION.
+*/
+
+html {
+  background: var(--night);
+  color: var(--ink);
+  font-family: 'Overpass Variable', 'Overpass Fallback', system-ui, sans-serif;
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  /* Fixed bars never cover a focused element or a section heading (WCAG 2.4.11). */
+  scroll-padding-top: calc(var(--topbar-h) + 16px);
+  scroll-padding-bottom: calc(var(--bottombar-h) + env(safe-area-inset-bottom, 0px) + 16px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--night);
+  color: var(--ink);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  font-weight: 400;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  isolation: isolate;
+  min-height: 100svh;
+}
+
+h1, h2, h3, h4 {
+  text-wrap: balance;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+p, li, dd, blockquote {
+  text-wrap: pretty;
+}
+
+/* Links: sodium, underlined, never color-only. */
+a {
+  color: var(--sodium);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: color-mix(in oklab, currentColor 45%, transparent);
+}
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* One focus ring everywhere: 2px solid sodium, 2px offset, never clipped. */
+:focus-visible {
+  outline: var(--focus-w) solid var(--sodium);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+::selection {
+  background: var(--sodium);
+  color: var(--night);
+}
+
+/* Skip link: first focusable element, visible on focus. */
+.skip-link {
+  position: fixed;
+  left: 16px;
+  top: 8px;
+  z-index: 100;
+  padding: 10px 14px;
+  background: var(--sodium);
+  color: var(--night);
+  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: var(--radius);
+  transform: translateY(-200%);
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: none;
+  outline-color: var(--ink);
+}
+
+/* Inline code and kbd read as data. */
+code, kbd, samp {
+  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+  font-size: 0.92em;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+/* Native dialogs inherit the night. */
+dialog {
+  color: var(--ink);
+  background: var(--deck);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+dialog::backdrop {
+  background: color-mix(in oklab, var(--night) 92%, transparent);
+}
+
+summary {
+  cursor: pointer;
+}
+
+/* Forced colors: decorative layers go away, outlines stay. */
+@media (forced-colors: active) {
+  .deco,
+  [data-deco] {
+    display: none !important;
+  }
+  :focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* No backdrop blur for people who asked for less transparency, or in quiet mode. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--night) !important;
+  }
+}
+html[data-mode="quiet"] .glass {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--night) !important;
+}

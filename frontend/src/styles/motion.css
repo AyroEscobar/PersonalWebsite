@@ -1,0 +1,96 @@
+/*
+  Motion (PLAN.md section 6). Owned by FOUNDATION.
+
+  The reduced state is the default. Motion only exists inside BOTH gates:
+    @media (prefers-reduced-motion: no-preference)  and  html:not([data-motion="reduced"])
+  The inline boot script sets data-motion="reduced" for the OS setting and for quiet mode,
+  so either one turns motion off before first paint.
+
+  In Tailwind, write gated motion with the `motion-ok:` variant, e.g.
+    className="motion-ok:transition-opacity motion-ok:duration-200"
+  In CSS, nest it the same way as the rules below.
+
+  Only transform and opacity animate in the DOM (plus SVG stroke color for lit states).
+  Under reduced motion, opacity fades of 150ms or less are still allowed (.fade-reduced).
+*/
+
+@keyframes ae-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ae-rise {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Aircraft obstruction light: 1.6s on, 1.6s off, soft ease. 0.31 Hz, far below 3 flashes a second. */
+@keyframes ae-beacon {
+  0%, 44% { opacity: 1; }
+  50%, 94% { opacity: 0.18; }
+  100% { opacity: 1; }
+}
+
+/* A 200ms brightness tick (rail stops when the ping wave reaches a node). */
+@keyframes ae-tick {
+  0% { opacity: 1; }
+  40% { opacity: 0.35; }
+  100% { opacity: 1; }
+}
+
+/* Static by default: the beacon is simply on. */
+.beacon {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="reduced"]) {
+    scroll-behavior: smooth;
+  }
+
+  html:not([data-motion="reduced"]) .beacon {
+    animation: ae-beacon 3.2s var(--ease) infinite;
+  }
+
+  html:not([data-motion="reduced"]) .plate-hover,
+  html:not([data-motion="reduced"]) .btn-text {
+    transition: background-color var(--dur-ui) var(--ease), border-color var(--dur-ui) var(--ease);
+  }
+
+  html:not([data-motion="reduced"]) .rule-l::after {
+    transition: opacity var(--dur-ui-slow) var(--ease);
+  }
+
+  html:not([data-motion="reduced"]) .tick {
+    animation: ae-tick 200ms var(--ease) 1;
+  }
+
+  html:not([data-motion="reduced"]) .enter-rise {
+    animation: ae-rise var(--dur-ui-slow) var(--ease-out) both;
+  }
+}
+
+/* Allowed under reduced motion: a short opacity fade for orientation. */
+.fade-reduced {
+  animation: ae-fade-in var(--dur-fade-reduced) linear both;
+}
+
+/* The beacon also stops in quiet mode and under forced colors. */
+html[data-mode="quiet"] .beacon {
+  animation: none !important;
+  opacity: 1;
+}
+
+/* View Transitions are off under reduced motion and in quiet mode. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+html[data-motion="reduced"]::view-transition-group(*),
+html[data-motion="reduced"]::view-transition-old(*),
+html[data-motion="reduced"]::view-transition-new(*) {
+  animation: none !important;
+}

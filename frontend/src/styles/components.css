@@ -1,0 +1,237 @@
+/*
+  Shared classes every builder uses (PLAN.md 2.2, 2.3, 4.0).
+  Owned by FOUNDATION. Ask in requests-<X>.md for changes.
+
+  Type        .t-display .t-h2 .t-h3 .t-lead .t-body .t-small .mono .label .lower
+  Layout      .page .page-grid .text-col .section .section-head
+  Surfaces    .plate .plate-hover .rule-l (+ .is-lit) .hair-t .hair-b
+  State       .state-now .state-past .state-live   (sets --state)
+  Controls    .chip .btn-text .target-44 .link-quiet
+*/
+
+/* ---------- type ---------- */
+
+.t-display {
+  font-size: var(--t-display);
+  line-height: 0.92;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.t-h2 {
+  font-size: var(--t-h2);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.t-h3 {
+  font-size: var(--t-h3);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.t-lead {
+  font-size: var(--t-lead);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.t-body {
+  font-size: var(--t-body);
+  line-height: 1.6;
+}
+
+.t-small {
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+
+.mono {
+  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+  font-size: var(--t-mono);
+  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Uppercase is only for labels of three words or fewer (PLAN.md 2.2). */
+.label {
+  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* Section names and UI words are lowercase by design. Never put names or titles in .lower. */
+.lower {
+  text-transform: lowercase;
+}
+
+.measure {
+  max-width: 64ch;
+}
+
+/* ---------- layout ---------- */
+
+/* The page frame: max 1360px, page padding, room for the 72px rail on desktop. */
+.page {
+  width: 100%;
+  max-width: calc(var(--page-max) + var(--rail-w));
+  margin-inline: auto;
+  padding-left: calc(var(--page-pad) + var(--rail-w));
+  padding-right: var(--page-pad);
+}
+
+/* 4 columns on phones, 8 on tablets, 12 on desktop. */
+.page-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+@media (min-width: 720px) {
+  .page-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .page-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+}
+
+/* The reading column: all 4 on phones, 1 to 6 on tablets, 2 to 7 on desktop. */
+.text-col {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+@media (min-width: 720px) {
+  .text-col { grid-column: 1 / span 6; }
+}
+@media (min-width: 1100px) {
+  .text-col { grid-column: 2 / span 6; }
+}
+
+.section {
+  position: relative;
+  padding-block: calc(var(--section-gap) / 2);
+}
+
+.section-head {
+  margin-bottom: 32px;
+}
+
+/* ---------- surfaces ---------- */
+
+/* Signage plate: deck on night, 1px hairline, 2px radius, no shadow. */
+.plate {
+  background: var(--deck);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+
+.plate-hover:hover,
+.plate-hover:focus-within {
+  background: var(--deck-2);
+}
+
+/* Left rule: a quiet trace that lights to --state. Only opacity animates (motion.css). */
+.rule-l {
+  position: relative;
+}
+.rule-l::before,
+.rule-l::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  pointer-events: none;
+}
+.rule-l::before {
+  background: var(--trace-lit);
+}
+.rule-l::after {
+  background: var(--state, var(--sodium));
+  opacity: 0;
+}
+.rule-l.is-lit::after,
+.rule-l:hover::after,
+.rule-l:focus-within::after {
+  opacity: 1;
+}
+
+.hair-t { border-top: 1px solid var(--hairline); }
+.hair-b { border-bottom: 1px solid var(--hairline); }
+
+/* ---------- state ---------- */
+
+/* Past work glows sodium, current work glows LED, live status is beacon. */
+.state-past { --state: var(--sodium); }
+.state-now { --state: var(--led); }
+.state-live { --state: var(--beacon); }
+
+/* ---------- controls ---------- */
+
+/* Status word chip. Text always carries the state; color never does it alone. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in oklab, var(--state, var(--dim)) 55%, transparent);
+  border-radius: var(--radius);
+  color: var(--state, var(--dim));
+  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+/* Text button: a visible word, 24px minimum target, no icon-only buttons. */
+.btn-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 24px;
+  min-width: 24px;
+  padding: 4px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.btn-text:hover {
+  background: var(--deck-2);
+  border-color: color-mix(in oklab, var(--sodium) 50%, transparent);
+}
+.btn-text[aria-pressed='true'] {
+  color: var(--sodium);
+  border-color: color-mix(in oklab, var(--sodium) 60%, transparent);
+}
+
+/* Top bar, bottom bar and dialog rows aim for 44px. */
+.target-44 {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* A link that reads as text until hovered or focused (names, rail stops). */
+.link-quiet {
+  color: inherit;
+  text-decoration: none;
+}
+.link-quiet:hover {
+  color: var(--sodium);
+}
