@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import GridPoster from './GridPoster.jsx'
 import DeferredMount from '../ui/DeferredMount.jsx'
 import { NODES } from '../content/places.js'
-import { emit, getState, on, setTier, useStore } from '../lib/store.js'
+import { emit, endPing, getState, on, setTier, useStore } from '../lib/store.js'
 import { detectTier, markWebGLUnavailable } from '../lib/tier.js'
 import { cameraVars, focusLights, heroVars, nearestNode } from './camera.js'
 import { live, pulseNode } from './live.js'
@@ -40,7 +40,10 @@ export default function NightGrid() {
       const node = p.node ?? (p.x != null ? nearestNode(p.x, p.y) : 'plano')
       setHl(node)
       window.clearTimeout(timer.current)
-      timer.current = window.setTimeout(() => setHl(''), 600)
+      timer.current = window.setTimeout(() => {
+        setHl('')
+        endPing(p.id)
+      }, 600)
       emit('nodeReached', node)
     })
     const off2 = on('nodeReached', (node) => pulseNode(node, { motion: getState().motion !== 'reduced' }))
