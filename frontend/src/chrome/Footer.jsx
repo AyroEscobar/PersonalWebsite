@@ -47,14 +47,14 @@ export default function Footer() {
             <NodeMark className="ft-node" />
             <span>{FOOTER.line.text}</span>
           </p>
-          <p className="ft-promise mono">{FOOTER.noTracking.text}</p>
+          <p className="ft-promise">{FOOTER.noTracking.text}</p>
         </div>
         <div className="ft-data mono">
           <BuildStamp />
           <VisitStamp />
           <p className="ft-attrib">{MAP.attribution.text}</p>
         </div>
-        <ul className="ft-controls mono">
+        <ul className="ft-controls">
           <li className="js-only">
             <QuietToggle variant="link" />
           </li>

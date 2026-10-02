@@ -82,9 +82,9 @@ a:hover {
   padding: 10px 14px;
   background: var(--sodium);
   color: var(--night);
-  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-  font-size: 14px;
-  font-weight: 500;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 650;
   text-decoration: none;
   border-radius: var(--radius);
   transform: translateY(-200%);

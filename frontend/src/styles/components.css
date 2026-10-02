@@ -193,7 +193,8 @@
   white-space: nowrap;
 }
 
-/* Text button: a visible word, 24px minimum target, no icon-only buttons. */
+/* Text button: a visible word, 24px minimum target, no icon-only buttons.
+   Words are set in sans; mono is for data (r1 T8). */
 .btn-text {
   display: inline-flex;
   align-items: center;
@@ -206,10 +207,11 @@
   border-radius: var(--radius);
   background: transparent;
   color: var(--ink);
-  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-  font-size: 13px;
+  font-family: inherit;
+  font-size: 0.875rem;
   line-height: 1.2;
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  letter-spacing: 0.005em;
   cursor: pointer;
 }
 .btn-text:hover {
@@ -236,11 +238,11 @@
   border-radius: var(--radius);
   background: var(--sodium);
   color: var(--night);
-  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-  font-size: 14px;
+  font-family: inherit;
+  font-size: 0.9375rem;
   line-height: 1.2;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-weight: 650;
+  letter-spacing: 0.005em;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -259,11 +261,10 @@
   align-items: center;
   gap: 8px;
   color: var(--state, var(--dim));
-  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 0.875rem;
   line-height: 1.2;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 .lamp-word::before {
