@@ -45,3 +45,6 @@ lerna-debug.log*
 # Personal notes (not for repo)
 SESSION_HANDOFF.md
 ROADMAP.md
+
+# Machine-local tool settings (scratch dir for headless Chrome profiles)
+frontend/tools/local.json
