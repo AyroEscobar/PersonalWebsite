@@ -9,8 +9,9 @@ import { Highlight } from './text.jsx'
   words: the line about the level he is aiming at, whose "that" answers the
   hero's invisible systems right above it (r2 U7), the "whole map" sentence
   set large with its middle line lit, the no-shortcut line as the one real
-  highway sign on the site (T9), then his origin paragraph with the
-  off-hours line and the vitals beside the duotone photo.
+  highway sign on the site (T9), then the off-hours line, the vitals beside
+  the duotone photo, and his origin paragraph last, so on a phone no screen
+  holds more than two "trying"s.
 */
 
 // The line inside the pull quote that gets the light. Styling only; the text is verbatim.
@@ -34,7 +35,6 @@ export default function Origin({ id, children }) {
               <p className="sign">
                 <span>{ORIGIN.closer.text}</span>
               </p>
-              <p className="t-lead origin-para">{ORIGIN.paragraph.text}</p>
               <p className="origin-off">{ORIGIN.offHours.text}</p>
               <div className="origin-id">
                 <picture className="origin-photo">
@@ -60,6 +60,7 @@ export default function Origin({ id, children }) {
                   ))}
                 </dl>
               </div>
+              <p className="t-lead origin-para origin-last">{ORIGIN.paragraph.text}</p>
             </div>
           </div>
         </div>
