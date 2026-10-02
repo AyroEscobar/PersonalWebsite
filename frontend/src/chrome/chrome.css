@@ -86,6 +86,8 @@ html:not([data-js]) .js-only {
   inset: 0 0 auto 0;
   z-index: 50;
   height: var(--topbar-h);
+  /* A fixed bar must never widen a phone's layout viewport. */
+  overflow-x: clip;
 }
 
 /* The backing layer. Solid by default; clear over the hero where scroll
@@ -227,7 +229,15 @@ html:not([data-js]) .js-only {
   color: var(--ink);
 }
 
-@media (max-width: 359.98px) {
+@media (max-width: 719.98px) {
+  .clock-btn {
+    gap: 8px;
+    padding: 0 10px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+}
+@media (max-width: 379.98px) {
   .clock-btn .clock-place,
   .clock-btn .clock-sep {
     display: none;
@@ -786,6 +796,7 @@ html[data-mode='quiet'] .quiet-lamp {
     max(calc(var(--page-pad) - 8px), env(safe-area-inset-left));
   background: var(--night);
   border-top: 1px solid var(--hairline);
+  overflow-x: clip;
 }
 @media (min-width: 720px) {
   .bottombar {
