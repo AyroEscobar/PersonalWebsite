@@ -30,7 +30,7 @@ export function SectionHeading({ id, className = 't-h2 lower', children }) {
   const s = sectionById(id)
   return (
     <h2 id={headingId(id)} className={className}>
-      {children ?? s?.label.text ?? id}
+      {children ?? s?.heading?.text ?? s?.label.text ?? id}
     </h2>
   )
 }
