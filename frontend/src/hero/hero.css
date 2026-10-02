@@ -114,19 +114,28 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 2px 0;
-  margin: 18px 0 0;
+  /* Every item carries its separator on its left; the row starts 20px early
+     and that strip is clipped, so a line that wraps never starts on a dot.
+     The clip stops 6px short, so a focus ring is never cut. */
+  margin: 18px 0 0 -20px;
   padding: 0;
   list-style: none;
   font-size: var(--t-body);
   line-height: 1.5;
+  clip-path: inset(-12px -12px -12px 14px);
 }
 .hero-contact li {
+  position: relative;
   display: inline-flex;
   align-items: center;
+  padding-left: 20px;
 }
-.hero-contact li + li::before {
+.hero-contact li::before {
   content: '·' / '';
-  padding: 0 10px;
+  position: absolute;
+  left: 0;
+  width: 20px;
+  text-align: center;
   color: var(--trace-lit);
 }
 .hero-contact a {
