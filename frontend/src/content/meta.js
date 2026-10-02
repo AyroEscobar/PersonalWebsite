@@ -22,10 +22,8 @@ export const HEAD = {
     width: 1200,
     height: 630,
     type: 'image/png',
-    // Provisional until B's og.html puts the lit grid in the image. Then B asks
-    // FOUNDATION to switch to: "Ayro Escobar, software engineer, Plano, Texas,
-    // on a night map of Dallas highways".
-    alt: item('meta-og-alt', 'Ayro Escobar, software engineer, Plano, Texas', [
+    // og.html builds the card from the hero's own night grid (scripts/og.mjs).
+    alt: item('meta-og-alt', 'Ayro Escobar, software engineer, Plano, Texas, on a night map of Dallas highways', [
       'identity-name',
       'identity-role',
       'identity-hometown',
