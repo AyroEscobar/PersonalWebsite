@@ -10,8 +10,8 @@
                  ?quiet in the URL wins, then the stored choice (ae.mode), then
                  auto-quiet for reduced motion, Save-Data or deviceMemory < 4
     data-motion  'reduced' when the OS asks for it or quiet mode is on, else 'full'
-    data-boot    'run' only on the first load of a session, with motion on,
-                 not quiet, and no #hash deep link. The first-paint sequence
+    data-boot    'run' only on the first load of the home page in a session,
+                 with motion on, not quiet, and no #hash deep link. The first-paint sequence
                  keys off html[data-boot="run"].
 */
 ;(function () {
@@ -36,6 +36,9 @@
   d.setAttribute('data-js', '')
   d.setAttribute('data-mode', mode)
   d.setAttribute('data-motion', reduced || mode === 'quiet' ? 'reduced' : 'full')
+  // The first paint belongs to the home page. The 404 stays dark, and a first
+  // visit that lands on it does not use up the home page's first paint.
+  if (!/^\/(index\.html)?$/.test(window.location.pathname)) return
   var booted = true
   try {
     booted = window.sessionStorage.getItem('ae.booted') === '1'
