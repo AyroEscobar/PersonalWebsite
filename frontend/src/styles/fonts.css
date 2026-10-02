@@ -1,0 +1,47 @@
+/*
+  Two self-hosted variable fonts, latin subset (Fontsource 5.3.0, SIL OFL 1.1,
+  licenses beside the files in src/assets/fonts). scripts/prerender.mjs adds a
+  <link rel="preload"> for both hashed files.
+
+  The fallback faces are metric-matched (size-adjust and ascent/descent
+  overrides computed from the font tables on Oct 1, 2026) so the swap from
+  Arial or Courier New causes no layout shift.
+*/
+
+@font-face {
+  font-family: 'Overpass Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('../assets/fonts/overpass-latin-wght-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Overpass Mono Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url('../assets/fonts/overpass-mono-latin-wght-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Overpass: upm 2000, ascent 1766, descent 766, avg width 0.4847 em vs Arial 0.4884 em. */
+@font-face {
+  font-family: 'Overpass Fallback';
+  src: local('Arial'), local('ArialMT'), local('Helvetica Neue'), local('Helvetica');
+  size-adjust: 99.25%;
+  ascent-override: 88.97%;
+  descent-override: 38.59%;
+  line-gap-override: 0%;
+}
+
+/* Overpass Mono: same vertical metrics, avg width 0.616 em vs Courier New 0.600 em. */
+@font-face {
+  font-family: 'Overpass Mono Fallback';
+  src: local('Courier New'), local('CourierNewPSMT'), local('Courier');
+  size-adjust: 102.65%;
+  ascent-override: 86.02%;
+  descent-override: 37.31%;
+  line-gap-override: 0%;
+}
