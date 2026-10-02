@@ -11,11 +11,15 @@ import { live } from './live.js'
   it where |distance - front| is small. The front moves at a constant speed,
   so the crest reaches the farthest visible road in 1.35 s (r1 T5):
 
-    crest       a wide sodium halo with an LED white-hot core, like a tracer
-    afterglow   every road the crest has passed holds about 35% sodium and
-                cools to the night over 2.5 s, so the network blooms, then
-                settles; the last road is dark by about 3.9 s, then the loop
-                stops
+    crest       a sodium halo with an LED white-hot core, like a tracer; the
+                halo is 14 to 28 px long (3.5% of the frame's short side),
+                round at both ends of every piece of road and drawn with MAX
+                blending so pieces never stack into beads; only the narrow
+                core adds up (r2 U5)
+    afterglow   every road the crest has passed holds about 35% of its light
+                and cools over 2.5 s: sodium down to the night, except US-75,
+                which cools back to its own LED; the last road is dark by
+                about 3.9 s, then the loop stops
     arrivals    when the front passes a node, `nodeReached` fires (RouteRail
                 ticks, the poster's ring pulses and its label flares to ink)
                 and a 300 ms LED flare opens on the node
@@ -58,6 +62,7 @@ layout(location=0) in vec2 aCorner;
 layout(location=1) in vec4 aSeg;
 layout(location=2) in vec3 aDA;
 layout(location=3) in vec3 aDB;
+layout(location=4) in float aRest;
 uniform mat3 uM;
 uniform vec2 uRes;
 uniform float uHalf;
@@ -66,6 +71,8 @@ out float vSide;
 out vec3 vDA;
 out vec3 vDB;
 out float vLen;
+out float vPx;
+out float vRest;
 void main() {
   vec2 pa = (uM * vec3(aSeg.xy, 1.0)).xy;
   vec2 pb = (uM * vec3(aSeg.zw, 1.0)).xy;
@@ -80,6 +87,8 @@ void main() {
   vDA = aDA;
   vDB = aDB;
   vLen = length(aSeg.zw - aSeg.xy);
+  vPx = l;
+  vRest = aRest;
   vec2 c = p / uRes * 2.0 - 1.0;
   gl_Position = vec4(c.x, -c.y, 0.0, 1.0);
 }`
@@ -91,15 +100,19 @@ in float vSide;
 in vec3 vDA;
 in vec3 vDB;
 in float vLen;
+in float vPx;
+in float vRest;
 uniform vec3 uFront;
 uniform vec3 uFade;
 uniform vec3 uSpeed;
 uniform float uBand;
 uniform float uCoreBand;
 uniform float uAfter;
+uniform float uHalf;
 uniform vec3 uHot;
 uniform vec3 uCore;
 uniform vec3 uCool;
+uniform vec3 uLed;
 uniform float uGlow;
 out vec4 o;
 float most(vec3 v) { return clamp(max(max(v.x, v.y), v.z), 0.0, 1.0); }
@@ -107,17 +120,24 @@ void main() {
   float s = clamp(vS, 0.0, 1.0);
   vec3 d = min(vDA + s * vLen, vDB + (1.0 - s) * vLen);
   vec3 x = d - uFront;
-  // The crest: a wide sodium halo with a narrow white-hot core.
+  // The crest: a sodium halo with a narrow white-hot core.
   float h = most(exp(-(x * x) / (uBand * uBand)) * uFade);
   float c = most(exp(-(x * x) / (uCoreBand * uCoreBand)) * uFade);
   // Afterglow: seconds since the crest passed, cooling over uAfter.
   vec3 since = max(-x, 0.0) / uSpeed;
   float g = most((1.0 - smoothstep(0.0, uAfter, since)) * step(x, vec3(0.0)) * step(d, vec3(1e8)) * uFade);
   float light = max(h, g * 0.35);
-  vec3 col = mix(uCool, uHot, clamp(max(h * 1.4, g), 0.0, 1.0));
+  // Each road cools to its own rest light: US-75 back to LED, the rest to the trace.
+  vec3 rest = mix(uCool, uLed, vRest);
+  vec3 after = mix(rest, uHot, g * (1.0 - vRest));
+  vec3 col = mix(after, uHot, clamp(h * 1.4, 0.0, 1.0));
   if (uGlow < 0.5) col = mix(col, uCore, c * 0.9);
-  float edge = uGlow > 0.5 ? exp(-vSide * vSide * 2.8) * (0.16 + 0.48 * h) : smoothstep(1.0, 0.4, abs(vSide));
-  float a = light * edge;
+  // Distance to the segment itself, past both end caps too, so every piece
+  // of road ends round and the pieces join into one smooth tube.
+  float along = (vS - s) * vPx;
+  float r = length(vec2(along, vSide * uHalf)) / uHalf;
+  float edge = uGlow > 0.5 ? exp(-r * r * 2.8) * (0.16 + 0.48 * h) : smoothstep(1.0, 0.4, r);
+  float a = clamp(light * edge, 0.0, 1.0);
   o = vec4(col * a, a);
 }`
 
@@ -254,6 +274,19 @@ export async function createEngine(canvas, opts) {
   }
   const distA = new Float32Array(E * 3).fill(FAR)
   const distB = new Float32Array(E * 3).fill(FAR)
+  const spinePath = pathBetween(g, nodeVerts.richardson, nodeVerts.allen)
+  const onSpine = new Set()
+  for (let i = 1; i < spinePath.length; i++) {
+    const a = spinePath[i - 1]
+    const b = spinePath[i]
+    onSpine.add(a < b ? a * 1e6 + b : b * 1e6 + a)
+  }
+  const restOf = new Float32Array(E)
+  for (let e = 0; e < E; e++) {
+    const a = g.edges[2 * e]
+    const b = g.edges[2 * e + 1]
+    restOf[e] = onSpine.has(a < b ? a * 1e6 + b : b * 1e6 + a) ? 1 : 0
+  }
 
   const segProg = compile(gl, SEG_VS, SEG_FS)
   const ptProg = compile(gl, PT_VS, PT_FS)
@@ -284,6 +317,13 @@ export async function createEngine(canvas, opts) {
   gl.enableVertexAttribArray(3)
   gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 0, 0)
   gl.vertexAttribDivisor(3, 1)
+  // Rest light per edge: 1 on US-75 between Richardson and Allen (the LED spine), 0 elsewhere.
+  const restBuf = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, restBuf)
+  gl.bufferData(gl.ARRAY_BUFFER, restOf, gl.STATIC_DRAW)
+  gl.enableVertexAttribArray(4)
+  gl.vertexAttribPointer(4, 1, gl.FLOAT, false, 0, 0)
+  gl.vertexAttribDivisor(4, 1)
 
   const MAX_PTS = 768
   const pts = new Float32Array(MAX_PTS * 8)
@@ -434,7 +474,7 @@ export async function createEngine(canvas, opts) {
     const local = []
     for (let v = 0; v < g.n; v++) if (fast[v] && Math.hypot(g.x[v] - px, g.y[v] - py) < 1600) local.push(v)
     if (local.length < 2) return []
-    const spine = pathBetween(g, nodeVerts.richardson, nodeVerts.allen)
+    const spine = spinePath
     const routeOf = (path) => {
       const xs = path.map((v) => g.x[v])
       const ys = path.map((v) => g.y[v])
@@ -521,6 +561,7 @@ export async function createEngine(canvas, opts) {
     gl.clearColor(0, 0, 0, 0)
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.enable(gl.BLEND)
+    gl.blendEquation(gl.FUNC_ADD)
     gl.blendFunc(gl.ONE, gl.ONE)
 
     // Waves.
@@ -565,16 +606,24 @@ export async function createEngine(canvas, opts) {
       gl.uniform3fv(u.uFront, front)
       gl.uniform3fv(u.uFade, fade)
       gl.uniform3fv(u.uSpeed, speeds)
-      gl.uniform1f(u.uBand, (tier === 'lite' ? 48 : 56) / scale)
+      // The crest's half-length along the road scales with the frame: 14px on
+      // a phone, 28px on a laptop, never a fixed 56 (r2 U5).
+      gl.uniform1f(u.uBand, Math.min(28, Math.max(14, Math.min(cssW, cssH) * 0.035)) / scale)
       gl.uniform1f(u.uCoreBand, 9 / scale)
       gl.uniform1f(u.uAfter, AFTERGLOW)
       gl.uniform3fv(u.uHot, HOT)
       gl.uniform3fv(u.uCore, CORE)
       gl.uniform3fv(u.uCool, COOL)
+      gl.uniform3fv(u.uLed, LED)
       gl.bindVertexArray(segVao)
+      // The halo: MAX blending, so where pieces of road overlap on a curve
+      // the light does not stack into beads.
+      gl.blendEquation(gl.MAX)
       gl.uniform1f(u.uGlow, 1)
       gl.uniform1f(u.uHalf, tier === 'lite' ? 7 : 9)
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, E)
+      // The core: narrow and additive, so it reads white-hot where it is brightest.
+      gl.blendEquation(gl.FUNC_ADD)
       gl.uniform1f(u.uGlow, 0)
       gl.uniform1f(u.uHalf, 1.6)
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, E)
