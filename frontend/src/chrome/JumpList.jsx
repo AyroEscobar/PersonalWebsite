@@ -74,7 +74,7 @@ function pushRecent(id) {
 function pingFromSearch() {
   const fire = () => {
     ping({ node: 'plano', source: 'jump' })
-    announce(MAP.pinged.text, { debounce: 1000 })
+    announce(MAP.pinged.text)
   }
   const r = document.querySelector('.ng-view')?.getBoundingClientRect()
   if (r && r.height > 0 && r.bottom > 120 && r.top < window.innerHeight - 120) return fire()
