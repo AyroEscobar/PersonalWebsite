@@ -1334,9 +1334,24 @@ html[data-motion='reduced'] :is(.jumplist[open]:not([data-instant]), .stops-shee
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* Desktop: the page's own 12 columns, so the footer starts on the reading
+   column's edge (column 2) like every section above it. */
 @media (min-width: 1100px) {
   .ft-inner {
-    grid-template-columns: minmax(0, 4fr) minmax(0, 5fr) minmax(0, 3fr);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+  }
+  .ft-id {
+    grid-column: 2 / span 4;
+  }
+  .ft-data {
+    grid-column: 6 / span 5;
+  }
+  .ft-controls {
+    grid-column: 11 / span 2;
+  }
+  .ft-host {
+    grid-column: 2 / -1;
   }
 }
 
@@ -1382,7 +1397,9 @@ html[data-motion='reduced'] :is(.jumplist[open]:not([data-instant]), .stops-shee
 }
 @media (min-width: 1100px) {
   .ft-controls {
-    justify-content: flex-end;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-end;
   }
 }
 .ft-link {
