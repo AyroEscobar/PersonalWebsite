@@ -33,6 +33,8 @@ const mid = (...ids) => [
 // moves further right, past the plates the sections lay over it.
 export const FRAMES = {
   origin: { at: [N.plano[0] + 60, N.plano[1] + 40], z: 0.5, ax: 74, ay: 40 },
+  // origin once the hero has scrolled away: the same ground, moved past the reading column
+  'origin-read': { at: [N.plano[0] + 60, N.plano[1] + 40], z: 0.5, ax: 84, ay: 44 },
   now: { at: mid('allen', 'plano', 'richardson'), z: 0.7, ax: 84, ay: 48 },
   work: { at: [N.plano[0] + 230, N.plano[1] - 90], z: 0.46, ax: 82, ay: 50 },
   builds: { at: [N.plano[0] + 20, N.plano[1] + 520], z: 0.3, ax: 84, ay: 46 },

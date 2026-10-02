@@ -208,10 +208,10 @@
     background: linear-gradient(90deg, var(--night) 0, var(--night) 61%, color-mix(in oklab, var(--night) 60%, transparent) 67%, transparent 76%);
     opacity: 0;
   }
-  .ng:not([data-focus='origin']) .ng-scrim::after {
+  .ng[data-reading] .ng-scrim::after {
     opacity: 1;
   }
-  .ng:not([data-focus='origin']) .ng-layers {
+  .ng[data-reading] .ng-layers {
     opacity: 0.62;
   }
 }
@@ -355,8 +355,8 @@
 /* ---------- focus: what each section lights (desktop) ---------- */
 
 @media (min-width: 1100px) {
-  .ng:not([data-focus='origin']) .ng-node .ng-label,
-  .ng:not([data-focus='origin']) .ng-off {
+  .ng[data-reading] .ng-node .ng-label,
+  .ng[data-reading] .ng-off {
     opacity: 0.5;
   }
   .ng[data-lit~='plano'] .ng-node[data-node='plano'] .ng-label,

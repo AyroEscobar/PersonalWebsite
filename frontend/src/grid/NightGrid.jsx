@@ -29,10 +29,25 @@ import './grid.css'
 export default function NightGrid() {
   const focus = useStore((s) => s.focus)
   const [hl, setHl] = useState('')
+  const [heroOut, setHeroOut] = useState(false)
   const timer = useRef(0)
 
-  const style = useMemo(() => ({ ...heroVars(), ...cameraVars(focus) }), [focus])
+  // Desktop reading: the hero frame holds only while the hero is on screen.
+  // Once the origin body takes over the viewport, the map steps right and the
+  // reading column goes to plain night, the same as every later stop.
+  const frame = focus === 'origin' && heroOut ? 'origin-read' : focus
+  const reading = frame !== 'origin'
+  const style = useMemo(() => ({ ...heroVars(), ...cameraVars(frame) }), [frame])
   const lights = focusLights(focus)
+
+  useEffect(() => {
+    const hero = document.querySelector('.hero')
+    if (!hero || typeof IntersectionObserver === 'undefined') return undefined
+    // Out once the hero's bottom edge rises above 45% of the viewport (the root is the lower 55%).
+    const io = new IntersectionObserver((es) => setHeroOut(!es.some((e) => e.isIntersecting)), { rootMargin: '-45% 0px 0px 0px' })
+    io.observe(hero)
+    return () => io.disconnect()
+  }, [])
 
   useEffect(() => {
     const off1 = on('ping', (p) => {
@@ -58,6 +73,7 @@ export default function NightGrid() {
     <div
       className="ng"
       data-focus={focus}
+      data-reading={reading ? '' : undefined}
       data-lit={lights.nodes || undefined}
       data-off={lights.offgrid || undefined}
       data-hl={hl || undefined}
