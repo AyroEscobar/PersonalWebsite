@@ -57,20 +57,32 @@ function Linked({ text }) {
   return out
 }
 
+/** A date range that only ever breaks at " to " (r1 M14). Same characters. */
+function Range({ text }) {
+  if (!text) return null
+  const parts = text.split(' to ')
+  if (parts.length !== 2) return <span className="nw">{text}</span>
+  return (
+    <>
+      <span className="nw">{parts[0]}</span> to <span className="nw">{parts[1]}</span>
+    </>
+  )
+}
+
 export default function Crew({ id }) {
   return (
     <Section id={id} className="page">
       <div className="page-grid">
         <div className="text-col">
           <StopHead id={id}>
-            <p className="mono c-intro">{CREW.intro.text}</p>
+            <p className="c-intro">{CREW.intro.text}</p>
           </StopHead>
           <ul className="crew">
             {CREW.entries.map((e) => {
               const p = split(e)
               if (!p) {
                 return (
-                  <li key={e.id} className="crew-row crew-row--plain">
+                  <li key={e.id} id={e.id} tabIndex={-1} className="crew-row crew-row--plain">
                     <span aria-hidden="true" />
                     <p className="crew-body">
                       <Linked text={e.text} />
@@ -79,9 +91,9 @@ export default function Crew({ id }) {
                 )
               }
               return (
-                <li key={e.id} className="crew-row">
+                <li key={e.id} id={e.id} tabIndex={-1} className="crew-row">
                   <p className="crew-when mono" aria-hidden="true">
-                    {p.when}
+                    <Range text={p.when} />
                   </p>
                   <div>
                     <h3 className="crew-title">{e.title}</h3>
