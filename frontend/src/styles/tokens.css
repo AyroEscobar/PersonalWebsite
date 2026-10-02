@@ -15,7 +15,7 @@
   --ink: #F3ECDF;
   --dim: #9AA7C2;
   --sodium: #FFA53D;
-  --led: #D6E6FF;
+  --led: #9CC3FF;
   --beacon: #FF5A47;
 
   /* roads */
@@ -97,7 +97,7 @@
   :root {
     --sodium: color(display-p3 1 0.63 0.18);
     --beacon: color(display-p3 1 0.3 0.22);
-    --led: color(display-p3 0.84 0.9 1);
+    --led: color(display-p3 0.62 0.77 1);
   }
 }
 
