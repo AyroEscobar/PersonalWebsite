@@ -53,7 +53,7 @@ function vercelHeaderRules() {
   return (config.headers || []).map((h) => ({ re: toRegex(h.source), headers: h.headers }))
 }
 
-export function serveDist({ port = 0, root = path.join(ROOT, 'dist'), host = '127.0.0.1', log = false } = {}) {
+export function serveDist({ port = 0, root = path.join(ROOT, 'dist'), host = '127.0.0.1', log = false, delay = null } = {}) {
   const rules = vercelHeaderRules()
   const packed = new Map()
   const compress = (file, buf, enc) => {
@@ -64,7 +64,13 @@ export function serveDist({ port = 0, root = path.join(ROOT, 'dist'), host = '12
     return packed.get(key)
   }
   const resolve = (urlPath) => {
-    let p = decodeURIComponent(urlPath.split('?')[0].split('#')[0])
+    let p
+    try {
+      p = decodeURIComponent(urlPath.split('?')[0].split('#')[0])
+    } catch {
+      // A malformed escape (/%E0%A4%A) is a 404, never a crash of the preview server (r1 M21).
+      return null
+    }
     if (p.includes('..')) return null
     if (p.endsWith('/')) p += 'index.html'
     const candidates = [p, `${p}.html`]
@@ -103,7 +109,10 @@ export function serveDist({ port = 0, root = path.join(ROOT, 'dist'), host = '12
     }
     res.setHeader('Content-Length', body.length)
     if (req.method === 'HEAD') return res.end()
-    res.end(body)
+    // QA can hold back some files (delay: (path) => ms), e.g. the fonts, to see what a slow network sees.
+    const wait = delay ? Number(delay(urlPath)) || 0 : 0
+    if (wait > 0) setTimeout(() => res.end(body), wait)
+    else res.end(body)
   })
   return new Promise((ok, bad) => {
     server.once('error', bad)
