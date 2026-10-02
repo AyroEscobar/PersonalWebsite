@@ -134,29 +134,32 @@ export default function ProgramStrip({ className = '' }) {
             <span className="ps-now" style={{ gridColumn: N + 1, gridRow: '2 / -1' }} />
           </div>
 
-          <table className="sr-only">
-            <caption>{PROGRAM.tableCaption.text}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{W.lane.text}</th>
-                <th scope="col">{W.item.text}</th>
-                <th scope="col">{W.from.text}</th>
-                <th scope="col">{W.until.text}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {LANES.flatMap((lane) =>
-                lane.blocks.map((b) => (
-                  <tr key={b.id}>
-                    <td>{lane.label.text}</td>
-                    <td>{b.label}</td>
-                    <td>{edgeText(b.start, b.startExact)}</td>
-                    <td>{b.end ? edgeText(b.end, b.endExact) : W.present.text}</td>
-                  </tr>
-                )),
-              )}
-            </tbody>
-          </table>
+          {/* A table ignores width: 1px and grows to its content, so it hides inside a clipped box (sr-only on a div). */}
+          <div className="sr-only">
+            <table>
+              <caption>{PROGRAM.tableCaption.text}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{W.lane.text}</th>
+                  <th scope="col">{W.item.text}</th>
+                  <th scope="col">{W.from.text}</th>
+                  <th scope="col">{W.until.text}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {LANES.flatMap((lane) =>
+                  lane.blocks.map((b) => (
+                    <tr key={b.id}>
+                      <td>{lane.label.text}</td>
+                      <td>{b.label}</td>
+                      <td>{edgeText(b.start, b.startExact)}</td>
+                      <td>{b.end ? edgeText(b.end, b.endExact) : W.present.text}</td>
+                    </tr>
+                  )),
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       <figcaption className="ps-caption mono">{PROGRAM.caption.text}</figcaption>
