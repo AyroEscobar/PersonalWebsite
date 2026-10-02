@@ -195,7 +195,7 @@ function compile(gl, vs, fs) {
 // ---------- engine ----------
 
 export async function createEngine(canvas, opts) {
-  const { gridUrl, cam, tier, dprFor, onReached, onDone, onFail } = opts
+  const { gridUrl, cam, tier, dprFor, onReached, onDone, onFail, heroInView = () => true } = opts
   const p3 = typeof matchMedia === 'function' && matchMedia('(color-gamut: p3)').matches
   const gl = canvas.getContext('webgl2', {
     alpha: true,
@@ -291,7 +291,7 @@ export async function createEngine(canvas, opts) {
   let cssW = 1
   let cssH = 1
   let dpr = 1
-  let heroVisible = true
+  let heroVisible = heroInView()
   let lastInput = performance.now()
   const waves = new Array(SLOTS).fill(null)
   let nextSlot = 0
@@ -318,11 +318,19 @@ export async function createEngine(canvas, opts) {
     dpr = dprFor()
     const w = Math.max(1, Math.round(cssW * dpr))
     const h = Math.max(1, Math.round(cssH * dpr))
+    // Resizing clears the canvas; only ask for a frame if something is lit.
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w
       canvas.height = h
     }
     kick()
+  }
+
+  // Wipe the canvas without a frame (WebGL may draw outside rAF).
+  function clearNow() {
+    gl.viewport(0, 0, canvas.width, canvas.height)
+    gl.clearColor(0, 0, 0, 0)
+    gl.clear(gl.COLOR_BUFFER_BIT)
   }
 
   // ---------- waves ----------
@@ -442,8 +450,10 @@ export async function createEngine(canvas, opts) {
 
   // ---------- frame ----------
 
+  const needsFrame = () => waves.some(Boolean) || sparks.length > 0 || trafficOn() || traffic.some((c) => (c.a ?? 0) > 0.01)
+
   function kick() {
-    if (!alive || raf || document.hidden) return
+    if (!alive || raf || document.hidden || !needsFrame()) return
     raf = requestAnimationFrame(frame)
   }
 
@@ -631,7 +641,15 @@ export async function createEngine(canvas, opts) {
     destroy,
     setHeroVisible(v) {
       heroVisible = v
-      if (v) kick()
+      if (v) return kick()
+      // Scrolled away: the traffic goes out at once, so the loop stops at once.
+      for (const car of traffic) car.a = 0
+      if (!waves.some(Boolean) && !sparks.length) {
+        cancelAnimationFrame(raf)
+        raf = 0
+        last = 0
+        clearNow()
+      }
     },
   }
 }

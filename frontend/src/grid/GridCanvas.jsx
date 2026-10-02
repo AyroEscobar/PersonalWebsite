@@ -35,9 +35,15 @@ export default function GridCanvas() {
       setTier(detectTier())
     }
 
+    const hero = document.querySelector('.hero')
     createEngine(canvas, {
       gridUrl,
       cam,
+      heroInView: () => {
+        if (!hero) return true
+        const r = hero.getBoundingClientRect()
+        return r.bottom > 0 && r.top < window.innerHeight
+      },
       tier: getState().tier,
       dprFor: () => (TIER_DPR[getState().tier] ?? TIER_DPR.lite)() || 1,
       onReached: (node) => emit('nodeReached', node),
@@ -57,7 +63,6 @@ export default function GridCanvas() {
           ro.observe(canvas)
           offs.push(() => ro.disconnect())
         }
-        const hero = document.querySelector('.hero')
         if (hero && typeof IntersectionObserver !== 'undefined') {
           const io = new IntersectionObserver((es) => engine.setHeroVisible(es.some((x) => x.isIntersecting)))
           io.observe(hero)
