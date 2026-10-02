@@ -36,7 +36,7 @@ export const NODES = {
     exit: 'east',
     a11y: 'New York City',
   }),
-  waterloo: item('node-waterloo', 'waterloo', ['exp-rbc-origin', 'com-hackathons-competed'], {
+  waterloo: item('node-waterloo', 'waterloo', ['exp-rbc-origin', 'com-hackathons-competed', 'com-htn-waterloo'], {
     kind: 'offgrid',
     state: 'lit-past',
     exit: 'north',
