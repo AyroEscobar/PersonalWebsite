@@ -8,8 +8,11 @@ import { AGE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
 
   r1 (Oct 2): the deck is sans in LED with viaere linked to its build card;
   a proof line names the two banks under it; a contact row follows. His
-  "level" paragraph moved from the hero into origin, right before the pull
-  quote (triage T2, T7, T16).
+  "level" paragraph moved from the hero into origin (triage T2, T7, T16).
+  r2: origin opens on the level paragraph, whose "that" answers the hero
+  caption about invisible systems right above it, then the pull quote and
+  the sign; his own origin paragraph sits with the off-hours line and the
+  vitals (triage U7). Words unchanged.
 */
 
 export const HERO = {
@@ -42,17 +45,17 @@ export const HERO = {
 }
 
 export const ORIGIN = {
-  paragraph: item(
-    'origin-paragraph',
-    `${AGE}, in cs at ut dallas. trying to live this all the way out. take the engineering as far as i can, build as much as i can, stay curious about anything that gets made. mostly that's software, but the rest counts too. just trying to be a good engineer and put together work i'd be proud to show.`,
-    ['voice-hero', 'identity-age'],
-    { verbatim: 'voice-hero' },
-  ),
   level: item(
     'origin-level',
     "i'm trying to be the kind of engineer who can build that. work that quietly holds itself up, doesn't need a human in the loop, doesn't sleep when i do. that's the level i'm aiming at.",
     ['voice-level'],
     { verbatim: 'voice-level' },
+  ),
+  paragraph: item(
+    'origin-paragraph',
+    `${AGE}, in cs at ut dallas. trying to live this all the way out. take the engineering as far as i can, build as much as i can, stay curious about anything that gets made. mostly that's software, but the rest counts too. just trying to be a good engineer and put together work i'd be proud to show.`,
+    ['voice-hero', 'identity-age'],
+    { verbatim: 'voice-hero' },
   ),
   pull: item(
     'origin-pull',
