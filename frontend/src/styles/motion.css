@@ -43,11 +43,15 @@
   opacity: 1;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion="reduced"]) {
-    scroll-behavior: smooth;
-  }
+/*
+  No scroll-behavior: smooth on <html>. It also animated every focus scroll,
+  which on a page this long made Tab feel slow and let one scroll swallow the
+  next. Jumps the page makes (rail stops, the bottom bar, the stops sheet,
+  search results, the name, in-text links) go through chrome/route.js goTo(),
+  which glides when motion is on and lands focus on the heading.
+*/
 
+@media (prefers-reduced-motion: no-preference) {
   html:not([data-motion="reduced"]) .beacon {
     animation: ae-beacon 3.2s var(--ease) infinite;
   }
