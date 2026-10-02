@@ -56,8 +56,7 @@ export function loadFacts() {
   The denylist (outside the repo, DENYLIST_PATH). One term per line, '#'
   comments, groups separated by a blank line.
 
-    a group whose comment says [held]   names held until he clears them;
-                                        skipped when ALLOW_HELD=1
+    a group whose comment says [held] is skipped when ALLOW_HELD=1
     near: <term> | <word>, <word>       a proximity rule: fails when <term>
                                         sits within NEAR_CHARS characters of
                                         any listed word, on either side
