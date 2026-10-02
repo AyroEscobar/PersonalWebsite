@@ -416,6 +416,7 @@ try {
     R.lighthouse = await runLighthouse({ port: chrome.port, url, runs: LH_RUNS, log: (m) => console.log(m) })
     if (R.lighthouse.skipped) check('lighthouse', 'lighthouse', 'warn', R.lighthouse.skipped)
     else {
+      if (R.lighthouse.retries) check('lighthouse', 'retried runs', 'warn', R.lighthouse.retries.join(' | '))
       for (const [key, { median: m }] of Object.entries(R.lighthouse)) {
         const t = key.startsWith('mobile') ? TARGETS.mobile : TARGETS.desktop
         const misses = ['performance', 'accessibility', 'best-practices', 'seo'].filter((c) => m[c] < t[c]).map((c) => `${c} ${m[c]} < ${t[c]}`)

@@ -36,13 +36,27 @@ export async function runLighthouse({ port, url, runs = 3, log = console.log }) 
     return { skipped: 'lighthouse not installed (npm run tools)' }
   }
   const out = {}
+  // A headless tab can die mid-run ("Target closed"). That is the harness, not
+  // the page: retry the run up to twice, and report every retry (run.mjs turns
+  // them into a warning), so a page that really crashes the tab still shows up.
+  const retries = []
   for (const form of ['mobile', 'desktop']) {
     for (const variant of ['full', 'quiet']) {
       const target = variant === 'quiet' ? `${url}/?quiet` : `${url}/`
       const samples = []
       for (let i = 0; i < runs; i++) {
         const flags = { port, output: 'json', logLevel: 'error', onlyCategories: CATS }
-        const result = await lighthouse(target, flags, form === 'desktop' ? desktopConfig : undefined)
+        let result = null
+        for (let attempt = 1; !result; attempt++) {
+          try {
+            result = await lighthouse(target, flags, form === 'desktop' ? desktopConfig : undefined)
+          } catch (e) {
+            const why = String(e?.message || e).split('\n')[0].slice(0, 160)
+            retries.push(`${form}/${variant} run ${i + 1}: ${why}`)
+            log(`  lighthouse ${form}/${variant} run ${i + 1}: ${why} (attempt ${attempt})`)
+            if (attempt >= 3) throw e
+          }
+        }
         const lhr = result.lhr
         const s = { runtimeError: lhr.runtimeError?.message }
         for (const c of CATS) s[c] = lhr.categories[c]?.score == null ? null : Math.round(lhr.categories[c].score * 100)
@@ -59,5 +73,6 @@ export async function runLighthouse({ port, url, runs = 3, log = console.log }) 
       out[`${form}-${variant}`] = { median: m, samples }
     }
   }
+  if (retries.length) Object.defineProperty(out, 'retries', { value: retries, enumerable: false })
   return out
 }
