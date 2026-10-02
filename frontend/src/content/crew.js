@@ -15,7 +15,7 @@ export const CREW = {
   entries: [
     item(
       'crew-hackcon',
-      'Speaker, MLH Hackcon 2026 · "Planning for Chaos" · August 21 to 23, 2026. Attended Hackcon 2025 and 2026.',
+      'Speaker, MLH Hackcon 2026 · "Planning for Chaos" · August 21 to 23, 2026. Also there in 2025.',
       ['exp-mlh-hackcon'],
       { title: 'Speaker, MLH Hackcon 2026', dates: 'August 21 to 23, 2026', start: '2026-08-21', end: '2026-08-23' },
     ),

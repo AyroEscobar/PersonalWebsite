@@ -10,7 +10,7 @@ import { item, ui } from './item.js'
 */
 
 export const WORK = {
-  intro: ui('work-intro', 'dated, newest first. the dates do the talking.'),
+  intro: ui('work-intro', 'dated, newest first.'),
   statusWords: {
     active: ui('status-active', 'active'),
     complete: ui('status-complete', 'complete'),
@@ -128,7 +128,7 @@ export const WORK = {
         ),
         item(
           'mlh-debrief-hackcon',
-          'Spoke at Hackcon 2026, MLH\'s annual conference for hackathon organizers: "Planning for Chaos".',
+          'Gave a talk called "Planning for Chaos" at Hackcon 2026, MLH\'s annual conference for hackathon organizers.',
           ['exp-mlh-hackcon'],
         ),
       ],
