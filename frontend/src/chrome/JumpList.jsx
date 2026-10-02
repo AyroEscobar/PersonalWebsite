@@ -5,8 +5,9 @@ import { BUILDS } from '../content/builds.js'
 import { SIGNAL } from '../content/signal.js'
 import { CHROME, JUMP } from '../content/meta.js'
 import { EMAIL, REPO, STORAGE } from '../content/constants.js'
+import { MAP } from '../content/places.js'
 import { announce } from '../lib/announce.js'
-import { setMode } from '../lib/store.js'
+import { ping, setMode } from '../lib/store.js'
 import { useQuiet } from '../lib/mode.js'
 import Announcer from '../ui/Announcer.jsx'
 import { registerJump, setShortcuts, shortcutsOn } from './jump.js'
@@ -62,6 +63,23 @@ function pushRecent(id) {
   } catch {
     /* storage blocked: no recents, nothing else changes */
   }
+}
+
+/*
+  The signature from the keyboard (A's B4): a ping from Plano, the same as
+  the hero's ping button. On desktop the map is the sticky layer beside the
+  reading column, so the wave runs where you are. On phones the map is the
+  hero block: the page goes back up to it first, then pings.
+*/
+function pingFromSearch() {
+  const fire = () => {
+    ping({ node: 'plano', source: 'jump' })
+    announce(MAP.pinged.text, { debounce: 1000 })
+  }
+  const r = document.querySelector('.ng-view')?.getBoundingClientRect()
+  if (r && r.height > 0 && r.bottom > 120 && r.top < window.innerHeight - 120) return fire()
+  goTo('origin')
+  window.setTimeout(fire, document.documentElement.dataset.motion === 'reduced' ? 0 : 700)
 }
 
 async function copyText(text) {
@@ -246,6 +264,17 @@ export default function JumpList({ base = '' }) {
         sub: host(c.href),
         lamp: 'link',
         run: nav(c.href),
+      })
+    }
+
+    if (onHome) {
+      list.push({
+        id: 'cmd-ping',
+        group: 'commands',
+        title: JUMP.commands.ping.text,
+        keywords: ['map', 'wave', 'grid', 'roads', 'highways', 'plano'],
+        lamp: 'cmd',
+        run: pingFromSearch,
       })
     }
 
