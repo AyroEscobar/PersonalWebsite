@@ -9,7 +9,8 @@ import { W } from './words.js'
 */
 
 // A figure in running text: 4,000+  60+  70%  2 hours  1 of 10. Not "13F", "K8" or a year.
-const FIGURE = /(?<![\w.,-])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\+|%)?(?![\w-])/g
+// No lookbehind (older iOS Safari cannot parse it): group 1 is the character before.
+const FIGURE = /(^|[^\w.,-])((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\+|%)?)(?![\w-])/g
 const YEAR = /^(19|20)\d\d$/
 
 /** Running text with its figures set as tabular, brighter numerals. */
@@ -17,14 +18,16 @@ export function Figures({ text }) {
   const out = []
   let last = 0
   for (const m of text.matchAll(FIGURE)) {
-    if (YEAR.test(m[0])) continue
-    if (m.index > last) out.push(text.slice(last, m.index))
+    const fig = m[2]
+    if (YEAR.test(fig)) continue
+    const at = m.index + m[1].length
+    if (at > last) out.push(text.slice(last, at))
     out.push(
-      <span key={m.index} className="fig">
-        {m[0]}
+      <span key={at} className="fig">
+        {fig}
       </span>,
     )
-    last = m.index + m[0].length
+    last = at + fig.length
   }
   if (!out.length) return text
   if (last < text.length) out.push(text.slice(last))
