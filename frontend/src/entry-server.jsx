@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { prerenderToNodeStream } from 'react-dom/static'
 import Root from './Root.jsx'
+import NotFound from './chrome/NotFound.jsx'
 import './styles/index.css'
 
 /*
@@ -12,7 +13,7 @@ import './styles/index.css'
 export async function render(page = 'home') {
   const { prelude } = await prerenderToNodeStream(
     <StrictMode>
-      <Root page={page} />
+      <Root page={page} NotFound={NotFound} />
     </StrictMode>,
   )
   let html = ''

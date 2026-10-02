@@ -7,13 +7,18 @@ import { initClient } from './lib/client.js'
 const el = document.getElementById('root')
 // Prerendered pages carry data-page. In `vite dev` any path other than / shows the 404.
 const page = el.dataset.page || (import.meta.env.DEV && window.location.pathname !== '/' ? '404' : 'home')
-const tree = (
-  <StrictMode>
-    <Root page={page} />
-  </StrictMode>
-)
 
-if (el.hasChildNodes()) hydrateRoot(el, tree)
-else createRoot(el).render(tree)
+async function start() {
+  // The 404 is a separate chunk, loaded before hydrating so the tree matches.
+  const NotFound = page === '404' ? (await import('./chrome/NotFound.jsx')).default : null
+  const tree = (
+    <StrictMode>
+      <Root page={page} NotFound={NotFound} />
+    </StrictMode>
+  )
+  if (el.hasChildNodes()) hydrateRoot(el, tree)
+  else createRoot(el).render(tree)
+  initClient()
+}
 
-initClient()
+start()
