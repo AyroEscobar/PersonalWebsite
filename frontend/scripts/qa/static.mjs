@@ -5,7 +5,7 @@
 import { readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { BANNED, DASH_RE, PRIVATE_SHAPES, loadDenylist, readTokens, termRegex, walk, hexToRgb } from '../lib/rules.mjs'
+import { BANNED, DASH_RE, PRIVATE_SHAPES, loadDenylist, loadNearRules, readTokens, termRegex, walk, hexToRgb } from '../lib/rules.mjs'
 
 export async function staticScan(ROOT) {
   const DIST = path.join(ROOT, 'dist')
@@ -27,15 +27,16 @@ export async function staticScan(ROOT) {
   const banned = BANNED.filter((re) => re.test(visibleText)).map(String)
   push('banned-words', banned.length ? 'fail' : 'pass', banned.length ? banned.join(', ') : 'none in prerendered text')
 
-  // Privacy: denylist, shapes, Esvo.
+  // Privacy: denylist terms (held groups included unless ALLOW_HELD=1), its proximity rules, and shapes.
   const deny = loadDenylist()
+  const shapes = [...PRIVATE_SHAPES, ...loadNearRules()]
   const privacy = []
   for (const f of text) {
     const t = readFileSync(f, 'utf8')
     if (deny) for (const term of deny) if (termRegex(term).test(t)) privacy.push(`${rel(f)}: denylist term`)
-    for (const s of PRIVATE_SHAPES) if (s.re.test(t)) privacy.push(`${rel(f)}: ${s.name}`)
+    for (const s of shapes) if (s.re.test(t)) privacy.push(`${rel(f)}: ${s.name}`)
   }
-  push('privacy', privacy.length ? 'fail' : deny ? 'pass' : 'warn', privacy.length ? privacy.join('; ') : deny ? 'denylist, EIN, phone and 2027 checks clean' : 'denylist missing, shape checks only')
+  push('privacy', privacy.length ? 'fail' : deny ? 'pass' : 'warn', privacy.length ? privacy.join('; ') : deny ? 'denylist terms, proximity rules, EIN and phone shapes clean' : 'denylist missing, shape checks only')
 
   // Map labels: only the six allowed node labels inside the map graphic.
   const { ALLOWED_MAP_LABELS } = await import(pathToFileURL(path.join(ROOT, 'src/content/places.js')))

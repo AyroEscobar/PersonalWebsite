@@ -8,7 +8,7 @@
     4  a duplicate content id
     5  an en or em dash anywhere in src, index.html, public or og (fonts excepted)
     6  a banned word (voice.md)
-    7  a privacy denylist term, an EIN or phone shape, 2027 near JPMorgan or RBC
+    7  a privacy denylist term or proximity rule, an EIN or phone shape
     8  'twenty' outside the AGE constant; "Onto what's next." not exactly once
     9  a token pair under its contrast floor
    10  an off-palette color literal, or a cut effect (scanlines, glitch, chamfers,
@@ -32,6 +32,7 @@ import {
   hexToRgb,
   loadDenylist,
   loadFacts,
+  loadNearRules,
   readTokens,
   termRegex,
   walk,
@@ -53,6 +54,7 @@ export async function checkContent({ quiet = false } = {}) {
   if (!facts) warn(`facts.json not found at ${FACTS_PATH}: fact id checks skipped`)
   const deny = loadDenylist()
   if (!deny) warn(`denylist not found at ${DENYLIST_PATH}: denylist check skipped`)
+  const shapes = [...PRIVATE_SHAPES, ...loadNearRules()]
 
   // ---------- 1 to 4, 8: the content modules ----------
   const { NON_VISIBLE } = await import(pathToFileURL(path.join(ROOT, 'src/content/item.js')))
@@ -183,7 +185,7 @@ export async function checkContent({ quiet = false } = {}) {
         if (m) err(`${r}:${where(text, m.index)}: denylist term (see ${DENYLIST_PATH})`)
       }
     }
-    for (const s of PRIVATE_SHAPES) {
+    for (const s of shapes) {
       const m = text.match(s.re)
       if (m) err(`${r}:${where(text, m.index)}: ${s.name}`)
     }

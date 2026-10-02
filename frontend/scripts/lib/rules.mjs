@@ -39,11 +39,11 @@ export const BANNED = [
   /\bwon\b(?= (at|first|second|third|best|the))/i,
 ]
 
-// Shapes that must never ship (PLAN.md 12 step 8).
+// Shapes that must never ship (PLAN.md 12 step 8). Rules that name a term,
+// including proximity rules, live in the denylist outside the repo.
 export const PRIVATE_SHAPES = [
   { name: 'EIN-shaped number', re: /\b\d{2}-\d{7}\b/ },
   { name: 'phone-shaped number', re: /(?<![\w.])\(?\d{3}\)?[-. ]\d{3}[-. ]\d{4}\b/ },
-  { name: '2027 near JPMorgan or RBC', re: /(JPMorgan|JPM|J\.P\.|RBC)[\s\S]{0,80}2027|2027[\s\S]{0,80}(JPMorgan|JPM|J\.P\.|RBC)/ },
 ]
 
 export function loadFacts() {
@@ -52,15 +52,55 @@ export function loadFacts() {
   return new Map(list.map((f) => [f.id, f]))
 }
 
-/** Denylist: one term per line, '#' comments. Esvo terms are skipped when ALLOW_ESVO=1. */
-export function loadDenylist() {
+/*
+  The denylist (outside the repo, DENYLIST_PATH). One term per line, '#'
+  comments, groups separated by a blank line.
+
+    a group whose comment says [held]   names held until he clears them;
+                                        skipped when ALLOW_HELD=1
+    near: <term> | <word>, <word>       a proximity rule: fails when <term>
+                                        sits within NEAR_CHARS characters of
+                                        any listed word, on either side
+
+  readDenylist() returns { terms, near } (near: [{ name, re }]) or null when
+  the file is missing. loadDenylist() returns just the terms.
+*/
+export const NEAR_CHARS = 80
+const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+export function readDenylist() {
   if (!existsSync(DENYLIST_PATH)) return null
-  const allowEsvo = process.env.ALLOW_ESVO === '1'
-  return readFileSync(DENYLIST_PATH, 'utf8')
-    .split('\n')
-    .map((l) => l.trim())
-    .filter((l) => l && !l.startsWith('#'))
-    .filter((l) => !(allowEsvo && /esvo/i.test(l)))
+  const allowHeld = process.env.ALLOW_HELD === '1'
+  const terms = []
+  const near = []
+  for (const group of readFileSync(DENYLIST_PATH, 'utf8').split(/\n\s*\n/)) {
+    const lines = group.split('\n').map((l) => l.trim()).filter(Boolean)
+    if (allowHeld && lines.some((l) => l.startsWith('#') && /\[held\]/i.test(l))) continue
+    for (const l of lines) {
+      if (l.startsWith('#')) continue
+      const m = l.match(/^near:\s*(.+?)\s*\|\s*(.+)$/i)
+      if (!m) {
+        terms.push(l)
+        continue
+      }
+      const words = m[2].split(',').map((w) => w.trim()).filter(Boolean).map(esc).join('|')
+      const term = esc(m[1])
+      near.push({
+        name: `denylist proximity rule ${near.length + 1}`,
+        re: new RegExp(`(${words})[\\s\\S]{0,${NEAR_CHARS}}${term}|${term}[\\s\\S]{0,${NEAR_CHARS}}(${words})`),
+      })
+    }
+  }
+  return { terms, near }
+}
+
+export function loadDenylist() {
+  return readDenylist()?.terms ?? null
+}
+
+/** Proximity rules from the denylist (empty when the file is missing). */
+export function loadNearRules() {
+  return readDenylist()?.near ?? []
 }
 
 export function termRegex(term) {
