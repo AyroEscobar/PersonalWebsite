@@ -67,7 +67,8 @@ export const NOW = {
 */
 export const PROGRAM = {
   from: '2025-01',
-  caption: ui('program-caption', "what ran at the same time. dotted edges mean the month isn't public."),
+  summary: ui('program-summary', 'what ran at the same time'),
+  caption: ui('program-caption', "dotted edges mean the month isn't public."),
   tableCaption: ui('program-table-caption', 'Overlap of school, work, ventures and community, January 2025 to now'),
   lanes: [
     { id: 'school', label: ui('lane-school', 'school') },

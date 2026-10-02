@@ -1,5 +1,5 @@
 import { Section } from '../ui/Section.jsx'
-import { NOW } from '../content/now.js'
+import { NOW, PROGRAM } from '../content/now.js'
 import { BUILD_DATE } from '../lib/build.js'
 import { isStale, monthShort } from '../lib/format.js'
 import StopHead from './StopHead.jsx'
@@ -9,7 +9,8 @@ import { Dotted } from './text.jsx'
 
 /*
   now (PLAN.md 3.4). B's NowBoard is the section's header plate; under it,
-  the ProgramStrip runs wide. Until the NowBoard file exists, NowLines
+  the ProgramStrip runs wide, folded behind "what ran at the same time"
+  (r1 T17); the strip and its table open together. Until the NowBoard file exists, NowLines
   renders the same lines with the same staleness rule, so the section never
   ships empty.
 */
@@ -21,7 +22,11 @@ export default function Now({ id }) {
           <StopHead id={id} />
           {NowBoard ? <NowBoard variant="section" /> : <NowLines />}
         </div>
-        <ProgramStrip className="c-wide" />
+        {/* Folded by default until Ayro says the overlap is fine to show (questions.md #41, r1 T17). */}
+        <details className="ps-fold c-wide">
+          <summary className="ps-summary">{PROGRAM.summary.text}</summary>
+          <ProgramStrip />
+        </details>
       </div>
     </Section>
   )

@@ -79,9 +79,17 @@ export default function ProgramStrip({ className = '' }) {
     const measure = () => {
       const can = el.scrollWidth > el.clientWidth + 1
       setScrolls(can)
-      // Open at now, once: the present is the part people look for first.
-      if (can && first) el.scrollLeft = el.scrollWidth
-      first = false
+      // Open at this year, once: the present is the part people look for
+      // first, and every block of the year starts in view (RBC is never cut
+      // to "BC" behind the lane names, r1 M14). Measured only once it has a
+      // width, so a strip that starts folded still opens at this year.
+      if (can && first) {
+        const years = el.querySelectorAll('.ps-year')
+        const year = years[years.length - 1]
+        const lane = el.querySelector('.ps-lane-label')
+        el.scrollLeft = year && lane ? year.offsetLeft - lane.offsetWidth - 8 : el.scrollWidth
+      }
+      if (el.clientWidth > 0) first = false
     }
     measure()
     if (typeof ResizeObserver === 'undefined') return
@@ -162,7 +170,7 @@ export default function ProgramStrip({ className = '' }) {
           </div>
         </div>
       </div>
-      <figcaption className="ps-caption mono">{PROGRAM.caption.text}</figcaption>
+      <figcaption className="ps-caption">{PROGRAM.caption.text}</figcaption>
     </figure>
   )
 }
