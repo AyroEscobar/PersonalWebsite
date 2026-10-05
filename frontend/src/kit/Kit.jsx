@@ -16,6 +16,9 @@ import CopyEmail from '../ui/CopyEmail.jsx'
 import ToastRegion, { ToastView } from '../ui/Toast.jsx'
 import SectionHead from '../ui/SectionHead.jsx'
 import ContactCard from '../ui/ContactCard.jsx'
+import ReadingSentence from '../ui/ReadingSentence.jsx'
+import ProfileCard from '../ui/ProfileCard.jsx'
+import Specimen from '../ui/Specimen.jsx'
 import Footer from '../chrome/Footer.jsx'
 import { ArrowDown, ArrowOut, Copy, Mail } from '../ui/icons.jsx'
 import { KIT } from '../content/kit.js'
@@ -48,6 +51,9 @@ const HOLDS = 'work that quietly holds itself up'
 const holds = LEVEL.includes(HOLDS) ? HOLDS : LEVEL.split('.')[0]
 const LINE2 = 'where my family never has'
 const line2 = ORIGIN.pull.text.includes(LINE2) ? LINE2 : ''
+// the whole-map sentence, the hero's first sentence, set as the hero sets it
+const END = 'along the way.'
+const SENTENCE = ORIGIN.pull.text.slice(0, ORIGIN.pull.text.indexOf(END) + END.length)
 
 // Each group's light sits behind its glass: two to four deep blobs, pulled in under the surfaces.
 const FIELDS = {
@@ -233,6 +239,13 @@ export default function Kit() {
           </div>
         </Group>
 
+        {/* ---------- the reading sentence (1.1, 6.1) ---------- */}
+        <Group id="reading" title={KIT.groups.reading.text} field="nav">
+          <Cell label={KIT.reading.standIn.text} className="kit-cell--reading">
+            <ReadingSentence className="kit-reading" text={SENTENCE} d={[6, 11, 16, 21]} m={[4, 9, 13, 17, 21]} />
+          </Cell>
+        </Group>
+
         {/* ---------- 5.2 masthead and the quiet switch ---------- */}
         <Group id="masthead" title={KIT.groups.masthead.text} field="chips">
           <div className="kit-row kit-row--masthead">
@@ -295,6 +308,11 @@ export default function Kit() {
             <div>
               <h3 className="kit-label kit-label--sub">{KIT.groups.head.text}</h3>
               <SectionHead word={sectionById('now').label.text} line={NOW.mission.text} as="p" />
+              <Cap>{KIT.head.inline.text}</Cap>
+              <div className="kit-rail-demo">
+                <SectionHead word={sectionById('work').label.text} line={WORK.intro.text} as="p" rail />
+              </div>
+              <Cap>{KIT.head.rail.text}</Cap>
             </div>
           </div>
         </Group>
@@ -314,14 +332,18 @@ export default function Kit() {
         {/* ---------- 5.5 card ---------- */}
         <Group id="card" title={KIT.groups.card.text} field="cards">
           <div className="kit-cards">
-            <Cell label={`${KIT.card.glass.text}, ${S.rest.text}`}>
-              <BuildCard card={card('build-viaere')} />
+            <Cell label={`${KIT.card.glass.text}, ${S.rest.text}, ${KIT.card.specimen.text}`}>
+              <BuildCard card={card('build-viaere')}>
+                <Specimen kind="viaere" />
+              </BuildCard>
             </Cell>
             <Cell label={`${KIT.card.glass.text}, ${S.hover.text}`}>
               <BuildCard card={card('build-neetcode')} state="hover" />
             </Cell>
-            <Cell label={KIT.card.focus.text}>
-              <BuildCard card={card('build-pool')} state="focus" />
+            <Cell label={`${KIT.card.focus.text}, ${KIT.card.specimen.text}`}>
+              <BuildCard card={card('build-pool')} state="focus">
+                <Specimen kind="circle-method" />
+              </BuildCard>
             </Cell>
             <Cell label={KIT.card.base.text}>
               <BuildCard card={card('build-gaia')} base />
@@ -336,6 +358,8 @@ export default function Kit() {
               <NowList />
               <WorkPlate plate={plate('plate-jpm')} />
               <Stack />
+              <ProfileCard />
+              <Cap>{KIT.groups.profile.text}</Cap>
             </div>
             <div className="kit-col">
               <WorkPlate plate={rbc} open />
@@ -368,7 +392,14 @@ export default function Kit() {
 
         {/* ---------- 5.13 contact card ---------- */}
         <Group id="contact" title={KIT.groups.contact.text} field="contact">
-          <ContactCard idPrefix="kit-contact" />
+          <div className="kit-contacts">
+            <Cell label={KIT.contact.narrow.text}>
+              <ContactCard idPrefix="kit-contact" />
+            </Cell>
+            <Cell label={KIT.contact.wide.text}>
+              <ContactCard idPrefix="kit-contact-wide" wide />
+            </Cell>
+          </div>
         </Group>
 
         {/* ---------- 4.4 fallbacks ---------- */}

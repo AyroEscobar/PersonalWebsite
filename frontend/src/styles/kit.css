@@ -478,3 +478,24 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* the reading sentence, smaller than the hero's so the kit page stays a page */
+.kit-reading {
+  font-size: clamp(2.25rem, 4.6vw, 4rem);
+}
+@media (max-width: 639.98px) {
+  .kit-reading {
+    font-size: min(2.25rem, calc((100vw - 32px) * 0.1));
+  }
+}
+/* the rail head shown in place (it is only sticky inside a split section) */
+.kit-rail-demo {
+  margin-top: var(--s-6);
+}
+.kit-rail-demo .sec-head--rail {
+  position: static;
+}
+.kit-contacts {
+  display: grid;
+  gap: var(--s-7);
+}
