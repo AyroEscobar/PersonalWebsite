@@ -1,75 +1,64 @@
 /*
-  v2 design tokens (DESIGN.md section 2). Light first: Plano at noon, warm.
-  Names are by role, never by value.
+  v3 design tokens (DESIGN.md section 2): Night Rain. Two hues and white,
+  nothing else. Names are by role, never by value.
 
   scripts/check-content.mjs parses the hex values in the FIRST :root block
   below (one token per line, `--name: #RRGGBB;`): every hex literal anywhere
   else in src must be one of them, and every text token is checked against
-  every surface it sits on, including the glass composites over the field.
-  The field colours are oklch; the check converts them.
+  every surface it sits on, including the glass composite over the brightest
+  backdrop the poster measured (public/poster/meta.json).
 */
 
 :root {
   /* surfaces */
-  --base: #FBF9F4;
-  --plate: #FFFFFF;
-  --plate-2: #F5F0E6;
+  --void: #05060D;
+  --plate: #0B0E18;
+  --plate-2: #0F1320;
 
   /* text */
-  --ink: #15120E;
-  --ink-2: #4A443C;
-  --ink-3: #5E574D;
-  --on-ink: #FBF9F4;
+  --ink: #F6FBFF;
+  --ink-2: #DFE6F3;
 
-  /* accent and status */
-  --accent: #1E4FD8;
-  --accent-ink: #163FB0;
-  --ok: #15803D;
-  --ok-ink: #11652F;
+  /* the two hues */
+  --cyan: #19E6FF;
+  --magenta: #FF3DBB;
+
+  /* the scene only, never UI */
+  --sky: #12324A;
+  --dawn: #A9D8F0;
 }
 
 :root {
   /* rgb triplets, used as rgb(var(--x) / alpha) */
-  --ink-rgb: 21 18 14;
-  --accent-rgb: 30 79 216;
   --lit: 255 255 255;
-  --sh: 60 45 20;
-  --rim-dark: 70 60 40;
+  --void-rgb: 5 6 13;
+  --cyan-rgb: 25 230 255;
 
-  /* rules */
-  --hair: rgb(var(--ink-rgb) / 0.07);
-  --hair-2: rgb(var(--ink-rgb) / 0.12);
+  /* the void alpha under copy on glass; the scene raises it to 0.70 over p 0.85 to 1 */
+  --scrim: 0.62;
 
-  /* the field, hero (2.1): luminous, warm. Chroma at the top of 2.1's range and a
-     little past it (0.10 to 0.11), because at 0.08 the 1440 fold still read as cream */
-  --f-peach: oklch(0.9 0.1 55);
-  --f-butter: oklch(0.95 0.11 95);
-  --f-sky: oklch(0.89 0.1 236);
-  --f-lilac: oklch(0.87 0.1 295);
-  --f-rose: oklch(0.86 0.1 10);
-  --f-core: oklch(0.84 0.12 60);
+  /* hairlines between experience lines */
+  --rule: rgb(var(--lit) / 0.1);
 
-  /* the field under content glass (12.3): deeper, so every sheet has colour to bend */
-  --f-peach-d: oklch(0.8 0.14 48);
-  --f-butter-d: oklch(0.88 0.15 90);
-  --f-sky-d: oklch(0.8 0.13 238);
-  --f-lilac-d: oklch(0.78 0.14 295);
-  --f-rose-d: oklch(0.8 0.14 8);
+  /* type: Mona Sans for every word; Geist Mono only for the build line and the scene controls */
+  --sans: 'Mona Sans', 'Mona Sans Fallback', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
-  /* type: Instrument Serif for his voice, Inter for everything upright */
-  --serif: 'Instrument Serif', 'Instrument Serif Fallback', Georgia, serif;
-  --sans: 'Inter', 'Inter Fallback', ui-sans-serif, system-ui, sans-serif;
-
-  /* type scale, in rem so a reader's larger default size scales the page (px at 16) */
-  --t-xs: 0.8125rem; /* 13 chips, captions, footer */
-  --t-sm: 0.875rem; /* 14 buttons, nav words, dense card copy */
-  --t-md: 1rem; /* 16 body */
-  --t-lg: 1.125rem; /* 18 lede, card titles */
-  --t-xl: 1.375rem; /* 22 masthead name, section lines */
-  --t-2xl: 1.75rem; /* 28 receipt numbers */
-  --t-3xl: 2.5rem; /* 40 section words on phones and tablets */
-  --t-4xl: 4rem; /* 64 section words from 1100px up */
-  --t-display: clamp(2.5rem, 7.2vw, 6.5rem); /* 40 to 104 */
+  /* type scale (2.2), in rem so a reader's larger default size scales the page (px at 16) */
+  --t-name: 6.5rem; /* 104 the one h1 */
+  --t-section: 2.5rem; /* 40 section titles */
+  --t-card-name: 1.75rem; /* 28 Esvo Technologies, Viaere */
+  --t-role: 1.25rem; /* 20 the hero role line, the card headline */
+  --t-lead: 1.0625rem; /* 17 the one line, the contact paragraph */
+  --t-body: 1rem; /* 16 card blurbs, footer row */
+  --t-line: 0.96875rem; /* 15.5 the experience lines */
+  --t-org: 1.0625rem; /* 17 the org names */
+  --t-btn: 0.9375rem; /* 15 buttons */
+  --t-btn-sm: 0.875rem; /* 14 small buttons, nav words */
+  --t-chip: 0.8125rem; /* 13 chips, the copied status */
+  --t-eyebrow: 0.75rem; /* 12 eyebrows, "elsewhere" */
+  --t-label: 0.6875rem; /* 11 the theme line */
+  --t-mono: 0.71875rem; /* 11.5 the build line, the scene controls */
 
   /* space */
   --s-1: 4px;
@@ -84,82 +73,74 @@
   --s-10: 96px;
 
   /* layout */
-  --gutter: 64px;
+  --gutter: 72px;
   --page-max: 1360px;
-  --section-gap: 96px;
-  --measure: 64ch;
 
   /* radius: concentric, outer = inner + padding */
+  --r-panel: 22px;
+  --r-card: 22px;
+  --r-chip: 14px;
+  --r-inner: 12px;
+  --r-pill: 999px;
   --r-1: 6px;
-  --r-2: 10px;
-  --r-3: 14px;
-  --r-4: 20px;
-  --r-5: 28px;
-  --r-full: 999px;
 
-  /* elevation (2.4): warm ink shadows, always down at a 1:2 ratio.
-     none is a hairline only; rest and raised are the drop parts of the glass
-     shadows (glass.css adds the inner light on top). */
-  --e-none: inset 0 0 0 1px var(--hair);
-  --e-rest: 0 14px 28px -14px rgb(var(--sh) / 0.42), 0 2px 5px -2px rgb(var(--sh) / 0.14);
-  --e-raised: 0 30px 60px -28px rgb(var(--sh) / 0.4), 0 10px 22px -12px rgb(var(--sh) / 0.2), 0 1px 2px rgb(var(--sh) / 0.08);
-  --e-raised-clear: 0 24px 50px -24px rgb(var(--sh) / 0.35), 0 10px 18px -12px rgb(var(--sh) / 0.2), 0 1px 2px rgb(var(--sh) / 0.1);
+  /* elevation (2.3): ink shadows, down, 1:2 */
+  --e-rest: 0 12px 28px -14px rgb(0 0 0 / 0.6);
+  --e-raised: 0 40px 90px -40px rgb(0 0 0 / 0.85), 0 12px 28px -14px rgb(0 0 0 / 0.6);
+  --e-inner: inset 0 1px 0 rgb(var(--lit) / 0.55), inset 0 -1px 0 rgb(var(--lit) / 0.06), inset 0 -40px 60px -50px rgb(var(--cyan-rgb) / 0.18);
 
-  /* motion (2.5) */
+  /* motion (2.4) */
   --dur-press: 120ms;
   --dur-hover: 160ms;
-  --dur-tip: 140ms;
-  --dur-tip-out: 100ms;
-  --dur-pop: 200ms;
-  --dur-pop-out: 150ms;
-  --dur-sheet: 320ms;
-  --dur-morph: 500ms;
+  --dur-reveal: 240ms;
+  --dur-canvas: 150ms;
+  --dur-nav: 200ms;
+  --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
   --ease-press: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-morph: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* focus (2.6): a base-coloured gap, then the accent ring */
-  --focus: 0 0 0 2px var(--base), 0 0 0 4px var(--accent);
+  /* focus: a void gap, then an ink ring */
+  --focus: 0 0 0 2px var(--void), 0 0 0 4px var(--ink);
 
-  color-scheme: light;
+  color-scheme: dark;
 }
 
-/* Phones: 16px gutters, 64px between sections. */
+/* gutters: 72 at 1100 px and up, 32 from 640 to 1099, 16 under 640 */
 @media (max-width: 639.98px) {
   :root {
     --gutter: 16px;
-    --section-gap: 64px;
+    --t-name: 3.25rem; /* 52 */
+    --t-section: 2rem; /* 32 */
+    --t-card-name: 1.5rem; /* 24 */
+    --t-role: 1.0625rem; /* 17 */
+    --t-lead: 1rem; /* 16 */
+    --t-body: 0.9375rem; /* 15 */
+    --t-line: 0.9375rem; /* 15 */
   }
 }
-
 @media (min-width: 640px) and (max-width: 1099.98px) {
   :root {
     --gutter: 32px;
   }
 }
 
-/* More contrast: body text goes to full ink, hairlines get stronger. */
+/* More contrast: secondary copy goes to full ink, hairlines get stronger. */
 @media (prefers-contrast: more) {
   :root {
-    --ink-2: #15120E;
-    --ink-3: #4A443C;
-    --hair: rgb(var(--ink-rgb) / 0.3);
-    --hair-2: rgb(var(--ink-rgb) / 0.45);
+    --ink-2: #F6FBFF;
+    --rule: rgb(var(--lit) / 0.3);
   }
 }
 
-/* Forced colours: system colours win. The field and glass layers hide themselves. */
+/* Forced colours: system colours win. The scene and the glass layers hide themselves. */
 @media (forced-colors: active) {
   :root {
-    --base: Canvas;
+    --void: Canvas;
+    --plate: Canvas;
+    --plate-2: Canvas;
     --ink: CanvasText;
     --ink-2: CanvasText;
-    --ink-3: CanvasText;
-    --on-ink: Canvas;
-    --accent: LinkText;
-    --accent-ink: LinkText;
-    --hair: CanvasText;
-    --hair-2: CanvasText;
+    --cyan: LinkText;
+    --rule: CanvasText;
     --focus: 0 0 0 2px Canvas, 0 0 0 4px Highlight;
   }
 }

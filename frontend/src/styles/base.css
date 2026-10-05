@@ -4,7 +4,7 @@
 */
 
 html {
-  background-color: var(--base);
+  background-color: var(--void);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 100%;
@@ -14,33 +14,42 @@ html {
   scroll-padding-top: 96px;
   -webkit-tap-highlight-color: transparent;
   overflow-x: clip;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+/* tools: a fixed clock (?t=) also means instant scrolls, so a capture lands where it asked */
+html.fixed {
+  scroll-behavior: auto;
 }
 
 @media (max-width: 639.98px) {
   html {
     scroll-padding-top: 24px;
-    scroll-padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
 }
 
 body {
   margin: 0;
   min-height: 100svh;
-  background-color: var(--base);
+  background-color: var(--void);
   color: var(--ink);
-  font-size: var(--t-md);
-  line-height: 1.55;
-  font-weight: 400;
+  font-size: var(--t-body);
+  line-height: 1.5;
+  font-weight: 420;
+  font-stretch: 100%;
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 #root {
   position: relative;
   min-height: 100svh;
-  /* the fields bleed past their sections; the page ends where its content does */
-  overflow: clip;
 }
 
 h1, h2, h3, h4 {
@@ -49,32 +58,39 @@ h1, h2, h3, h4 {
   color: var(--ink);
 }
 
-p, li, dd, blockquote {
+p, li, dd {
   text-wrap: pretty;
 }
 
 p { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
 
-/* Links: ink with an accent underline, never colour only. A link that sits straight on the
-   field (the hero lede, the builds note) has no glass under it, and accent on a raw blob
-   measures 3.1:1; ink holds 4.5:1 on every blob (rules.mjs, "text on the raw field", which
-   check-content ties to this colour). Links on glass set accent-ink (components.css). */
+/* Links: ink with a cyan underline, never colour only. Links outside glass sit
+   on the raw scene; ink holds 4.5:1 on its brightest pixel (rules.mjs). */
 a {
   color: var(--ink);
   text-decoration-line: underline;
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 0.2em;
-  text-decoration-color: var(--accent);
-  transition: text-decoration-color var(--dur-hover) ease, color var(--dur-hover) ease;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: rgb(var(--cyan-rgb) / 0.55);
+  transition: text-decoration-color var(--dur-hover) var(--ease-out), color var(--dur-hover) var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   a:hover {
-    text-decoration-thickness: 2px;
-    text-decoration-color: var(--accent-ink);
+    text-decoration-color: var(--cyan);
   }
 }
 
-/* One focus ring everywhere (2.6): a base gap, then the accent, as a shadow so it follows radii. */
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* One focus ring everywhere (2.1): a void gap, then the ink ring, as a shadow so it follows radii. */
 :focus-visible {
   outline: none;
   box-shadow: var(--focus);
@@ -85,49 +101,61 @@ a {
 }
 
 ::selection {
-  background: rgb(var(--accent-rgb) / 0.18);
+  background: rgb(var(--cyan-rgb) / 0.28);
   color: var(--ink);
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .skip-link {
   position: fixed;
-  left: 12px;
-  top: 12px;
+  left: 16px;
+  top: 16px;
   z-index: 100;
-  padding: 10px 14px;
-  background: var(--ink);
-  color: var(--on-ink);
-  font: 600 var(--t-sm) / 1 var(--sans);
+  padding: 12px 18px;
+  background: var(--cyan);
+  color: var(--void);
+  font: 600 var(--t-btn) / 1 var(--sans);
+  font-stretch: 104%;
   text-decoration: none;
-  border-radius: var(--r-2);
-  transform: translateY(-160%);
+  border-radius: var(--r-pill);
+  transform: translateY(-200%);
 }
 .skip-link:focus,
 .skip-link:focus-visible {
   transform: none;
 }
 
-/* Numbers that line up: dates, receipts, the build hash. */
+/* Numbers that line up: dates, the build hash. */
 .tnum,
 time {
   font-variant-numeric: tabular-nums;
 }
 
-hr {
-  border: 0;
-  border-top: 1px solid var(--hair);
-}
-
-summary {
-  cursor: pointer;
-}
-
 /* The `notext` QA mode (?notext=1): text and its underlines hidden so the contrast capture
-   sees only the backdrop (a link's accent underline is not what its words sit on). */
+   sees only the backdrop. */
 html.notext body * {
   color: transparent !important;
   text-shadow: none !important;
   text-decoration-color: transparent !important;
+}
+
+/* ui=0: the bare scene, for the poster and README captures */
+html[data-ui='0'] .top,
+html[data-ui='0'] main,
+html[data-ui='0'] .footer,
+html[data-ui='0'] .skip-link {
+  visibility: hidden;
 }
 
 /* Forced colours: decorative layers go away, focus stays visible. */

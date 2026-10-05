@@ -1,56 +1,36 @@
 /*
-  Two families, two self-hosted files, Latin subset, SIL OFL 1.1 (licenses
-  beside the files in src/assets/fonts). 33 KB in all; vite.config.js adds a
-  <link rel="preload"> for each hashed file.
+  Two families, two self-hosted files, Latin subsets, SIL OFL 1.1 (licences
+  beside the files in src/assets/fonts).
 
-    Instrument Serif   his voice, always italic: the sentence, his own lowercase
-                       lines, section words, the active nav word, chip words
-                       (the upright cut was preloaded and never drawn, so it
-                       is gone)
-    Inter (variable)   names, roles, companies, numbers and every UI word
+    Mona Sans (variable, wght 200 to 900, wdth 75 to 125)   every word on the site; preloaded
+    Geist Mono (400)   the footer build line and the two scene controls only; not preloaded
 
-  No monospace anywhere (DESIGN.md 2.3).
-
-  The fallback faces are metric matched so the swap moves nothing. The
-  numbers were computed on Oct 4, 2026 from the real advance widths of the
-  hero sentence (serif) and the proof line (sans) against Georgia and Arial,
-  plus each font's hhea ascent and descent.
+  The sans fallback is metric matched to Arial so the swap moves nothing.
 */
 
 @font-face {
-  font-family: 'Instrument Serif';
-  font-style: italic;
+  font-family: 'Mona Sans';
+  font-style: normal;
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+  font-display: swap;
+  src: url('../assets/fonts/mona-sans-vf-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('../assets/fonts/instrument-serif-italic-latin.woff2') format('woff2');
+  src: url('../assets/fonts/geist-mono-latin.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('../assets/fonts/inter-var-latin.woff2') format('woff2');
-}
-
-/* Instrument Serif italic over Georgia Italic: advance 57.29 em vs 72.44 em on the sentence. */
-@font-face {
-  font-family: 'Instrument Serif Fallback';
-  font-style: italic;
-  src: local('Georgia Italic'), local('Georgia-Italic');
-  size-adjust: 79.09%;
-  ascent-override: 125.18%;
-  descent-override: 39.2%;
-  line-gap-override: 0%;
-}
-
-/* Inter 400 over Arial: advance 86.95 em vs 81.82 em on the proof line. */
-@font-face {
-  font-family: 'Inter Fallback';
+  font-family: 'Mona Sans Fallback';
   font-style: normal;
   src: local('Arial'), local('ArialMT'), local('Helvetica');
-  size-adjust: 106.27%;
-  ascent-override: 91.16%;
-  descent-override: 22.7%;
+  size-adjust: 103%;
+  ascent-override: 92%;
+  descent-override: 23%;
   line-gap-override: 0%;
 }
