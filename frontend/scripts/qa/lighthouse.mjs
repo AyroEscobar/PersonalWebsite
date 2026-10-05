@@ -1,6 +1,6 @@
 /*
   Lighthouse (PLAN.md 7, 12 step 4). Mobile and desktop presets, full mode
-  and ?quiet, N runs each, median reported. Runs against the QA Chrome over
+  and ?quiet=1 (solid plates), N runs each, median reported. Runs against the QA Chrome over
   its debugging port, so no second browser is launched.
 */
 
@@ -42,7 +42,7 @@ export async function runLighthouse({ port, url, runs = 3, log = console.log }) 
   const retries = []
   for (const form of ['mobile', 'desktop']) {
     for (const variant of ['full', 'quiet']) {
-      const target = variant === 'quiet' ? `${url}/?quiet` : `${url}/`
+      const target = variant === 'quiet' ? `${url}/?quiet=1` : `${url}/`
       const samples = []
       for (let i = 0; i < runs; i++) {
         const flags = { port, output: 'json', logLevel: 'error', onlyCategories: CATS }
