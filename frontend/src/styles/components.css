@@ -439,14 +439,19 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
 .card-title a:is(:focus-visible, .is-focus) .ruler {
   box-shadow: var(--gx-shadow, var(--g-shadow)), var(--focus);
 }
-/* the ruler: the lens material sliding over the title on hover, magnifying it 1.12x */
+/* the ruler: the lens material sliding over the title on hover, magnifying it. The title
+   grows from its left edge, so its first letter stays on the body's edge; the ruler hugs the
+   magnified title with 10px of glass each side (its focus ring 4px beyond that, still 10px
+   inside the card's 24px padding) and 10px above and below. --ruler-s is 1.12, or less
+   when that would carry a long title past the padding (BuildCard measures it); a title
+   that wraps wraps the same way inside the ruler. */
 .card .ruler {
+  --o: 10px;
   position: absolute;
-  left: -18px;
-  right: -18px;
-  top: 50%;
-  height: 44px;
-  margin-top: -22px;
+  left: calc(-1 * var(--o));
+  top: calc(var(--tp, 1px) - var(--o));
+  bottom: calc(var(--tp, 1px) - var(--o));
+  width: calc(var(--ruler-s, 1.12) * 100% + 2 * var(--o));
   overflow: hidden;
   pointer-events: none;
   opacity: 0;
@@ -454,11 +459,12 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
 }
 .card .ruler-text {
   position: absolute;
-  left: 50%;
+  left: var(--o);
   top: 50%;
-  white-space: nowrap;
+  width: calc((100% - 2 * var(--o)) / var(--ruler-s, 1.12));
   color: var(--ink);
-  transform: translate(-50%, -50%) scale(1.12);
+  transform-origin: 0 50%;
+  transform: translateY(-50%) scale(var(--ruler-s, 1.12));
 }
 @media (hover: hover) and (pointer: fine) {
   .card:hover .ruler {
@@ -528,6 +534,9 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
   .card-links a {
     padding-block: 11px;
     margin-block: -11px;
+  }
+  .card-title a {
+    --tp: 11px;
   }
   .card-links a {
     padding-inline: 6px;
@@ -1679,7 +1688,9 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
 .lens-nav .nav-a.is-focus {
   box-shadow: var(--focus);
 }
-/* the bead: the lens looking at the current word, with a 2px line under it */
+/* the bead: the lens looking at the current word, with a 2px line under it. The line sits
+   4px above the bead's bottom, clear of the italic's descenders (the g of "origin" ends
+   4.3px under the baseline): 2.7px of air on the pill, 4.7 in the dock */
 .lens-nav .bead {
   position: absolute;
   left: 0;
@@ -1692,7 +1703,7 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
   transform-origin: 0 50%;
   opacity: 0;
   background:
-    linear-gradient(var(--ink), var(--ink)) 50% calc(100% - 7px) / 22% 2px no-repeat,
+    linear-gradient(var(--ink), var(--ink)) 50% calc(100% - 4px) / 22% 2px no-repeat,
     radial-gradient(closest-side, rgb(var(--lit) / 0.7), rgb(var(--lit) / 0.2) 70%, transparent);
 }
 .lens-nav .bead[data-placed] {
@@ -1782,13 +1793,17 @@ html[data-mode='morph'] .lens-nav.is-reader:not(.is-ready) {
   }
 }
 
-/* the narrowest phones: six words still fit the dock */
+/* the narrowest phones: six words still fit the dock, the italic current word too
+   ("contact" is 53px at 20px, 42px at 16; a slot is 43px at 320) */
 @media (max-width: 359.98px) {
   .lens-nav .nav-a {
     padding: 0 2px;
   }
   .lens-nav .nav-sans {
     font-size: var(--t-xs);
+  }
+  .lens-nav .nav-it {
+    font-size: 16px;
   }
 }
 
