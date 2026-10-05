@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 /*
-  budget (PLAN.md 7, acceptance 4, 22, 32). Runs after every build on dist,
-  gzip -9. Fails the build when a budget is blown or something banned ships.
+  budget (DESIGN.md 10). Runs after every build on dist, gzip -9. Fails the
+  build when a budget is blown or something banned ships.
 
-    entry JS (entry + static imports)   120 KB gz
-    lazy: grid canvas (src/grid/*)        14 KB gz
-    lazy: JumpList                         8 KB gz
-    lazy: specimens (all)                 12 KB gz
+    entry JS (entry + static imports)   110 KB gz (target 100)
+    lazy: the lens and loupe              8 KB gz (src/glass/lens.js)
+    lazy: specimens (all)                12 KB gz
+    lazy: the kit route                  20 KB gz (src/kit/*, never loaded by /)
     any other lazy chunk                  20 KB gz each
-    CSS                                   20 KB gz
+    CSS                                   24 KB gz
     HTML for /                            90 KB gz
-    dfw-grid.json                         10 KB gz
-    preloaded fonts                       2 files, 65 KB
+    preloaded fonts                       3 files, 60 KB
     headshot files                        50 KB each
     initial transfer                     350 KB
     third-party requests, media files, three.js, Firebase, Mapbox,
@@ -31,16 +30,15 @@ const DIST = path.join(ROOT, 'dist')
 const KB = 1024
 
 export const BUDGETS = {
-  entryJs: 120 * KB,
-  grid: 14 * KB,
-  jumplist: 8 * KB,
+  entryJs: 110 * KB,
+  lens: 8 * KB,
   specimens: 12 * KB,
+  kit: 20 * KB,
   otherLazy: 20 * KB,
-  css: 20 * KB,
+  css: 24 * KB,
   html: 90 * KB,
-  gridJson: 10 * KB,
-  fonts: 65 * KB,
-  fontFiles: 2,
+  fonts: 60 * KB,
+  fontFiles: 3,
   image: 50 * KB,
   initial: 350 * KB,
 }
@@ -85,18 +83,18 @@ export function measure() {
   add('js', `entry (${entryFiles.size} file${entryFiles.size > 1 ? 's' : ''})`, entryGz, BUDGETS.entryJs, { files: [...entryFiles] })
 
   // Lazy chunks, classified by source path.
-  const lazy = { grid: 0, jumplist: 0, specimens: 0 }
+  const lazy = { lens: 0, kit: 0, specimens: 0 }
   for (const [key, c] of Object.entries(manifest)) {
     if (!c.isDynamicEntry) continue
     const size = fileGz(path.join(DIST, c.file)) + (c.imports || []).filter((i) => !entryFiles.has(manifest[i]?.file)).reduce((s, i) => s + fileGz(path.join(DIST, manifest[i].file)), 0)
     const src = c.src || key
-    if (/src\/grid\//.test(src)) lazy.grid += size
-    else if (/JumpList/.test(src)) lazy.jumplist += size
+    if (/src\/glass\/lens\.js$/.test(src)) lazy.lens += size
+    else if (/src\/kit\//.test(src)) lazy.kit += size
     else if (/src\/sections\/specimens\//.test(src)) lazy.specimens += size
     else add('lazy', src, size, BUDGETS.otherLazy)
   }
-  add('lazy', 'grid canvas (src/grid)', lazy.grid, BUDGETS.grid)
-  add('lazy', 'JumpList', lazy.jumplist, BUDGETS.jumplist)
+  add('lazy', 'lens and loupe (src/glass/lens.js)', lazy.lens, BUDGETS.lens)
+  add('lazy', 'kit route (src/kit)', lazy.kit, BUDGETS.kit)
   add('lazy', 'specimens (all)', lazy.specimens, BUDGETS.specimens)
 
   // CSS: every stylesheet in dist.
@@ -109,11 +107,9 @@ export function measure() {
   add('html', 'index.html', htmlGz, BUDGETS.html)
   if (existsSync(path.join(DIST, '404.html'))) add('html', '404.html', fileGz(path.join(DIST, '404.html')), BUDGETS.html)
 
-  // Grid data, wherever it lands.
-  const gridJson = walk(DIST, { exts: ['.json'] }).filter((f) => /dfw-grid/.test(f))
-  const gridSrc = path.join(ROOT, 'src/data/dfw-grid.json')
-  if (gridJson.length) for (const f of gridJson) add('data', path.relative(DIST, f), fileGz(f), BUDGETS.gridJson)
-  else if (existsSync(gridSrc)) add('data', 'src/data/dfw-grid.json (bundled)', fileGz(gridSrc), BUDGETS.gridJson)
+  // The kit route must never ride along with the home page.
+  for (const f of entryFiles) if (/kit/i.test(f)) fails.push(`the kit route is in the entry bundle: ${f}`)
+  if (/\/assets\/Kit-[\w-]+\.js/.test(indexHtml)) fails.push('index.html preloads the kit chunk')
 
   // Fonts: the preloads in index.html.
   const preloads = [...indexHtml.matchAll(/<link rel="preload" href="\/([^"]+\.woff2)"/g)].map((m) => m[1])
@@ -121,7 +117,8 @@ export function measure() {
   add('fonts', `${preloads.length} preloaded woff2`, fontBytes, BUDGETS.fonts, { files: preloads })
   if (preloads.length > BUDGETS.fontFiles) fails.push(`fonts: ${preloads.length} preloads, budget ${BUDGETS.fontFiles}`)
   const allFonts = walk(path.join(DIST, 'assets'), { exts: ['.woff2', '.woff', '.ttf', '.otf'] })
-  if (allFonts.length > 2) fails.push(`fonts: ${allFonts.length} font files in dist, only the two Overpass files are allowed`)
+  if (allFonts.length > 3) fails.push(`fonts: ${allFonts.length} font files in dist, only Instrument Serif (italic, regular) and Inter are allowed`)
+  if (allFonts.some((f) => /mono/i.test(f))) fails.push('fonts: a monospace font file shipped (DESIGN.md 2.3: no monospace)')
 
   // Images.
   for (const f of walk(path.join(DIST, 'assets'), { exts: ['.avif', '.webp', '.jpg', '.jpeg', '.png'] })) {
