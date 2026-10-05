@@ -1,14 +1,18 @@
 /*
-  CSS entry. Order is precedence: tokens, fonts, preflight, base, shared
-  components, Tailwind utilities, motion gates, print. Vite inlines the
-  @imports (postcss-import) before Tailwind runs.
+  CSS entry. Order is precedence: tokens, fonts, preflight, base, the field,
+  the glass material, the component kit, Tailwind utilities, motion, print.
+  Vite inlines the @imports (postcss-import) before Tailwind runs.
 */
 @import './tokens.css';
 @import './fonts.css';
 @import 'tailwindcss/base';
 @import './base.css';
+@import './field.css';
+@import './glass.css';
 @import 'tailwindcss/components';
 @import './components.css';
+@import './page.css';
+@import './kit.css';
 @import 'tailwindcss/utilities';
 @import './motion.css';
 @import './print.css';

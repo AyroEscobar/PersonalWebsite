@@ -1,30 +1,35 @@
 /*
-  Base: document, type defaults, focus, links, skip link.
-  Loaded after Tailwind's preflight (see index.css). Owned by FOUNDATION.
+  Base: the document, type defaults, links, focus, the skip link.
+  Loaded after Tailwind's preflight (see index.css).
 */
 
 html {
-  background: var(--night);
+  background-color: var(--base);
   color: var(--ink);
-  font-family: 'Overpass Dot', 'Overpass Variable', 'Overpass Fallback', system-ui, sans-serif;
+  font-family: var(--sans);
   font-size: 100%;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  font-optical-sizing: auto;
   font-kerning: normal;
-  /* Fixed bars never cover a focused element or a section heading (WCAG 2.4.11). */
-  scroll-padding-top: calc(var(--topbar-h) + 16px);
-  scroll-padding-bottom: calc(var(--bottombar-h) + env(safe-area-inset-bottom, 0px) + 16px);
+  scroll-padding-top: 96px;
   -webkit-tap-highlight-color: transparent;
+  overflow-x: clip;
+}
+
+@media (max-width: 639.98px) {
+  html {
+    scroll-padding-top: 24px;
+    scroll-padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 body {
   margin: 0;
   min-height: 100svh;
-  background: var(--night);
+  background-color: var(--base);
   color: var(--ink);
-  font-size: var(--t-body);
-  line-height: 1.6;
+  font-size: var(--t-md);
+  line-height: 1.55;
   font-weight: 400;
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
@@ -32,13 +37,15 @@ body {
 }
 
 #root {
-  isolation: isolate;
+  position: relative;
   min-height: 100svh;
+  /* the fields bleed past their sections; the page ends where its content does */
+  overflow: clip;
 }
 
 h1, h2, h3, h4 {
-  text-wrap: balance;
-  font-weight: 800;
+  margin: 0;
+  font-weight: inherit;
   color: var(--ink);
 }
 
@@ -46,131 +53,85 @@ p, li, dd, blockquote {
   text-wrap: pretty;
 }
 
-/* Links: sodium, underlined, never color-only. */
+p { margin: 0; }
+
+/* Links: accent, underlined, never colour only. */
 a {
-  color: var(--sodium);
+  color: var(--accent);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.22em;
-  text-decoration-color: color-mix(in oklab, currentColor 45%, transparent);
+  text-underline-offset: 0.18em;
+  text-decoration-color: rgb(var(--accent-rgb) / 0.4);
+  transition: text-decoration-color var(--dur-hover) ease, color var(--dur-hover) ease;
 }
-a:hover {
-  text-decoration-color: currentColor;
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    color: var(--accent-ink);
+    text-decoration-color: currentColor;
+  }
 }
 
-/* One focus ring everywhere: 2px solid sodium, 2px offset, never clipped. */
+/* One focus ring everywhere (2.6): a base gap, then the accent, as a shadow so it follows radii. */
 :focus-visible {
-  outline: var(--focus-w) solid var(--sodium);
-  outline-offset: var(--focus-offset);
-  border-radius: var(--radius);
+  outline: none;
+  box-shadow: var(--focus);
+  border-radius: var(--r-1);
 }
 :focus:not(:focus-visible) {
   outline: none;
 }
 
 ::selection {
-  background: var(--sodium);
-  color: var(--night);
+  background: rgb(var(--accent-rgb) / 0.18);
+  color: var(--ink);
 }
 
-/* Skip link: first focusable element, visible on focus. */
 .skip-link {
   position: fixed;
-  left: 16px;
-  top: 8px;
+  left: 12px;
+  top: 12px;
   z-index: 100;
   padding: 10px 14px;
-  background: var(--sodium);
-  color: var(--night);
-  font-family: inherit;
-  font-size: 0.9375rem;
-  font-weight: 650;
+  background: var(--ink);
+  color: var(--on-ink);
+  font: 600 var(--t-sm) / 1 var(--sans);
   text-decoration: none;
-  border-radius: var(--radius);
-  transform: translateY(-200%);
+  border-radius: var(--r-2);
+  transform: translateY(-160%);
 }
 .skip-link:focus,
 .skip-link:focus-visible {
   transform: none;
-  outline-color: var(--ink);
 }
 
-/* Inline code and kbd read as data. */
-code, kbd, samp {
-  font-family: 'Overpass Mono Variable', 'Overpass Mono Fallback', ui-monospace, monospace;
-  font-size: 0.92em;
+/* Numbers that line up: dates, receipts, the build hash. */
+.tnum,
+time {
+  font-variant-numeric: tabular-nums;
 }
 
 hr {
   border: 0;
-  border-top: 1px solid var(--hairline);
-}
-
-/* Native dialogs inherit the night. */
-dialog {
-  color: var(--ink);
-  background: var(--deck);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-}
-dialog::backdrop {
-  background: color-mix(in oklab, var(--night) 92%, transparent);
+  border-top: 1px solid var(--hair);
 }
 
 summary {
   cursor: pointer;
 }
 
-/* Forced colors: decorative layers go away, outlines stay. */
+/* The `notext` QA mode (?notext=1): text hidden so the contrast capture sees only the backdrop. */
+html.notext body * {
+  color: transparent !important;
+  text-shadow: none !important;
+}
+
+/* Forced colours: decorative layers go away, focus stays visible. */
 @media (forced-colors: active) {
-  .deco,
   [data-deco] {
     display: none !important;
   }
   :focus-visible {
-    outline-color: Highlight;
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
   }
-
-  /* Night text on a sodium fill maps to Canvas on LinkText, and the system
-     backplate behind the text is Canvas too, so the words vanish (r2 U4).
-     Every filled control and tab takes a system pair instead. !important so
-     a hover or a "copied" state in a later file never brings the fill back. */
-  .btn-fill,
-  .btn-fill:hover,
-  .skip-link,
-  .nf-home,
-  .nf-home:hover {
-    background: ButtonFace !important;
-    color: ButtonText !important;
-    border: 1px solid ButtonText !important;
-  }
-  .stop-no,
-  .ps-summary::before {
-    background: Canvas !important;
-    color: CanvasText !important;
-    border: 1px solid CanvasText;
-  }
-  .sign {
-    background: Canvas !important;
-    color: CanvasText !important;
-    outline-color: CanvasText !important;
-  }
-  .cm-ring .spec-label,
-  .cm-ring .cm-hub {
-    color: CanvasText !important;
-  }
-}
-
-/* No backdrop blur for people who asked for less transparency, or in quiet mode. */
-@media (prefers-reduced-transparency: reduce) {
-  .glass {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: var(--night) !important;
-  }
-}
-html[data-mode="quiet"] .glass {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  background: var(--night) !important;
 }
