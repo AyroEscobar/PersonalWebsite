@@ -2,7 +2,7 @@
   "t": 2.3,
   "p": 0,
   "tier": "full",
-  "build": "2c827ba",
+  "build": "618e4ae",
   "views": {
     "hero-1440": {
       "width": 1440,
@@ -35,16 +35,16 @@
           100
         ],
         "footer": [
-          77,
-          122,
-          156
+          146,
+          178,
+          192
         ]
       },
-      "mean": 0.3071,
+      "mean": 0.3074,
       "sizes": {
-        "avif": 18985,
-        "webp": 25614,
-        "png": 921023
+        "avif": 18977,
+        "webp": 25636,
+        "png": 920684
       }
     },
     "hero-780": {
@@ -78,11 +78,11 @@
           99
         ]
       },
-      "mean": 0.3031,
+      "mean": 0.3033,
       "sizes": {
-        "avif": 16999,
-        "webp": 24932,
-        "png": 601815
+        "avif": 17053,
+        "webp": 24934,
+        "png": 601436
       }
     }
   },
@@ -113,10 +113,441 @@
       100
     ],
     "footer": [
-      77,
-      122,
-      156
+      146,
+      178,
+      192
     ]
   },
-  "luminance": 0.3071
+  "composite": {
+    "views": {
+      "390": {
+        "0": {
+          "scrollY": 0,
+          "lines": 12,
+          "lowest": 6.05,
+          "worst": {
+            "text": "Software engineer · Plano, Texas",
+            "sel": "p.eyebrow",
+            "size": 11,
+            "weight": 600,
+            "large": false,
+            "min": 4.5,
+            "ratio": 6.05,
+            "bg": [
+              48,
+              73,
+              104
+            ],
+            "textLum": 0.64
+          }
+        },
+        "1": {
+          "scrollY": 5127,
+          "lines": 34,
+          "lowest": 8.32,
+          "worst": {
+            "text": "elsewhere",
+            "sel": "span.eyebrow",
+            "size": 12,
+            "weight": 600,
+            "large": false,
+            "min": 4.5,
+            "ratio": 8.32,
+            "bg": [
+              40,
+              51,
+              74
+            ],
+            "textLum": 0.64
+          }
+        },
+        "0.3": {
+          "scrollY": 1359,
+          "lines": 19,
+          "lowest": 3.21,
+          "worst": {
+            "text": "check out",
+            "sel": "h2.sec-title",
+            "size": 32,
+            "weight": 650,
+            "large": true,
+            "min": 3,
+            "ratio": 3.21,
+            "bg": [
+              123,
+              143,
+              160
+            ],
+            "textLum": 0.958
+          }
+        },
+        "0.56": {
+          "scrollY": 2682,
+          "lines": 20,
+          "lowest": 6.96,
+          "worst": {
+            "text": "Software Engineer Intern, CIB · Plano, Texas · J",
+            "sel": "span.exp-top",
+            "size": 15,
+            "weight": 420,
+            "large": false,
+            "min": 4.5,
+            "ratio": 6.96,
+            "bg": [
+              63,
+              77,
+              86
+            ],
+            "textLum": 0.788
+          }
+        },
+        "0.8": {
+          "scrollY": 4011,
+          "lines": 20,
+          "lowest": 6.6,
+          "worst": {
+            "text": "MongoDB",
+            "sel": "span.chip",
+            "size": 13,
+            "weight": 480,
+            "large": false,
+            "min": 4.5,
+            "ratio": 6.6,
+            "bg": [
+              65,
+              81,
+              90
+            ],
+            "textLum": 0.788
+          }
+        }
+      },
+      "768": {
+        "0": {
+          "scrollY": 0,
+          "lines": 10,
+          "lowest": 6.37,
+          "worst": {
+            "text": "Software engineer · Plano, Texas",
+            "sel": "p.eyebrow",
+            "size": 11,
+            "weight": 600,
+            "large": false,
+            "min": 4.5,
+            "ratio": 6.37,
+            "bg": [
+              44,
+              70,
+              101
+            ],
+            "textLum": 0.64
+          }
+        },
+        "1": {
+          "scrollY": 5232,
+          "lines": 33,
+          "lowest": 8.42,
+          "worst": {
+            "text": "ayro@esvotech.com",
+            "sel": "a.email",
+            "size": 20,
+            "weight": 600,
+            "large": false,
+            "min": 4.5,
+            "ratio": 8.42,
+            "bg": [
+              39,
+              50,
+              72
+            ],
+            "textLum": 0.64
+          }
+        },
+        "0.3": {
+          "scrollY": 1540,
+          "lines": 14,
+          "lowest": 8.71,
+          "worst": {
+            "text": "Co-founder, Founding Engineer",
+            "sel": "p.eyebrow",
+            "size": 12,
+            "weight": 600,
+            "large": false,
+            "min": 4.5,
+            "ratio": 8.71,
+            "bg": [
+              39,
+              48,
+              65
+            ],
+            "textLum": 0.64
+          }
+        },
+        "0.56": {
+          "scrollY": 2840,
+          "lines": 16,
+          "lowest": 7.25,
+          "worst": {
+            "text": "Executive dashboards shipped directly with the C",
+            "sel": "span.exp-note",
+            "size": 15.5,
+            "weight": 420,
+            "large": false,
+            "min": 4.5,
+            "ratio": 7.25,
+            "bg": [
+              31,
+              77,
+              99
+            ],
+            "textLum": 0.788
+          }
+        },
+        "0.8": {
+          "scrollY": 4074,
+          "lines": 30,
+          "lowest": 6.5,
+          "worst": {
+            "text": "Firebase",
+            "sel": "span.chip",
+            "size": 13,
+            "weight": 480,
+            "large": false,
+            "min": 4.5,
+            "ratio": 6.5,
+            "bg": [
+              67,
+              82,
+              89
+            ],
+            "textLum": 0.788
+          }
+        }
+      },
+      "1440": {
+        "0": {
+          "scrollY": 0,
+          "lines": 16,
+          "lowest": 5.7,
+          "worst": {
+            "text": "Software engineer · Plano, Texas",
+            "sel": "p.eyebrow",
+            "size": 12,
+            "weight": 600,
+            "large": false,
+            "min": 4.5,
+            "ratio": 5.7,
+            "bg": [
+              41,
+              78,
+              110
+            ],
+            "textLum": 0.64
+          }
+        },
+        "1": {
+          "scrollY": 5531,
+          "lines": 38,
+          "lowest": 6.6,
+          "worst": {
+            "text": "ayro@esvotech.com",
+            "sel": "a.email",
+            "size": 20,
+            "weight": 600,
+            "large": false,
+            "min": 4.5,
+            "ratio": 6.6,
+            "bg": [
+              44,
+              68,
+              90
+            ],
+            "textLum": 0.64
+          }
+        },
+        "0.3": {
+          "scrollY": 1404,
+          "lines": 15,
+          "lowest": 7.41,
+          "worst": {
+            "text": "check out",
+            "sel": "a",
+            "size": 14,
+            "weight": 520,
+            "large": false,
+            "min": 4.5,
+            "ratio": 7.41,
+            "bg": [
+              29,
+              62,
+              84
+            ],
+            "textLum": 0.64
+          }
+        },
+        "0.56": {
+          "scrollY": 2635,
+          "lines": 15,
+          "lowest": 5.98,
+          "worst": {
+            "text": "experience",
+            "sel": "a",
+            "size": 14,
+            "weight": 520,
+            "large": false,
+            "min": 4.5,
+            "ratio": 5.98,
+            "bg": [
+              34,
+              77,
+              100
+            ],
+            "textLum": 0.64
+          }
+        },
+        "0.8": {
+          "scrollY": 3840,
+          "lines": 17,
+          "lowest": 8.44,
+          "worst": {
+            "text": "experience",
+            "sel": "a",
+            "size": 14,
+            "weight": 520,
+            "large": false,
+            "min": 4.5,
+            "ratio": 8.44,
+            "bg": [
+              40,
+              65,
+              85
+            ],
+            "textLum": 0.788
+          }
+        }
+      },
+      "1920": {
+        "0": {
+          "scrollY": 0,
+          "lines": 16,
+          "lowest": 5.17,
+          "worst": {
+            "text": "Software engineer · Plano, Texas",
+            "sel": "p.eyebrow",
+            "size": 12,
+            "weight": 600,
+            "large": false,
+            "min": 4.5,
+            "ratio": 5.17,
+            "bg": [
+              41,
+              86,
+              116
+            ],
+            "textLum": 0.64
+          }
+        },
+        "1": {
+          "scrollY": 6611,
+          "lines": 38,
+          "lowest": 6.98,
+          "worst": {
+            "text": "ayro@esvotech.com",
+            "sel": "a.email",
+            "size": 20,
+            "weight": 600,
+            "large": false,
+            "min": 4.5,
+            "ratio": 6.98,
+            "bg": [
+              43,
+              65,
+              85
+            ],
+            "textLum": 0.64
+          }
+        },
+        "0.3": {
+          "scrollY": 1685,
+          "lines": 16,
+          "lowest": 8.09,
+          "worst": {
+            "text": "check out",
+            "sel": "a",
+            "size": 14,
+            "weight": 520,
+            "large": false,
+            "min": 4.5,
+            "ratio": 8.09,
+            "bg": [
+              29,
+              55,
+              78
+            ],
+            "textLum": 0.64
+          }
+        },
+        "0.56": {
+          "scrollY": 3162,
+          "lines": 16,
+          "lowest": 7.12,
+          "worst": {
+            "text": "experience",
+            "sel": "a",
+            "size": 14,
+            "weight": 520,
+            "large": false,
+            "min": 4.5,
+            "ratio": 7.12,
+            "bg": [
+              40,
+              63,
+              85
+            ],
+            "textLum": 0.64
+          }
+        },
+        "0.8": {
+          "scrollY": 4608,
+          "lines": 16,
+          "lowest": 8.97,
+          "worst": {
+            "text": "experience",
+            "sel": "a",
+            "size": 14,
+            "weight": 520,
+            "large": false,
+            "min": 4.5,
+            "ratio": 8.97,
+            "bg": [
+              40,
+              61,
+              80
+            ],
+            "textLum": 0.788
+          }
+        }
+      }
+    },
+    "lowest": {
+      "view": "390",
+      "p": 0.3,
+      "text": "check out",
+      "sel": "h2.sec-title",
+      "size": 32,
+      "weight": 650,
+      "large": true,
+      "min": 3,
+      "ratio": 3.21,
+      "bg": [
+        123,
+        143,
+        160
+      ],
+      "textLum": 0.958
+    },
+    "failures": [],
+    "method": "text hidden, 3x3 mean, worst pixel under each line box"
+  },
+  "luminance": 0.3074
 }
