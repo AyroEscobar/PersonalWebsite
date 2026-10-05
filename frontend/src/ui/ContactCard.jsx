@@ -8,7 +8,8 @@ import { SIGNAL } from '../content/signal.js'
   560, with a scrim under the copy and the pointer specular. His contact
   paragraph renders unchanged: its first clause (up to the question mark)
   in the italic serif, the rest in Inter 16. Then the address as text with
-  the copy button, and the link row.
+  the copy button, and the link row of his channels (no email item: the
+  address and its copy button sit right above it).
   `wide` (from 900px up): his words on the left, the address and the link
   row on the right, for a card that fills a section column.
 */
@@ -32,7 +33,7 @@ export default function ContactCard({ copyState, copyBusy, tipOpen, linkStates, 
         </a>
         <CopyEmail addressId={addressId} state={copyState} busy={copyBusy} tipOpen={tipOpen} />
       </div>
-      <LinkRow states={linkStates} />
+      <LinkRow links={SIGNAL.channels} states={linkStates} />
     </Glass>
   )
 }
