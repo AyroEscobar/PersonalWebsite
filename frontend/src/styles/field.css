@@ -1,0 +1,76 @@
+/*
+  field.css: the bright light field behind the glass (DESIGN.md section 3, 12.3).
+  Colour lives behind the glass, never in it.
+
+  <Field preset="hero" /> (src/field/Field.jsx) renders one layer per section:
+  empty <i class="blob"> elements, each a radial gradient placed and sized by
+  custom properties (--c colour, --d diameter, --x --y centre, --dx --dy drift).
+  The layer bleeds past its section so neighbouring fields overlap without
+  a seam, and sits under every content layer. It clips sideways only: a
+  vertical clip draws a hard edge through any blob near a section boundary
+  (seen in the first kit screenshots), so the page clips at #root instead.
+
+  Rules (3.5, 3.6): blobs move by transform only, never filter: blur();
+  nothing here ever sits on an ancestor of a glass element.
+*/
+
+.field {
+  position: absolute;
+  inset: -30vh 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow-x: clip;
+  contain: layout style;
+}
+
+.field--hero {
+  inset: 0 0 -30vh;
+}
+
+.blob {
+  --D: var(--d);
+  --X: var(--x);
+  --Y: var(--y);
+  position: absolute;
+  left: calc(var(--X) - var(--D) / 2);
+  top: calc(var(--Y) - var(--D) / 2);
+  width: var(--D);
+  height: var(--D);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--c), transparent 72%);
+}
+
+/* phones: each blob can take its own size and place (--dm, --xm, --ym) */
+@media (max-width: 639.98px) {
+  .blob {
+    --D: var(--dm, var(--d));
+    --X: var(--xm, var(--x));
+    --Y: var(--ym, var(--y));
+  }
+}
+
+/* The structure layer the lens bends: a 64px grid at 5% warm ink, hero only,
+   fading to nothing over the hero's last 160px. */
+.field-grid {
+  position: absolute;
+  inset: 0 0 30vh;
+  background-image:
+    linear-gradient(rgb(var(--ink-rgb) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--ink-rgb) / 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: -1px -1px;
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 160px), transparent);
+  mask-image: linear-gradient(to bottom, black calc(100% - 160px), transparent);
+}
+
+/* Everything that sits on a field paints above it. */
+.on-field {
+  position: relative;
+  z-index: 1;
+}
+
+@media (forced-colors: active) {
+  .field {
+    display: none;
+  }
+}
