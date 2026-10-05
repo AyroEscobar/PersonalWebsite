@@ -16,8 +16,14 @@ import { CHROME } from '../content/meta.js'
     active  the current section id
     states  kit only: { [sectionId]: 'hover' | 'focus' | 'active' }
     over    content is scrolling under it (.over-content)
+    reader  the page's nav: src/hero/nav.js owns its classes, box and aria-current
+            after hydration. In morph mode it stays unseen until the reader has
+            placed it on the sentence; without JavaScript it is a pinned pill.
 */
-export default function LensNav({ state = 'pill', fixed = false, auto = false, active = 'origin', states = {}, over = false, className = '', ref, ...rest }) {
+// the lens map preset for each look (src/glass/lens.js PRESET)
+const PRESET = { lens: 'lens', pill: 'nav', dock: 'dock' }
+
+export default function LensNav({ state = 'pill', fixed = false, auto = false, active = 'origin', states = {}, over = false, reader = false, className = '', ref, ...rest }) {
   const listRef = useRef(null)
   const beadRef = useRef(null)
 
@@ -41,9 +47,9 @@ export default function LensNav({ state = 'pill', fixed = false, auto = false, a
     return () => ro?.disconnect()
   }, [active, state])
 
-  const cls = ['lens-nav', `is-${state}`, fixed && 'is-fixed', auto && 'is-auto', over && 'over-content', className].filter(Boolean).join(' ')
+  const cls = ['lens-nav', `is-${state}`, fixed && 'is-fixed', auto && 'is-auto', over && 'over-content', reader && 'is-reader', className].filter(Boolean).join(' ')
   return (
-    <Glass as="nav" ref={ref} tier="clear" spec lens={state} className={cls} aria-label={CHROME.sectionsNav.text} {...rest}>
+    <Glass as="nav" ref={ref} tier="clear" spec lens={PRESET[state]} className={cls} aria-label={CHROME.sectionsNav.text} {...rest}>
       <span className="caustic" aria-hidden="true" />
       <span className="loupe" aria-hidden="true" />
       <ul className="nav-list" ref={listRef}>
