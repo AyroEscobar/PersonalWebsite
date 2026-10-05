@@ -317,6 +317,7 @@ export function monoShare() {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
   let total = 0
   let mono = 0
+  let outside = 0
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
     if (!n.textContent.trim()) continue
     const el = n.parentElement
@@ -325,9 +326,13 @@ export function monoShare() {
     if (folded && !el.closest('summary')) continue
     if (!shown(el)) continue
     total++
-    if (/mono|courier|consolas|menlo/i.test(getComputedStyle(el).fontFamily.split(',')[0])) mono++
+    if (/mono|courier|consolas|menlo/i.test(getComputedStyle(el).fontFamily.split(',')[0])) {
+      mono++
+      // v3 (DESIGN.md 2.2): Geist Mono only for the footer's build line and the scene controls
+      if (!el.closest('.foot-row--mono, .ctl')) outside++
+    }
   }
-  return { total, mono, share: total ? Math.round((mono / total) * 1000) / 10 : 0 }
+  return { total, mono, outside, share: total ? Math.round((mono / total) * 1000) / 10 : 0 }
 }
 
 /** r1 T9: elements inside <main> with a visible border on all four sides. */

@@ -42,7 +42,9 @@ export async function staticScan(ROOT) {
 
   // CSS palette and cut effects.
   const tokens = readTokens(readFileSync(path.join(ROOT, 'src/styles/tokens.css'), 'utf8'))
-  const allowed = new Set([...Object.values(tokens).map((h) => h.toUpperCase()), '#FFFFFF', '#FFF', '#000000', '#000', '#060A18', '#B5BFD6', '#3A4A70'])
+  // print.css redefines the tokens for paper (ink on white); those values are tokens too
+  const printTokens = [...readFileSync(path.join(ROOT, 'src/styles/print.css'), 'utf8').matchAll(/--[\w-]+\s*:\s*(#[0-9a-fA-F]{3,6})\b/g)].map((m) => m[1].toUpperCase())
+  const allowed = new Set([...Object.values(tokens).map((h) => h.toUpperCase()), ...printTokens, '#FFFFFF', '#FFF', '#000000', '#000'])
   const cssText = css.map((f) => readFileSync(f, 'utf8')).join('\n')
   const hexes = [...new Set([...cssText.matchAll(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/g)].map((m) => m[0].toUpperCase()))]
   const off = hexes.filter((h) => !allowed.has(h))
@@ -66,18 +68,22 @@ export async function staticScan(ROOT) {
   }
   push('effects', cut.length ? 'fail' : 'pass', cut.length ? cut.join('; ') : 'no cut effects, keyframes touch transform and opacity only')
 
-  // Dependencies that must be gone (acceptance 4) and media (budget also checks).
+  // Dependencies that must be gone (acceptance 4) and media (budget also checks). three is the
+  // scene (DESIGN.md 3.1): allowed in the lazy scene chunk only, never in the entry or any other file.
   const jsText = js.map((f) => readFileSync(f, 'utf8')).join('\n')
+  const notScene = js.filter((f) => !/\/assets\/scene-[\w-]+\.js$/.test(f))
+  const notSceneText = notScene.map((f) => readFileSync(f, 'utf8')).join('\n')
   const gone = [
-    ['Firebase', /firestore|firebaseapp/i],
-    ['Mapbox', /mapbox/i],
-    ['three.js', /WebGLRenderer/],
-    ['framer-motion', /framer-motion/],
-    ['react-router', /react-router|createBrowserRouter/],
+    ['Firebase', /firestore|firebaseapp/i, jsText],
+    ['Mapbox', /mapbox/i, jsText],
+    ['three.js outside the scene chunk', /WebGLRenderer|three\.module|REVISION\s*=\s*['"]\d+/, notSceneText],
+    ['framer-motion', /framer-motion/, jsText],
+    ['react-router', /react-router|createBrowserRouter/, jsText],
   ]
-    .filter(([, re]) => re.test(jsText + index))
+    .filter(([, re, t]) => re.test(t + index))
     .map(([n]) => n)
-  push('removed-deps', gone.length ? 'fail' : 'pass', gone.length ? `still in dist: ${gone.join(', ')}` : 'no Firebase, Mapbox, three.js, framer-motion or react-router')
+  const sceneChunks = js.length - notScene.length
+  push('removed-deps', gone.length || sceneChunks !== 1 ? 'fail' : 'pass', gone.length ? `in dist: ${gone.join(', ')}` : sceneChunks !== 1 ? `${sceneChunks} scene chunks (expected 1)` : 'no Firebase, Mapbox, framer-motion or react-router; three only in the one scene chunk')
 
   // Sound policy (PLAN.md 6.6): the site makes no sound. No Web Audio, no media
   // element, no speech, no vibration. Opt-in ticks would have to change this rule first.

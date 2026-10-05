@@ -14,9 +14,10 @@
   1920: horizontal overflow, console errors, failed or third-party requests,
   broken links and images, contrast spot checks, target sizes, structure.
   Then axe (390 and 1440), reduced motion, the keyboard walk, hydration, the
-  404 status, the copy toast, print, the r1 regressions that still apply,
-  the glass checks (DESIGN.md 9: measured composite contrast, the reader
-  and the morph, forced colours, quiet mode), Lighthouse, and the bundle
+  404 status, the copy status, print, the r1 regressions that still apply,
+  the glass and scene checks (DESIGN.md 7, 9, 10: composite contrast at five
+  scroll positions, forced colours, quiet, framing, the city, the scroll
+  mapping, the still tier, frame cost), Lighthouse, and the bundle
   report. Writes qa-report.md and qa-report.json to the reviews dir and
   screenshots to the shots dir (tools/local.json, or .build/qa).
 
@@ -231,7 +232,8 @@ try {
     }
   }
   const fontFamilies = [...new Set(R.pages.flatMap((p) => p.facts.fonts.map((f) => f.replace(/ [\d ]+$/, ''))))]
-  check('fonts', 'only Mona Sans and Geist Mono', fontFamilies.length && fontFamilies.every((f) => /^(Mona Sans|Geist Mono)$/.test(f)) ? 'pass' : 'fail', fontFamilies.join(', '))
+  // 'Mona Sans Fallback' is fonts.css's local() face with size-adjust, so the swap moves nothing (no file)
+  check('fonts', 'only Mona Sans and Geist Mono', fontFamilies.length && fontFamilies.every((f) => /^(Mona Sans|Geist Mono|Mona Sans Fallback( normal)?)$/.test(f)) ? 'pass' : 'fail', fontFamilies.join(', '))
 
   // ---------- 7. links ----------
   log('links')
@@ -285,29 +287,27 @@ try {
     check('links', 'external', broken.length ? 'fail' : unverifiable.length ? 'warn' : 'pass', [...broken.map((l) => `${l.status} ${l.href}`), ...unverifiable.map((l) => `unverifiable ${l.status} ${l.href}`)].join(', ') || `${R.links.external.length} external links`)
   }
 
-  // ---------- 8. motion: reduced, idle, the entry ----------
+  // ---------- 8. motion: reduced, paused, motion off ----------
   log('motion')
-  const motionProbe = async (label, { reduce = false, query = '', hash = '', scrollTo = null } = {}) => {
+  const motionProbe = async (label, { reduce = false, query = '', act = null } = {}) => {
     const page = await cdp.newPage({ width: 1440, height: 900 })
     await page.addInitScript(fn(P.rafCounterInit))
     await page.send('Storage.clearDataForOrigin', { origin, storageTypes: 'local_storage,session_storage' })
     if (reduce) await page.media([{ name: 'prefers-reduced-motion', value: 'reduce' }])
-    await page.goto(`${url}/${query}${hash}`, { settle: 0 })
-    await sleep(1800)
-    if (scrollTo) {
-      await page.eval(`document.getElementById(${JSON.stringify(scrollTo)})?.scrollIntoView({ behavior: 'instant' })`)
-      await sleep(1000)
+    await page.goto(`${url}/${query}`, { settle: 0 })
+    await sleep(3500)
+    if (act) {
+      await page.eval(act)
+      await sleep(600)
     }
     await page.eval('window.__qa.raf = 0')
     await sleep(3000)
     const res = await page.eval(`({
       raf: window.__qa.raf,
-      canvas: document.querySelectorAll('canvas').length,
-      mode: document.documentElement.dataset.mode,
-      motion: document.documentElement.dataset.motion,
+      canvasOn: !!document.querySelector('.stage canvas.on'),
       tier: document.documentElement.dataset.tier,
-      lensSeen: (() => { try { return sessionStorage.getItem('ae.lens') } catch { return null } })(),
-      nav: document.getElementById('nav')?.className || '',
+      motion: document.documentElement.dataset.motion,
+      paused: window.__stats ? window.__stats.paused : null,
     })`)
     res.animations = await page.eval(fn(P.runningAnimations))
     await page.close()
@@ -315,11 +315,11 @@ try {
     return res
   }
   const rm = await motionProbe('reduced', { reduce: true })
-  check('motion', 'reduced motion', rm.raf === 0 && rm.canvas === 0 && rm.mode === 'split' && !rm.animations.length ? 'pass' : 'fail', `rAF ${rm.raf} in 3 s, canvas ${rm.canvas}, mode ${rm.mode} (the nav is a pill from the start, the lens rests on the last line), long animations ${rm.animations.length}`)
-  const fresh = await motionProbe('first-visit')
-  check('motion', 'the lens enters once per session', fresh.lensSeen === '1' && fresh.mode === 'morph' && /is-lens/.test(fresh.nav) ? 'pass' : 'fail', `ae.lens ${fresh.lensSeen} after the first visit, mode ${fresh.mode}, nav "${fresh.nav.split(' ').filter((c) => /^is-/.test(c)).join(' ')}"`)
-  const idle = await motionProbe('idle-offscreen', { scrollTo: 'work' })
-  check('motion', 'rAF idle with hero offscreen', idle.raf === 0 ? 'pass' : 'fail', `${idle.raf} callbacks in 3 s without input, canvas ${idle.canvas}`)
+  check('motion', 'reduced motion', rm.raf === 0 && !rm.canvasOn && rm.tier === 'still' && !rm.animations.length ? 'pass' : 'fail', `rAF ${rm.raf} in 3 s, canvas on ${rm.canvasOn}, tier ${rm.tier}, long animations ${rm.animations.length}`)
+  const paused = await motionProbe('paused', { query: '?tier=full', act: `[...document.querySelectorAll('.ctl')].find((b) => /pause/.test(b.textContent))?.click()` })
+  check('motion', 'pause the scene stops every frame', paused.raf === 0 && paused.paused === true ? 'pass' : 'fail', `rAF ${paused.raf} in 3 s after "pause the scene", __stats.paused ${paused.paused}`)
+  const off = await motionProbe('motion-off', { query: '?tier=full', act: `[...document.querySelectorAll('.ctl')].find((b) => /motion off/.test(b.textContent))?.click()` })
+  check('motion', 'motion off: the poster, no loop', off.raf === 0 && !off.canvasOn && off.tier === 'still' ? 'pass' : 'fail', `rAF ${off.raf} in 3 s after "motion off", canvas on ${off.canvasOn}, tier ${off.tier}, data-motion ${off.motion}`)
 
   // ---------- 9. keyboard ----------
   log('keyboard')
@@ -340,24 +340,30 @@ try {
     check('keyboard', 'skip link first', seq[0] && /skip/i.test(seq[0].name) ? 'pass' : 'fail', seq[0]?.name)
     check('keyboard', 'visible focus', noRing.length ? 'fail' : 'pass', noRing.slice(0, 5).map((f) => `${f.tag} "${f.name}"`).join(', ') || `${seq.length} stops, all with a ring`)
     check('keyboard', 'focus not obscured', obscured.length ? 'fail' : 'pass', obscured.slice(0, 5).map((f) => `${f.tag} "${f.name}"`).join(', '))
-    // v2 (DESIGN.md 5.1, 10): the skip link, the six nav words (the nav comes first; focusing a
-    // word while it is the lens turns it into the pill), the name, the quiet switch, then the hero
-    // pills. The nav word's own text is "work work" (upright and italic), so match on href.
+    // v3 (DESIGN.md 9): the skip link, the wordmark, the four nav words, the quiet switch, then the
+    // hero's email and "see the work", then the cards' links (Esvo first), the email, copy, the three
+    // links, the footer links, the scene controls.
     const EXPECT = [
       ['skip link', (f) => /skip/i.test(f.name)],
-      ...SECTION_IDS.map((id) => [`nav ${id}`, (f) => f.tag === 'a' && f.href === `#${id}` && f.name !== 'Ayro Escobar']),
       ['name', (f) => f.name === 'Ayro Escobar'],
+      ...SECTION_IDS.map((id) => [`nav ${id}`, (f) => f.tag === 'a' && f.href === `#${id}` && f.name !== 'Ayro Escobar']),
       ['quiet', (f) => /^quiet/i.test(f.name)],
       ['hero email', (f) => /^mailto:/.test(f.href || '')],
-      ['see the work', (f) => f.href === '#work' && /see the work/i.test(f.name)],
+      ['see the work', (f) => f.href === '#check-out' && /see the work/i.test(f.name)],
+      ['visit esvotech.com', (f) => /esvotech\.com/.test(f.href || '')],
+      ['visit viaere.com', (f) => /viaere\.com/.test(f.href || '')],
+      ['contact email', (f) => /^mailto:/.test(f.href || '') && /esvotech/.test(f.name)],
+      ['copy', (f) => /copy/i.test(f.name)],
+      ['GitHub', (f) => /github\.com\/AyroEscobar$/.test(f.href || '')],
+      ['scene controls', (f) => /pause the scene|play the scene/i.test(f.name)],
     ]
     let j = 0
     for (const f of seq) if (j < EXPECT.length && EXPECT[j][1](f)) j++
     const missing = EXPECT.filter(([, m]) => !seq.some(m)).map(([n]) => n)
-    check('keyboard', 'tab order spec', j === EXPECT.length ? 'pass' : 'fail', j === EXPECT.length ? 'skip, six nav words, name, quiet, hero email, see the work' : missing.length ? `never reached: ${missing.join(', ')}` : `out of order at "${EXPECT[j][0]}"`)
+    check('keyboard', 'tab order spec', j === EXPECT.length ? 'pass' : 'fail', j === EXPECT.length ? 'skip, name, four nav words, quiet, hero email, see the work, the two cards, email, copy, links, scene controls' : missing.length ? `never reached: ${missing.join(', ')}` : `out of order at "${EXPECT[j][0]}"`)
 
     // Enter on a nav word lands the heading below the pill.
-    const rail = await page.eval(`!!document.querySelector('nav a[href="#work"]')`)
+    const rail = await page.eval(`!!document.querySelector('nav a[href="#check-out"]')`)
     if (rail) {
       // The tab walk can end with a focus scroll still in flight: jump to the top
       // without animation and wait for scrollY to hold still before pressing Enter.
@@ -370,12 +376,12 @@ try {
           if (still >= 4) { clearInterval(t); done() }
         }, 25)
       })`)
-      await page.eval(`document.querySelector('nav a[href="#work"]').focus({ preventScroll: true })`)
+      await page.eval(`document.querySelector('nav a[href="#experience"]').focus({ preventScroll: true })`)
       await page.key('Enter')
-      await sleep(1300)
-      const pos = await page.eval(`(() => { const h = document.getElementById('work-h').getBoundingClientRect(); const nav = document.getElementById('nav'); const b = getComputedStyle(nav).position === 'fixed' && nav.getBoundingClientRect().top < 100 ? nav.getBoundingClientRect().bottom : 0; const cur = document.querySelector('#nav [aria-current] .nav-sans'); return { top: Math.round(h.top), bar: Math.round(b), vh: innerHeight, current: cur ? cur.textContent.trim() : null } })()`)
+      await sleep(1600)
+      const pos = await page.eval(`(() => { const h = document.getElementById('experience-h').getBoundingClientRect(); const nav = document.querySelector('.top .nav'); const b = nav.getBoundingClientRect().bottom; const cur = document.querySelector('.nav [aria-current="true"]'); return { top: Math.round(h.top), bar: Math.round(b), vh: innerHeight, current: cur ? cur.getAttribute('href') : null } })()`)
       check('keyboard', 'nav word lands below the pill', pos.top >= pos.bar && pos.top < pos.vh ? 'pass' : 'fail', `heading top ${pos.top}, pill bottom ${pos.bar}`)
-      check('nav', 'aria-current tracks the section', pos.current === 'work' ? 'pass' : pos.current == null ? 'pending' : 'fail', `aria-current on "${pos.current}" after jumping to work`)
+      check('nav', 'aria-current tracks the section', pos.current === '#experience' ? 'pass' : 'fail', `aria-current on "${pos.current}" after jumping to experience`)
     }
     R.keyboard = { sequence: seq }
     await page.close()
@@ -388,13 +394,14 @@ try {
     const page = await cdp.newPage({ width: w, height: mobile ? 844 : 900, dpr: mobile ? 2 : 1, mobile })
     await page.send('Storage.clearDataForOrigin', { origin, storageTypes: 'local_storage,session_storage' })
     await page.goto(`${url}/`, { settle: 1800 })
-    await page.eval(`document.querySelector('.contact .btn--primary').scrollIntoView({ block: 'center', behavior: 'instant' })`)
+    await page.eval(`document.querySelector('#contact .email-row button').scrollIntoView({ block: 'center', behavior: 'instant' })`)
     await sleep(400)
-    await page.eval(`document.querySelector('.contact .btn--primary').click()`)
-    await sleep(700)
+    await page.eval(`document.querySelector('#contact .email-row button').click()`)
+    await sleep(500)
     if (!NO_SHOTS) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, `after-state-${w}-copied.png`))))
-    const said = await page.eval(`document.querySelector('.toast-region')?.textContent.trim() || ''`)
-    check('interaction', `copy email toast @${w}`, said.length > 0 ? 'pass' : 'fail', `the status region says "${said}"`)
+    const said = await page.eval(`document.querySelector('#contact .email-row [role="status"]')?.textContent.trim() || ''`)
+    const pill = await page.eval(`document.querySelector('#contact .email-row button')?.textContent.trim() || ''`)
+    check('interaction', `copy email status @${w}`, said === 'email copied' && pill === 'copied' ? 'pass' : 'fail', `the status region says "${said}", the pill reads "${pill}"`)
     await page.close()
     const q = await cdp.newPage({ width: w, height: mobile ? 844 : 900, dpr: mobile ? 2 : 1, mobile })
     await q.goto(`${url}/?quiet=1`, { settle: 800 })
@@ -424,12 +431,15 @@ try {
       const page = await cdp.newPage({ width: w, height: h, dpr: mobile ? 2 : 1, mobile })
       await page.goto(`${url}/`, { settle: 1200 })
       const c = await page.eval(`(() => {
-        const m = document.querySelector('main .hero a[href^="mailto:"]')
+        const m = document.querySelector('#top a[href^="mailto:"]')
         const h1 = document.querySelector('h1')
-        return { mail: m ? Math.round(m.getBoundingClientRect().bottom) : null, vh: innerHeight, h1: Math.round(h1.getBoundingClientRect().top), sw: document.documentElement.scrollWidth, iw: innerWidth }
+        const sheet = document.querySelector('.panel--hero')
+        return { mail: m ? Math.round(m.getBoundingClientRect().bottom) : null, vh: innerHeight, h1: Math.round(h1.getBoundingClientRect().top), h1b: Math.round(h1.getBoundingClientRect().bottom), sheet: Math.round(sheet.getBoundingClientRect().top), sw: document.documentElement.scrollWidth, iw: innerWidth }
       })()`)
       check('r1', `T2 email on the first screen @${w}x${h}`, c.mail != null && c.mail <= c.vh ? 'pass' : 'fail', `the hero email pill ends at ${c.mail} of ${c.vh}`)
-      if (mobile) check('r1', `T6 name high on a phone @${w}x${h}`, c.h1 < 300 && c.sw <= w && c.iw === w ? 'pass' : 'fail', `h1 top ${c.h1}, scrollWidth ${c.sw}`)
+      // v3 (DESIGN.md 6.3): the man takes the top of a phone and the name sits in the sheet under him,
+      // so the old "name above 300 px" rule becomes: the sheet starts in the lower 60% and the name is whole on the first screen
+      if (mobile) check('r1', `T6 name on the first screen on a phone @${w}x${h}`, c.sheet >= h * 0.4 && c.h1b <= h && c.sw <= w && c.iw === w ? 'pass' : 'fail', `sheet top ${c.sheet} (at least ${Math.round(h * 0.4)}), h1 ${c.h1} to ${c.h1b} of ${h}, scrollWidth ${c.sw}`)
       await page.close()
     }
 
@@ -444,7 +454,7 @@ try {
         setTimeout(() => {
           const h1 = document.querySelector('h1')
           const b = h1.getBoundingClientRect()
-          const q = document.querySelector('.masthead .quiet').getBoundingClientRect()
+          const q = document.querySelector('.top .nav').getBoundingClientRect()
           done({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, iw: innerWidth, h1Clip: h1.scrollWidth > h1.clientWidth + 1 || b.right > innerWidth + 1, quietRight: Math.round(q.right) })
         }, 400)
       })`)
@@ -459,7 +469,7 @@ try {
       await page.eval(fn(P.scrollThrough))
       const m = await page.eval(fn(P.monoShare))
       const b = await page.eval(fn(P.borderedBoxes))
-      check('v2', 'no monospace at 1440 (DESIGN.md 9.3)', m.mono === 0 ? 'pass' : 'fail', `${m.mono} of ${m.total} visible text nodes are monospace, must be 0`)
+      check('v3', 'monospace only in the build line and scene controls (DESIGN.md 2.2)', m.outside === 0 ? 'pass' : 'fail', `${m.mono} of ${m.total} visible text nodes are monospace, ${m.outside} outside .foot-row--mono and .ctl (must be 0)`)
       check('r1', 'T9 bordered boxes at 1440', b.count < 40 ? 'pass' : 'fail', `${b.count} fully bordered elements in main (under 40): ${b.sample.join(', ')}`)
       await page.close()
     }
@@ -483,7 +493,7 @@ try {
 
   // ---------- 10c. the glass checks (DESIGN.md 9; they replaced the r2 map checks) ----------
   log('glass checks')
-  await glassChecks({ cdp, url, check, sleep })
+  await glassChecks({ cdp, url, check, sleep, scratch: REVIEWS })
 
   // ---------- 11. Lighthouse ----------
   if (!FAST) {
