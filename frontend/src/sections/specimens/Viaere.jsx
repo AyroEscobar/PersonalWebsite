@@ -15,10 +15,13 @@ import Button from '../../ui/Button.jsx'
   and set apart, and nothing ever lights it. Captioned as an illustration:
   no counts, no tail numbers, no thresholds printed.
 
-  Only the markers move (transform, motion.css, staggered 40ms).
+  Only the markers move (transform, motion.css, staggered 40ms). On a
+  narrow stage the bunched markers would touch, so the middle one rises on
+  a stem (data-lift, components.css).
 */
 
-const BUNCHED = [0.86, 0.92, 1.03]
+// A and B sit 8% apart, so on the narrowest stage the raised B's stem clears A's circle
+const BUNCHED = [0.85, 0.93, 1.03]
 const SPREAD = [1 / 6, 3 / 6, 5 / 6]
 const LAMPS = ['green', 'amber', 'red']
 const tierOf = (x) => (x > 1 ? 'red' : x >= 0.85 ? 'amber' : 'green')
@@ -54,7 +57,7 @@ export default function Viaere({ spec }) {
             {spec.end.text}
           </span>
           {xs.map((x, i) => (
-            <span key={i} className="via-mark" data-tier={tiers[i]} style={{ '--x': x, '--i': i }}>
+            <span key={i} className="via-mark" data-tier={tiers[i]} data-lift={!spread && i === 1 ? '' : undefined} style={{ '--x': x, '--i': i }}>
               <b>{spec.marks[i].text}</b>
             </span>
           ))}

@@ -158,7 +158,8 @@
   }
 
   /* specimens: the Viaere markers glide, staggered; the circle method's pattern turns */
-  html:not([data-motion='reduced']) .via-mark {
+  html:not([data-motion='reduced']) :is(.via-mark, .via-mark b),
+  html:not([data-motion='reduced']) .via-mark b::after {
     transition: transform 700ms var(--ease-morph) calc(var(--i, 0) * 40ms);
   }
   html:not([data-motion='reduced']) .cm-pattern {

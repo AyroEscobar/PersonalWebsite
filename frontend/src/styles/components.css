@@ -693,19 +693,22 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
   border-radius: 0 4px 4px 0;
   background: linear-gradient(90deg, color-mix(in oklch, var(--red) 22%, transparent), transparent);
 }
+/* axis labels: one line each, below the past-window band; the end label ends at the
+   window's end tick, so a marker past the window never sits over it */
 .via-end {
   position: absolute;
   bottom: 0;
-  font: 500 12px / 1 var(--sans);
+  font: 500 var(--t-xs) / 1 var(--sans);
   font-variant-numeric: tabular-nums;
   color: var(--ink-2);
+  white-space: nowrap;
 }
 .via-end[data-at='start'] {
   left: 0;
 }
 .via-end[data-at='end'] {
   left: 90%;
-  transform: translateX(-50%);
+  transform: translateX(-100%);
 }
 /* a marker is as wide as the window, moved by transform, its pip at its left edge */
 .via-mark {
@@ -743,13 +746,47 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, calc(var(--up, 0) * -30px));
   background: var(--plate);
   box-shadow:
     inset 0 0 0 1.5px var(--lamp),
     0 6px 12px -6px rgb(var(--sh) / 0.45);
-  font: 600 11px / 1 var(--sans);
+  font: 600 var(--t-xs) / 1 var(--sans);
   color: var(--ink);
+}
+/* the stem a raised marker stands on, down to where its circle would rest */
+.via-mark b::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1.5px;
+  height: 30px;
+  margin-left: -0.75px;
+  background: var(--lamp);
+  transform-origin: 50% 0;
+  transform: scaleY(var(--up, 0));
+}
+/* the stage decides by its own width (a wide card is narrow in the two-column grid too):
+   under 540px the bunched markers would touch (A and B sit 7.2% of the window apart), so
+   the middle one rises on its stem and the circles drop to 22px; under 320px the lamp row
+   would run into the tag, so it drops below it */
+.spec-stage.via {
+  container: via / inline-size;
+}
+@container via (max-width: 539.98px) {
+  .via-mark[data-lift] {
+    --up: 1;
+  }
+  .via-mark b {
+    width: 22px;
+    height: 22px;
+  }
+}
+@container via (max-width: 319.98px) {
+  .via-lamps {
+    top: 40px;
+  }
 }
 
 /* the circle method */
