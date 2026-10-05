@@ -37,7 +37,7 @@ try {
   // 256-color palette with dithering keeps the look well under the budget.
   if (kb > 300) {
     const sharp = (await import('../tools/sharp.mjs')).default
-    const buf = await sharp(OUT).png({ palette: true, colors: 256, dither: 0.6, compressionLevel: 9, effort: 10 }).toBuffer()
+    const buf = await sharp(OUT).png({ palette: true, colors: 256, dither: 0.3, compressionLevel: 9, effort: 10 }).toBuffer()
     writeFileSync(OUT, buf)
     kb = statSync(OUT).size / 1024
   }
