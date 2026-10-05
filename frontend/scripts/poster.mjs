@@ -5,7 +5,9 @@
     public/poster/hero-1440.{avif,webp}   1440x900 at DPR 1, the hero camera, t 2.3, p 0
     public/poster/hero-780.{avif,webp}    390x844 at DPR 2 with mobile emulation (780x1688)
     public/poster/meta.json               sizes, mean luminance, the brightest backdrop pixel under
-                                          each text surface (check-content's composite), t, build sha
+                                          each text surface (check-content's composite rules), the
+                                          measured contrast of every text line on the composite at
+                                          four widths and five scroll positions (lib/composite.mjs), t, build sha
     .build/poster/*.png                   the source captures
 
   The composite measurement (rules.mjs COMPOSITE_RULES): for each key, the page is laid out with
@@ -27,6 +29,7 @@ import { fileURLToPath } from 'node:url'
 import { serveDist } from './serve-dist.mjs'
 import { launchChrome } from './lib/chrome.mjs'
 import { connect } from './lib/cdp.mjs'
+import { measureComposite } from './lib/composite.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(ROOT, 'public/poster')
@@ -149,6 +152,13 @@ try {
     console.log(`poster: ${v.name} brightest under each surface: ${Object.entries(view.brightest).map(([k, px]) => `${k} rgb(${px.join(',')})`).join('  ')}`)
     meta.views[v.name] = view
     await page.close()
+  }
+  // text contrast on the real composite: every visible line, four widths, five scroll positions
+  meta.composite = await measureComposite({ cdp, url, sharp, tmpDir: SRC, tier: TIER })
+  if (meta.composite.failures.length) {
+    console.error(`poster: ${meta.composite.failures.length} line(s) under their contrast minimum on the composite:`)
+    for (const f of meta.composite.failures) console.error(`  ${f.view} p ${f.p}: ${f.sel} "${f.text}" ${f.ratio} (needs ${f.min})`)
+    code = 1
   }
   cdp.close()
   // the composite worst case across both views

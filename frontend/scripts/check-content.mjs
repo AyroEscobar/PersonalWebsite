@@ -12,7 +12,9 @@
     8  "twenty" or "20 years" anywhere in src (no age on the site); "Onto what's next." not exactly once
     9  a token pair under its contrast floor, or text on glass under its floor measured on the
        composite: the glass fill, brightness and scrim over the brightest backdrop pixel the
-       poster script measured under a panel (public/poster/meta.json)
+       poster script measured under a panel (public/poster/meta.json); and every visible text line
+       measured on the real composite over the live scene at 1440, 390, 768 and 1920 and at p 0,
+       0.3, 0.56, 0.8 and 1 (meta.json composite, scripts/lib/composite.mjs): 4.5:1, 3:1 large
    10  an off-palette color literal (#hex or rgb() in CSS and JSX; three's 0x literals are the
        scene's own), or a cut effect (scanlines, glitch, chamfers, cursor replacement) in src
    11  an import of @react-three, framer-motion, firebase or react-router anywhere; an import of
@@ -32,6 +34,7 @@
 import { readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { COMPOSITE_VIEWS, COMPOSITE_PS } from './lib/composite.mjs'
 import {
   BANNED,
   COMPOSITE_RULES,
@@ -323,6 +326,28 @@ export async function checkContent({ quiet = false } = {}) {
       if (!worst) continue
       pairs.push({ fg: worst.t, bg: rule.glass, min: rule.min, ratio: worst.ratio, kind: 'composite' })
       if (worst.ratio < rule.min) err(`contrast: --${worst.t} on ${rule.glass} over the brightest backdrop rgb(${px.join(', ')}) is ${worst.ratio.toFixed(2)}, needs ${rule.min}`)
+    }
+  }
+
+  // ---------- 9: every text line measured on the real composite (scripts/lib/composite.mjs via poster.mjs) ----------
+  {
+    let comp = null
+    try {
+      comp = existsSync(metaPath) ? JSON.parse(readFileSync(metaPath, 'utf8')).composite : null
+    } catch {
+      comp = null
+    }
+    if (!comp) err('contrast: public/poster/meta.json has no measured composite; run `npm run poster` after a build so every text line is measured over the live scene')
+    else {
+      for (const v of COMPOSITE_VIEWS) {
+        for (const p of COMPOSITE_PS) {
+          const m = comp.views?.[v.name]?.[p]
+          if (!m) err(`contrast: the composite was not measured at ${v.name} p ${p}`)
+          else if (!m.lines) err(`contrast: the composite at ${v.name} p ${p} measured no text`)
+        }
+      }
+      for (const f of comp.failures || []) err(`contrast: ${f.view} p ${f.p}: ${f.sel} "${f.text}" is ${f.ratio} on the composite, needs ${f.min}`)
+      if (comp.lowest) pairs.push({ fg: comp.lowest.sel, bg: `the live composite (${comp.lowest.view} p ${comp.lowest.p})`, min: comp.lowest.min, ratio: comp.lowest.ratio, kind: 'measured' })
     }
   }
 
