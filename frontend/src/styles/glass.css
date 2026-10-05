@@ -7,7 +7,9 @@
   Layers, back to front:
     backdrop filter   blur + saturate + brightness (thick) or a 6px blur (clear)
     fill              --g-fill, white at 5 to 9 percent, never uniform
-    .scrim     z1     a local void pool under copy, inset 12, so the scene shows through the padding ring
+    .scrim     z1     the void pool under copy, edge to edge as in a3 (an inset pool left a bright
+                      saturated ring that read as a card inside a card); the hero's is a gradient,
+                      0.40 at the top so the scene shows through its upper third
     inner shading     --e-inner in --g-shadow (the top line, the exit line, the rock's light leaking in)
     .ring      z2     clear glass only: a nested backdrop-filter feathered from the edge in
     ::after    z3     sheen, the diagonal streak, 5% grain, the pointer specular
@@ -116,12 +118,12 @@
   opacity: calc(var(--g-spec) * var(--gx-deco, 1));
 }
 
-/* a local void pool under copy, so text on glass keeps its contrast while the scene shows through the padding ring */
+/* the void pool under copy, so text on glass keeps its contrast over the live scene */
 .glass > .scrim {
   position: absolute;
-  inset: var(--g-scrim-inset, 12px);
+  inset: var(--g-scrim-inset, 0);
   z-index: 1;
-  border-radius: calc(var(--g-r, var(--r-panel)) - var(--g-scrim-inset, 12px));
+  border-radius: calc(var(--g-r, var(--r-panel)) - var(--g-scrim-inset, 0px));
   pointer-events: none;
   background: var(--gx-scrim, var(--g-scrim, rgb(var(--void-rgb) / var(--scrim))));
 }
