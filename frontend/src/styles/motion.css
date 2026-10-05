@@ -60,6 +60,9 @@
 .card-title-text {
   transition: opacity var(--dur-pop) ease;
 }
+.card:focus-within :is(.ruler, .card-title-text) {
+  transition: none;
+}
 /* tier lite: the stand-in lens reads the sentence by cross-fading from line to line */
 .lens-static--reading {
   transition: opacity 150ms ease;
@@ -107,6 +110,10 @@
     transition:
       opacity var(--dur-pop) var(--ease-press),
       transform var(--dur-pop) var(--ease-press);
+  }
+  /* nothing keyboard-initiated travels (2.5): focus shows the ruler and its ring at once */
+  html:not([data-motion='reduced']) .card:focus-within :is(.ruler, .card-title-text) {
+    transition: none;
   }
 
   /* tooltip scales from its anchor */
