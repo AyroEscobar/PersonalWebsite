@@ -7,10 +7,12 @@ import { SECTION_IDS } from '../content/sections.js'
   SERVER_STATE, then re-renders with the live state.
 
   State
-    focus   the section in view, one of the six ids (the lens nav)
-    tier    'full' | 'lite'                (src/lib/tier.js)
+    focus   the section in view, one of the four ids, or 'top' (the nav)
+    tier    'full' | 'lite' | 'still'          (src/lib/tier.js)
     quiet   true when the quiet switch is on (html[data-transparency='reduced'])
-    motion  'full' | 'reduced'             (the OS setting)
+    motion  'on' | 'off'                       (the footer's "motion off" control)
+    paused  true while the viewer paused the scene
+    glLost  true after a WebGL context loss that did not restore
 
   Usage
     const quiet = useStore((s) => s.quiet)
@@ -18,10 +20,12 @@ import { SECTION_IDS } from '../content/sections.js'
 */
 
 const SERVER_STATE = Object.freeze({
-  focus: 'origin',
+  focus: 'top',
   tier: 'full',
   quiet: false,
-  motion: 'full',
+  motion: 'on',
+  paused: false,
+  glLost: false,
 })
 
 let state = SERVER_STATE
@@ -53,17 +57,25 @@ export function useStore(selector = (s) => s) {
 }
 
 export function setFocus(id) {
-  if (SECTION_IDS.includes(id)) set({ focus: id })
+  if (id === 'top' || SECTION_IDS.includes(id)) set({ focus: id })
 }
 
 export function setTier(tier) {
-  if (tier === 'full' || tier === 'lite') set({ tier })
+  if (tier === 'full' || tier === 'lite' || tier === 'still') set({ tier })
 }
 
-export function setMotion(motion) {
-  if (motion === 'full' || motion === 'reduced') set({ motion })
+export function setMotionState(motion) {
+  if (motion === 'on' || motion === 'off') set({ motion })
 }
 
 export function setQuietState(quiet) {
   set({ quiet: !!quiet })
+}
+
+export function setPaused(paused) {
+  set({ paused: !!paused })
+}
+
+export function setGlLost(glLost) {
+  set({ glLost: !!glLost })
 }

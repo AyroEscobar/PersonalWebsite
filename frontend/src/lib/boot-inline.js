@@ -1,20 +1,18 @@
 /*
-  Inline boot script (DESIGN.md 4.3, 4.4). NOT imported by the app.
+  Inline boot script (DESIGN.md 3.10, 4.5). NOT imported by the app.
   vite.config.js minifies this file and inlines it in <head> before any CSS
   paints; scripts/prerender.mjs hashes the result for the CSP in vercel.json.
   Keep it ES5, tiny, and free of anything that can throw uncaught.
 
   Writes on <html>, read by CSS and by src/lib/client.js:
     data-js            JavaScript is running
-    data-motion        'reduced' for the OS setting or ?motion=reduced, else 'full'
-    data-tier          'lite' for 4 cores or fewer, 4 GB or less, or Save-Data
-                       (?tier=lite or ?tier=full force it), else 'full'
-    data-lens          'on' only where a url() backdrop filter is honoured. @supports
-                       alone is not trusted (Safari parses url() and ignores it), so
-                       the gate also needs a Chromium-only API. ?lens=off turns it off.
-    data-transparency  'reduced' when the quiet switch is on (ae.quiet, or ?quiet=1)
-    data-mode          'split' (the nav is its own pill from the start) under reduced
-                       motion or tier lite, else 'morph' (the lens becomes the nav)
+    data-motion        'off' when the viewer turned the scene off (ae.motion), else 'on'
+    data-tier          'still' under prefers-reduced-motion, motion off, no WebGL2 or ?tier=still;
+                       'lite' for Save-Data, 4 GB or less, a coarse pointer or a short side under
+                       700 px (?tier=lite); else 'full' (?tier=full forces it)
+    data-transparency  'reduced' when the quiet switch is on (ae.quiet, ?quiet=1, or the OS setting)
+    data-ui            '0' for ?ui=0 (the bare scene, for posters)
+    class fixed        ?t= (a fixed clock: instant scrolls for captures)
     class notext       ?notext=1, for the contrast capture in QA
 */
 ;(function () {
@@ -32,27 +30,42 @@
       return false
     }
   }
+  function ls(k) {
+    try {
+      return window.localStorage.getItem(k)
+    } catch (e) {
+      return null
+    }
+  }
+  var motionOff = ls('ae.motion') === 'off'
   var reduced = mq('(prefers-reduced-motion: reduce)') || has(/[?&]motion=reduced(&|$)/)
-  var lite =
-    has(/[?&]tier=lite(&|$)/) ||
-    (!has(/[?&]tier=full(&|$)/) &&
-      !!((n.hardwareConcurrency && n.hardwareConcurrency <= 4) || (c && c.saveData) || (n.deviceMemory && n.deviceMemory <= 4)))
+  var forced = (q.match(/[?&]tier=(full|lite|still)(&|$)/) || [])[1]
+  var gl = null
+  if (!forced && !reduced && !motionOff) {
+    try {
+      gl = document.createElement('canvas').getContext('webgl2')
+      if (gl) {
+        var ext = gl.getExtension('WEBGL_lose_context')
+        if (ext) ext.loseContext()
+      }
+    } catch (e) {
+      gl = null
+    }
+  }
+  var tier = forced
+  if (!tier) {
+    if (reduced || motionOff || !gl) tier = 'still'
+    else if ((c && c.saveData) || (n.deviceMemory && n.deviceMemory <= 4) || mq('(pointer: coarse)') || Math.min(window.innerWidth, window.innerHeight) < 700) tier = 'lite'
+    else tier = 'full'
+  }
   var quiet = false
   if (has(/[?&]quiet=/)) quiet = has(/[?&]quiet=(1|on|true)(&|$)/)
-  else {
-    try {
-      quiet = window.localStorage.getItem('ae.quiet') === '1'
-    } catch (e) {}
-  }
-  var lens = false
-  try {
-    lens = !lite && !has(/[?&]lens=off(&|$)/) && !!(window.CSS && CSS.supports('backdrop-filter', 'url(#x)')) && !!n.userAgentData
-  } catch (e) {}
+  else quiet = ls('ae.quiet') === '1' || mq('(prefers-reduced-transparency: reduce)')
   d.setAttribute('data-js', '')
-  d.setAttribute('data-motion', reduced ? 'reduced' : 'full')
-  d.setAttribute('data-tier', lite ? 'lite' : 'full')
-  d.setAttribute('data-lens', lens ? 'on' : 'off')
+  d.setAttribute('data-motion', motionOff ? 'off' : 'on')
+  d.setAttribute('data-tier', tier)
   d.setAttribute('data-transparency', quiet ? 'reduced' : 'full')
-  d.setAttribute('data-mode', reduced || lite ? 'split' : 'morph')
+  if (has(/[?&]ui=0(&|$)/)) d.setAttribute('data-ui', '0')
+  if (has(/[?&]t=/)) d.className += ' fixed'
   if (has(/[?&]notext=1(&|$)/)) d.className += ' notext'
 })()
