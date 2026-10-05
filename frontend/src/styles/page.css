@@ -133,9 +133,6 @@
   }
 }
 
-.col-narrow {
-  max-width: 880px;
-}
 .sub-head {
   margin: var(--s-8) 0 var(--s-4);
   font-size: var(--t-xl);
