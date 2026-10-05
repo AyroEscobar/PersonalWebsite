@@ -15,7 +15,8 @@ import { HEAD } from './src/content/meta.js'
   - The inline boot script (src/lib/boot-inline.js) is minified and placed first
     in <head>. Its hash goes into the CSP (scripts/prerender.mjs keeps
     vercel.json in sync).
-  - Both font files get <link rel="preload"> with their hashed names.
+  - The three font files (Instrument Serif italic and regular, Inter) get
+    <link rel="preload"> with their hashed names.
 */
 
 function gitSha() {
@@ -89,7 +90,7 @@ function sitePlugin() {
         if (ctx.bundle) {
           const fonts = Object.values(ctx.bundle)
             .map((a) => a.fileName)
-            .filter((f) => /\/overpass-(mono-)?latin-wght-normal-[\w-]+\.woff2$/.test(f))
+            .filter((f) => /\/(instrument-serif-(italic-)?latin|inter-var-latin)-[\w-]+\.woff2$/.test(f))
             .sort()
           preloads = fonts
             .map((f) => `<link rel="preload" href="/${f}" as="font" type="font/woff2" crossorigin />`)

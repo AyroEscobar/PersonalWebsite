@@ -1,61 +1,72 @@
 /*
-  Two self-hosted variable fonts, latin subset (Fontsource 5.3.0, SIL OFL 1.1,
-  licenses beside the files in src/assets/fonts). scripts/prerender.mjs adds a
-  <link rel="preload"> for both hashed files.
+  Two families, three self-hosted files, Latin subset, SIL OFL 1.1 (licenses
+  beside the files in src/assets/fonts). 48 KB in all; vite.config.js adds a
+  <link rel="preload"> for each hashed file.
 
-  The fallback faces are metric-matched (size-adjust and ascent/descent
-  overrides computed from the font tables on Oct 1, 2026) so the swap from
-  Arial or Courier New causes no layout shift.
+    Instrument Serif   his voice: the sentence, his own lowercase lines,
+                       section words, the active nav word, chip words
+    Inter (variable)   names, roles, companies, numbers and every UI word
+
+  No monospace anywhere (DESIGN.md 2.3).
+
+  The fallback faces are metric matched so the swap moves nothing. The
+  numbers were computed on Oct 4, 2026 from the real advance widths of the
+  hero sentence (serif) and the proof line (sans) against Georgia and Arial,
+  plus each font's hhea ascent and descent.
 */
 
 @font-face {
-  font-family: 'Overpass Variable';
-  font-style: normal;
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
   font-display: swap;
-  font-weight: 100 900;
-  src: url('../assets/fonts/overpass-latin-wght-normal.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  src: url('../assets/fonts/instrument-serif-italic-latin.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Overpass Mono Variable';
+  font-family: 'Instrument Serif';
   font-style: normal;
+  font-weight: 400;
   font-display: swap;
-  font-weight: 300 700;
-  src: url('../assets/fonts/overpass-mono-latin-wght-normal.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  src: url('../assets/fonts/instrument-serif-latin.woff2') format('woff2');
 }
 
-/* Overpass: upm 2000, ascent 1766, descent 766, avg width 0.4847 em vs Arial 0.4884 em. */
 @font-face {
-  font-family: 'Overpass Fallback';
-  src: local('Arial'), local('ArialMT'), local('Helvetica Neue'), local('Helvetica');
-  size-adjust: 99.25%;
-  ascent-override: 88.97%;
-  descent-override: 38.59%;
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../assets/fonts/inter-var-latin.woff2') format('woff2');
+}
+
+/* Instrument Serif italic over Georgia Italic: advance 57.29 em vs 72.44 em on the sentence. */
+@font-face {
+  font-family: 'Instrument Serif Fallback';
+  font-style: italic;
+  src: local('Georgia Italic'), local('Georgia-Italic');
+  size-adjust: 79.09%;
+  ascent-override: 125.18%;
+  descent-override: 39.2%;
   line-gap-override: 0%;
 }
 
-/* Overpass Mono: same vertical metrics, avg width 0.616 em vs Courier New 0.600 em. */
 @font-face {
-  font-family: 'Overpass Mono Fallback';
-  src: local('Courier New'), local('CourierNewPSMT'), local('Courier');
-  size-adjust: 102.65%;
-  ascent-override: 86.02%;
-  descent-override: 37.31%;
+  font-family: 'Instrument Serif Fallback';
+  font-style: normal;
+  src: local('Georgia'), local('Georgia-Regular');
+  size-adjust: 77.05%;
+  ascent-override: 128.48%;
+  descent-override: 40.23%;
   line-gap-override: 0%;
 }
 
-/*
-  Overpass ships U+00B7, the middle dot this site uses as its separator, with
-  zero advance width, so " · " drew the dot over the following space
-  ("Ayro Escobar ·Plano"). This face covers only that one character with a
-  system sans whose dot is centered. Listed first in every sans stack, so all
-  other characters still fall through to Overpass. Nothing is downloaded.
-  Mono text is unaffected (Overpass Mono's dot is fine).
-*/
+/* Inter 400 over Arial: advance 86.95 em vs 81.82 em on the proof line. */
 @font-face {
-  font-family: 'Overpass Dot';
-  src: local('Helvetica Neue'), local('HelveticaNeue'), local('Arial'), local('ArialMT'), local('Helvetica'), local('Roboto'), local('Segoe UI'), local('DejaVu Sans');
-  unicode-range: U+00B7;
+  font-family: 'Inter Fallback';
+  font-style: normal;
+  src: local('Arial'), local('ArialMT'), local('Helvetica');
+  size-adjust: 106.27%;
+  ascent-override: 91.16%;
+  descent-override: 22.7%;
+  line-gap-override: 0%;
 }
