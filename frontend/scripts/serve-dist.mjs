@@ -73,7 +73,7 @@ export function serveDist({ port = 0, root = path.join(ROOT, 'dist'), host = '12
     }
     if (p.includes('..')) return null
     if (p.endsWith('/')) p += 'index.html'
-    const candidates = [p, `${p}.html`]
+    const candidates = [p, `${p}.html`, `${p}/index.html`]
     for (const c of candidates) {
       const abs = path.join(root, c)
       if (abs.startsWith(root) && existsSync(abs) && statSync(abs).isFile()) return abs

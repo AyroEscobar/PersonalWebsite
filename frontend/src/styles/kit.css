@@ -1,0 +1,465 @@
+/*
+  kit.css: the layout of the kit page (/kit) only. The components it shows
+  are styled in components.css and glass.css; nothing here changes them.
+*/
+
+.kit-top {
+  position: relative;
+  padding-top: 28px;
+  padding-bottom: var(--s-8);
+}
+.kit-intro {
+  margin-top: var(--s-9);
+  padding-inline: var(--s-6);
+}
+.kit-word {
+  font-size: clamp(56px, 8vw, 112px);
+  line-height: 0.95;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.kit-line {
+  margin-top: var(--s-3);
+  font-size: var(--t-xl);
+  color: var(--ink-2);
+  max-width: 40ch;
+}
+.kit-back {
+  margin-top: var(--s-4);
+  font: 500 var(--t-sm) / 1 var(--sans);
+}
+
+.kit-group {
+  position: relative;
+  padding-block: var(--s-8);
+}
+.kit-group > .field {
+  inset: 0;
+}
+.kit-label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: var(--s-6);
+  padding-inline: var(--s-6);
+  font: 500 var(--t-sm) / 1 var(--sans);
+  color: var(--ink-2);
+}
+.kit-label--sub {
+  padding-inline: 0;
+  margin: var(--s-6) 0 var(--s-3);
+  font-size: var(--t-xs);
+}
+.kit-label--sub:first-child {
+  margin-top: 0;
+}
+.kit-sim {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--r-full);
+  background: var(--ink);
+  color: var(--on-ink);
+  font: 600 11px / 1 var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.kit-cap {
+  font: 400 var(--t-xs) / 1.35 var(--sans);
+  color: var(--ink-2);
+}
+.kit-cell {
+  display: grid;
+  gap: var(--s-3);
+  align-content: start;
+  min-width: 0;
+}
+.kit-specimen {
+  min-width: 0;
+}
+.kit-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s-7);
+  align-items: start;
+}
+.kit-panel {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-6);
+}
+
+/* the material */
+.kit-material {
+  position: relative;
+  padding: var(--s-4) var(--s-6) 0;
+}
+.kit-material-words {
+  position: absolute;
+  left: var(--s-6);
+  right: 0;
+  top: 44px;
+  font-size: clamp(64px, 9.4vw, 136px);
+  line-height: 1;
+  letter-spacing: -0.015em;
+  /* outlined, so the glass bends a structure instead of greying a black mass */
+  color: transparent;
+  -webkit-text-stroke: 1.25px rgb(var(--ink-rgb) / 0.42);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.kit-swatches {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-6);
+  align-items: end;
+}
+.kit-swatch-cell {
+  display: grid;
+  gap: var(--s-3);
+  align-content: end;
+}
+.kit-swatch {
+  height: 200px;
+}
+.kit-swatch--clear {
+  height: 96px;
+  margin-bottom: 52px;
+}
+.kit-swatch--bar {
+  height: 52px;
+  margin-bottom: 74px;
+}
+
+/* the lens nav */
+.kit-nav {
+  display: grid;
+  gap: var(--s-7);
+}
+.kit-lens-sentence {
+  font-size: clamp(44px, 6.4vw, 92px);
+  padding-left: var(--s-6);
+}
+.kit-cell--lens .kit-cap {
+  padding-left: var(--s-6);
+}
+.kit-nav-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-7) var(--s-8);
+  padding-inline: var(--s-6);
+  align-items: start;
+}
+.kit-cell--dock .lens-nav {
+  width: 358px;
+  max-width: calc(100vw - 2 * var(--gutter));
+}
+
+/* masthead and switches */
+.kit-row--masthead {
+  align-items: center;
+}
+.kit-mast {
+  padding-inline: var(--s-6);
+}
+.kit-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+}
+
+/* the button matrix: rows are variants, columns are states */
+.kit-matrix {
+  display: grid;
+  gap: var(--s-5);
+  padding-inline: var(--s-6);
+}
+.kit-mrow {
+  display: grid;
+  grid-template-columns: 88px repeat(6, minmax(0, 1fr));
+  gap: var(--s-4);
+  align-items: center;
+}
+.kit-mhead .kit-cap {
+  padding-left: 4px;
+}
+.kit-mname {
+  font: italic 400 var(--t-xl) / 1 var(--serif);
+  color: var(--ink);
+}
+.kit-mcell {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+.kit-mcap {
+  display: none;
+  padding-left: 4px;
+}
+.kit-spill {
+  display: grid;
+  gap: var(--s-3);
+  margin-top: var(--s-7);
+  padding-inline: var(--s-6);
+}
+.kit-spill .btn-group {
+  gap: 4px;
+}
+
+/* cards */
+.kit-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-6);
+  align-items: start;
+}
+
+/* receipts */
+.kit-receipts {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--s-6);
+}
+
+/* now list and plates */
+.kit-lists {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s-6);
+  align-items: start;
+}
+.kit-col {
+  display: grid;
+  gap: var(--s-6);
+}
+
+/* link row, tooltip, toast */
+.kit-bits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-7) var(--s-6);
+  padding-inline: var(--s-6);
+}
+.kit-cell--tip .kit-specimen {
+  padding-top: 40px;
+}
+
+/* fallbacks */
+.kit-fallbacks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-6);
+}
+.kit-fb {
+  display: grid;
+  gap: var(--s-3);
+  align-content: start;
+}
+.kit-fb-stack {
+  display: grid;
+  gap: var(--s-4);
+}
+.kit-fb-line {
+  font-size: 34px;
+  padding-left: 12px;
+}
+.kit-fb-sheet {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-5);
+}
+.sim-forced .kit-fb-stack,
+.sim-forced .kit-fb-stack * {
+  color: var(--ink);
+}
+.sim-forced .btn--primary {
+  background: var(--plate);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.sim-forced .chip {
+  background: var(--plate);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+/* tokens */
+.kit-tokens {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s-8);
+  padding-inline: var(--s-6);
+}
+.kit-swatchlist,
+.kit-radii,
+.kit-space,
+.kit-scale {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.kit-swatchlist li,
+.kit-radii li {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.kit-chipcolor {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-3);
+  box-shadow: inset 0 0 0 1px var(--hair-2);
+}
+.kit-chipcolor--field {
+  border-radius: 50%;
+  box-shadow: none;
+}
+.kit-type-serif {
+  font-size: var(--t-3xl);
+  line-height: 1.05;
+}
+.kit-type-sans {
+  margin-top: var(--s-2);
+  font: 600 var(--t-xl) / 1.2 var(--sans);
+  letter-spacing: -0.015em;
+}
+.kit-scale {
+  display: grid;
+  gap: 2px;
+  margin-top: var(--s-4);
+  color: var(--ink);
+  line-height: 1.25;
+}
+.kit-scale .kit-cap {
+  display: inline-block;
+  width: 40px;
+}
+.kit-radius {
+  width: 56px;
+  height: 56px;
+  background: rgb(var(--lit) / 0.7);
+  box-shadow: inset 0 0 0 1.5px var(--ink-3);
+}
+.kit-space {
+  display: grid;
+  gap: 6px;
+}
+.kit-space li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+.kit-spacebar {
+  height: 10px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.kit-group--footer {
+  padding-bottom: 0;
+}
+.kit-footer {
+  margin-top: 0;
+}
+
+/* phones */
+@media (max-width: 899.98px) {
+  .kit-row,
+  .kit-lists,
+  .kit-cards,
+  .kit-tokens,
+  .kit-bits {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .kit-swatches {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .kit-fallbacks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .kit-receipts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .kit-mrow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: var(--s-4);
+  }
+  .kit-mhead {
+    display: none;
+  }
+  .kit-mname {
+    grid-column: 1 / -1;
+  }
+  .kit-mcap {
+    display: block;
+  }
+}
+@media (max-width: 639.98px) {
+  .kit-intro,
+  .kit-label,
+  .kit-matrix,
+  .kit-mast,
+  .kit-nav-row,
+  .kit-spill,
+  .kit-bits,
+  .kit-tokens,
+  .kit-material {
+    padding-inline: 0;
+  }
+  .kit-label--sub {
+    padding-inline: 0;
+  }
+  .kit-lens-sentence,
+  .kit-cell--lens .kit-cap {
+    padding-left: 10px;
+    font-size: 34px;
+  }
+  .kit-cell--lens .kit-cap {
+    font-size: var(--t-xs);
+  }
+  .kit-material-words {
+    left: 0;
+    top: 28px;
+    font-size: 56px;
+    white-space: normal;
+  }
+  .kit-swatch {
+    height: 140px;
+  }
+  .kit-swatch--clear {
+    height: 64px;
+    margin-bottom: 38px;
+  }
+  .kit-swatch--bar {
+    height: 52px;
+    margin-bottom: 44px;
+  }
+  .kit-fallbacks {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .kit-receipts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .kit-fb-line {
+    font-size: 30px;
+  }
+  /* the pill is a wide-screen state; at phone width its specimen packs the six words like the dock */
+  .kit-nav-row .lens-nav.is-pill {
+    width: 100%;
+  }
+  .kit-nav-row .lens-nav.is-pill .nav-list {
+    width: 100%;
+    gap: 0;
+    justify-content: space-between;
+  }
+  .kit-nav-row .lens-nav.is-pill .nav-a {
+    padding: 0 6px;
+  }
+  .kit-cell--dock,
+  .kit-nav-row > .kit-cell {
+    width: 100%;
+  }
+}

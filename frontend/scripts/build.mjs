@@ -7,7 +7,7 @@
     3  check-content      (fails on unsourced copy, dashes, privacy, contrast)
     4  vite build         client, with a manifest
     5  vite build --ssr   src/entry-server.jsx into dist-ssr
-    6  prerender          dist/index.html and dist/404.html, CSP hash
+    6  prerender          dist/index.html, dist/kit/index.html, dist/404.html, CSP hash
     7  budget             gzip budgets and banned code
     8  tidy               manifest to .build/, dist-ssr removed
 
@@ -78,7 +78,7 @@ await build({
 step('prerender')
 const { prerender } = await import('./prerender.mjs')
 const pr = await prerender().catch((e) => fail(e.message))
-console.log(`prerender: index.html ${pr.homeBytes} B, 404.html ${pr.notFoundBytes} B, ${pr.hashes.length} inline script hash(es)`)
+console.log(`prerender: index.html ${pr.homeBytes} B, kit/index.html ${pr.kitBytes} B, 404.html ${pr.notFoundBytes} B, ${pr.hashes.length} inline script hash(es)`)
 
 // 7
 step('budget')

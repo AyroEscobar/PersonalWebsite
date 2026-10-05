@@ -2,8 +2,9 @@
 /*
   prerender (PLAN.md 7, 9, 11). After the client and SSR builds:
 
-    dist/index.html  '/'    full page HTML, so the name and copy paint before any script
-    dist/404.html    '/404' the themed 404, served with HTTP 404 for unknown paths
+    dist/index.html      '/'     full page HTML, so the name and copy paint before any script
+    dist/kit/index.html  '/kit'  the component kit (DESIGN.md 5.15), noindex, not in the sitemap
+    dist/404.html        '/404'  the themed 404, served with HTTP 404 for unknown paths
 
   Then it hashes every inline <script> (the boot script) for the CSP and keeps
   vercel.json in sync: locally it rewrites the hash and tells you to commit it;
@@ -15,7 +16,7 @@
   Also asserts the contract QA relies on: one h1, the six section h2s, no
   em or en dashes in the HTML.
 */
-import { readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -36,6 +37,7 @@ async function inlineCss(html) {
 export async function prerender() {
   const { render } = await import(pathToFileURL(path.join(ROOT, 'dist-ssr/entry-server.js')))
   const { NOT_FOUND } = await import(pathToFileURL(path.join(ROOT, 'src/content/meta.js')))
+  const { KIT } = await import(pathToFileURL(path.join(ROOT, 'src/content/kit.js')))
   const { SECTION_IDS, headingId } = await import(pathToFileURL(path.join(ROOT, 'src/content/sections.js')))
 
   let template = await readFile(path.join(DIST, 'index.html'), 'utf8')
@@ -49,11 +51,17 @@ export async function prerender() {
 
   const home = await render('home')
   const notFound = await render('404')
+  const kit = await render('kit')
 
   const homeHtml = template.replace('<div id="root"></div>', `<div id="root">${home}</div>`)
   const nfHtml = template
     .replace('<div id="root"></div>', `<div id="root" data-page="404">${notFound}</div>`)
     .replace(/<title>[^<]*<\/title>/, `<title>${NOT_FOUND.title.text}</title>\n    <meta name="robots" content="noindex" />`)
+    .replace(/\s*<link rel="canonical"[^>]*>/, '')
+    .replace(/\s*<meta property="og:url"[^>]*>/, '')
+  const kitHtml = template
+    .replace('<div id="root"></div>', `<div id="root" data-page="kit">${kit}</div>`)
+    .replace(/<title>[^<]*<\/title>/, `<title>${KIT.title.text}</title>\n    <meta name="robots" content="noindex" />`)
     .replace(/\s*<link rel="canonical"[^>]*>/, '')
     .replace(/\s*<meta property="og:url"[^>]*>/, '')
 
@@ -66,22 +74,25 @@ export async function prerender() {
     if (!new RegExp(`<h2[^>]*id="${headingId(id)}"`).test(home)) problems.push(`home is missing <h2 id="${headingId(id)}">`)
   }
   if (!/<h1[\s>]/.test(notFound)) problems.push('404 has no h1')
-  for (const [name, html] of [['index.html', homeHtml], ['404.html', nfHtml]]) {
+  if ((kit.match(/<h1[\s>]/g) || []).length !== 1) problems.push('kit needs exactly one h1')
+  for (const [name, html] of [['index.html', homeHtml], ['404.html', nfHtml], ['kit/index.html', kitHtml]]) {
     if (/[–—]/.test(html)) problems.push(`${name} contains an en or em dash`)
   }
   if (problems.length) throw new Error(`prerender:\n  ${problems.join('\n  ')}`)
 
   await writeFile(path.join(DIST, 'index.html'), homeHtml)
   await writeFile(path.join(DIST, '404.html'), nfHtml)
+  await mkdir(path.join(DIST, 'kit'), { recursive: true })
+  await writeFile(path.join(DIST, 'kit/index.html'), kitHtml)
 
   const hashes = new Set()
-  for (const html of [homeHtml, nfHtml]) {
+  for (const html of [homeHtml, nfHtml, kitHtml]) {
     for (const m of html.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)<\/script>/g)) {
       hashes.add(`'sha256-${createHash('sha256').update(m[1], 'utf8').digest('base64')}'`)
     }
   }
   await syncCsp([...hashes].sort())
-  return { homeBytes: Buffer.byteLength(homeHtml), notFoundBytes: Buffer.byteLength(nfHtml), hashes: [...hashes] }
+  return { homeBytes: Buffer.byteLength(homeHtml), notFoundBytes: Buffer.byteLength(nfHtml), kitBytes: Buffer.byteLength(kitHtml), hashes: [...hashes] }
 }
 
 async function syncCsp(hashes) {
