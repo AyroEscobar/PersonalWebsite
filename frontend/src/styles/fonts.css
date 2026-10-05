@@ -1,10 +1,12 @@
 /*
-  Two families, three self-hosted files, Latin subset, SIL OFL 1.1 (licenses
-  beside the files in src/assets/fonts). 48 KB in all; vite.config.js adds a
+  Two families, two self-hosted files, Latin subset, SIL OFL 1.1 (licenses
+  beside the files in src/assets/fonts). 33 KB in all; vite.config.js adds a
   <link rel="preload"> for each hashed file.
 
-    Instrument Serif   his voice: the sentence, his own lowercase lines,
-                       section words, the active nav word, chip words
+    Instrument Serif   his voice, always italic: the sentence, his own lowercase
+                       lines, section words, the active nav word, chip words
+                       (the upright cut was preloaded and never drawn, so it
+                       is gone)
     Inter (variable)   names, roles, companies, numbers and every UI word
 
   No monospace anywhere (DESIGN.md 2.3).
@@ -24,14 +26,6 @@
 }
 
 @font-face {
-  font-family: 'Instrument Serif';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('../assets/fonts/instrument-serif-latin.woff2') format('woff2');
-}
-
-@font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 400 700;
@@ -47,16 +41,6 @@
   size-adjust: 79.09%;
   ascent-override: 125.18%;
   descent-override: 39.2%;
-  line-gap-override: 0%;
-}
-
-@font-face {
-  font-family: 'Instrument Serif Fallback';
-  font-style: normal;
-  src: local('Georgia'), local('Georgia-Regular');
-  size-adjust: 77.05%;
-  ascent-override: 128.48%;
-  descent-override: 40.23%;
   line-gap-override: 0%;
 }
 
