@@ -44,6 +44,8 @@ export const KIT = {
     tooltip: ui('kit-g-tooltip', 'tooltip'),
     toast: ui('kit-g-toast', 'toast'),
     head: ui('kit-g-head', 'section head'),
+    reading: ui('kit-g-reading', 'the reading sentence'),
+    profile: ui('kit-g-profile', 'origin card'),
     contact: ui('kit-g-contact', 'contact card'),
     footer: ui('kit-g-footer', 'footer'),
     fallbacks: ui('kit-g-fallbacks', 'fallbacks'),
@@ -54,6 +56,17 @@ export const KIT = {
     thick: ui('kit-mat-thick', 'thick: buttons, the contact card, the toast'),
     sheet: ui('kit-mat-sheet', 'sheet: every content surface'),
     bar: ui('kit-mat-bar', 'bar: the nav once it is a pill'),
+  },
+  reading: {
+    standIn: ui('kit-reading-stand-in', 'the stand-in lens on line 2, before the reader takes it; under reduced motion it rests on the last line'),
+  },
+  head: {
+    inline: ui('kit-head-inline', 'inline: the line beside the word'),
+    rail: ui('kit-head-rail', 'rail: the word over its line, held under the nav, from 1100px'),
+  },
+  contact: {
+    narrow: ui('kit-contact-narrow', 'narrow'),
+    wide: ui('kit-contact-wide', 'wide: fills a section column from 900px'),
   },
   nav: {
     lens: ui('kit-nav-lens', 'lens: reading the sentence'),
@@ -69,6 +82,7 @@ export const KIT = {
     glass: ui('kit-card-glass', 'glass sheet, the one the page uses'),
     base: ui('kit-card-base', 'base card, kept only to show what is not used'),
     focus: ui('kit-card-focus', 'focus inside: the card takes the hover look'),
+    specimen: ui('kit-card-specimen', 'with a specimen above the title (lazy, a poster holds its box)'),
   },
   linkrow: {
     legend: ui('kit-linkrow-legend', 'github shows hover, linkedin shows focus, instagram shows press.'),
