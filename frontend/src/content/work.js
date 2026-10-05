@@ -74,6 +74,7 @@ export const WORK = {
       node: 'nyc',
       facts: ['exp-rbc'],
       debrief: [item('rbc-debrief', 'Inaugural cohort, 1 of 10 interns. Six trading-floor desks in four months.', ['exp-rbc'])],
+      receipt: { value: '6', label: 'trading-floor desks in four months' },
       origin: item(
         'rbc-origin',
         'The door opened at Hack the North, where someone from RBC saw something in me.',
@@ -84,6 +85,7 @@ export const WORK = {
           id: 'desk-rates-fx',
           name: 'Rates Trading and FX Algorithms',
           text: "An AI code review agent trained on 4,000+ pull request comments from the desk's two strongest engineers. It runs as a first pass before human review.",
+          receipt: { value: '4,000+', label: 'pull request comments' },
           facts: ['exp-rbc-desk-rates-fx'],
         },
         {
@@ -96,6 +98,7 @@ export const WORK = {
           id: 'desk-qis',
           name: 'Quantitative Investment Strategies',
           text: 'An autonomous multi-agent platform, built with the Digital and AI Innovation team, that parallelizes research, analysis and report generation across 60+ quant strategies, cutting processing from 2 hours to 10 minutes per strategy. Integrated into RBC internal systems.',
+          receipt: { value: '60+', label: 'quant strategies' },
           facts: ['exp-rbc-desk-qis'],
         },
         {
@@ -108,12 +111,14 @@ export const WORK = {
           id: 'desk-cross-asset',
           name: 'Cross-Asset Sales',
           text: "An AI editorial QA agent for the desk's flagship research brief, a global markets digest read by 1,500+ employees including executives. It reviews every issue before it sends.",
+          receipt: { value: '1,500+', label: 'readers of the brief' },
           facts: ['exp-rbc-desk-cross-asset'],
         },
         {
           id: 'desk-aag',
           name: 'Alternative Asset Group',
           text: 'An automated SEC filing pipeline that pulls 20 credit reports in 5 minutes, down from about an hour, comparing N-CSR and 13F filings into structured storage.',
+          receipt: { value: '20', label: 'credit reports in 5 minutes' },
           facts: ['exp-rbc-desk-aag'],
         },
       ],

@@ -32,17 +32,12 @@ export const CANONICAL = 'https://www.ayroescobar.com/'
 export const HOST = 'ayroescobar.com'
 
 // The day the now section was last checked against facts.json. After
-// STALE_AFTER_DAYS the now board says "last updated" and drops to sodium.
+// STALE_AFTER_DAYS the now list says "last updated" instead of "updated".
 export const NOW_UPDATED = '2026-10-01'
 export const STALE_AFTER_DAYS = 45
 
-// Plano, for the clock and the sun. City-level coordinates only.
-export const PLANO = { lat: 33.05, lon: -96.7, tz: 'America/Chicago' }
-
 // localStorage and sessionStorage keys (always behind try/catch).
 export const STORAGE = {
-  mode: 'ae.mode',
-  booted: 'ae.booted',
-  shortcuts: 'ae.shortcuts',
-  recents: 'ae.recents',
+  quiet: 'ae.quiet',
+  lens: 'ae.lens',
 }

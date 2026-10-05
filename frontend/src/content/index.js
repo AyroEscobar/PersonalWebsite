@@ -1,7 +1,6 @@
 // Barrel for the content modules. Import from here or from the module directly.
 export * from './constants.js'
 export * from './sections.js'
-export * from './places.js'
 export * from './identity.js'
 export * from './now.js'
 export * from './work.js'
@@ -9,3 +8,4 @@ export * from './builds.js'
 export * from './crew.js'
 export * from './signal.js'
 export * from './meta.js'
+export * from './kit.js'

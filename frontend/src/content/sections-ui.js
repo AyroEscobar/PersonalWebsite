@@ -16,6 +16,7 @@ export const W = {
   present: ui('w-present', 'present'),
   notPublic: ui('w-not-public', 'not public'),
   now: ui('w-now', 'now'),
+  past: ui('w-past', 'past'),
   lane: ui('w-lane', 'lane'),
   item: ui('w-item', 'item'),
   from: ui('w-from', 'from'),

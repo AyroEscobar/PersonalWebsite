@@ -2,7 +2,9 @@ import { item, ui } from './item.js'
 import { AGE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
 
 /*
-  Hero (PLAN.md 3.2, rendered by A) and the origin body (3.3, rendered by C).
+  Hero and the origin body (DESIGN.md 6.1 to 6.3).
+  v2 (Oct 4): the eyebrow takes a comma instead of the middle dot and the
+  deck names Viaere and MD7 in proper case (DESIGN.md 6.1). No claim changed.
   Final copy. Builders render it; they do not rewrite it. Changes go through
   requests-<X>.md.
 
@@ -16,13 +18,13 @@ import { AGE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
 */
 
 export const HERO = {
-  eyebrow: item('hero-eyebrow', 'software engineer · plano, texas', ['identity-role', 'identity-hometown']),
+  eyebrow: item('hero-eyebrow', 'software engineer, plano, texas', ['identity-role', 'identity-hometown']),
   name: item('hero-name', 'Ayro Escobar', ['identity-name']),
   deck: item(
     'hero-deck',
-    'cs at ut dallas. co-founder, engineering, at viaere. software engineer at md7.',
+    'cs at ut dallas. co-founder, engineering, at Viaere. software engineer at MD7.',
     ['identity-student', 'ven-viaere-bio', 'exp-md7'],
-    { link: { phrase: 'viaere', href: '#build-viaere' } },
+    { link: { phrase: 'Viaere', href: '#build-viaere' } },
   ),
   proof: item(
     'hero-proof',

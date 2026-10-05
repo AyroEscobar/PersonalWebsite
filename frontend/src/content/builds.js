@@ -56,6 +56,8 @@ export const BUILDS = {
       ],
       stack: null,
       links: [source('https://github.com/AyroEscobar/pool-tournament-system')],
+      // The one number on a build card (DESIGN.md 5.8, 6.6): restates pool-what.
+      receipt: { value: 'just over 100,000', label: 'assertions, cs 4302' },
       specimen: 'circle-method',
       layout: 'wide',
     },
@@ -169,7 +171,7 @@ export const BUILDS = {
   ),
   thisSite: item(
     'builds-this-site',
-    'this site: react, vite, tailwind and raw webgl2, prerendered. source on github.',
+    'this site: react, vite and tailwind, prerendered. source on github.',
     ['prj-personal-website'],
     { href: REPO },
   ),
