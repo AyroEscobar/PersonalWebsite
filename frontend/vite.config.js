@@ -18,6 +18,8 @@ import { HEAD } from './src/content/meta.js'
   - Mona Sans gets a <link rel="preload"> with its hashed name; the two poster
     AVIFs are preloaded with media queries (the first paint).
   - three and src/scene/* land in one lazy chunk named "scene" (budget.mjs finds it).
+  - three's table of CSS colour keywords is emptied (noColourNames): the scene never sets a colour
+    by name, and the table carries words the privacy scan holds (it is not copy, but it ships as text).
 */
 
 function gitSha() {
@@ -77,6 +79,20 @@ function headTags() {
   ].join('\n    ')
 }
 
+// three.core.js: `const _colorKeywords = { 'aliceblue': 0xF0F8FF, ... };` becomes `{}`. Fails the build
+// if the table is not found, so a three upgrade cannot quietly ship it again.
+function noColourNames() {
+  return {
+    name: 'ae-no-colour-names',
+    transform(code, id) {
+      if (!/node_modules\/three\/build\/three\.core(\.min)?\.js$/.test(id)) return null
+      const re = /const _colorKeywords = \{[^}]*\};/
+      if (!re.test(code)) this.error('three.core.js: _colorKeywords table not found; update noColourNames in vite.config.js')
+      return { code: code.replace(re, 'const _colorKeywords = {};'), map: null }
+    },
+  }
+}
+
 function sitePlugin() {
   let boot = ''
   return {
@@ -109,7 +125,7 @@ function sitePlugin() {
 }
 
 export default defineConfig({
-  plugins: [react(), sitePlugin()],
+  plugins: [react(), sitePlugin(), noColourNames()],
   define: {
     __BUILD_SHA__: JSON.stringify(BUILD_SHA),
     __BUILD_DATE__: JSON.stringify(BUILD_DATE),
