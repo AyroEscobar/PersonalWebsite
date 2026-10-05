@@ -71,8 +71,9 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* the field drifts, 20 to 30 s, alternate, staggered (3.5); off at tier lite */
-  html:not([data-motion='reduced']):not([data-tier='lite']) .blob {
+  /* the field drifts, 20 to 30 s, alternate, staggered (3.5); off at tier lite, and only
+     while the field is near the screen (src/field/live.js) */
+  html:not([data-motion='reduced']):not([data-tier='lite']) .field.is-live .blob {
     animation: drift var(--dur, 24s) ease-in-out var(--delay, 0s) infinite alternate;
     will-change: transform;
   }
@@ -147,6 +148,14 @@
       width var(--dur-morph) var(--ease-morph),
       height var(--dur-morph) var(--ease-morph),
       border-radius var(--dur-morph) var(--ease-morph);
+  }
+
+  /* specimens: the Viaere markers glide, staggered; the circle method's pattern turns */
+  html:not([data-motion='reduced']) .via-mark {
+    transition: transform 700ms var(--ease-morph) calc(var(--i, 0) * 40ms);
+  }
+  html:not([data-motion='reduced']) .cm-pattern {
+    transition: transform 600ms var(--ease-morph);
   }
 
   /* the bead follows the current word */
