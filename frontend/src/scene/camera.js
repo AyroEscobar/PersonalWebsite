@@ -21,7 +21,7 @@ export const CAM = {
 }
 
 export function makeCamera() {
-  const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 1200)
+  const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 3200)
   const aim = new THREE.Vector3(), aimB = new THREE.Vector3(), tmpAim = new THREE.Vector3()
   /** p: progress; F: his world position (feet); Bcam: the rock's world centre (camera-shifted); ptr: { x, y } parallax; size: [w, h] */
   function place(p, F, Bcam, ptr, [w, h0]) {

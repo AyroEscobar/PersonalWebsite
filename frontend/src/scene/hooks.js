@@ -4,6 +4,7 @@
   (?t ?p ?tier ?slip ?ui) are read in boulder.js.
 */
 import * as THREE from 'three'
+import { hazeT } from './world.js'
 
 export function readQuery() {
   const q = new URLSearchParams(location.search)
@@ -15,9 +16,9 @@ export function readQuery() {
 }
 
 export function installHooks(ctx) {
-  const { r, cam, canvas, slope, fig, city, R, tier, render, state, objs, CAM, LIGHT } = ctx
+  const { r, cam, canvas, slope, fig, city, R, tier, render, state, objs, CAM, LIGHT, CITY } = ctx
   const proj = new THREE.Vector3(), box = new THREE.Box3()
-  window.__CAM = CAM; window.__LIGHT = LIGHT
+  window.__CAM = CAM; window.__LIGHT = LIGHT; window.__CITY = CITY
   window.__prog = () => ({ prog: state.prog(), target: state.target(), vel: state.vel() })
   window.__objs = objs
   window.__frameAt = (tt, p) => {
@@ -60,13 +61,15 @@ export function installHooks(ctx) {
     const bp = []
     for (let i = 0; i < 400; i++) { const u = Math.acos(1 - 2 * (i + 0.5) / 400), v = i * 2.39996; bp.push(new THREE.Vector3(Math.sin(u) * Math.cos(v), Math.cos(u), Math.sin(u) * Math.sin(v)).multiplyScalar(R * 1.035).add(B)) }
     out.boulder = toScreen(bp)
-    // the city box counts only the lights the camera can see: a ray from the camera to each sampled
-    // point must not hit the mountain first (the cliff hides most of the carpet at the hero camera)
+    // the city box counts only the lights the camera can see: through the valley haze (transmittance
+    // over 0.2, the same formula as the shader) and with no mountain in the way (a ray from the camera
+    // to each sampled point must not hit the slope first)
     const cp = city.userData.points.geometry.attributes.position, cpts = []
     const ray = new THREE.Raycaster(), dir = new THREE.Vector3()
     const ground = slope.children.find((o) => o.isMesh && o.geometry?.attributes?.position?.count > 10000)
-    for (let i = 0; i < cp.count; i += 19) {
+    for (let i = 0; i < cp.count; i += 7) {
       const p = new THREE.Vector3().fromBufferAttribute(cp, i).applyMatrix4(city.userData.points.matrixWorld)
+      if (hazeT(city.userData.haze(), cam.position, p) < 0.2) continue
       dir.copy(p).sub(cam.position); const dist = dir.length(); dir.normalize()
       ray.set(cam.position, dir); ray.far = dist
       if (ground && ray.intersectObject(ground, false).length) continue
@@ -84,7 +87,7 @@ export function installHooks(ctx) {
 }
 
 export function removeHooks() {
-  for (const k of ['__CAM', '__LIGHT', '__prog', '__objs', '__frameAt', '__bench', '__bounds', '__feet', '__ready', '__stats']) {
+  for (const k of ['__CAM', '__LIGHT', '__CITY', '__prog', '__objs', '__frameAt', '__bench', '__bounds', '__feet', '__ready', '__stats']) {
     try { delete window[k] } catch { window[k] = undefined }
   }
 }

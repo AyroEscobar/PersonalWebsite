@@ -43,9 +43,20 @@ const SLIP_EVERY = 14
 const SLIP = { dist: 0.9, slide: 0.45, plant: 0.3, hold: 0.12, resume: 0.6 }
 const SPRING_W = 11     // rad/s: critically damped, settles in about 0.4 s, never overshoots
 const HOLD_MS = 260     // the clock holds this long after the first frame, while the canvas fades in over the poster
-// the city carpet: 200 m below. a3 had it at 225 m, where the cliff hid every light on desktop; at 200 it
-// shows below his feet at the stack and the wide (measured: p 0.8 and 1) and stays off screen at the hero
-const CITY = { below: -200, near: 260, far: 640 }
+// the city carpet (REFINE.md build item 1): a valley floor 200 m below the start, 500 to 1100 m out
+// toward the lower left of every camera, with the far ridge moved out 2.5x (scaled about the hero camera,
+// so its silhouette is a3's) so the floor runs far enough to be seen under his feet. The valley
+// haze hides every light shallower than haze(p) degrees below the camera: the cloud thins as he climbs.
+const CITY = {
+  below: -200, near: 500, far: 1100, cx: -110, width: 1000, size: 4.6, ridgeScale: 2.5, ridgeOrigin: [-47.2, -11.8, 8.5],
+  haze: [[0, 32], [0.45, 30], [0.56, 26], [0.7, 23], [0.8, 19.5], [0.9, 16], [1, 12.8]],
+}
+const hazeAt = (p) => {
+  const H = CITY.haze
+  let deg = H[H.length - 1][1]
+  for (let i = 1; i < H.length; i++) if (p <= H[i][0]) { const [p0, d0] = H[i - 1], [p1, d1] = H[i]; deg = d0 + (d1 - d0) * clamp((p - p0) / (p1 - p0), 0, 1); break }
+  return Math.pow(Math.LN2, 0.25) * Math.sin(THREE.MathUtils.degToRad(deg)) // transmittance 0.5 at that depression
+}
 const FIGURE_URL = new URL('../assets/figure/man.glb', import.meta.url).href
 
 let S = null
@@ -77,14 +88,15 @@ export function mount(canvas, opts = {}) {
   const fogBase = new THREE.Color(F0[0]), fogPale = new THREE.Color(FOG.pale)
   const sky = makeSky(); scene.add(sky)
   const stars = makeStars(); sky.add(stars)
-  const ridge = makeRidge({ skyUniforms: sky.material.uniforms }); scene.add(ridge)
+  const ridge = makeRidge({ skyUniforms: sky.material.uniforms, scale: CITY.ridgeScale, origin: CITY.ridgeOrigin }); scene.add(ridge)
   const { cam, place } = makeCamera()
 
   // the slope frame carries the mountain and the figure; +x climbs
   const slope = new THREE.Group(); slope.rotation.z = THREE.MathUtils.degToRad(SLOPE); scene.add(slope)
   const ground = contourMaterial({ strength: full ? 1 : 0.8, wet: 0.6 })
   slope.add(makeSlope({ material: ground }))
-  const city = makeCity({ count: full ? 2600 : 1400, ...CITY, skyUniforms: sky.material.uniforms }); scene.add(city)
+  const city = makeCity({ count: full ? 2600 : 1400, ...CITY, skyUniforms: sky.material.uniforms, ridge }); scene.add(city)
+  city.userData.setHaze(hazeAt(0))
   const rain = full ? makeRain({ count: 320 }) : null
   if (rain) scene.add(rain)
 
@@ -197,6 +209,7 @@ export function mount(canvas, opts = {}) {
       rain.userData.update(now, manInRain)
     }
     sky.material.uniforms.uGlowAMix.value = 1 - 0.2 * prog
+    city.userData.setHaze(hazeAt(prog))
     sky.material.uniforms.uDawn.value = dawn
     stars.material.opacity = 0.8 * (1 - dawn / 0.35 * 0.6)
     ground.userData.u.uDawn.value = dawn
@@ -288,7 +301,7 @@ export function mount(canvas, opts = {}) {
     slope.add(fig.group)
     fig.boulder.add(droplets(R, full ? 110 : 36, { lite: !full }))
     installHooks({
-      r, cam, canvas, scene, slope, fig, city, R, tier, render, CAM, LIGHT,
+      r, cam, canvas, scene, slope, fig, city, R, tier, render, CAM, LIGHT, CITY,
       objs: { city, ridge, rain, pool, hemi: lights.hemi, key: lights.key, sky, ground, stars, fig, r, post, scene, cam },
       state: {
         prog: () => spring.pos, target: () => target, vel: () => spring.vel, t: () => t, tau: () => tau, rate: () => rate,
