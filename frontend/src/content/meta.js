@@ -22,11 +22,12 @@ export const HEAD = {
     width: 1200,
     height: 630,
     type: 'image/png',
-    // og.html builds the card from the hero's own night grid (scripts/og.mjs).
-    alt: item('meta-og-alt', 'Ayro Escobar, software engineer, Plano, Texas, on a night map of Dallas highways', [
+    // og.html builds the card from the hero itself: his sentence and its lens (scripts/og.mjs).
+    alt: item('meta-og-alt', 'Ayro Escobar, software engineer, Plano, Texas. His sentence under a glass lens on a bright field.', [
       'identity-name',
       'identity-role',
       'identity-hometown',
+      'voice-the-map',
     ]),
   },
   person: {
