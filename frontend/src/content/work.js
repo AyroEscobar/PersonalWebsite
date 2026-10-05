@@ -1,188 +1,55 @@
-import { item, ui } from './item.js'
+import { ui } from './item.js'
 
 /*
-  The work section (PLAN.md 3.5): ReleasePlates (MD7, JPMorgan, RBC, MLH),
-  the RBC DeskBranch, and the StackPlate. Rendered by C.
-
-  Plate fields inherit the plate's facts. `status` is the visible word,
-  `state` picks the light: 'now' is LED, 'past' is sodium.
-  JPMorgan's debrief is his own published farewell sentence (r2 N1), past
-  tense and with no team name (questions.md #1, #6).
+  Experience (COPY.md 3.4): one line each, newest first. The org on its own
+  line, then the details with middle dots, then the receipt where facts.json
+  has one. Dates use "to"; "present" where true. Nothing about 2027.
 */
 
-export const WORK = {
-  intro: ui('work-intro', 'dated.'),
-  statusWords: {
-    active: ui('status-active', 'active'),
-    complete: ui('status-complete', 'complete'),
-  },
-  desksLabel: ui('desks-label', 'six desks'),
-  plates: [
-    {
-      id: 'plate-md7',
-      org: 'MD7',
-      role: 'Software Engineer (contract)',
-      place: 'Allen, Texas',
-      dates: 'May 2026 to present',
-      start: '2026-05',
-      end: null,
-      status: 'active',
-      state: 'now',
-      node: 'allen',
-      facts: ['exp-md7'],
-      debrief: [
-        item(
-          'md7-debrief',
-          'Clean executive dashboards that replace Power BI, shipped directly with the CTO, with real ownership over architecture and ship cadence.',
-          ['exp-md7-public-work'],
-        ),
-      ],
-    },
-    {
-      id: 'plate-jpm',
-      org: 'JPMorgan Chase',
-      role: 'Software Engineer Intern, CIB',
-      place: 'Plano, Texas',
-      dates: 'June to August 2026',
-      start: '2026-06',
-      end: '2026-08',
-      status: 'complete',
-      state: 'past',
-      node: 'plano',
-      facts: ['exp-jpm-2026'],
-      // His own published sentence from the Aug 21 farewell post, verbatim, no
-      // team name (questions.md #42 default; #6 keeps the team out).
-      debrief: [
-        item(
-          'jpm-debrief',
-          'What I found was a team that trusted me with real work, pushed me when I needed it, and taught me more than I expected to learn in one summer.',
-          ['voice-jpm-farewell'],
-          { verbatim: 'voice-jpm-farewell' },
-        ),
-      ],
-    },
-    {
-      id: 'plate-rbc',
-      org: 'RBC Capital Markets',
-      role: 'Software Engineer Intern, AidenEdge rotational program',
-      place: 'New York City',
-      dates: 'January to April 2026',
-      start: '2026-01',
-      end: '2026-04',
-      status: 'complete',
-      state: 'past',
-      node: 'nyc',
-      facts: ['exp-rbc'],
-      debrief: [item('rbc-debrief', 'Inaugural cohort, 1 of 10 interns. Six trading-floor desks in four months.', ['exp-rbc'])],
-      receipt: { value: '6', label: 'trading-floor desks in four months' },
-      origin: item(
-        'rbc-origin',
-        'The door opened at Hack the North, where someone from RBC saw something in me.',
-        ['exp-rbc-origin'],
-      ),
-      desks: [
-        {
-          id: 'desk-rates-fx',
-          name: 'Rates Trading and FX Algorithms',
-          text: "An AI code review agent trained on 4,000+ pull request comments from the desk's two strongest engineers. It runs as a first pass before human review.",
-          receipt: { value: '4,000+', label: 'pull request comments' },
-          facts: ['exp-rbc-desk-rates-fx'],
-        },
-        {
-          id: 'desk-rates-compression',
-          name: 'Rates Trading',
-          text: 'A trade compression tool that decomposes compression swaps into their true underlying risks.',
-          facts: ['exp-rbc-desk-rates-compression'],
-        },
-        {
-          id: 'desk-qis',
-          name: 'Quantitative Investment Strategies',
-          text: 'An autonomous multi-agent platform, built with the Digital and AI Innovation team, that parallelizes research, analysis and report generation across 60+ quant strategies, cutting processing from 2 hours to 10 minutes per strategy. Integrated into RBC internal systems.',
-          receipt: { value: '60+', label: 'quant strategies' },
-          facts: ['exp-rbc-desk-qis'],
-        },
-        {
-          id: 'desk-aidi',
-          name: 'AI and Digital Innovation',
-          text: 'Audited 4,700+ internal AI agents into 12 centralized workflows, surfacing a 70% redundancy rate and trimming prompt logic to cut token waste.',
-          facts: ['exp-rbc-desk-aidi'],
-        },
-        {
-          id: 'desk-cross-asset',
-          name: 'Cross-Asset Sales',
-          text: "An AI editorial QA agent for the desk's flagship research brief, a global markets digest read by 1,500+ employees including executives. It reviews every issue before it sends.",
-          receipt: { value: '1,500+', label: 'readers of the brief' },
-          facts: ['exp-rbc-desk-cross-asset'],
-        },
-        {
-          id: 'desk-aag',
-          name: 'Alternative Asset Group',
-          text: 'An automated SEC filing pipeline that pulls 20 credit reports in 5 minutes, down from about an hour, comparing N-CSR and 13F filings into structured storage.',
-          receipt: { value: '20', label: 'credit reports in 5 minutes' },
-          facts: ['exp-rbc-desk-aag'],
-        },
-      ],
-    },
-    {
-      id: 'plate-mlh',
-      org: 'Major League Hacking',
-      role: 'Coach',
-      place: 'contract, hybrid',
-      dates: 'June 2025 to present',
-      start: '2025-06',
-      end: null,
-      status: 'active',
-      state: 'now',
-      node: null,
-      facts: ['exp-mlh-coach'],
-      debrief: [
-        item(
-          'mlh-debrief-ghw',
-          'Supports Global Hack Week live streams. Built a CSV to Google Sheet automation the MLH team ran weekly.',
-          ['exp-mlh-ghw'],
-        ),
-        item(
-          'mlh-debrief-hackcon',
-          'Gave a talk called "Planning for Chaos" at Hackcon 2026, MLH\'s annual conference for hackathon organizers.',
-          ['exp-mlh-hackcon'],
-        ),
-      ],
-    },
-  ],
+export const W = {
+  to: ui('w-to', 'to'),
+  present: ui('w-present', 'present'),
 }
 
-export const STACK = {
-  heading: ui('stack-heading', 'stack'),
-  rows: [
-    {
-      id: 'stack-languages',
-      label: 'languages',
-      value: 'Java (strongest), TypeScript, JavaScript, Python, C++, SQL',
-      facts: ['sk-languages'],
-    },
-    {
-      id: 'stack-frameworks',
-      label: 'frameworks',
-      value: 'React, Next.js, Node.js, Spring Boot, Tailwind, React Native and Expo',
-      facts: ['sk-frameworks'],
-    },
-    {
-      id: 'stack-cloud',
-      label: 'cloud and data',
-      value: 'AWS, PostgreSQL, Supabase, Firebase, MongoDB, Kafka, GraphQL, Git, Vercel',
-      facts: ['sk-cloud-data'],
-    },
-    {
-      id: 'stack-ai',
-      label: 'ai systems',
-      value: 'AI agents and multi-agent systems, built on the RBC desks and in my own system. Claude Code daily.',
-      facts: ['sk-ai'],
-    },
-    {
-      id: 'stack-cert',
-      label: 'certification',
-      value: 'AWS Certified Cloud Practitioner',
-      facts: ['edu-cert-aws-ccp'],
-    },
-  ],
-}
+export const EXPERIENCE = [
+  {
+    id: 'line-md7',
+    org: 'MD7',
+    details: 'Software Engineer (contract) · Allen, Texas · May 2026 to present.',
+    note: 'Executive dashboards shipped directly with the CTO.',
+    facts: ['exp-md7', 'exp-md7-public-work'],
+  },
+  {
+    id: 'line-jpm',
+    org: 'JPMorgan Chase',
+    details: 'Software Engineer Intern, CIB · Plano, Texas · June to August 2026.',
+    facts: ['exp-jpm-2026'],
+  },
+  {
+    id: 'line-rbc',
+    org: 'RBC Capital Markets',
+    details: 'Software Engineer Intern · New York · January to April 2026.',
+    note: 'Inaugural AidenEdge cohort, 1 of 10 interns, six trading-floor desks in four months.',
+    facts: ['exp-rbc'],
+  },
+  {
+    id: 'line-mlh',
+    org: 'Major League Hacking',
+    details: 'Coach · June 2025 to present.',
+    note: 'Spoke at Hackcon 2026, "Planning for Chaos".',
+    facts: ['exp-mlh-coach', 'exp-mlh-hackcon'],
+  },
+  {
+    id: 'line-hackutd',
+    org: 'HackUTD',
+    details: 'Tech team · 2025 to 2026.',
+    note: 'Co-maintained HackPortal, the registration, check-in and judging platform.',
+    facts: ['com-hackutd'],
+  },
+  {
+    id: 'line-utd',
+    org: 'UT Dallas',
+    details: 'B.S. Computer Science, in progress · AWS Certified Cloud Practitioner.',
+    facts: ['edu-degree', 'identity-student', 'edu-cert-aws-ccp'],
+  },
+]

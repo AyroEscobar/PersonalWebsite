@@ -1,96 +1,25 @@
 import { item, ui } from './item.js'
-import { AGE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
+import { EMAIL } from './constants.js'
 
 /*
-  Hero and the origin body (DESIGN.md 6.1 to 6.3).
-  v2 (Oct 4): the eyebrow takes a comma instead of the middle dot and the
-  deck names Viaere and MD7 in proper case (DESIGN.md 6.1). The hero email
-  pill reads "email me". No claim changed.
-  Final copy. Builders render it; they do not rewrite it. Changes go through
-  requests-<X>.md.
-
-  r1 (Oct 2): the deck is sans in LED with viaere linked to its build card;
-  a proof line names the two banks under it; a contact row follows. His
-  "level" paragraph moved from the hero into origin (triage T2, T7, T16).
-  r2: origin opens on the level paragraph, whose "that" answers the hero
-  caption about invisible systems right above it, then the pull quote and
-  the sign; his own origin paragraph sits with the off-hours line and the
-  vitals (triage U7). Words unchanged.
+  The hero (COPY.md 3.2). Builders render it; they do not rewrite it.
+  The theme line is the only theme line on the site: 11 px, lowercase, once,
+  in the hero's lower-left corner.
 */
 
 export const HERO = {
-  eyebrow: item('hero-eyebrow', 'software engineer, plano, texas', ['identity-role', 'identity-hometown']),
+  sceneAlt: ui('scene-alt', 'A figure pushing a huge boulder up a mountain slope at night, lit by neon.'),
+  eyebrow: item('hero-eyebrow', 'Software engineer · Plano, Texas', ['identity-role', 'identity-hometown']),
   name: item('hero-name', 'Ayro Escobar', ['identity-name']),
-  deck: item(
-    'hero-deck',
-    'cs at ut dallas. co-founder, engineering, at Viaere. software engineer at MD7.',
-    ['identity-student', 'ven-viaere-bio', 'exp-md7'],
-    { link: { phrase: 'Viaere', href: '#build-viaere' } },
+  role: item('hero-role', 'Co-founder and Founding Engineer at Viaere. Founder of Esvo Technologies.', ['ven-viaere-bio', 'ven-esvo']),
+  line: item(
+    'hero-line',
+    'I build software that has to hold up in the real world, for the hangar floor and the trading floor.',
+    ['ven-viaere-tagline', 'ven-viaere-bio', 'exp-rbc'],
   ),
-  proof: item(
-    'hero-proof',
-    'Software Engineer Intern at JPMorgan Chase, CIB, summer 2026. Before that, RBC Capital Markets in New York, the inaugural AidenEdge cohort, six trading-floor desks in four months.',
-    ['exp-jpm-2026', 'exp-rbc'],
-  ),
-  contactLabel: ui('hero-contact-label', 'reach me'),
-  contact: [
-    // v2 (DESIGN.md 6.1): a short pill label, so both pills sit on one line at 390. The
-    // address itself is written out in the contact card, beside its copy button.
-    { id: 'hero-contact-email', label: 'email me', href: `mailto:${EMAIL}`, facts: ['ln-email'] },
-    { id: 'hero-contact-linkedin', label: 'LinkedIn', href: LINKEDIN, facts: ['ln-linkedin'] },
-    { id: 'hero-contact-github', label: 'GitHub', href: GITHUB, facts: ['ln-github'] },
-    { id: 'hero-contact-work', label: 'see the work', href: '#work', ui: true },
-  ],
-  lead: item(
-    'hero-lead',
-    "the hunger came from realizing how much of the world runs on invisible systems. somebody wrote the code that settles every trade, gets your food to the door, routes messages around the world, and tells an ambulance which street to take to your house. that's the part i fell in love with.",
-    ['voice-invisible-systems'],
-    { verbatim: 'voice-invisible-systems' },
-  ),
-}
-
-export const ORIGIN = {
-  level: item(
-    'origin-level',
-    "i'm trying to be the kind of engineer who can build that. work that quietly holds itself up, doesn't need a human in the loop, doesn't sleep when i do. that's the level i'm aiming at.",
-    ['voice-level'],
-    { verbatim: 'voice-level' },
-  ),
-  paragraph: item(
-    'origin-paragraph',
-    `${AGE}, in cs at ut dallas. trying to live this all the way out. take the engineering as far as i can, build as much as i can, stay curious about anything that gets made. mostly that's software, but the rest counts too. just trying to be a good engineer and put together work i'd be proud to show.`,
-    ['voice-hero', 'identity-age'],
-    { verbatim: 'voice-hero' },
-  ),
-  pull: item(
-    'origin-pull',
-    'I am trying to build a life where my family never has to worry about money, and ship a few things that outlast me along the way. That sentence is the whole map. Every role I take and every hour I spend gets weighed against it.',
-    ['voice-the-map'],
-    { verbatim: 'voice-the-map' },
-  ),
-  closer: item(
-    'origin-closer',
-    'The cost of doing the work is doing the work. There is no shortcut.',
-    ['voice-no-shortcut'],
-    { verbatim: 'voice-no-shortcut' },
-  ),
-  offHours: item(
-    'origin-off-hours',
-    "music is always on while i work. when i'm burnt out i recover with minecraft videos, anime, or the distractible podcast.",
-    ['identity-interests'],
-  ),
-  vitals: [
-    { id: 'vital-base', label: 'base', value: 'Plano, Texas', facts: ['identity-hometown'] },
-    {
-      id: 'vital-school',
-      label: 'school',
-      value: 'B.S. Computer Science, The University of Texas at Dallas',
-      facts: ['edu-degree'],
-    },
-    { id: 'vital-languages', label: 'languages', value: 'English, Spanish', facts: ['identity-languages'] },
-    { id: 'vital-status', label: 'status', value: 'US citizen', facts: ['identity-citizenship'] },
-  ],
-  photoAlt: item('origin-photo-alt', 'Ayro Escobar standing in a snowy park', ['identity-name']),
+  email: { id: 'hero-email', label: 'email me', href: `mailto:${EMAIL}`, facts: ['ln-email'] },
+  work: ui('hero-work', 'see the work', { href: '#check-out' }),
+  theme: item('hero-theme', 'uphill, on purpose.', ['voice-typing-lines', 'voice-no-shortcut']),
 }
 
 export const SKIP = ui('skip-link', 'skip to content')

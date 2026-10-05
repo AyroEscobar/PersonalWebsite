@@ -1,39 +1,15 @@
 import { ui } from './item.js'
 
 /*
-  The six sections, in scroll order (DESIGN.md 6). Section ids are stable:
-  the lens nav, deep links and the prerender contract all key off them.
-
-  label    the word in the lens nav
-  heading  the h2, when it differs from the label (signal, labeled contact)
+  The four sections with a nav entry, in scroll order (COPY.md 3.7, 6.6). The
+  hero is #top and has no nav entry. Section ids are stable: the nav, deep
+  links, the scroll anchors and the prerender contract all key off them.
 */
 export const SECTIONS = [
-  {
-    id: 'origin',
-    label: ui('stop-origin', 'origin'),
-  },
-  {
-    id: 'now',
-    label: ui('stop-now', 'now'),
-  },
-  {
-    id: 'work',
-    label: ui('stop-work', 'work'),
-  },
-  {
-    id: 'builds',
-    label: ui('stop-builds', 'builds'),
-  },
-  {
-    id: 'crew',
-    label: ui('stop-crew', 'crew'),
-  },
-  {
-    id: 'signal',
-    // Navigation says what is there; the section keeps its name (r1 T15).
-    label: ui('stop-signal', 'contact'),
-    heading: ui('stop-signal-heading', 'signal'),
-  },
+  { id: 'check-out', label: ui('stop-check-out', 'check out') },
+  { id: 'experience', label: ui('stop-experience', 'experience') },
+  { id: 'stack', label: ui('stop-stack', 'stack') },
+  { id: 'contact', label: ui('stop-contact', 'contact') },
 ]
 
 export const SECTION_IDS = SECTIONS.map((s) => s.id)
