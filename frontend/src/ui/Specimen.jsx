@@ -5,10 +5,11 @@ import { BUILDS } from '../content/builds.js'
 /*
   <Specimen kind="viaere" /> (DESIGN.md 5.5, 6.6): the small working drawing
   above the title of a wide build card. Each one is its own lazy chunk
-  (src/sections/specimens/*), mounted as it nears the screen. Until then a
-  poster holds exactly its box (the same stage and bar), with the
-  illustration's summary as its accessible name, so nothing shifts when it
-  arrives and nothing is lost if it never does.
+  (src/sections/specimens/*, under 2 KB), mounted at the first idle moment
+  after load, so it is there before a reader (or a keyboard) reaches it.
+  Until then a poster holds exactly its box (the same stage and bar), with
+  the illustration's summary as its accessible name, so nothing shifts when
+  it arrives and nothing is lost if it never does.
 */
 const LOAD = {
   viaere: () => import('../sections/specimens/Viaere.jsx'),
@@ -34,6 +35,6 @@ export default function Specimen({ kind, className = '' }) {
   const load = LOAD[kind]
   if (!spec || !load) return null
   return (
-    <DeferredMount load={load} when="visible" rootMargin="400px 0px" fallback={<Poster spec={spec} />} props={{ spec }} className={`spec-wrap spec-wrap--${kind} ${className}`.trim()} />
+    <DeferredMount load={load} when="load" fallback={<Poster spec={spec} />} props={{ spec }} className={`spec-wrap spec-wrap--${kind} ${className}`.trim()} />
   )
 }
