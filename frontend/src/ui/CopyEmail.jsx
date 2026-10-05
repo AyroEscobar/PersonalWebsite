@@ -1,48 +1,55 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Button from './Button.jsx'
-import Tooltip from './Tooltip.jsx'
-import { Copy } from './icons.jsx'
-import { toast } from './toast-bus.js'
 import { EMAIL } from '../content/constants.js'
 import { SIGNAL } from '../content/signal.js'
-import { W } from '../content/sections-ui.js'
 
 /*
-  Copy the email address (DESIGN.md 5.13): the primary pill in the contact
-  card. While the clipboard write runs the label reads "copying email"; then
-  the toast says "copied". If the clipboard is blocked, the address on the
-  page is selected and the toast says how to copy it.
+  <CopyEmail> (DESIGN.md 5.11): the address as a cyan 20/600 mailto link with an underline that
+  draws in on hover, a small glass "copy" pill beside it (aria-label "copy email"), and a
+  role="status" aria-live="polite" span that reads "email copied" for 1.8 s while the pill reads
+  "copied". Clipboard API with the textarea fallback. States: rest · hover · focus · copied.
 */
-export default function CopyEmail({ addressId, state, busy: forcedBusy = false, tipOpen = false }) {
-  const [busy, setBusy] = useState(false)
+export default function CopyEmail({ copied: forcedCopied, state, idPrefix = 'contact' }) {
+  const [copied, setCopied] = useState(false)
+  const timer = useRef(0)
+  const kit = forcedCopied !== undefined
+  const done = kit ? !!forcedCopied : copied
+  useEffect(() => () => window.clearTimeout(timer.current), [])
 
   const copy = async () => {
-    setBusy(true)
-    let ok = false
     try {
       await navigator.clipboard.writeText(EMAIL)
-      ok = true
     } catch {
-      ok = false
+      const t = document.createElement('textarea')
+      t.value = EMAIL
+      t.setAttribute('readonly', '')
+      t.style.position = 'fixed'
+      t.style.opacity = '0'
+      document.body.appendChild(t)
+      t.select()
+      try {
+        document.execCommand('copy')
+      } catch {
+        /* nothing more to try */
+      }
+      t.remove()
     }
-    setBusy(false)
-    if (ok) return toast(SIGNAL.copied.text)
-    const el = addressId && document.getElementById(addressId)
-    if (el) {
-      const r = document.createRange()
-      r.selectNodeContents(el)
-      const sel = window.getSelection()
-      sel.removeAllRanges()
-      sel.addRange(r)
-    }
-    toast(W.copySelectedStatus.text)
+    setCopied(true)
+    window.clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => setCopied(false), 1800)
   }
 
   return (
-    <Tooltip label={SIGNAL.copyTip.text} open={tipOpen}>
-      <Button variant="primary" icon={Copy} busy={busy || forcedBusy} busyLabel={SIGNAL.copyingEmail.text} state={state} onClick={copy}>
-        {SIGNAL.copyEmail.text}
+    <div className="email-row">
+      <a id={`${idPrefix}-email`} className={['email', state && `is-${state}`].filter(Boolean).join(' ')} href={SIGNAL.email.mailto}>
+        {SIGNAL.email.text}
+      </a>
+      <Button variant="glass" size="sm" aria-label={SIGNAL.copyEmail.text} onClick={kit ? undefined : copy} state={state} tabIndex={kit ? -1 : undefined}>
+        {done ? SIGNAL.copied.text : SIGNAL.copy.text}
       </Button>
-    </Tooltip>
+      <span className="copied" role="status" aria-live="polite">
+        {done ? SIGNAL.copiedStatus.text : ''}
+      </span>
+    </div>
   )
 }

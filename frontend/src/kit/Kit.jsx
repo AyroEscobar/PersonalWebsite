@@ -1,470 +1,151 @@
-import Field from '../field/Field.jsx'
+import Stage from '../hero/Stage.jsx'
+import Poster from '../hero/Poster.jsx'
 import Glass from '../glass/Glass.jsx'
-import Masthead from '../ui/Masthead.jsx'
-import QuietSwitch from '../ui/QuietSwitch.jsx'
-import LensNav from '../ui/LensNav.jsx'
-import LensLine from '../ui/LensLine.jsx'
+import Wordmark from '../ui/Wordmark.jsx'
+import NavPill from '../ui/NavPill.jsx'
 import Button from '../ui/Button.jsx'
 import Chip from '../ui/Chip.jsx'
-import BuildCard from '../ui/BuildCard.jsx'
-import NowList from '../ui/NowList.jsx'
-import WorkPlate from '../ui/WorkPlate.jsx'
-import Stack from '../ui/Stack.jsx'
-import Receipt from '../ui/Receipt.jsx'
-import LinkRow from '../ui/LinkRow.jsx'
+import Panel from '../ui/Panel.jsx'
+import ProjectCard from '../ui/ProjectCard.jsx'
+import ExperienceList from '../ui/ExperienceList.jsx'
+import QuietSwitch from '../ui/QuietSwitch.jsx'
 import CopyEmail from '../ui/CopyEmail.jsx'
-import ToastRegion, { ToastView } from '../ui/Toast.jsx'
-import SectionHead from '../ui/SectionHead.jsx'
-import ContactCard from '../ui/ContactCard.jsx'
-import ReadingSentence from '../ui/ReadingSentence.jsx'
-import ProfileCard from '../ui/ProfileCard.jsx'
-import Specimen from '../ui/Specimen.jsx'
+import LinkRow from '../ui/LinkRow.jsx'
+import SceneControls from '../ui/SceneControls.jsx'
+import Eyebrow from '../ui/Eyebrow.jsx'
 import Footer from '../chrome/Footer.jsx'
-import { ArrowDown, ArrowOut, Copy, Mail } from '../ui/icons.jsx'
 import { KIT } from '../content/kit.js'
-import { SKIP, HERO, ORIGIN } from '../content/identity.js'
-import { BUILDS } from '../content/builds.js'
-import { WORK } from '../content/work.js'
-import { NOW } from '../content/now.js'
+import { HERO, SKIP } from '../content/identity.js'
+import { PROJECTS } from '../content/projects.js'
+import { EXPERIENCE } from '../content/work.js'
+import { STACK } from '../content/stack.js'
+import { NOT_FOUND } from '../content/meta.js'
 import { SIGNAL } from '../content/signal.js'
-import { sectionById } from '../content/sections.js'
 
 /*
-  The kit (/kit, DESIGN.md 5.15). Every component in every state on one
-  page, with the production CSS and the real content modules. Rows are
-  variants, columns are states, each cell labelled (prototype b's matrix).
-  The forcing classes (.is-hover, .is-focus, .is-active, .is-loading) exist
-  only for this page; forced-state specimens are inert so the keyboard walk
-  only meets live controls. The fallback row uses .sim-* classes and says
-  SIMULATED. Each group sits over its own field, because glass needs
-  something to bend.
+  The kit (/kit, DESIGN.md 5.14). Every component in every state over the live scene (the
+  still poster in the still tier), with the production CSS and the real content modules. The
+  forcing classes (.is-hover, .is-focus, .is-press) exist only for this page; forced-state
+  specimens are inert so the keyboard walk only meets live controls. Fallbacks use .sim-*
+  classes and say "simulated".
 */
-
 const S = KIT.states
-const card = (id) => BUILDS.cards.find((c) => c.id === id)
-const plate = (id) => WORK.plates.find((p) => p.id === id)
-const B = (c, d, x, y, a) => ({ c, d, x, y, a, dm: d * 1.5, xm: x, ym: y })
 
-// The material line: his words, from ORIGIN.level, behind the glass.
-const LEVEL = ORIGIN.level.text
-const HOLDS = 'work that quietly holds itself up'
-const holds = LEVEL.includes(HOLDS) ? HOLDS : LEVEL.split('.')[0]
-const LINE2 = 'where my family never has'
-const line2 = ORIGIN.pull.text.includes(LINE2) ? LINE2 : ''
-// the whole-map sentence, the hero's first sentence, set as the hero sets it
-const END = 'along the way.'
-const SENTENCE = ORIGIN.pull.text.slice(0, ORIGIN.pull.text.indexOf(END) + END.length)
-
-// Each group's light sits behind its glass: two to four deep blobs, pulled in under the surfaces.
-const FIELDS = {
-  // the clear swatch is the hero's lens, so it sits over the hero's lighter peach, not a deep blob
-  material: [{ ...B('peach', 50, 12, 55), dm: 80, xm: 20, ym: 40 }, { ...B('butter-d', 46, 40, 35), xm: 92, ym: 30 }, { ...B('sky-d', 50, 66, 60), xm: 10, ym: 80 }, { ...B('lilac-d', 48, 92, 45), xm: 90, ym: 80 }],
-  // the lens is the hero's: it reads over the hero's own lighter field, never a deep blob (saturate 200% turns one neon)
-  nav: [{ ...B('peach', 52, 14, 30), ym: 14 }, { ...B('butter', 46, 50, 20), xm: 100, ym: 40 }, B('sky', 52, 86, 40), { ...B('rose', 44, 40, 70, 0.6), ym: 50 }, B('lilac-d', 40, 30, 96, 0.7)],
-  buttons: [B('sky-d', 50, 14, 55), B('peach-d', 46, 46, 45), B('lilac-d', 50, 80, 60), B('butter-d', 36, 100, 20, 0.8)],
-  chips: [B('butter-d', 50, 22, 45), B('lilac-d', 48, 72, 45), B('peach-d', 36, 96, 90, 0.85)],
-  cards: [B('peach-d', 54, 8, 30), B('butter-d', 46, 40, 20), B('sky-d', 54, 70, 30), B('lilac-d', 50, 20, 80), B('rose-d', 48, 86, 80)],
-  lists: [B('lilac-d', 54, 14, 20), B('sky-d', 50, 46, 60), B('peach-d', 52, 82, 30), B('butter-d', 46, 76, 85), B('rose-d', 44, 12, 85)],
-  bits: [B('sky-d', 50, 14, 45), B('butter-d', 46, 46, 40), B('rose-d', 48, 80, 50)],
-  contact: [B('peach-d', 56, 22, 50), B('butter-d', 50, 52, 46), B('rose-d', 44, 80, 60, 0.85)],
-  fallbacks: [B('sky-d', 46, 12, 50), B('peach-d', 44, 38, 40), B('lilac-d', 46, 64, 60), B('butter-d', 44, 90, 40)],
-  tokens: [B('butter-d', 44, 20, 40, 0.8), B('sky-d', 44, 80, 60, 0.8)],
-}
-
-function Group({ id, title, field, sim = false, children, className = '' }) {
+function Group({ id, title, sim = false, bare = false, children }) {
   return (
-    <section className={`kit-group ${className}`.trim()} aria-labelledby={`kit-${id}`}>
-      {field && <Field blobs={FIELDS[field]} />}
-      <div className="page on-field">
-        <h2 id={`kit-${id}`} className="kit-label">
-          {title}
-          {sim && <span className="kit-sim">{KIT.simulated.text}</span>}
-        </h2>
-        {children}
-      </div>
+    <section className={`kit-group ${bare ? 'kit-group--bare' : ''}`.trim()} aria-labelledby={`kit-${id}`}>
+      {bare ? (
+        <>
+          <h2 id={`kit-${id}`} className="kit-h kit-h--bare">
+            {title}
+            {sim && <span className="kit-sim">{KIT.simulated.text}</span>}
+          </h2>
+          {children}
+        </>
+      ) : (
+        <Panel reveal={false} className="kit-panel">
+          <h2 id={`kit-${id}`} className="kit-h">
+            {title}
+            {sim && <span className="kit-sim">{KIT.simulated.text}</span>}
+          </h2>
+          {children}
+        </Panel>
+      )}
     </section>
   )
 }
 
-const Cap = ({ children }) => <p className="kit-cap">{children}</p>
+const Cell = ({ label, children, className = '' }) => (
+  <figure className={`kit-cell ${className}`.trim()}>
+    {children}
+    <figcaption className="kit-cap">{label}</figcaption>
+  </figure>
+)
 
-function Cell({ label, children, className = '' }) {
-  return (
-    <div className={`kit-cell ${className}`.trim()}>
-      <div className="kit-specimen">{children}</div>
-      <Cap>{label}</Cap>
-    </div>
-  )
-}
-
-/* ---------- buttons: 3 variants by 6 states ---------- */
-const BTN_STATES = [
-  ['rest', {}],
-  ['hover', { state: 'hover' }],
-  ['focus', { state: 'focus' }],
-  ['active', { state: 'active' }],
-  ['disabled', { disabled: true }],
-  ['loading', { busy: true }],
+const COLOURS = [
+  ['void', '#05060D', ''],
+  ['plate', '#0B0E18', ''],
+  ['ink', '#F6FBFF', '18.6 : 1'],
+  ['ink-2', '#DFE6F3', '15.2 : 1'],
+  ['cyan', '#19E6FF', '13.3 : 1'],
+  ['magenta', '#FF3DBB', KIT.tokens.sceneRim.text],
+  ['sky', '#12324A', KIT.tokens.sceneOnly.text],
+  ['dawn', '#A9D8F0', KIT.tokens.sceneOnly.text],
 ]
-const BTN_VARIANTS = [
-  ['primary', { icon: Copy, label: SIGNAL.copyEmail.text, busyLabel: SIGNAL.copyingEmail.text }],
-  ['glass', { icon: ArrowOut, label: KIT.sample.button.text, busyLabel: KIT.sample.buttonBusy.text }],
-  ['ghost', { icon: ArrowOut, label: KIT.sample.ghost.text, busyLabel: KIT.sample.ghostBusy.text }],
+const TYPE = [
+  ['name', 'name'],
+  ['section', 'sec-title'],
+  ['card-name', 'card-name'],
+  ['role', 'role'],
+  ['lead', 'oneline'],
+  ['body', 'card-body'],
+  ['line', 'exp-sample'],
+  ['btn', 'btn-sample'],
+  ['chip', 'chip-sample'],
+  ['eyebrow', 'eyebrow'],
+  ['label', 'theme-sample'],
+  ['mono', 'mono-sample'],
 ]
-
-function ButtonMatrix() {
-  return (
-    <div className="kit-matrix" inert>
-      <div className="kit-mrow kit-mhead" aria-hidden="true">
-        <span />
-        {BTN_STATES.map(([k]) => (
-          <span key={k} className="kit-cap">
-            {S[k].text}
-          </span>
-        ))}
-      </div>
-      {BTN_VARIANTS.map(([v, p]) => (
-        <div key={v} className="kit-mrow">
-          <span className="kit-mname">{KIT.variants[v].text}</span>
-          {BTN_STATES.map(([k, st]) => (
-            <div key={k} className="kit-mcell">
-              <Button variant={v} icon={p.icon} busyLabel={p.busyLabel} {...st}>
-                {p.label}
-              </Button>
-              <span className="kit-cap kit-mcap">{S[k].text}</span>
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-/* ---------- the fallbacks, side by side ---------- */
-function FallbackSpecimen() {
-  return (
-    <div className="kit-fb-stack">
-      <p className="sentence kit-fb-line">
-        <LensLine>{holds.split(' ').slice(0, 3).join(' ')}</LensLine>
-      </p>
-      <Glass tier="sheet" className="kit-fb-sheet">
-        <div className="chips">
-          <Chip status="now" />
-          <Chip>{BUILDS.cards[0].meta.split(' · ')[1]}</Chip>
-        </div>
-        <p className="card-body">{NOW.mission.text}</p>
-      </Glass>
-      <div className="btn-group">
-        <Button variant="primary" icon={Mail}>
-          {SIGNAL.emailLabel.text}
-        </Button>
-        <Button variant="glass" icon={ArrowDown}>
-          {KIT.sample.work.text}
-        </Button>
-      </div>
-    </div>
-  )
-}
 
 export default function Kit() {
-  const pool = card('build-pool')
-  const rbc = plate('plate-rbc')
+  const esvo = PROJECTS[0]
+  const viaere = PROJECTS[1]
   return (
     <>
       <a className="skip-link" href="#main">
         {SKIP.text}
       </a>
-      <main id="main" tabIndex={-1} className="kit">
-        {/* ---------- header ---------- */}
-        <header className="kit-top">
-          <Field blobs={[B('peach', 60, 14, 10), B('butter', 50, 50, -10), B('sky', 56, 92, 30), B('rose', 40, 46, 70, 0.45)]} className="field--hero" />
-          <div className="page on-field">
-            <Masthead />
-            <div className="kit-intro">
-              <h1 className="kit-word voice">{KIT.word.text}</h1>
-              <p className="kit-line voice">{KIT.line.text}</p>
-              <p className="kit-back">
-                <a href="/">{KIT.back.text}</a>
-              </p>
-            </div>
-          </div>
+      <Stage />
+      <header className="top">
+        <Wordmark />
+        <NavPill />
+      </header>
+      <main id="main" tabIndex={-1} className="kit-main">
+        <header className="kit-head">
+          <a className="kit-back" href="/">
+            {KIT.back.text}
+          </a>
+          <h1 className="kit-word">{KIT.word.text}</h1>
+          <p className="oneline">{KIT.line.text}</p>
         </header>
 
-        {/* ---------- the material ---------- */}
-        <Group id="material" title={KIT.groups.material.text} field="material">
-          <div className="kit-material">
-            <p className="kit-material-words voice" aria-hidden="true">
-              {holds}
-            </p>
-            <div className="kit-swatches">
-              <div className="kit-swatch-cell">
-                <Glass tier="clear" lens="lens" className="kit-swatch kit-swatch--clear" />
-                <Cap>{KIT.material.clear.text}</Cap>
-              </div>
-              <div className="kit-swatch-cell">
-                <Glass tier="thick" lens="card" spec className="kit-swatch" />
-                <Cap>{KIT.material.thick.text}</Cap>
-              </div>
-              <div className="kit-swatch-cell">
-                <Glass tier="sheet" spec className="kit-swatch" />
-                <Cap>{KIT.material.sheet.text}</Cap>
-              </div>
-              <div className="kit-swatch-cell">
-                <Glass tier="clear" lens="nav" className="kit-swatch kit-swatch--bar lens-nav is-pill" />
-                <Cap>{KIT.material.bar.text}</Cap>
-              </div>
-            </div>
-          </div>
-        </Group>
-
-        {/* ---------- 5.1 the lens nav ---------- */}
-        <Group id="nav" title={KIT.groups.nav.text} field="nav">
-          <div className="kit-nav">
-            <Cell label={KIT.nav.lens.text} className="kit-cell--lens">
-              <p className="sentence kit-lens-sentence">{line2 && <LensLine>{line2}</LensLine>}</p>
-            </Cell>
-            <div className="kit-nav-row">
-              <Cell label={KIT.nav.pill.text}>
-                <LensNav state="pill" active="now" aria-label={KIT.nav.pill.text} />
-              </Cell>
-              <Cell label={KIT.nav.states.text}>
-                <div inert>
-                  <LensNav state="pill" active="origin" states={{ now: 'hover', work: 'focus', builds: 'active' }} aria-label={KIT.nav.states.text} />
-                </div>
-              </Cell>
-              <Cell label={KIT.nav.dock.text} className="kit-cell--dock">
-                <LensNav state="dock" active="work" aria-label={KIT.nav.dock.text} />
-              </Cell>
-            </div>
-          </div>
-        </Group>
-
-        {/* ---------- the reading sentence (1.1, 6.1) ---------- */}
-        <Group id="reading" title={KIT.groups.reading.text} field="nav">
-          <Cell label={KIT.reading.standIn.text} className="kit-cell--reading">
-            <ReadingSentence className="kit-reading" text={SENTENCE} d={[6, 11, 16, 21]} m={[4, 9, 13, 17, 21]} />
-          </Cell>
-        </Group>
-
-        {/* ---------- 5.2 masthead and the quiet switch ---------- */}
-        <Group id="masthead" title={KIT.groups.masthead.text} field="chips">
-          <div className="kit-row kit-row--masthead">
-            <div className="kit-mast">
-              <Masthead quiet={false} />
-            </div>
-            <div className="kit-cells" inert>
-              <Cell label={S.rest.text}>
-                <QuietSwitch state="" pressed={false} tip={false} />
-              </Cell>
-              <Cell label={S.hover.text}>
-                <QuietSwitch state="hover" pressed={false} tip={false} />
-              </Cell>
-              <Cell label={S.focus.text}>
-                <QuietSwitch state="focus" pressed={false} tip={false} />
-              </Cell>
-              <Cell label={S.active.text}>
-                <QuietSwitch state="active" pressed={false} tip={false} />
-              </Cell>
-              <Cell label={S.pressed.text}>
-                <QuietSwitch state="" pressed tip={false} />
-              </Cell>
-            </div>
-          </div>
-        </Group>
-
-        {/* ---------- 5.3 buttons ---------- */}
-        <Group id="buttons" title={KIT.groups.buttons.text} field="buttons">
-          <ButtonMatrix />
-          <div className="kit-spill" inert>
-            <div className="btn-group">
-              <Button variant="glass" icon={ArrowDown} state="active" style={{ '--mx': '78%', '--my': '60%' }}>
-                {KIT.sample.work.text}
-              </Button>
-              <Button variant="glass" icon={ArrowOut} className="is-spill" style={{ '--mx': '-14px', '--my': '24px' }}>
-                {KIT.sample.button.text}
-              </Button>
-            </div>
-            <Cap>{S.spill.text}</Cap>
-          </div>
-        </Group>
-
-        {/* ---------- 5.4 chips, 5.8 receipts, 5.12 section head ---------- */}
-        <Group id="chips" title={KIT.groups.chips.text} field="chips">
-          <div className="kit-row">
-            <Glass tier="sheet" className="kit-panel">
-              <div className="chips">
-                <Chip status="now" />
-                <Chip status="past" />
-              </div>
-              <Cap>{KIT.chips.status.text}</Cap>
-              <div className="chips">
-                <Chip>{BUILDS.cards[1].meta.split(' · ')[1]}</Chip>
-                <Chip>{BUILDS.cards[1].meta.split(' · ')[0]}</Chip>
-                <Chip>{BUILDS.cards[2].meta}</Chip>
-                <Chip word>{BUILDS.cards[0].meta.split(' · ')[0]}</Chip>
-              </div>
-              <Cap>{KIT.chips.plain.text}</Cap>
-            </Glass>
-            <div>
-              <h3 className="kit-label kit-label--sub">{KIT.groups.head.text}</h3>
-              <SectionHead word={sectionById('now').label.text} line={NOW.mission.text} as="p" />
-              <Cap>{KIT.head.inline.text}</Cap>
-              <div className="kit-rail-demo">
-                <SectionHead word={sectionById('work').label.text} line={WORK.intro.text} as="p" rail />
-              </div>
-              <Cap>{KIT.head.rail.text}</Cap>
-            </div>
-          </div>
-        </Group>
-
-        <Group id="receipts" title={KIT.groups.receipt.text} field="bits">
-          <Glass tier="sheet" className="kit-panel kit-receipts">
-            <Receipt value={pool.receipt.value} label={pool.receipt.label} facts={pool.facts} />
-            <Receipt value={rbc.receipt.value} label={rbc.receipt.label} facts={rbc.facts} />
-            {rbc.desks
-              .filter((d) => d.receipt)
-              .map((d) => (
-                <Receipt key={d.id} value={d.receipt.value} label={d.receipt.label} facts={d.facts} />
-              ))}
-          </Glass>
-        </Group>
-
-        {/* ---------- 5.5 card ---------- */}
-        <Group id="card" title={KIT.groups.card.text} field="cards">
-          <div className="kit-cards">
-            <Cell label={`${KIT.card.glass.text}, ${S.rest.text}, ${KIT.card.specimen.text}`}>
-              <BuildCard card={card('build-viaere')}>
-                <Specimen kind="viaere" />
-              </BuildCard>
-            </Cell>
-            <Cell label={`${KIT.card.glass.text}, ${S.hover.text}`}>
-              <BuildCard card={card('build-neetcode')} state="hover" />
-            </Cell>
-            <Cell label={`${KIT.card.focus.text}, ${KIT.card.specimen.text}`}>
-              <BuildCard card={card('build-pool')} state="focus">
-                <Specimen kind="circle-method" />
-              </BuildCard>
-            </Cell>
-            <Cell label={KIT.card.base.text}>
-              <BuildCard card={card('build-gaia')} base />
-            </Cell>
-          </div>
-        </Group>
-
-        {/* ---------- 5.6 now, 5.7 plates ---------- */}
-        <Group id="lists" title={`${KIT.groups.now.text}, ${KIT.groups.plate.text}`} field="lists">
-          <div className="kit-lists">
-            <div className="kit-col">
-              <NowList />
-              <WorkPlate plate={plate('plate-jpm')} />
-              <Stack />
-              <ProfileCard />
-              <Cap>{KIT.groups.profile.text}</Cap>
-            </div>
-            <div className="kit-col">
-              <WorkPlate plate={rbc} open />
-              <Cap>{`${WORK.desksLabel.text}, ${S.open.text}`}</Cap>
-            </div>
-          </div>
-        </Group>
-
-        {/* ---------- 5.9 link row, 5.10 tooltip, 5.11 toast ---------- */}
-        <Group id="bits" title={`${KIT.groups.linkrow.text}, ${KIT.groups.tooltip.text}, ${KIT.groups.toast.text}`} field="bits">
-          <div className="kit-bits">
-            <Cell label={S.rest.text}>
-              <LinkRow label={`${KIT.groups.linkrow.text}, ${S.rest.text}`} />
-            </Cell>
-            <Cell label={KIT.linkrow.legend.text}>
-              <div inert>
-                <LinkRow states={{ 'channel-github': 'hover', 'channel-linkedin': 'focus', 'channel-instagram': 'active' }} />
-              </div>
-            </Cell>
-            <Cell label={`${KIT.groups.tooltip.text}, ${S.shown.text}`} className="kit-cell--tip">
-              <div inert>
-                <CopyEmail tipOpen />
-              </div>
-            </Cell>
-            <Cell label={`${KIT.groups.toast.text}, ${S.shown.text}`}>
-              <ToastView text={SIGNAL.copied.text} />
-            </Cell>
-          </div>
-        </Group>
-
-        {/* ---------- 5.13 contact card ---------- */}
-        <Group id="contact" title={KIT.groups.contact.text} field="contact">
-          <div className="kit-contacts">
-            <Cell label={KIT.contact.narrow.text}>
-              <ContactCard idPrefix="kit-contact" />
-            </Cell>
-            <Cell label={KIT.contact.wide.text}>
-              <ContactCard idPrefix="kit-contact-wide" wide />
-            </Cell>
-          </div>
-        </Group>
-
-        {/* ---------- 4.4 fallbacks ---------- */}
-        <Group id="fallbacks" title={KIT.groups.fallbacks.text} field="fallbacks" sim>
-          <div className="kit-fallbacks" inert>
-            {[
-              ['sim-noblur', KIT.fallbacks.noblur.text],
-              ['sim-reduced', KIT.fallbacks.reduced.text],
-              ['sim-contrast', KIT.fallbacks.contrast.text],
-              ['sim-forced', KIT.fallbacks.forced.text],
-            ].map(([cls, label]) => (
-              <div key={cls} className="kit-fb">
-                <div className={cls}>
-                  <FallbackSpecimen />
-                </div>
-                <Cap>{label}</Cap>
-              </div>
+        {/* 1. tokens */}
+        <Group id="tokens" title={KIT.groups.tokens.text}>
+          <p className="kit-sub">{KIT.tokens.color.text}</p>
+          <ul className="kit-swatches">
+            {COLOURS.map(([t, hex, note]) => (
+              <li key={t}>
+                <span className="kit-swatch" style={{ background: `var(--${t})` }} />
+                <span className="kit-cap">
+                  {t} <span className="tnum">{hex}</span>
+                  {note && <> · {note}</>}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="kit-sub">{KIT.tokens.type.text}</p>
+          <div className="kit-type">
+            {TYPE.map(([t, cls]) => (
+              <p key={t} className={`${cls} kit-type-row`} data-token={`--t-${t}`}>
+                <span className="kit-cap kit-type-tag">{`--t-${t}`}</span>
+                {HERO.name.text}
+              </p>
             ))}
           </div>
-        </Group>
-
-        {/* ---------- tokens ---------- */}
-        <Group id="tokens" title={KIT.groups.tokens.text} field="tokens">
-          <div className="kit-tokens">
+          <div className="kit-row kit-row--tokens">
             <div>
-              <h3 className="kit-label kit-label--sub">{KIT.tokens.color.text}</h3>
-              <ul className="kit-swatchlist">
-                {['base', 'ink', 'ink-2', 'ink-3', 'accent', 'ok'].map((t) => (
-                  <li key={t}>
-                    <span className="kit-chipcolor" style={{ background: `var(--${t})` }} />
-                    <span className="kit-cap">{t}</span>
-                  </li>
-                ))}
-              </ul>
-              <h3 className="kit-label kit-label--sub">{KIT.tokens.field.text}</h3>
-              <ul className="kit-swatchlist">
-                {['peach', 'butter', 'sky', 'lilac', 'rose', 'peach-d', 'butter-d', 'sky-d', 'lilac-d', 'rose-d'].map((t) => (
-                  <li key={t}>
-                    <span className="kit-chipcolor kit-chipcolor--field" style={{ background: `radial-gradient(closest-side, var(--f-${t}), transparent 96%)` }} />
-                    <span className="kit-cap">{t}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="kit-label kit-label--sub">{KIT.tokens.type.text}</h3>
-              <p className="kit-type-serif voice">{KIT.tokens.serifSample.text}</p>
-              <p className="kit-type-sans">{KIT.tokens.sansSample.text}</p>
-              <ul className="kit-scale">
-                {['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'].map((t) => (
-                  <li key={t} style={{ fontSize: `var(--t-${t})` }}>
-                    <span className="kit-cap">{t}</span> {HERO.name.text}
-                  </li>
-                ))}
-              </ul>
-              <h3 className="kit-label kit-label--sub">{KIT.tokens.radius.text}</h3>
+              <p className="kit-sub">{KIT.tokens.radius.text}</p>
               <ul className="kit-radii">
-                {['1', '2', '3', '4', '5', 'full'].map((r) => (
+                {['panel', 'card', 'chip', 'inner', 'pill'].map((r) => (
                   <li key={r}>
                     <span className="kit-radius" style={{ borderRadius: `var(--r-${r})` }} />
                     <span className="kit-cap">{r}</span>
                   </li>
                 ))}
               </ul>
-              <h3 className="kit-label kit-label--sub">{KIT.tokens.space.text}</h3>
+            </div>
+            <div>
+              <p className="kit-sub">{KIT.tokens.space.text}</p>
               <ul className="kit-space">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
                   <li key={n}>
@@ -474,19 +155,240 @@ export default function Kit() {
                 ))}
               </ul>
             </div>
+            <div>
+              <p className="kit-sub">{KIT.tokens.elevation.text}</p>
+              <ul className="kit-elev">
+                {['rest', 'raised', 'inner'].map((e) => (
+                  <li key={e}>
+                    <span className="kit-elev-box" style={{ boxShadow: `var(--e-${e})` }} />
+                    <span className="kit-cap">{e}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </Group>
 
-        <section className="kit-group kit-group--footer" aria-labelledby="kit-footer">
-          <div className="page">
-            <h2 id="kit-footer" className="kit-label">
-              {KIT.groups.footer.text}
-            </h2>
+        {/* 2. glass */}
+        <Group id="glass" title={KIT.groups.glass.text} bare sim>
+          <div className="kit-glass">
+            {[
+              ['', `${KIT.glass.thick.text}, ${S.rest.text}`],
+              ['sim-entering', `${KIT.glass.thick.text}, ${S.entering.text}`],
+              ['sim-reduced', KIT.glass.reduced.text],
+              ['sim-noblur', KIT.glass.noblur.text],
+              ['sim-contrast', KIT.glass.contrast.text],
+              ['sim-forced', KIT.glass.forced.text],
+              ['sim-lite', KIT.glass.lite.text],
+            ].map(([cls, label]) => (
+              <Cell key={label} label={label} className={cls}>
+                <Panel reveal={false} state={cls === 'sim-entering' ? 'entering' : undefined} className="kit-sample-panel">
+                  <Eyebrow>{viaere.title}</Eyebrow>
+                  <p className="card-name">{viaere.name}</p>
+                  <p className="card-head">{viaere.headline}</p>
+                </Panel>
+              </Cell>
+            ))}
+            <Cell label={KIT.glass.clear.text}>
+              <Glass tier="clear" pill className="kit-clear-sample" />
+            </Cell>
           </div>
-        </section>
+        </Group>
+
+        {/* 3. buttons */}
+        <Group id="buttons" title={KIT.groups.buttons.text}>
+          <p className="kit-sub">{KIT.variants.primary.text}</p>
+          <div className="kit-row" inert>
+            {[['rest', {}], ['hover', { state: 'hover' }], ['focus', { state: 'focus' }], ['press', { state: 'press' }], ['disabled', { disabled: true }]].map(([k, p]) => (
+              <Cell key={k} label={S[k].text}>
+                <Button variant="primary" href={HERO.email.href} {...p}>
+                  {HERO.email.label}
+                </Button>
+              </Cell>
+            ))}
+          </div>
+          <p className="kit-sub">{KIT.variants.glass.text}</p>
+          <div className="kit-row" inert>
+            {[['rest', {}], ['hover', { state: 'hover' }], ['focus', { state: 'focus' }], ['press', { state: 'press' }], ['disabled', { disabled: true }]].map(([k, p]) => (
+              <Cell key={k} label={S[k].text}>
+                <Button variant="glass" icon="down" href={HERO.work.href} {...p}>
+                  {HERO.work.text}
+                </Button>
+              </Cell>
+            ))}
+            <Cell label={S.small.text}>
+              <Button variant="glass" size="sm" icon="out" href={viaere.href}>
+                {viaere.link}
+              </Button>
+            </Cell>
+          </div>
+        </Group>
+
+        {/* 4. chips */}
+        <Group id="chips" title={KIT.groups.chips.text}>
+          <div className="kit-row">
+            <Cell label={S.rest.text}>
+              <Chip>{STACK.rows[0].chips[1]}</Chip>
+            </Cell>
+            <Cell label={S.hover.text}>
+              <Chip state="hover">{STACK.rows[0].chips[1]}</Chip>
+            </Cell>
+            <Cell label={S.long.text}>
+              <Chip>{STACK.rows[3].chips[0]}</Chip>
+            </Cell>
+          </div>
+        </Group>
+
+        {/* 5. card */}
+        <Group id="card" title={KIT.groups.card.text} bare>
+          <div className="kit-cards">
+            <Cell label={S.rest.text}>
+              <ProjectCard card={esvo} reveal={false} />
+            </Cell>
+            <Cell label={S.hover.text}>
+              <div inert>
+                <ProjectCard card={viaere} state="hover" reveal={false} />
+              </div>
+            </Cell>
+            <Cell label={S.focusWithin.text}>
+              <div inert>
+                <ProjectCard card={esvo} state="focus" reveal={false} />
+              </div>
+            </Cell>
+            <Cell label={S.quiet.text} className="sim-reduced">
+              <div inert>
+                <ProjectCard card={viaere} reveal={false} />
+              </div>
+            </Cell>
+          </div>
+        </Group>
+
+        {/* 6. experience list */}
+        <Group id="experience" title={KIT.groups.experience.text}>
+          <ExperienceList lines={EXPERIENCE} />
+        </Group>
+
+        {/* 7. nav pill */}
+        <Group id="nav" title={KIT.groups.nav.text} bare>
+          <div className="kit-stack" inert>
+            <Cell label={`${KIT.nav.desktop.text}: ${S.rest.text}, ${S.active.text}, ${S.hover.text}, ${S.focus.text}`}>
+              <NavPill fixed={false} active="check-out" states={{ experience: 'hover', stack: 'focus' }} className="kit-nav" />
+            </Cell>
+            <div className="kit-row">
+              <Cell label={`${KIT.nav.phone.text}, ${S.closed.text}`}>
+                <NavPill fixed={false} active="experience" className="kit-nav kit-nav--phone" />
+              </Cell>
+              <Cell label={`${KIT.nav.phone.text}, ${S.open.text}`}>
+                <NavPill fixed={false} active="experience" open className="kit-nav kit-nav--phone" />
+              </Cell>
+              <Cell label={KIT.nav.switchOff.text}>
+                <QuietSwitch pressed={false} />
+              </Cell>
+              <Cell label={KIT.nav.switchOn.text}>
+                <QuietSwitch pressed />
+              </Cell>
+            </div>
+          </div>
+        </Group>
+
+        {/* 8. copy email and link row */}
+        <Group id="contact" title={KIT.groups.contact.text}>
+          <div className="kit-stack" inert>
+            <Cell label={S.rest.text}>
+              <CopyEmail idPrefix="kit-rest" />
+            </Cell>
+            <Cell label={S.hover.text}>
+              <CopyEmail idPrefix="kit-hover" state="hover" />
+            </Cell>
+            <Cell label={S.focus.text}>
+              <CopyEmail idPrefix="kit-focus" state="focus" />
+            </Cell>
+            <Cell label={S.copied.text}>
+              <CopyEmail idPrefix="kit-copied" copied />
+            </Cell>
+            <Cell label={`${S.rest.text} · ${S.hover.text} · ${S.focus.text}`}>
+              <LinkRow states={{ 'channel-linkedin': 'hover', 'channel-instagram': 'focus' }} />
+            </Cell>
+            <Cell label={SIGNAL.closer.id}>
+              <p className="closer">{SIGNAL.closer.text}</p>
+            </Cell>
+          </div>
+        </Group>
+
+        {/* 9. scene controls */}
+        <Group id="controls" title={KIT.groups.controls.text}>
+          <div className="kit-row" inert>
+            <Cell label={S.rest.text}>
+              <SceneControls tier="full" paused={false} motion="on" />
+            </Cell>
+            <Cell label={S.hover.text}>
+              <SceneControls tier="full" paused={false} motion="on" state="hover" />
+            </Cell>
+            <Cell label={S.focus.text}>
+              <SceneControls tier="full" paused={false} motion="on" state="focus" />
+            </Cell>
+            <Cell label={S.paused.text}>
+              <SceneControls tier="full" paused motion="on" />
+            </Cell>
+            <Cell label={S.off.text}>
+              <SceneControls tier="still" paused={false} motion="off" />
+            </Cell>
+            <Cell label={S.still.text}>
+              <SceneControls tier="still" paused={false} motion="on" />
+            </Cell>
+          </div>
+        </Group>
+
+        {/* 10. stage */}
+        <Group id="stage" title={KIT.groups.stage.text}>
+          <p className="kit-sub">{KIT.stage.note.text}</p>
+          <div className="kit-row">
+            <Cell label={S.posterOnly.text}>
+              <div className="kit-stage-sample">
+                <Poster />
+              </div>
+            </Cell>
+            <Cell label={S.canvasOn.text}>
+              <div className="kit-stage-sample kit-stage-sample--on">
+                <Poster />
+                <span className="kit-stage-on" />
+              </div>
+            </Cell>
+            <Cell label={S.lost.text}>
+              <div className="kit-stage-sample kit-stage-sample--lost">
+                <Poster />
+              </div>
+            </Cell>
+          </div>
+        </Group>
+
+        {/* 11. footer, skip link, 404 */}
+        <Group id="chrome" title={KIT.groups.chrome.text} bare>
+          <div className="kit-stack">
+            <Cell label={KIT.chrome.skip.text}>
+              <span className="skip-link kit-skip">{SKIP.text}</span>
+            </Cell>
+            <Cell label={KIT.chrome.notFound.text}>
+              <div className="kit-nf" inert>
+                <Panel variant="nf" reveal={false}>
+                  <p className="sec-title">{NOT_FOUND.line.text}</p>
+                  <p className="nf-actions">
+                    <Button variant="primary" href="/">
+                      {NOT_FOUND.home.text}
+                    </Button>
+                  </p>
+                </Panel>
+              </div>
+            </Cell>
+            <Cell label={KIT.chrome.footer.text}>
+              <div className="kit-footer-sample">
+                <Footer kit controls={<SceneControls tier="full" paused={false} motion="on" />} />
+              </div>
+            </Cell>
+          </div>
+        </Group>
       </main>
-      <Footer className="kit-footer" />
-      <ToastRegion />
+      <Footer kit />
     </>
   )
 }

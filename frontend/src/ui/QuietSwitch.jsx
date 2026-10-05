@@ -1,48 +1,30 @@
-import Glass from '../glass/Glass.jsx'
-import Tooltip from './Tooltip.jsx'
 import { CHROME } from '../content/meta.js'
 import { toggleQuiet, useQuiet } from '../lib/mode.js'
 import { useHydrated } from '../lib/hydrated.js'
 
 /*
-  The quiet switch (DESIGN.md 5.2, 4.4.2): solid panels instead of glass.
-  It sets html[data-transparency], which Safari needs because it ignores
-  prefers-reduced-transparency, and remembers the choice (ae.quiet).
-  A 32px glass pill (44 on phones) with a 14px knob and the word "quiet".
-
-  The pressed look is driven by html[data-transparency] in CSS before
-  hydration (so a returning visitor never sees it flip); aria-pressed
-  follows once hydrated. `state` and `pressed` force a look for the kit.
+  The quiet switch (DESIGN.md 4.5): solid panels instead of glass. A 26x16 knob and the word
+  "quiet", role="switch" with aria-checked, persisted (ae.quiet), applied before first paint by
+  the boot script. Quiet does not stop the scene; "motion off" in the footer does.
+  `pressed` forces a look for the kit (inert).
 */
-export default function QuietSwitch({ state, pressed, tip = true, tipOpen = false }) {
+export default function QuietSwitch({ pressed, state, className = '' }) {
   const quiet = useQuiet()
   const hydrated = useHydrated()
-  const kit = state !== undefined || pressed !== undefined
+  const kit = pressed !== undefined
   const on = kit ? !!pressed : quiet
-  const btn = (
-    <Glass
-      as="button"
+  return (
+    <button
       type="button"
-      tier="thick"
-      pill
-      spec
-      className={['quiet', state && `is-${state}`, kit && on && 'is-pressed'].filter(Boolean).join(' ')}
-      aria-pressed={hydrated || kit ? on : undefined}
+      role="switch"
+      aria-checked={hydrated || kit ? on : false}
+      title={CHROME.quietTip.text}
+      className={['quiet', state && `is-${state}`, kit && 'kit-static', className].filter(Boolean).join(' ')}
       onClick={kit ? undefined : toggleQuiet}
       tabIndex={kit ? -1 : undefined}
-      data-kit={kit ? '' : undefined}
     >
-      <span className="quiet-track" aria-hidden="true">
-        <span className="quiet-knob" />
-      </span>
+      <span className="quiet-knob" aria-hidden="true" />
       <span>{CHROME.quiet.text}</span>
-    </Glass>
-  )
-  return tip ? (
-    <Tooltip label={CHROME.quietTip.text} open={tipOpen} below>
-      {btn}
-    </Tooltip>
-  ) : (
-    btn
+    </button>
   )
 }

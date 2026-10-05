@@ -1,61 +1,37 @@
 import Glass from '../glass/Glass.jsx'
+import { ArrowDown, ArrowOut } from './icons.jsx'
 
 /*
-  <Button> (DESIGN.md 5.3): 40px pills (44 on phones), Inter 600 14.
+  <Button> (DESIGN.md 5.1, 5.2): 44px pills, Mona 15/600 wdth 104.
 
-    variant   'primary' (the ink pill, one per control group) | 'glass' | 'ghost'
+    variant   'primary' (cyan fill, void ink: the email button and nothing else) | 'glass' (thick glass pill)
+    size      'md' (44) | 'sm' (40, 14px text: the card links, "copy", the scene controls)
+    icon      'down' | 'out' | none, a trailing 14px (12px small) icon
     href      renders a link; otherwise a <button type="button">
-    icon      a leading icon component; trailing puts it after the label
-    busy      loading: aria-busy, a spinner replaces the icon, the label turns into
-              busyLabel (the present participle) without changing width
-    disabled  opacity .45, not-allowed, no press
-    state     kit only: 'hover' | 'focus' | 'active' forces that look
+    disabled  opacity .45, no pointer
+    state     kit only: 'hover' | 'focus' | 'press' forces that look
 */
-export default function Button({
-  variant = 'primary',
-  href,
-  icon: Icon,
-  trailing = false,
-  busy = false,
-  busyLabel,
-  disabled = false,
-  state,
-  className = '',
-  children,
-  ...rest
-}) {
+const ICONS = { down: ArrowDown, out: ArrowOut }
+
+export default function Button({ variant = 'primary', size = 'md', icon, href, disabled = false, state, className = '', children, ...rest }) {
   const As = href && !disabled ? 'a' : 'button'
-  const cls = [
-    'btn',
-    variant !== 'glass' && `btn--${variant}`,
-    Icon && trailing && 'btn--trailing',
-    !Icon && 'btn--text-only',
-    state && `is-${state}`,
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ')
+  const Icon = icon ? ICONS[icon] : null
+  const cls = ['btn', `btn--${variant}`, size === 'sm' && 'btn--sm', state && `is-${state}`, className].filter(Boolean).join(' ')
   const props = {
     className: cls,
-    'aria-busy': busy ? 'true' : undefined,
     ...(As === 'a' ? { href } : { type: 'button', disabled: disabled || undefined }),
     ...(As === 'a' && disabled ? { 'aria-disabled': 'true' } : {}),
     ...rest,
   }
   const inner = (
     <>
-      {Icon && !trailing && <Icon />}
-      {!trailing && <span className="spin" aria-hidden="true" />}
-      <span className="btn-label">
-        <span className="idle">{children}</span>
-        {busyLabel && <span className="busy">{busyLabel}</span>}
-      </span>
-      {Icon && trailing && <Icon />}
+      <span className="btn-label">{children}</span>
+      {Icon && <Icon />}
     </>
   )
   if (variant === 'glass') {
     return (
-      <Glass as={As} tier="thick" pill spec lens="btn" {...props}>
+      <Glass as={As} tier="thick" pill spec {...props}>
         {inner}
       </Glass>
     )

@@ -1,21 +1,14 @@
 import { headingId } from '../content/sections.js'
-import Field from '../field/Field.jsx'
 
 /*
-  The section contract: every one of the six renders
+  The section contract: every one of the five renders
     <section id={id} aria-labelledby="{id}-h"> ... <h2 id="{id}-h"> ...
-  with its own light field behind it. The prerender and QA rely on it.
-
-    <Section id="work" field="work">...</Section>
-
-    rail   from 1100px up: a <SectionHead rail> in a left column, everything
-           else in a right column (wrap it in one element)
+  (the hero is #top, labelled by its h1). The prerender, the scroll anchors and QA rely on it.
 */
-export default function Section({ id, field, rail = false, className = '', children, ...rest }) {
+export default function Section({ id, labelledBy, className = '', children, ...rest }) {
   return (
-    <section id={id} aria-labelledby={headingId(id)} className={`section ${className}`.trim()} {...rest}>
-      {field && <Field preset={field} />}
-      <div className={`page on-field ${rail ? 'sec-split' : ''}`.trim()}>{children}</div>
+    <section id={id} aria-labelledby={labelledBy ?? headingId(id)} className={`sec ${className}`.trim()} {...rest}>
+      {children}
     </section>
   )
 }

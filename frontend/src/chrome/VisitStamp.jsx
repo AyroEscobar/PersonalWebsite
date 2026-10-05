@@ -4,15 +4,10 @@ import { kb, secs } from '../lib/format.js'
 import { afterLoad } from '../lib/idle.js'
 
 /*
-  VisitStamp (DESIGN.md 5.14). "this visit: 184 KB, first paint 1.2 s on your
-  device", or "first paint 640 ms" under a second. Measured on this visit by
-  this browser: the transfer size of the document and every resource it
-  pulled, and the first-contentful-paint entry. It keeps counting what the visit loads later (opening search pulls
-  a small chunk), at most once a second. If either number is unavailable
-  (no Resource Timing sizes, no Paint Timing, everything served from cache)
-  the line is simply not there. Never a live region.
-
-  The <p> always renders so the footer does not shift when the text lands.
+  VisitStamp (DESIGN.md 5.13). "this visit: 184 KB, first paint 640 ms on your device". Measured
+  on this visit by this browser: the transfer size of the document and every resource it pulled,
+  and the first-contentful-paint entry. If either number is unavailable the words are simply not
+  there. Never a live region. The <span> always renders so the footer does not shift.
 */
 function measure() {
   const nav = performance.getEntriesByType?.('navigation')?.[0]
@@ -24,14 +19,12 @@ function measure() {
   return { bytes, fcp: fcp.startTime }
 }
 
-// Under a second, milliseconds read better than "0.0 s".
 const paint = (ms) => (ms < 1000 ? `${Math.max(1, Math.round(ms))} ms` : secs(ms))
 
-export default function VisitStamp({ className = '' }) {
+export default function VisitStamp() {
   const [m, setM] = useState(null)
-
   useEffect(() => {
-    if (typeof performance === 'undefined') return
+    if (typeof performance === 'undefined') return undefined
     let po
     let t = 0
     let stopped = false
@@ -58,14 +51,14 @@ export default function VisitStamp({ className = '' }) {
       po?.disconnect()
     }
   }, [])
-
   return (
-    <p className={`stamp visit-stamp ${className}`.trim()}>
+    <span className="stamp visit-stamp">
       {m && (
         <>
+          {' · '}
           {FOOTER.visitPrefix.text} {kb(m.bytes)}, {FOOTER.visitPaint.text} {paint(m.fcp)} {FOOTER.visitSuffix.text}
         </>
       )}
-    </p>
+    </span>
   )
 }

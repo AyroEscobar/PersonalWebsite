@@ -1,51 +1,48 @@
-import { useEffect } from 'react'
 import { FOOTER } from '../content/meta.js'
-import { REPO } from '../content/constants.js'
+import { FIGURE_CREDIT, REPO } from '../content/constants.js'
 import BuildStamp from './BuildStamp.jsx'
 import VisitStamp from './VisitStamp.jsx'
+import SceneControls from '../ui/SceneControls.jsx'
 
 /*
-  Footer (DESIGN.md 5.14): base, a hairline on top, Inter 13. His line on
-  the left; the build stamp and this visit's numbers on the right; the
-  no-tracking promise and the site source. Links only.
-
-  Printing opens every folded <details> in the work section (the RBC desks)
-  before the print dialog and folds them again after.
+  Footer (DESIGN.md 5.13): two rows. The plain row: name · place, "no cookies, no analytics.",
+  "site source", "the kit", and the CC BY credit for the figure (mandatory in every tier,
+  REFINE.md item 5). The mono row: the build line with the measured first paint, and the scene
+  controls.
 */
-function usePrintOpensDetails() {
-  useEffect(() => {
-    let opened = []
-    const before = () => {
-      opened = [...document.querySelectorAll('#work details:not([open])')]
-      opened.forEach((d) => d.setAttribute('open', ''))
-    }
-    const after = () => {
-      opened.forEach((d) => d.removeAttribute('open'))
-      opened = []
-    }
-    window.addEventListener('beforeprint', before)
-    window.addEventListener('afterprint', after)
-    return () => {
-      window.removeEventListener('beforeprint', before)
-      window.removeEventListener('afterprint', after)
-    }
-  }, [])
-}
-
-export default function Footer({ className = '' }) {
-  usePrintOpensDetails()
+export default function Footer({ className = '', kit = false, controls }) {
   return (
     <footer className={`footer ${className}`.trim()}>
-      <div className="page ft-inner">
+      <div className="foot-row">
         <p className="ft-line">{FOOTER.line.text}</p>
         <p>{FOOTER.noTracking.text}</p>
-        <a className="ft-link" href={REPO}>
-          {FOOTER.source.text}
-        </a>
-        <div className="ft-stamps">
+        <p>
+          <a href={REPO} rel="noopener">
+            {FOOTER.source.text}
+          </a>
+        </p>
+        {!kit && (
+          <p>
+            <a href="/kit">{FOOTER.kit.text}</a>
+          </p>
+        )}
+        <p className="credit">
+          {FOOTER.credit.text}{' '}
+          <a href={FIGURE_CREDIT.modelHref} rel="noopener">
+            {FIGURE_CREDIT.model}
+          </a>{' '}
+          {FOOTER.creditBy.text} {FIGURE_CREDIT.author},{' '}
+          <a href={FIGURE_CREDIT.licenceHref} rel="noopener">
+            {FIGURE_CREDIT.licence}
+          </a>
+        </p>
+      </div>
+      <div className="foot-row foot-row--mono">
+        <p className="build">
           <BuildStamp />
           <VisitStamp />
-        </div>
+        </p>
+        {controls ?? <SceneControls />}
       </div>
     </footer>
   )

@@ -1,33 +1,23 @@
-import Glass from '../glass/Glass.jsx'
-import { EMAIL } from '../content/constants.js'
+import Eyebrow from './Eyebrow.jsx'
 import { SIGNAL } from '../content/signal.js'
 
 /*
-  The link row (DESIGN.md 5.9): one glass row at r-3 with 4px padding,
-  items 36px (44 on phones) at r-3 minus 4. Email first, then the channels;
-  the contact card passes the channels alone (its address and copy button
-  sit right above the row).
-  `states` (kit only) maps a channel id to 'hover' | 'focus' | 'active';
-  `label` names the landmark when a page has more than one row.
-
-  On phones the row keeps one deliberate shape: every item on one line when
-  they fit, otherwise an even grid (two by two for four items, three over
-  two for five), never a lone item on a line of its own. The wrapper is the
-  size container that decides it (components.css 5.9); on wider screens it
-  is display: contents, so the row lays out as if it were not there.
+  <LinkRow> (DESIGN.md 5.12): the "elsewhere" eyebrow then GitHub · LinkedIn · Instagram as 16/540
+  ink links with a cyan .55 underline 4 px below, brightening to cyan on hover; rel="me noopener".
+  `states` (kit only) maps a channel id to 'hover' | 'focus'.
 */
-const LINKS = [{ id: 'channel-email', label: SIGNAL.emailLabel.text, href: `mailto:${EMAIL}` }, ...SIGNAL.channels]
-
-export default function LinkRow({ links = LINKS, states = {}, label = SIGNAL.elsewhere.text, className = '' }) {
+export default function LinkRow({ states = {}, className = '' }) {
+  const kit = Object.keys(states).length > 0
   return (
-    <div className="linkrow-fit" data-n={links.length}>
-      <Glass as="nav" tier="thick" lens="row" spec className={`linkrow ${className}`.trim()} aria-label={label}>
-        {links.map((l) => (
-          <a key={l.id} href={l.href} className={states[l.id] ? `is-${states[l.id]}` : undefined}>
-            {l.label}
-          </a>
-        ))}
-      </Glass>
-    </div>
+    <p className={`elsewhere ${className}`.trim()}>
+      <Eyebrow as="span" className="elsewhere-label">
+        {SIGNAL.elsewhere.text}
+      </Eyebrow>
+      {SIGNAL.channels.map((c) => (
+        <a key={c.id} href={c.href} rel="me noopener" className={states[c.id] ? `is-${states[c.id]}` : undefined} tabIndex={kit ? -1 : undefined}>
+          {c.label}
+        </a>
+      ))}
+    </p>
   )
 }

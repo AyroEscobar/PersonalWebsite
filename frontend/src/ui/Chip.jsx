@@ -1,21 +1,7 @@
-import { W } from '../content/sections-ui.js'
-
 /*
-  <Chip> (DESIGN.md 5.4): a 28px pill that is never interactive.
-
-    <Chip status="now" />    a status chip: a hairline enters from its left
-    <Chip status="past" />   (accent for now, ink-3 for past), word in italic serif
-    <Chip>2026</Chip>        plain: numbers in tabular Inter 13
-    <Chip word>single file</Chip>   plain, a word in italic serif
+  <Chip> (DESIGN.md 5.3): 30px, radius 14, Mona 13/480 ink-2, never interactive and never
+  focusable. The two long chips wrap, never truncate. States: rest · hover (kit: state="hover").
 */
-export default function Chip({ status, word = false, className = '', children }) {
-  if (status) {
-    const text = children ?? (status === 'now' ? W.now.text : W.past.text)
-    return (
-      <span className={`chip chip--${status} ${className}`.trim()}>
-        <span className="chip-word">{text}</span>
-      </span>
-    )
-  }
-  return <span className={`chip ${className}`.trim()}>{word ? <span className="chip-word">{children}</span> : children}</span>
+export default function Chip({ state, className = '', children }) {
+  return <span className={['chip', state && `is-${state}`, className].filter(Boolean).join(' ')}>{children}</span>
 }
