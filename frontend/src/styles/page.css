@@ -1,0 +1,228 @@
+/*
+  page.css: the composition of the home page (DESIGN.md 6). Interim: the
+  kit stage laid the sections out from kit components; the page stage owns
+  this file, the hero's reading lens and the morph.
+*/
+
+.hero {
+  position: relative;
+  min-height: 100svh;
+  padding-top: 28px;
+}
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100svh - 28px);
+}
+.hero-sentence {
+  margin-top: clamp(48px, 9vh, 120px);
+  padding-inline: var(--s-6);
+}
+.hero-copy {
+  padding-inline: var(--s-6);
+  margin-top: var(--s-8);
+  max-width: 1100px;
+}
+.hero-lede {
+  max-width: var(--measure);
+  font: 400 var(--t-lg) / 1.5 var(--sans);
+  color: var(--ink-2);
+}
+.hero-proof {
+  margin-top: var(--s-3);
+  max-width: var(--measure);
+  font: 400 var(--t-md) / 1.55 var(--sans);
+  color: var(--ink-2);
+}
+.hero-cta {
+  margin-top: var(--s-7);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-4) var(--s-6);
+  padding-bottom: var(--s-9);
+}
+.hero-caption {
+  margin-left: auto;
+  font-size: 20px;
+  color: var(--ink-2);
+}
+@media (max-width: 819.98px) {
+  .hero-sentence {
+    font-size: clamp(28px, 8.4vw, 40px);
+    padding-inline: 0;
+    margin-top: var(--s-8);
+  }
+  .hero-copy {
+    padding-inline: 0;
+    margin-top: var(--s-6);
+  }
+  .hero-caption {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}
+
+.origin-body {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--s-8);
+  padding-top: var(--s-9);
+}
+.origin-voice {
+  display: grid;
+  gap: var(--s-5);
+  font-size: var(--t-xl);
+  line-height: 1.35;
+  color: var(--ink);
+}
+.origin-side {
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+  font: 400 var(--t-md) / 1.55 var(--sans);
+  color: var(--ink-2);
+}
+.origin-off {
+  font-size: var(--t-sm);
+}
+.origin-closer {
+  grid-column: 1 / -1;
+  font-size: var(--t-xl);
+  color: var(--ink);
+}
+@media (max-width: 899.98px) {
+  .origin-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-6);
+  }
+}
+
+.col-narrow {
+  max-width: 880px;
+}
+.sub-head {
+  margin: var(--s-8) 0 var(--s-4);
+  font-size: var(--t-xl);
+  color: var(--ink);
+}
+
+.cards {
+  display: grid;
+  gap: var(--s-6);
+}
+.cards--wide {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.cards--half {
+  margin-top: var(--s-6);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 1099.98px) {
+  .cards--half {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 899.98px) {
+  .cards--wide,
+  .cards--half {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-4);
+  }
+}
+.builds-note {
+  margin-top: var(--s-4);
+  font: 400 var(--t-sm) / 1.5 var(--sans);
+  color: var(--ink-2);
+}
+.builds-note + .builds-note {
+  margin-top: var(--s-1);
+}
+
+.crew-sheet {
+  padding: var(--s-2) var(--s-6);
+}
+.crew-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.crew-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--s-5);
+  row-gap: 4px;
+  padding: var(--s-5) 0;
+  box-shadow: inset 0 -1px 0 var(--hair);
+}
+.crew-row:last-child {
+  box-shadow: none;
+}
+.crew-title {
+  font: 600 var(--t-md) / 1.35 var(--sans);
+}
+.crew-when {
+  grid-column: 2;
+  grid-row: 1;
+  font: 400 var(--t-xs) / 1.6 var(--sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.crew-text {
+  grid-column: 1 / -1;
+  font: 400 var(--t-sm) / 1.55 var(--sans);
+  color: var(--ink-2);
+  max-width: 68ch;
+}
+@media (max-width: 639.98px) {
+  .crew-sheet {
+    padding: 0 var(--s-5);
+  }
+  .crew-when {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+.signal-closer {
+  margin-top: var(--s-6);
+  font-size: var(--t-xl);
+  color: var(--ink);
+}
+
+/* the pinned nav needs room at the top on wide screens, at the bottom on phones */
+main {
+  position: relative;
+}
+
+/* 404 */
+.nf-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100svh - 28px);
+}
+.nf-line {
+  margin-top: auto;
+  padding-inline: var(--s-6);
+}
+.nf-h1 {
+  margin-top: var(--s-7);
+  padding-inline: var(--s-6);
+  font: 600 var(--t-xl) / 1.2 var(--sans);
+}
+.nf-actions {
+  margin-top: var(--s-5);
+  margin-bottom: auto;
+  padding: 0 var(--s-6) var(--s-10);
+}
+@media (max-width: 819.98px) {
+  .nf-line {
+    font-size: clamp(28px, 8.4vw, 40px);
+    padding-inline: 0;
+  }
+  .nf-h1,
+  .nf-actions {
+    padding-inline: 0;
+  }
+}
