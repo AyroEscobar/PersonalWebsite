@@ -1,31 +1,29 @@
-import { getState, setMode, setMotion, setTier, subscribe } from './store.js'
-import { detectTier } from './tier.js'
-import { BOOT_MS, endBoot, readHtmlMode } from './mode.js'
+import { setMotion } from './store.js'
+import { syncFromHtml } from './mode.js'
+import { initPointer } from '../glass/pointer.js'
+import { onIdle } from './idle.js'
 
 /*
   Client start-up, called once from main.jsx after hydration is scheduled.
   Copies <html data-*> (set by the inline boot script) into the store,
-  computes the render tier, and keeps both in sync with the OS setting.
+  follows the OS motion setting, starts the pointer specular, and loads the
+  lens maps (src/glass/lens.js, its own small chunk) after fonts and paint.
 */
 export function initClient() {
-  const { mode, motion } = readHtmlMode()
-  setMode(mode, { persist: false })
-  setMotion(motion)
-  setTier(detectTier())
+  syncFromHtml()
 
-  // The OS reduced-motion setting can change while the page is open.
   const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
-  mq?.addEventListener?.('change', () => setMode(getState().mode, { persist: false }))
-
-  // Re-tier whenever mode or motion changes (quiet mode is always static).
-  let last = `${getState().mode}/${getState().motion}`
-  subscribe(() => {
-    const key = `${getState().mode}/${getState().motion}`
-    if (key === last) return
-    last = key
-    setTier(detectTier())
+  mq?.addEventListener?.('change', (e) => {
+    document.documentElement.dataset.motion = e.matches ? 'reduced' : 'full'
+    setMotion(e.matches ? 'reduced' : 'full')
   })
 
-  // The first-paint sequence owns 1.2 s; then data-boot goes away for good.
-  if (document.documentElement.dataset.boot === 'run') window.setTimeout(endBoot, BOOT_MS + 400)
+  initPointer()
+
+  const fonts = document.fonts?.ready ?? Promise.resolve()
+  fonts.then(() =>
+    onIdle(() => {
+      import('../glass/lens.js').then((m) => m.startLens()).catch(() => {})
+    }, 1200),
+  )
 }

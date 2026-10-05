@@ -1,48 +1,58 @@
 /*
-  Inline boot script (PLAN.md 4.0, 4.12, 5). NOT imported by the app.
+  Inline boot script (DESIGN.md 4.3, 4.4). NOT imported by the app.
   vite.config.js minifies this file and inlines it in <head> before any CSS
-  paints. scripts/prerender.mjs hashes the result for the CSP in vercel.json.
+  paints; scripts/prerender.mjs hashes the result for the CSP in vercel.json.
   Keep it ES5, tiny, and free of anything that can throw uncaught.
 
-  Writes on <html>:
-    data-js      JavaScript is running
-    data-mode    'quiet' | 'full'
-                 ?quiet in the URL wins, then the stored choice (ae.mode), then
-                 auto-quiet for reduced motion, Save-Data or deviceMemory < 4
-    data-motion  'reduced' when the OS asks for it or quiet mode is on, else 'full'
-    data-boot    'run' only on the first load of the home page in a session,
-                 with motion on, not quiet, and no #hash deep link. The first-paint sequence
-                 keys off html[data-boot="run"].
+  Writes on <html>, read by CSS and by src/lib/client.js:
+    data-js            JavaScript is running
+    data-motion        'reduced' for the OS setting or ?motion=reduced, else 'full'
+    data-tier          'lite' for 4 cores or fewer, 4 GB or less, or Save-Data
+                       (?tier=lite or ?tier=full force it), else 'full'
+    data-lens          'on' only where a url() backdrop filter is honoured. @supports
+                       alone is not trusted (Safari parses url() and ignores it), so
+                       the gate also needs a Chromium-only API. ?lens=off turns it off.
+    data-transparency  'reduced' when the quiet switch is on (ae.quiet, or ?quiet=1)
+    data-mode          'split' (the nav is its own pill from the start) under reduced
+                       motion or tier lite, else 'morph' (the lens becomes the nav)
+    class notext       ?notext=1, for the contrast capture in QA
 */
 ;(function () {
   var d = document.documentElement
-  var reduced = false
-  var stored = null
-  var mode = 'full'
-  try {
-    reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  } catch (e) {}
-  try {
-    stored = window.localStorage.getItem('ae.mode')
-  } catch (e) {}
-  if (/[?&]quiet(=[^&]*)?(&|$)/.test(window.location.search)) {
-    mode = /[?&]quiet=(0|off|false)(&|$)/.test(window.location.search) ? 'full' : 'quiet'
-  } else if (stored === 'quiet' || stored === 'full') {
-    mode = stored
-  } else {
-    var c = navigator.connection
-    if (reduced || (c && c.saveData) || (navigator.deviceMemory && navigator.deviceMemory < 4)) mode = 'quiet'
+  var q = window.location.search
+  var n = navigator
+  var c = n.connection
+  function has(re) {
+    return re.test(q)
   }
-  d.setAttribute('data-js', '')
-  d.setAttribute('data-mode', mode)
-  d.setAttribute('data-motion', reduced || mode === 'quiet' ? 'reduced' : 'full')
-  // The first paint belongs to the home page. The 404 stays dark, and a first
-  // visit that lands on it does not use up the home page's first paint.
-  if (!/^\/(index\.html)?$/.test(window.location.pathname)) return
-  var booted = true
+  function mq(s) {
+    try {
+      return window.matchMedia(s).matches
+    } catch (e) {
+      return false
+    }
+  }
+  var reduced = mq('(prefers-reduced-motion: reduce)') || has(/[?&]motion=reduced(&|$)/)
+  var lite =
+    has(/[?&]tier=lite(&|$)/) ||
+    (!has(/[?&]tier=full(&|$)/) &&
+      !!((n.hardwareConcurrency && n.hardwareConcurrency <= 4) || (c && c.saveData) || (n.deviceMemory && n.deviceMemory <= 4)))
+  var quiet = false
+  if (has(/[?&]quiet=/)) quiet = has(/[?&]quiet=(1|on|true)(&|$)/)
+  else {
+    try {
+      quiet = window.localStorage.getItem('ae.quiet') === '1'
+    } catch (e) {}
+  }
+  var lens = false
   try {
-    booted = window.sessionStorage.getItem('ae.booted') === '1'
-    window.sessionStorage.setItem('ae.booted', '1')
+    lens = !lite && !has(/[?&]lens=off(&|$)/) && !!(window.CSS && CSS.supports('backdrop-filter', 'url(#x)')) && !!n.userAgentData
   } catch (e) {}
-  if (!booted && !reduced && mode !== 'quiet' && !window.location.hash) d.setAttribute('data-boot', 'run')
+  d.setAttribute('data-js', '')
+  d.setAttribute('data-motion', reduced ? 'reduced' : 'full')
+  d.setAttribute('data-tier', lite ? 'lite' : 'full')
+  d.setAttribute('data-lens', lens ? 'on' : 'off')
+  d.setAttribute('data-transparency', quiet ? 'reduced' : 'full')
+  d.setAttribute('data-mode', reduced || lite ? 'split' : 'morph')
+  if (has(/[?&]notext=1(&|$)/)) d.className += ' notext'
 })()

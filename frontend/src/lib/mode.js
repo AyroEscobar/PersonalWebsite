@@ -1,47 +1,66 @@
-import { useStore, setMode, getState } from './store.js'
+import { getState, setMotion, setQuietState, setTier, useStore } from './store.js'
+import { STORAGE } from '../content/constants.js'
 
 /*
-  Modes and motion (PLAN.md 4.0, 4.12, 6).
+  Modes (DESIGN.md 4.4). The inline boot script (src/lib/boot-inline.js)
+  decides them before first paint and writes them on <html>. initClient()
+  copies them into the store; after that, setQuiet() is the only writer.
 
-  The inline script (src/lib/boot-inline.js) decides the mode and motion
-  before first paint and writes them on <html>. initClient() copies them into
-  the store. After that, setMode() is the only writer.
-
-    readHtmlMode()     { mode, motion, boot } from <html data-*>
-    toggleQuiet()      flip quiet mode, persisted per viewer
-    useQuiet()         true in quiet mode (false on the server and while hydrating)
-    useReducedMotion() true when motion is reduced (OS or quiet mode)
-    BOOT_MS            the first-paint budget; endBoot() removes data-boot after it
-
-  CSS gates: use the `motion-ok:` Tailwind variant or nest rules under
-  @media (prefers-reduced-motion: no-preference) { html:not([data-motion="reduced"]) ... }
+    readHtmlMode()     { quiet, motion, tier, lens } from <html data-*>
+    setQuiet(on)       the quiet switch: solid panels instead of glass
+                       (html[data-transparency]), persisted per viewer
+    toggleQuiet()
+    useQuiet()         false on the server and while hydrating
+    useReducedMotion()
 */
 
-export const BOOT_MS = 1200
-
 export function readHtmlMode() {
-  if (typeof document === 'undefined') return { mode: 'full', motion: 'full', boot: false }
+  if (typeof document === 'undefined') return { quiet: false, motion: 'full', tier: 'full', lens: false }
   const d = document.documentElement.dataset
   return {
-    mode: d.mode === 'quiet' ? 'quiet' : 'full',
+    quiet: d.transparency === 'reduced',
     motion: d.motion === 'reduced' ? 'reduced' : 'full',
-    boot: d.boot === 'run',
+    tier: d.tier === 'lite' ? 'lite' : 'full',
+    lens: d.lens === 'on',
   }
 }
 
+/** One frame with no transitions, so a flip snaps instead of smearing (better-ui). */
+function snap() {
+  const root = document.documentElement
+  root.classList.add('no-transitions')
+  void root.offsetWidth
+  requestAnimationFrame(() => root.classList.remove('no-transitions'))
+}
+
+export function setQuiet(on) {
+  if (typeof document === 'undefined') return
+  snap()
+  document.documentElement.dataset.transparency = on ? 'reduced' : 'full'
+  try {
+    localStorage.setItem(STORAGE.quiet, on ? '1' : '0')
+  } catch {
+    /* storage blocked: the choice lasts for this page only */
+  }
+  setQuietState(on)
+  window.dispatchEvent(new CustomEvent('ae:quiet', { detail: on }))
+}
+
 export function toggleQuiet() {
-  setMode(getState().mode === 'quiet' ? 'full' : 'quiet')
+  setQuiet(!getState().quiet)
 }
 
 export function useQuiet() {
-  return useStore((s) => s.mode === 'quiet')
+  return useStore((s) => s.quiet)
 }
 
 export function useReducedMotion() {
   return useStore((s) => s.motion === 'reduced')
 }
 
-/** Remove data-boot once the first-paint sequence has had its 1.2 s. */
-export function endBoot() {
-  if (typeof document !== 'undefined') delete document.documentElement.dataset.boot
+export function syncFromHtml() {
+  const m = readHtmlMode()
+  setQuietState(m.quiet)
+  setMotion(m.motion)
+  setTier(m.tier)
 }
