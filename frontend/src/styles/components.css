@@ -1739,13 +1739,18 @@ html[data-mode='morph'] .lens-nav.is-reader:not(.is-ready) {
   display: inline-block;
   white-space: nowrap;
 }
+/* centred on the line's ink (0.564em down a 0.98em line box of Instrument Serif: ascent
+   990, descent 310, tallest ascender 748, deepest descender 216), 1.2 lines tall, so the
+   loupe's 1.16x line (ink 1.118em tall) sits whole inside the glass */
+.lens-line {
+  --lens-h: 1.176em;
+}
 .lens-line > .lens-static {
   z-index: var(--gx-lens-zi, 1);
-  left: -0.24em;
-  right: -0.24em;
-  top: 50%;
-  height: 1.13em;
-  margin-top: -0.53em;
+  left: -0.3em;
+  right: -0.3em;
+  top: calc(0.564em - var(--lens-h) / 2);
+  height: var(--lens-h);
 }
 
 /* the reading sentence (ReadingSentence): as wide as its longest line, so the lens spans it.
@@ -1754,7 +1759,7 @@ html[data-mode='morph'] .lens-nav.is-reader:not(.is-ready) {
 .reading {
   --lens-at: 1;
   --lens-pad: 0.24em;
-  --lens-h: calc(0.98em * 1.15);
+  --lens-h: calc(0.98em * 1.2);
   width: fit-content;
   max-width: 100%;
 }
@@ -1762,20 +1767,22 @@ html[data-mode='morph'] .lens-nav.is-reader:not(.is-ready) {
   z-index: var(--gx-lens-zi, 1);
   left: calc(-1 * var(--lens-pad));
   right: calc(-1 * var(--lens-pad));
-  /* line i's centre is (i + 0.5) pitches down; the italic sits a touch low in its box */
-  top: calc(var(--lens-at) * 0.98em + 0.49em + 0.035em - var(--lens-h) / 2);
+  /* line i's ink centre is i pitches plus 0.564em down (see .lens-line): the loupe magnifies
+     about it, so the 1.16x line's ascenders and descenders both stay inside the glass */
+  top: calc(var(--lens-at) * 0.98em + 0.564em - var(--lens-h) / 2);
   height: var(--lens-h);
 }
 /* handed to the nav: kept in layout (the reader measures it on resize), never painted */
 .lens-static.is-handed {
   visibility: hidden;
 }
-/* phones: 46px, not DESIGN's 52: at 52 the rod's lower edge pulled the tops of line 3 under
-   it (a 39px line pitch leaves 6.5px of overlap a side; 46 leaves 3.5) */
+/* phones: the lens spans the screen less 6px a side (5.1), so the sentence takes the whole
+   column and the lens reaches into each gutter; 1.2 lines tall (48px at 40px), which holds
+   the loupe's 1.16x line now that the soft bezel no longer folds the next line's tops in */
 @media (max-width: 639.98px) {
   .reading {
-    --lens-pad: 12px;
-    --lens-h: 46px;
+    --lens-pad: calc(var(--gutter) - 6px);
+    width: auto;
   }
 }
 /* reduced motion: the lens rests on the last line and nothing travels (4.4.5) */
