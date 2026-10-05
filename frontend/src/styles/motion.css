@@ -1,112 +1,165 @@
 /*
-  Motion (PLAN.md section 6). Owned by FOUNDATION.
+  motion.css: every transition and keyframe on the site (DESIGN.md 2.5).
 
-  The reduced state is the default. Motion only exists inside BOTH gates:
-    @media (prefers-reduced-motion: no-preference)  and  html:not([data-motion="reduced"])
-  The inline boot script sets data-motion="reduced" for the OS setting and for quiet mode,
-  so either one turns motion off before first paint.
+  The still page is the default. Motion exists only inside BOTH gates:
+    @media (prefers-reduced-motion: no-preference)  and  html:not([data-motion='reduced'])
+  The inline boot script sets data-motion='reduced' for the OS setting (and ?motion=reduced).
 
-  In Tailwind, write gated motion with the `motion-ok:` variant, e.g.
-    className="motion-ok:transition-opacity motion-ok:duration-200"
-  In CSS, nest it the same way as the rules below.
-
-  Only transform and opacity animate in the DOM (plus SVG stroke color for lit states).
-  Under reduced motion, opacity fades of 150ms or less are still allowed (.fade-reduced).
+  Only transform and opacity animate, plus colour and background on hover.
+  Never backdrop-filter, box-shadow, filter or a displacement scale
+  (check-content fails the build on a keyframe that animates them).
+  Nothing keyboard-initiated travels. Under reduced motion, short opacity
+  fades stay (MDN: reduce means fewer, gentler animations, not none).
 */
 
-@keyframes ae-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(var(--dx, 4vmax), var(--dy, 3vmax), 0) scale(1.08);
+  }
 }
 
-@keyframes ae-rise {
-  from { opacity: 0; transform: translate3d(0, 8px, 0); }
-  to { opacity: 1; transform: none; }
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
 }
 
-/* Aircraft obstruction light: 1.6s on, 1.6s off, soft ease. 0.31 Hz, far below 3 flashes a second. */
-@keyframes ae-beacon {
-  0%, 44% { opacity: 1; }
-  50%, 94% { opacity: 0.18; }
-  100% { opacity: 1; }
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
 }
 
-/* A 200ms brightness tick (rail stops when the ping wave reaches a node). */
-@keyframes ae-tick {
-  0% { opacity: 1; }
-  40% { opacity: 0.35; }
-  100% { opacity: 1; }
+/* allowed under reduced motion: opacity fades only */
+.glass::before,
+.glass::after {
+  transition: opacity 400ms ease;
 }
-
-/* Static by default: the beacon is simply on. */
-.beacon {
-  opacity: 1;
+.glass > .spec {
+  transition: opacity var(--dur-hover) ease;
 }
-
-/*
-  No scroll-behavior: smooth on <html>. It also animated every focus scroll,
-  which on a page this long made Tab feel slow and let one scroll swallow the
-  next. Jumps the page makes (rail stops, the bottom bar, the stops sheet,
-  search results, the name, in-text links) go through chrome/route.js goTo(),
-  which glides when motion is on and lands focus on the heading.
-*/
+.tip {
+  transition: opacity var(--dur-tip-out) ease-out;
+}
+.tip[data-open] {
+  transition: opacity var(--dur-tip) ease-out;
+}
+.tip[data-instant] {
+  transition: none;
+}
+.lens-nav .nav-list,
+.lens-nav .nav-sans,
+.lens-nav .nav-it,
+.glass > .loupe,
+.is-under,
+.card .ruler,
+.card-title-text {
+  transition: opacity var(--dur-pop) ease;
+}
+.btn .spin {
+  animation: pulse 1.2s ease-in-out infinite;
+  border-right-color: currentColor;
+  opacity: 0.6;
+}
 
 @media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion="reduced"]) .beacon {
-    animation: ae-beacon 3.2s var(--ease) infinite;
+  /* the field drifts, 20 to 30 s, alternate, staggered (3.5); off at tier lite */
+  html:not([data-motion='reduced']):not([data-tier='lite']) .blob {
+    animation: drift var(--dur, 24s) ease-in-out var(--delay, 0s) infinite alternate;
+    will-change: transform;
   }
 
-  html:not([data-motion="reduced"]) .plate-hover {
-    transition: background-color var(--dur-ui) var(--ease), border-color var(--dur-ui) var(--ease);
-  }
-
-  /* Every pressable control on the page answers the press the same way:
-     text buttons and chips everywhere, plus the bars' own controls. */
-  html:not([data-motion="reduced"]) :is(.btn-text, .btn-fill, .clock-btn, .search-chip, .bb-stop, .bb-next, .nf-home) {
+  /* press: scale(0.96) on the press curve; hover: colour and background */
+  html:not([data-motion='reduced']) :is(.btn, .quiet, .linkrow a, .lens-nav .nav-a) {
     transition:
-      transform var(--dur-press) var(--ease-out),
-      background-color var(--dur-ui) var(--ease),
-      border-color var(--dur-ui) var(--ease),
-      color var(--dur-ui) var(--ease);
+      transform var(--dur-press) var(--ease-press),
+      background-color var(--dur-hover) ease,
+      color var(--dur-hover) ease;
   }
-  html:not([data-motion="reduced"]) :is(.btn-text, .btn-fill, .clock-btn, .search-chip, .bb-stop, .bb-next, .nf-home):active {
-    transform: scale(0.97);
+  html:not([data-motion='reduced']) .quiet-track {
+    transition: background-color var(--dur-hover) ease;
   }
-
-  html:not([data-motion="reduced"]) .rule-l::after {
-    transition: opacity var(--dur-ui-slow) var(--ease);
+  html:not([data-motion='reduced']) .quiet-knob {
+    transition: transform var(--dur-hover) var(--ease-press);
   }
 
-  html:not([data-motion="reduced"]) .tick {
-    animation: ae-tick 200ms var(--ease) 1;
+  /* spinner turns */
+  html:not([data-motion='reduced']) .btn .spin {
+    animation: spin 700ms linear infinite;
+    border-right-color: transparent;
+    opacity: 1;
   }
 
-  html:not([data-motion="reduced"]) .enter-rise {
-    animation: ae-rise var(--dur-ui-slow) var(--ease-out) both;
+  /* the card lifts 2px and the ruler slides in */
+  html:not([data-motion='reduced']) .card {
+    transition: transform var(--dur-pop) var(--ease-press);
+  }
+  html:not([data-motion='reduced']) .card .ruler {
+    transition:
+      opacity var(--dur-pop) var(--ease-press),
+      transform var(--dur-pop) var(--ease-press);
+  }
+
+  /* tooltip scales from its anchor */
+  html:not([data-motion='reduced']) .tip {
+    transition:
+      opacity var(--dur-tip-out) ease-out,
+      transform var(--dur-tip-out) ease-out;
+  }
+  html:not([data-motion='reduced']) .tip[data-open] {
+    transition:
+      opacity var(--dur-tip) ease-out,
+      transform var(--dur-tip) ease-out;
+  }
+  html:not([data-motion='reduced']) .tip[data-instant] {
+    transition: none;
+  }
+
+  /* toast rises 8px on enter, sinks on exit */
+  html:not([data-motion='reduced']) .toast {
+    transition:
+      opacity var(--dur-pop-out) ease-out,
+      transform var(--dur-pop-out) ease-out;
+  }
+  @starting-style {
+    html:not([data-motion='reduced']) .toast {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  /* the bead follows the current word */
+  html:not([data-motion='reduced']) .lens-nav .bead {
+    transition:
+      transform var(--dur-sheet) var(--ease-morph),
+      opacity var(--dur-pop) ease;
+  }
+
+  /* the desks open by height where the browser can animate to auto */
+  html:not([data-motion='reduced']) .desks {
+    interpolate-size: allow-keywords;
+  }
+  html:not([data-motion='reduced']) .desks::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 300ms var(--ease-sheet),
+      content-visibility 300ms allow-discrete;
+  }
+  html:not([data-motion='reduced']) .desks[open]::details-content {
+    block-size: auto;
+  }
+  html:not([data-motion='reduced']) .desks > summary svg {
+    transition: transform var(--dur-pop) var(--ease-press);
   }
 }
 
-/* Allowed under reduced motion: a short opacity fade for orientation. */
-.fade-reduced {
-  animation: ae-fade-in var(--dur-fade-reduced) linear both;
-}
-
-/* The beacon also stops in quiet mode and under forced colors. */
-html[data-mode="quiet"] .beacon {
-  animation: none !important;
-  opacity: 1;
-}
-
-/* View Transitions are off under reduced motion and in quiet mode. */
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none !important;
-  }
-}
-html[data-motion="reduced"]::view-transition-group(*),
-html[data-motion="reduced"]::view-transition-old(*),
-html[data-motion="reduced"]::view-transition-new(*) {
-  animation: none !important;
+/* a theme or quiet flip snaps instead of smearing: src/lib/mode.js adds this for one frame */
+html.no-transitions *,
+html.no-transitions *::before,
+html.no-transitions *::after {
+  transition: none !important;
 }
