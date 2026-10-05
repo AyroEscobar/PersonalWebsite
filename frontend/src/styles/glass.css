@@ -322,10 +322,11 @@
   opacity: 0;
 }
 
-/* loupe: where the backdrop cannot be displaced (Safari, Firefox, tier lite) the lens
-   shows a magnified copy of the words under it (src/glass/lens.js fills it) */
+/* loupe: a reading lens shows a magnified copy of the words under it, in every browser
+   (src/glass/lens.js fills it); the fallbacks that turn the lens into a plate set
+   --gx-loupe: none and the originals stay */
 .glass > .loupe {
-  display: none;
+  display: var(--gx-loupe, block);
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -333,9 +334,6 @@
   overflow: hidden;
   pointer-events: none;
   opacity: 0;
-}
-html[data-lens='off'] .glass > .loupe {
-  display: var(--gx-loupe, block);
 }
 .glass > .loupe.is-on {
   opacity: 1;

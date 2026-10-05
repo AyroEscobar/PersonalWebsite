@@ -128,7 +128,7 @@ export function startReader({ nav, sentence, lens: L }) {
   }
   const presetFor = () => (G.phone ? 'dock' : 'nav')
 
-  // ---------- the loupe (where the backdrop cannot be displaced) ----------
+  // ---------- the loupe: the magnified words, in every browser (src/glass/lens.js) ----------
   function loupeAt(el, i) {
     window.clearTimeout(loupeT)
     if (G.lines[i]) L.loupeOn(el, G.lines[i], MAG)
@@ -254,7 +254,7 @@ export function startReader({ nav, sentence, lens: L }) {
         if (i !== idx) {
           idx = i
           place(lensBox(idx))
-          if (html.dataset.lens !== 'on') loupeAfterMove(nav, idx, ms(420))
+          loupeAfterMove(nav, idx, ms(420))
         }
       } else if (state === 'lens' && want) toPill()
       else if (state === 'pill' && !want) toLens()

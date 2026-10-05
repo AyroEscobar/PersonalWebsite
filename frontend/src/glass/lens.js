@@ -3,28 +3,33 @@
   src/lib/client.js imports it after fonts are ready and the page is idle.
 
   Chrome (html[data-lens='on']): each [data-lens-preset] element gets an SVG
-  displacement map sized to its box, so its backdrop really bends and
-  magnifies (glass.css applies it as `backdrop-filter: url(#id) ...`).
-  Everywhere else: the loupe, a magnified copy of the words under a lens
-  resting on a line of type (.lens-line > .lens-static).
+  displacement map sized to its box, so its backdrop really bends
+  (glass.css applies it as `backdrop-filter: url(#id) ...`).
+  The words under a reading lens (the hero, the 404, the reduced-motion
+  line) are magnified by the loupe in every browser: a magnified copy of
+  the words, drawn crisp inside the glass, with the originals hidden under
+  it. Displacement resamples whole pixels, so magnifying type through it
+  tore descenders and doubled contours (v2/reviews/site-art.md 1); on the
+  reading lens it only bends the rim and the field.
 
     startLens()                       wire everything up (idempotent)
     applyLens(el, preset, w, h, s)    give one element its map (s: lensing strength 0 to 1)
     lensFilter(preset, w, h, s)       the filter id, built once per size and cached
-    lineBoxes(el)                     the rendered lines of an element's text, page coordinates
     wordLines(root)                   the word spans of root, grouped by rendered line
     loupeOn(lens, line, mag) / loupeOff(lens)   line: a .lens-line, or one line of word spans
     materialize(el, preset, w, h)     the entry: lensing at 0.35, 0.7, 1 over 400 ms, once per session
 
   The map (research/glass.md 3): everything samples inward (a convex lens),
-  color-interpolation-filters is sRGB, feImage is sized to the element. The
-  interior is a rod profile, s(u) = u/M + (1 - 1/M) u^3, so the middle of a
-  line reads M times larger and the ends compress back to meet the rim; the
-  bezel is a convex squircle with a Snell bend. Dispersion is three
-  displacement passes (scale x 1-k, 1, 1+k) recombined per channel. The
-  hero lens disperses only on screens of 1.5x and up (k 0.008): the map
-  samples whole pixels, so at 1x any k splits the type into 1px red and
-  cyan patches, which read as misregistration (DESIGN.md 0.3).
+  color-interpolation-filters is sRGB, feImage is sized to the element and
+  drawn at devicePixelRatio, then smoothed, so the field bends without
+  steps. The interior is a rod profile, s(u) = u/M + (1 - 1/M) u^3. Two
+  bezels: 'snell' (a convex squircle with a Snell bend, for heavily
+  pre-blurred glass: nav, dock, buttons, cards) and 'soft' (1 - t)^3 for the
+  reading lens. A Snell bezel's slope at the rim is about -11, so any push
+  over 0.09 of the bezel folds the map: content near the rim shows twice,
+  mirrored. 'soft' keeps push x 3 / bezel under 1, so the map never folds
+  and a stroke crossing the rim stays one stroke. Dispersion is three
+  displacement passes (scale x 1-k, 1, 1+k) recombined per channel.
 */
 
 const NS = 'http://www.w3.org/2000/svg'
@@ -61,17 +66,66 @@ export function rodInv(u, M) {
   return (lo + hi) / 2
 }
 
-export function lensMap(w, h, r, { mag = 1, magY = mag, bezel = 16, push = 12 }, strength = 1) {
-  const N = w * h
+// the bezel's bend at depth t (0 at the rim, 1 at the bezel's inner edge), 1 at the rim
+const BEZEL = {
+  snell: (t) => {
+    const sl = (sq(Math.min(1, t + 0.002)) - sq(Math.max(0, t - 0.002))) / 0.004
+    return snell(sl) / NORM
+  },
+  soft: (t) => (1 - t) * (1 - t) * (1 - t),
+}
+
+// a separable box blur over the inside of the lens only (outside stays 0)
+function smooth(A, IN, W, H, rad) {
+  if (rad < 1) return
+  const T = new Float32Array(A.length)
+  for (let pass = 0; pass < 2; pass++) {
+    const horiz = pass === 0
+    const src = horiz ? A : T
+    const dst = horiz ? T : A
+    const n = horiz ? W : H
+    const lines = horiz ? H : W
+    for (let l = 0; l < lines; l++) {
+      for (let k = 0; k < n; k++) {
+        const i = horiz ? l * W + k : k * W + l
+        if (!IN[i]) {
+          dst[i] = 0
+          continue
+        }
+        let sum = 0
+        let cnt = 0
+        for (let o = -rad; o <= rad; o++) {
+          const kk = k + o
+          if (kk < 0 || kk >= n) continue
+          const j = horiz ? l * W + kk : kk * W + l
+          if (!IN[j]) continue
+          sum += src[j]
+          cnt++
+        }
+        dst[i] = cnt ? sum / cnt : 0
+      }
+    }
+  }
+}
+
+/**
+ * The displacement map for a w by h CSS-pixel box with corner radius r,
+ * drawn at `dpr` device pixels per CSS pixel. Displacements are in CSS
+ * pixels (the filter's user space), so `scale` is too.
+ */
+export function lensMap(w, h, r, { mag = 1, magY = mag, bezel = 16, push = 12, profile = 'snell' }, strength = 1, dpr = 1) {
+  const W = Math.max(1, Math.round(w * dpr))
+  const H = Math.max(1, Math.round(h * dpr))
+  const N = W * H
   const DX = new Float32Array(N)
   const DY = new Float32Array(N)
   const IN = new Uint8Array(N)
-  let max = 1
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const i = y * w + x
-      const px = x + 0.5
-      const py = y + 0.5
+  const bend = BEZEL[profile] || BEZEL.snell
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const i = y * W + x
+      const px = (x + 0.5) / dpr
+      const py = (y + 0.5) / dpr
       const s = sdf(px, py, w, h, r)
       if (s >= 0) continue
       IN[i] = 1
@@ -81,36 +135,33 @@ export function lensMap(w, h, r, { mag = 1, magY = mag, bezel = 16, push = 12 },
       let dy = (rod(v, magY) - v) * (h / 2)
       const t = Math.min(1, -s / bezel)
       if (t < 1) {
-        const sl = (sq(Math.min(1, t + 0.002)) - sq(Math.max(0, t - 0.002))) / 0.004
-        const m = snell(sl) / NORM
-        const gx = sdf(px + 1, py, w, h, r) - s
-        const gy = sdf(px, py + 1, w, h, r) - s
+        const m = bend(t)
+        const gx = sdf(px + 0.5, py, w, h, r) - sdf(px - 0.5, py, w, h, r)
+        const gy = sdf(px, py + 0.5, w, h, r) - sdf(px, py - 0.5, w, h, r)
         const gl = Math.hypot(gx, gy) || 1
         dx += (-gx / gl) * m * push
         dy += (-gy / gl) * m * push
       }
-      dx *= strength
-      dy *= strength
-      DX[i] = dx
-      DY[i] = dy
-      max = Math.max(max, Math.abs(dx), Math.abs(dy))
+      DX[i] = dx * strength
+      DY[i] = dy * strength
     }
   }
+  const rad = Math.round(dpr)
+  smooth(DX, IN, W, H, rad)
+  smooth(DY, IN, W, H, rad)
+  let max = 1
+  for (let i = 0; i < N; i++) max = Math.max(max, Math.abs(DX[i]), Math.abs(DY[i]))
   const scale = Math.ceil(max * 2 + 2)
   const c = document.createElement('canvas')
-  c.width = w
-  c.height = h
+  c.width = W
+  c.height = H
   const ctx = c.getContext('2d')
-  const im = ctx.createImageData(w, h)
+  const im = ctx.createImageData(W, H)
   const d = im.data
   for (let i = 0; i < N; i++) {
     const o = i * 4
-    if (IN[i]) {
-      d[o] = Math.round(128 + (DX[i] / (scale / 2)) * 127)
-      d[o + 1] = Math.round(128 + (DY[i] / (scale / 2)) * 127)
-    } else {
-      d[o] = d[o + 1] = 128
-    }
+    d[o] = Math.round(128 + (DX[i] / (scale / 2)) * 127)
+    d[o + 1] = Math.round(128 + (DY[i] / (scale / 2)) * 127)
     d[o + 2] = 128
     d[o + 3] = 255
   }
@@ -118,15 +169,17 @@ export function lensMap(w, h, r, { mag = 1, magY = mag, bezel = 16, push = 12 },
   return { url: c.toDataURL(), scale }
 }
 
-const dense = () => (window.devicePixelRatio || 1) >= 1.5
+const dpr = () => Math.min(3, Math.max(1, Math.round((window.devicePixelRatio || 1) * 2) / 2))
 
 // Presets (DESIGN.md 4.3), w and h in px.
 export const PRESET = {
-  // Dispersion only on dense screens. feDisplacementMap samples the nearest pixel, so any
-  // per-channel offset rounds to whole device pixels: at 1x that is a 1px red and cyan
-  // patch on the type at any k (v2/shots/site/r1/lens-crop.png); at 2x it is half a
-  // CSS pixel and reads as glass.
-  lens: (w, h, phone) => ({ r: h / 2, mag: 1.16, bezel: Math.round(h * 0.2), push: Math.round(h * (phone ? 0.18 : 0.22)), blur: phone ? 0 : 0.45, disp: phone || !dense() ? 0 : 0.008 }),
+  // The reading lens. Its words are magnified by the loupe (crisp in every browser), so the
+  // map leaves the interior at 1x and only bends a soft rim band: bezel 0.3h, push 0.07h,
+  // push x 3 / bezel = 0.7, so the map never folds (see BEZEL). The pre-blur matches the
+  // 1.5px backdrop blur the loupe browsers get, so the neighbouring lines' tails that reach
+  // into the glass look the same everywhere. No dispersion: with no magnified type in the
+  // backdrop it would only fringe those tails.
+  lens: (w, h, phone) => ({ r: h / 2, mag: 1, bezel: Math.round(h * 0.3), push: Math.max(1.5, h * 0.02), blur: phone ? 0.5 : 0.7, disp: 0, profile: 'soft' }),
   nav: (w, h) => ({ r: h / 2, mag: 1.03, bezel: 16, push: 14, blur: 11, disp: 0.03 }),
   dock: () => ({ r: 28, mag: 1.02, bezel: 16, push: 14, blur: 11, disp: 0.03 }),
   btn: (w, h) => ({ r: h / 2, mag: 1, bezel: 14, push: 12, blur: 7, disp: 0 }),
@@ -156,10 +209,11 @@ export function lensFilter(preset, w, h, strength = 1) {
   w = Math.max(8, Math.round(w))
   h = Math.max(8, Math.round(h))
   const phone = window.innerWidth <= 640
-  const key = `${preset}-${w}x${h}-${strength}-${phone ? 'p' : 'd'}${dense() ? '2' : '1'}`
+  const k = dpr()
+  const key = `${preset}-${w}x${h}-${strength}-${phone ? 'p' : 'd'}${k}`
   if (cache.has(key)) return cache.get(key)
   const p = (PRESET[preset] || PRESET.btn)(w, h, phone)
-  const map = lensMap(w, h, p.r, p, strength)
+  const map = lensMap(w, h, p.r, p, strength, k)
   const id = `lf${++seq}`
   const f = document.createElementNS(NS, 'filter')
   f.setAttribute('id', id)
@@ -216,38 +270,52 @@ function lensAll() {
   idle(step)
 }
 
-// ---------- lines of type ----------
-/** Each rendered line of an element's text: { left, right, top, bottom, cy } in page coordinates. */
-export function lineBoxes(el) {
-  const range = document.createRange()
-  range.selectNodeContents(el)
-  const lines = []
-  for (const r of range.getClientRects()) {
-    if (r.width < 1 || r.height < 1) continue
-    const cy = (r.top + r.bottom) / 2
-    const L = lines.find((l) => Math.abs(l.cy - cy) < r.height * 0.35)
-    if (L) {
-      L.left = Math.min(L.left, r.left)
-      L.right = Math.max(L.right, r.right)
-    } else lines.push({ left: r.left, right: r.right, top: r.top, bottom: r.bottom, cy })
+// ---------- the loupe: the magnified words of a reading lens, in every browser ----------
+const bfOK = () => {
+  try {
+    return CSS.supports('backdrop-filter', 'blur(1px)') || CSS.supports('-webkit-backdrop-filter', 'blur(1px)')
+  } catch {
+    return false
   }
-  lines.sort((a, b) => a.cy - b.cy)
-  return lines.map((l) => ({
-    left: l.left + window.scrollX,
-    right: l.right + window.scrollX,
-    top: l.top + window.scrollY,
-    bottom: l.bottom + window.scrollY,
-    cy: l.cy + window.scrollY,
-  }))
 }
-
-// ---------- the loupe: magnification where the backdrop cannot be displaced ----------
+// Off wherever the lens is a solid plate under the line (no backdrop-filter, reduced
+// transparency, more contrast, forced colours): there the originals stay and read once.
 export const loupeAllowed = () =>
-  !lensOn() &&
+  bfOK() &&
   html().dataset.transparency !== 'reduced' &&
   !mq('(prefers-reduced-transparency: reduce)') &&
   !mq('(prefers-contrast: more)') &&
   !mq('(forced-colors: active)')
+
+/*
+  Where a line's ink sits in its line box: the centre between the tallest
+  ascender and the deepest descender of the face, measured once per font and
+  size. The loupe magnifies about it, so a line's ascenders and descenders
+  grow evenly and stay inside a lens centred on it (components.css centres
+  the reading lens there too).
+*/
+const inkCache = new Map()
+function inkCentre(cs, fs, lh) {
+  const font = `${cs.fontStyle} ${cs.fontWeight} ${fs}px ${cs.fontFamily}`
+  const key = `${font}/${lh}`
+  if (inkCache.has(key)) return inkCache.get(key)
+  let c = lh / 2
+  try {
+    const ctx = document.createElement('canvas').getContext('2d')
+    ctx.font = font
+    const m = ctx.measureText('hgjly')
+    const fa = m.fontBoundingBoxAscent
+    const fd = m.fontBoundingBoxDescent
+    if (fa > 0 && fd > 0) {
+      const base = (lh - (fa + fd)) / 2 + fa
+      c = base - (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2
+    }
+  } catch {
+    // no canvas text metrics: the line box centre
+  }
+  inkCache.set(key, c)
+  return c
+}
 
 function wrapWords(root, skip) {
   if (root.dataset.words) return [...root.querySelectorAll(':scope .w')]
@@ -312,11 +380,12 @@ export function loupeOn(lens, line, M = 1.16) {
   const fs = parseFloat(cs.fontSize)
   const lh = parseFloat(cs.lineHeight) || fs
   const W = lr.width
-  const H = lr.height
   // A word's box is its content area, centred on its line box: the line box starts lh/2 above that centre.
   const wr = words[0].getBoundingClientRect()
   const oy = (wr.top + wr.bottom) / 2 - lh / 2 - lr.top
-  const ty = H / 2 + (oy - H / 2) * M
+  // magnify about the line's ink centre: a point y down the line box lands at oy + gc + (y - gc) * M
+  const gc = inkCentre(cs, fs, lh)
+  const ty = oy + gc * (1 - M)
   lp.style.setProperty('--loupe-size', `${fs}px`)
   lp.style.setProperty('--loupe-lh', `${lh}px`)
   lp.replaceChildren(
@@ -342,10 +411,7 @@ export function loupeOn(lens, line, M = 1.16) {
 }
 
 function loupeAll() {
-  document.querySelectorAll('.lens-line > .lens-static').forEach((lens) => {
-    if (lensOn()) return
-    loupeOn(lens, lens.parentElement)
-  })
+  document.querySelectorAll('.lens-line > .lens-static').forEach((lens) => loupeOn(lens, lens.parentElement))
 }
 
 // ---------- the entry ----------
