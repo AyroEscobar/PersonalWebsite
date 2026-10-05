@@ -55,19 +55,22 @@ p, li, dd, blockquote {
 
 p { margin: 0; }
 
-/* Links: accent, underlined, never colour only. */
+/* Links: ink with an accent underline, never colour only. A link that sits straight on the
+   field (the hero lede, the builds note) has no glass under it, and accent on a raw blob
+   measures 3.1:1; ink holds 4.5:1 on every blob (rules.mjs, "text on the raw field", which
+   check-content ties to this colour). Links on glass set accent-ink (components.css). */
 a {
-  color: var(--accent);
+  color: var(--ink);
   text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
-  text-decoration-color: rgb(var(--accent-rgb) / 0.4);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--accent);
   transition: text-decoration-color var(--dur-hover) ease, color var(--dur-hover) ease;
 }
 @media (hover: hover) and (pointer: fine) {
   a:hover {
-    color: var(--accent-ink);
-    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--accent-ink);
   }
 }
 
