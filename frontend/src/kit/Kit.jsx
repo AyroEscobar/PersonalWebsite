@@ -95,12 +95,12 @@ export default function Kit() {
       <a className="skip-link" href="#main">
         {SKIP.text}
       </a>
-      <Stage />
       <header className="top">
         <Wordmark />
         <NavPill />
       </header>
       <main id="main" tabIndex={-1} className="kit-main">
+        <Stage />
         <header className="kit-head">
           <a className="kit-back" href="/">
             {KIT.back.text}

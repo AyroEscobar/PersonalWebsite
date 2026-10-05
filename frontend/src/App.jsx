@@ -14,7 +14,8 @@ import { SKIP } from './content/identity.js'
   The home page (DESIGN.md 6). Landmark and focus order: skip link, wordmark, nav, <main> with
   the five sections in scroll order (the hero holds the page's one <h1>), <footer>. The stage
   (poster and canvas) is fixed behind everything; every section is a glass panel floating in
-  that world.
+  that world. It sits first in <main> so the poster's alt (the scene, in words) is inside a
+  landmark; being fixed, where it sits in the DOM does not change how it paints.
 */
 export default function App() {
   return (
@@ -22,12 +23,12 @@ export default function App() {
       <a className="skip-link" href="#main">
         {SKIP.text}
       </a>
-      <Stage />
       <header className="top">
         <Wordmark />
         <NavPill />
       </header>
       <main id="main" tabIndex={-1}>
+        <Stage />
         <Hero />
         <CheckOut />
         <Experience />
