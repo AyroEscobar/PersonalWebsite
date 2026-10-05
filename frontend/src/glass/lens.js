@@ -21,9 +21,10 @@
   interior is a rod profile, s(u) = u/M + (1 - 1/M) u^3, so the middle of a
   line reads M times larger and the ends compress back to meet the rim; the
   bezel is a convex squircle with a Snell bend. Dispersion is three
-  displacement passes (scale x 1-k, 1, 1+k) recombined per channel; the
-  hero lens uses k 0.005 so the fringe reads as glass, not as
-  misregistration (DESIGN.md 0.3 asked for 0.010; it still split at 1x).
+  displacement passes (scale x 1-k, 1, 1+k) recombined per channel. The
+  hero lens disperses only on screens of 1.5x and up (k 0.008): the map
+  samples whole pixels, so at 1x any k splits the type into 1px red and
+  cyan patches, which read as misregistration (DESIGN.md 0.3).
 */
 
 const NS = 'http://www.w3.org/2000/svg'
@@ -117,11 +118,15 @@ export function lensMap(w, h, r, { mag = 1, magY = mag, bezel = 16, push = 12 },
   return { url: c.toDataURL(), scale }
 }
 
+const dense = () => (window.devicePixelRatio || 1) >= 1.5
+
 // Presets (DESIGN.md 4.3), w and h in px.
 export const PRESET = {
-  // dispersion 0.005, not DESIGN's 0.010: at 0.010 a 1x screen still showed red and cyan
-  // edges on "never has", where the rod compresses most (v2/shots/site/r1/lens-crop.png)
-  lens: (w, h, phone) => ({ r: h / 2, mag: 1.16, bezel: Math.round(h * 0.2), push: Math.round(h * (phone ? 0.18 : 0.22)), blur: phone ? 0 : 0.45, disp: phone ? 0 : 0.005 }),
+  // Dispersion only on dense screens. feDisplacementMap samples the nearest pixel, so any
+  // per-channel offset rounds to whole device pixels: at 1x that is a 1px red and cyan
+  // patch on the type at any k (v2/shots/site/r1/lens-crop.png); at 2x it is half a
+  // CSS pixel and reads as glass.
+  lens: (w, h, phone) => ({ r: h / 2, mag: 1.16, bezel: Math.round(h * 0.2), push: Math.round(h * (phone ? 0.18 : 0.22)), blur: phone ? 0 : 0.45, disp: phone || !dense() ? 0 : 0.008 }),
   nav: (w, h) => ({ r: h / 2, mag: 1.03, bezel: 16, push: 14, blur: 11, disp: 0.03 }),
   dock: () => ({ r: 28, mag: 1.02, bezel: 16, push: 14, blur: 11, disp: 0.03 }),
   btn: (w, h) => ({ r: h / 2, mag: 1, bezel: 14, push: 12, blur: 7, disp: 0 }),
@@ -151,7 +156,7 @@ export function lensFilter(preset, w, h, strength = 1) {
   w = Math.max(8, Math.round(w))
   h = Math.max(8, Math.round(h))
   const phone = window.innerWidth <= 640
-  const key = `${preset}-${w}x${h}-${strength}-${phone ? 'p' : 'd'}`
+  const key = `${preset}-${w}x${h}-${strength}-${phone ? 'p' : 'd'}${dense() ? '2' : '1'}`
   if (cache.has(key)) return cache.get(key)
   const p = (PRESET[preset] || PRESET.btn)(w, h, phone)
   const map = lensMap(w, h, p.r, p, strength)
