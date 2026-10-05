@@ -1,0 +1,13 @@
+man.glb: the figure mesh in this folder.
+
+Source: "Male base" by Артур Мигранов, on Poly Pizza
+  https://poly.pizza/m/eWGDnQ0jzmH
+License: Creative Commons Attribution 3.0 Unported (CC BY 3.0)
+  https://creativecommons.org/licenses/by/3.0/
+
+Changes made for this site (tools/build-figure.mjs): the mesh was welded, scaled to 1.80 m,
+simplified with meshoptimizer, auto-rigged with 21 joints and skinned, quantized and
+meshopt-compressed into one GLB. The pose and the push cycle are solved at runtime on that
+rig (src/scene/figure.js). The material is this site's own (dark clearcoat with a neon edge).
+
+Credit, as shown in the site footer: 3D figure: Male base by Артур Мигранов, CC BY 3.0.
