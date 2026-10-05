@@ -4,7 +4,7 @@ import Section from '../ui/Section.jsx'
 import SectionHead from '../ui/SectionHead.jsx'
 
 /*
-  crew (DESIGN.md 6.7): the four entries as rows on one glass sheet. The
+  crew (DESIGN.md 6.7): the head in the rail, the four entries as rows on one glass sheet. The
   title in Inter 600 16, the dates tabular, the rest in Inter 14. Strings
   are split on their own " · " separators and nothing is reworded; a string
   that does not split cleanly renders whole.
@@ -27,9 +27,9 @@ function split(e) {
 
 export default function Crew() {
   return (
-    <Section id="crew" field="crew">
-      <SectionHead id="crew" line={CREW.intro.text} />
-      <Glass tier="sheet" className="crew-sheet col-narrow">
+    <Section id="crew" field="crew" rail>
+      <SectionHead id="crew" line={CREW.intro.text} rail />
+      <Glass tier="sheet" className="crew-sheet sec-body">
         <ul className="crew-rows">
           {CREW.entries.map((e) => {
             const p = split(e)
