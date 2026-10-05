@@ -337,6 +337,13 @@ export async function checkContent({ quiet = false } = {}) {
     } catch {
       comp = null
     }
+    // the poster is the first paint: a dark or failed render (luminance under prototype b's 0.09 floor) never ships
+    try {
+      const lumMeta = existsSync(metaPath) ? JSON.parse(readFileSync(metaPath, 'utf8')).luminance : null
+      if (!(lumMeta >= 0.09)) err(`poster: public/poster/meta.json luminance ${lumMeta} is under the 0.09 floor (a dark or failed render); re-run \`npm run poster\``)
+    } catch {
+      /* unreadable meta is reported above */
+    }
     if (!comp) err('contrast: public/poster/meta.json has no measured composite; run `npm run poster` after a build so every text line is measured over the live scene')
     else {
       for (const v of COMPOSITE_VIEWS) {
