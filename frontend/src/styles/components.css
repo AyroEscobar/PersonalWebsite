@@ -267,8 +267,9 @@ html[data-tier='still'] .stage canvas {
 .panel--exp .sec-title {
   margin-bottom: 22px;
 }
+/* 684, not DESIGN's 660: at 660 the cloud-and-data row left GraphQL alone on a line */
 .panel--stack {
-  width: min(660px, 100%);
+  width: min(684px, 100%);
 }
 .panel--stack .sec-title {
   margin-bottom: 20px;
