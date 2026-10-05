@@ -157,6 +157,10 @@ html[data-ui='0'] .footer,
 html[data-ui='0'] .skip-link {
   visibility: hidden;
 }
+/* the stage sits inside <main> (a landmark for the poster's alt), so it opts back in */
+html[data-ui='0'] main .stage {
+  visibility: visible;
+}
 
 /* Forced colours: decorative layers go away, focus stays visible. */
 @media (forced-colors: active) {
