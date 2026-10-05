@@ -21,7 +21,7 @@ export default function NotFound() {
         {SKIP.text}
       </a>
       <main id="main" tabIndex={-1} className="hero nf">
-        <Field preset="hero" grid />
+        <Field preset="hero" />
         <div className="page on-field nf-inner">
           <Masthead />
           {line && (

@@ -94,7 +94,7 @@ function blobStyle(b) {
   return st
 }
 
-export default function Field({ preset, blobs, grid = false, className = '' }) {
+export default function Field({ preset, blobs, className = '' }) {
   const list = blobs ?? FIELDS[preset] ?? []
   const cls = ['field', preset === 'hero' && 'field--hero', className].filter(Boolean).join(' ')
   return (
@@ -102,7 +102,6 @@ export default function Field({ preset, blobs, grid = false, className = '' }) {
       {list.map((b, i) => (
         <i key={i} className="blob" style={blobStyle(b)} />
       ))}
-      {grid && <div className="field-grid" />}
     </div>
   )
 }

@@ -49,19 +49,8 @@
   }
 }
 
-/* The structure layer the lens bends: a 64px grid at 5% warm ink, hero only,
-   fading to nothing over the hero's last 160px. */
-.field-grid {
-  position: absolute;
-  inset: 0 0 30vh;
-  background-image:
-    linear-gradient(rgb(var(--ink-rgb) / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(var(--ink-rgb) / 0.05) 1px, transparent 1px);
-  background-size: 64px 64px;
-  background-position: -1px -1px;
-  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 160px), transparent);
-  mask-image: linear-gradient(to bottom, black calc(100% - 160px), transparent);
-}
+/* The 64px grid the lens bends is not part of the field: it lives under the sentence block
+   only (components.css, .reading::before), so no graph paper spreads across the page. */
 
 /* Everything that sits on a field paints above it. */
 .on-field {

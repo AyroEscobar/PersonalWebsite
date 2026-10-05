@@ -49,7 +49,7 @@ export default function Origin() {
   return (
     <section id="origin" aria-labelledby={headingId('origin')} className="hero">
       <div className="hero-stage">
-        <Field preset="hero" grid />
+        <Field preset="hero" />
         <div className="page on-field hero-inner">
           <Masthead as="h1" href="#origin" />
           <div className="hero-col">

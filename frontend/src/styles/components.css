@@ -1875,6 +1875,31 @@ html[data-motion='reduced'] .reading {
   }
 }
 
+/* The structure layer the lens bends (DESIGN.md 3.3): a 64px grid at 3% warm ink under the
+   sentence block only, the hero's and the 404's, fading to nothing well inside the block's
+   own edges, so it never shows in the masthead band, beside the sentence or below it. */
+.reading::before,
+.lens-line::before {
+  content: '';
+  position: absolute;
+  inset: -0.3em -0.4em;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgb(var(--ink-rgb) / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--ink-rgb) / 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: center;
+  -webkit-mask-image: radial-gradient(closest-side, black 30%, transparent);
+  mask-image: radial-gradient(closest-side, black 30%, transparent);
+}
+@media (forced-colors: active) {
+  .reading::before,
+  .lens-line::before {
+    display: none;
+  }
+}
+
 /* the sentence: his voice, hand-set lines */
 .sentence {
   position: relative;
