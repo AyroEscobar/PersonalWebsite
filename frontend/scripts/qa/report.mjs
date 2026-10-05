@@ -1,7 +1,7 @@
 /*
   QA report writer: qa-report.md and qa-report.json in the reviews dir, with
   the numbers beside the baseline (research/baseline-metrics.json) and the
-  PLAN.md 13 acceptance criteria mapped to the checks that prove them.
+  DESIGN.md 11 acceptance criteria mapped to the checks that prove them.
 */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
@@ -9,65 +9,46 @@ import { localConfig } from '../lib/chrome.mjs'
 
 const KB = 1024
 
-// Acceptance criteria (PLAN.md 13) -> the check ids that decide them.
-// 'manual' means a person has to look (Ayro's five minutes or a design review).
+// Acceptance criteria (DESIGN.md 11, the v2 spec; numbers 1 to 6 are looked at, not counted)
+// -> the check ids that decide them. 'manual' means a person has to look.
 const CRITERIA = [
-  [1, 'npm run build passes with check-content and budget green', ['build/npm run build', 'budget/budgets']],
-  [2, 'no U+2013 or U+2014 in dist or src', ['static/dashes', 'build/npm run build']],
-  [3, 'every visible string carries a public fact id or ui flag', ['build/npm run build']],
-  [4, 'no Firebase, Mapbox, three.js, framer-motion or react-router in dist', ['static/removed-deps']],
-  [5, 'no audio, EXIF photos, backend, Admin or Review in the branch', ['repo/removed files']],
-  [6, 'vercel.json: no catch-all, immutable assets, headers and CSP hash', ['repo/vercel.json', 'http/security headers', 'http/immutable assets']],
-  [7, 'granular commits, no AI attribution, nothing pushed', ['repo/commits']],
-  [8, 'JPMorgan once as Software Engineer Intern, CIB, June to August 2026', ['build/npm run build', 'static/privacy'], 'manual'],
-  [9, 'MD7 reads Software Engineer (contract), May 2026 to present', ['build/npm run build'], 'manual'],
-  [10, 'HackUTD past tense, February 2025 to September 2026, tech team', ['build/npm run build'], 'manual'],
-  [11, 'agent system: no count, no time of day, no link', ['static/privacy'], 'manual'],
-  [12, 'Viaere: no counts, customers or start date; co-founders not named', ['static/privacy'], 'manual'],
-  [13, 'Interview-Lens says built with a team; nobody is founder', ['build/npm run build'], 'manual'],
-  [14, 'hackathons use competed; no awards implied', ['static/competed']],
-  [15, 'none of the private facts appear', ['static/privacy']],
-  [16, 'the only live numbers are time, sky, build stamp and visit stamp', [], 'manual'],
-  [17, 'twenty only via the AGE constant', ['build/npm run build']],
-  [18, "Onto what's next. exactly once", ['static/closer-once']],
-  [19, 'hero map: four Texas labels and two off-grid links only', ['static/map-labels']],
-  [20, 'palette is the tokens only', ['static/palette']],
-  [21, 'no scanline, glitch, noise, bracket, chamfer or full-viewport blend', ['static/effects']],
-  [22, 'fonts: exactly Overpass and Overpass Mono, two preloads, 65 KB', ['fonts/only overpass', 'budget/budgets']],
-  [23, 'past sodium, current LED, beacon only for live status', [], 'manual'],
-  [24, 'RouteRail six stops with aria-current at 1440 and 390', ['nav/aria-current tracks the section']],
-  [25, 'first paint within 1.3 s, never over content, skipped when it should be', ['motion/first paint runs once', 'motion/no first paint on repeat or deep link', 'motion/reduced motion', 'motion/quiet mode']],
-  [26, 'tap or click sends a wave along the road graph within 2 s', [], 'manual'],
-  [27, 'ping button fires from Plano and says pinged from plano', ['signature/ping status @1440', 'signature/ping status @390']],
-  [28, 'reduced motion or quiet: no canvas, ping highlights a node', ['motion/reduced motion', 'motion/quiet mode']],
-  [29, 'vertical swipes on the map scroll the page (pan-y)', ['signature/map touch-action pan-y']],
-  [30, 'Lighthouse mobile: perf 90+, a11y, bp, seo 100', ['lighthouse/mobile-full']],
-  [31, 'mobile LCP 2.5 s, CLS 0.02, TBT 150 ms; desktop perf 99', ['lighthouse/mobile-full', 'lighthouse/desktop-full']],
-  [32, 'entry JS, CSS, HTML, initial transfer budgets; zero third-party and media', ['budget/budgets']],
-  [33, '?quiet scores at least as high as full mode', ['lighthouse/mobile quiet >= full', 'lighthouse/desktop quiet >= full']],
-  [34, 'one rAF loop, idle when the hero is offscreen', ['motion/rAF idle with hero offscreen']],
-  [35, 'axe: zero violations on / and /404 at both widths', ['axe/home@390', 'axe/home@1440', 'axe/404@390', 'axe/404@1440']],
-  [36, 'token contrast floors and measured text contrast', ['build/npm run build', 'page/home@390 contrast', 'page/home@1440 contrast']],
-  [37, 'keyboard sequence, focus return, unobscured focus', ['keyboard/skip link first', 'keyboard/visible focus', 'keyboard/focus not obscured', 'keyboard/tab order spec', 'keyboard/cmd+k and esc', 'keyboard/rail stop lands below the bar']],
-  [38, 'targets 24 px, bars and dialog rows 44 px', ['page/home@390 targets', 'page/home@1440 targets']],
-  [39, 'map, specimens and ProgramStrip have text equivalents', [], 'manual'],
-  [40, 'single-key shortcuts can be turned off and it persists', [], 'manual'],
-  [41, 'title, canonical, og:url, sitemap on www; twitter name=', ['meta/title, canonical, og, twitter', 'http//sitemap.xml']],
-  [42, 'robots and sitemap MIME; unknown path is a themed 404', ['http//robots.txt', 'http//sitemap.xml', 'http/404 status']],
-  [43, 'og.png 1200 by 630, 300 KB, alt without dashes or numbers', ['meta/og.png']],
-  [44, 'JSON-LD Person validates', ['meta/json-ld person']],
-  [45, 'prerendered h1, six h2s and the hero caption', ['prerender/h1 and h2s before JS', 'prerender/hero caption before JS']],
-  [46, '?quiet removes canvas, boot and motion; same DOM', ['motion/quiet mode']],
-  [47, 'print: one or two pages, no map or buttons', ['print/print hides chrome'], 'manual'],
-  [48, '404 has h1, a link home, the poster, passes axe', ['http/404 status', 'axe/404@390', 'axe/404@1440']],
-  [49, 'qa-report.md and the after shots exist', []],
-  [50, 'scratch under 1 GB, no Chrome profiles left', ['repo/scratch']],
+  [1, 'the 1440 fold: name, role, city and a receipt in five seconds; the sentence and lens first; colour under every line; at least as striking as prototype a', ['prerender/the sentence before JS', 'r1/T2 email on the first screen @1440x900'], 'manual'],
+  [2, 'the lens close up reads as thick clear glass, magnifying about 1.16x, the fringe faint', ['glass/reader takes the stand-in\'s box @1440'], 'manual'],
+  [3, 'the 390 fold: masthead, six lines, the lens on line 2, both pills above 700px; lens off still reads as glass', ['glass/reader takes the stand-in\'s box @390', 'r1/T2 email on the first screen @390x844', 'r1/T6 name high on a phone @390x844'], 'manual'],
+  [4, 'scrolling: the lens snaps line to line, becomes the pill (the dock on phones) once, active word in italic', ['glass/morph @1440', 'glass/morph @390', 'glass/deep link lands on the nav @1440', 'glass/deep link lands on the nav @390', 'nav/aria-current tracks the section']],
+  [5, 'the kit page shows every component in every state, and the fallbacks look designed', ['glass/quiet mode @1440', 'glass/quiet mode @390', 'glass/forced colours @1440', 'glass/forced colours @390'], 'manual'],
+  [7, 'npm run build green: check-content, budget, prerender', ['build/npm run build', 'budget/budgets']],
+  [8, 'no U+2013 or U+2014 in dist or src', ['static/dashes', 'build/npm run build']],
+  [9, 'every visible string carries a public fact id or ui flag; nothing from the denylist', ['build/npm run build', 'static/privacy']],
+  [10, 'measured composite contrast at four scroll positions, 1440 and 390, zero failures', ['glass/measured contrast @1440', 'glass/measured contrast @390', 'page/home@390 contrast', 'page/home@1440 contrast']],
+  [11, '3 to 5 live glass surfaces on the first screen', ['glass/first-screen surfaces @1440', 'glass/first-screen surfaces @390']],
+  [12, 'the morph under 600 ms and one #nav', ['glass/morph @1440', 'glass/morph @390']],
+  [13, 'the keyboard reaches every nav word, button, link and summary, in reading order, with a visible ring', ['glass/keyboard reaches every control', 'keyboard/skip link first', 'keyboard/visible focus', 'keyboard/focus not obscured', 'keyboard/tab order spec', 'keyboard/nav word lands below the pill']],
+  [14, 'no sideways scroll from 320 to 1920', ['glass/no sideways scroll at 320 to 1920']],
+  [15, 'forced colours: a 2px border on every glass surface', ['glass/forced colours @1440', 'glass/forced colours @390']],
+  [16, 'reduced motion: the field stops, no morph, the nav a pill from the start', ['motion/reduced motion']],
+  [17, 'quiet: solid plates, the lens under the words', ['glass/quiet mode @1440', 'glass/quiet mode @390']],
+  [18, 'axe: zero violations on / and the 404 at 390 and 1440', ['axe/home@390', 'axe/home@1440', 'axe/404@390', 'axe/404@1440']],
+  [19, 'no monospace anywhere', ['v2/no monospace at 1440 (DESIGN.md 9.3)']],
+  [20, 'fonts: Instrument Serif and Inter only, three preloads, 60 KB', ['fonts/only Instrument Serif and Inter', 'budget/budgets']],
+  [21, 'no layout shift when the fonts arrive late', ['r1/T12 no shift when the fonts arrive late']],
+  [22, 'Lighthouse mobile: LCP under 2.5 s, CLS 0.02, TBT 150 ms; a11y, bp, seo 100', ['lighthouse/mobile-full']],
+  [23, 'Lighthouse desktop', ['lighthouse/desktop-full']],
+  [24, '?quiet=1 scores at least as high as full mode', ['lighthouse/mobile quiet >= full', 'lighthouse/desktop quiet >= full']],
+  [25, 'entry JS, CSS, HTML, lens, kit, specimens and initial transfer budgets; zero third-party and media', ['budget/budgets', 'static/removed-deps']],
+  [26, "Onto what's next. exactly once; hackathons competed", ['static/closer-once', 'static/competed']],
+  [27, 'palette is the tokens; no scanline, glitch, chamfer or blend effects', ['static/palette', 'static/effects']],
+  [28, 'title, canonical, og, twitter, JSON-LD; og.png 1200 by 630 under 300 KB', ['meta/title, canonical, og, twitter', 'meta/json-ld person', 'meta/og.png']],
+  [29, 'robots and sitemap; an unknown path is a themed 404', ['http//robots.txt', 'http//sitemap.xml', 'http/404 status']],
+  [30, 'the copy email button answers in the status region', ['interaction/copy email toast @390', 'interaction/copy email toast @1440']],
+  [31, 'print: the nav and buttons hidden', ['print/print hides chrome']],
+  [32, 'granular commits, no AI attribution, nothing pushed', ['repo/commits']],
+  [33, 'scratch under 1 GB, no Chrome profiles left', ['repo/scratch']],
 ]
 
 function criteriaStatus(R) {
   const by = new Map(R.checks.map((c) => [`${c.area}/${c.id}`, c]))
   return CRITERIA.map(([n, text, ids, manual]) => {
-    if (n === 49) return { n, text, status: R.shots.length ? 'pass' : 'pending', detail: `${R.shots.length} shots` }
     const found = ids.map((id) => by.get(id)).filter(Boolean)
     let status
     if (!ids.length) status = 'manual'
@@ -118,7 +99,7 @@ export function writeReport(R, { REVIEWS, SHOTS }) {
   }
   L.push('')
 
-  L.push('## Acceptance criteria (PLAN.md 13)', '')
+  L.push('## Acceptance criteria (DESIGN.md 11)', '')
   L.push('| # | criterion | status | evidence |', '|---|---|---|---|')
   for (const c of crit) L.push(`| ${c.n} | ${c.text} | ${c.status} | ${c.detail} |`)
   L.push('')
@@ -135,7 +116,7 @@ export function writeReport(R, { REVIEWS, SHOTS }) {
 
   if (R.motion && Object.keys(R.motion).length) {
     L.push('## Motion probes', '')
-    for (const [k, v] of Object.entries(R.motion)) L.push(`- ${k}: rAF ${v.raf} in 3 s, canvas ${v.canvas}, data-boot at load ${v.bootAtLoad}, after ${v.boot}, mode ${v.mode}, motion ${v.motion}, tier ${v.tier}, long animations ${v.animations?.length ?? 0}`)
+    for (const [k, v] of Object.entries(R.motion)) L.push(`- ${k}: rAF ${v.raf} in 3 s, canvas ${v.canvas}, mode ${v.mode}, motion ${v.motion}, tier ${v.tier}, lens entry seen ${v.lensSeen}, long animations ${v.animations?.length ?? 0}`)
     L.push('')
   }
 
@@ -146,7 +127,7 @@ export function writeReport(R, { REVIEWS, SHOTS }) {
   }
 
   L.push('## Screenshots', '', `In ${SHOTS}:`, '', R.shots.map((s) => `- ${s}`).join('\n') || '- none', '')
-  L.push('## Manual (Ayro, five minutes)', '', '- VoiceOver over the rail, the map label, one desk branch and the JumpList.', '- A real iPhone tap on the hero: feel the ping and confirm scrolling never gets trapped.', '')
+  L.push('## Manual (Ayro, five minutes)', '', '- Scroll the first screen slowly on a laptop and on an iPhone: the lens should read the sentence line by line and become the nav once.', '- Safari: the lens has no displacement there, so the loupe magnifies; check it still reads as glass.', '- VoiceOver over the nav, the sentence and one desk list.', '')
 
   const md = path.join(REVIEWS, 'qa-report.md')
   writeFileSync(md, L.join('\n'))
