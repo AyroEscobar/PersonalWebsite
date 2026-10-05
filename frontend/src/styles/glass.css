@@ -394,8 +394,9 @@
     --gx-fill: linear-gradient(165deg, var(--plate), var(--plate-2));
     --gx-ring: none;
     --gx-lens-z: 1;
-  --gx-lens-zi: -1;
+    --gx-lens-zi: -1;
     --gx-under: 1;
+    --gx-loupe: none;
   }
 }
 .sim-noblur {
@@ -416,7 +417,7 @@
     --gx-ring: none;
     --gx-caustic: none;
     --gx-lens-z: 1;
-  --gx-lens-zi: -1;
+    --gx-lens-zi: -1;
     --gx-under: 1;
     --gx-loupe: none;
   }
@@ -443,7 +444,7 @@ html[data-transparency='reduced'],
     --gx-deco: 0;
     --gx-shadow: 0 0 0 2px var(--ink), var(--e-rest);
     --gx-lens-z: 1;
-  --gx-lens-zi: -1;
+    --gx-lens-zi: -1;
     --gx-under: 1;
     --gx-loupe: none;
   }
