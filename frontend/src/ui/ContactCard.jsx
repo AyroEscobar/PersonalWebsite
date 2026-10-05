@@ -9,17 +9,19 @@ import { SIGNAL } from '../content/signal.js'
   paragraph renders unchanged: its first clause (up to the question mark)
   in the italic serif, the rest in Inter 16. Then the address as text with
   the copy button, and the link row.
+  `wide` (from 900px up): his words on the left, the address and the link
+  row on the right, for a card that fills a section column.
 */
 function split(text) {
   const i = text.indexOf('?')
   return i < 0 ? [text, ''] : [text.slice(0, i + 1), text.slice(i + 1)]
 }
 
-export default function ContactCard({ copyState, copyBusy, tipOpen, linkStates, idPrefix = 'contact' }) {
+export default function ContactCard({ copyState, copyBusy, tipOpen, linkStates, idPrefix = 'contact', wide = false }) {
   const [voice, rest] = split(SIGNAL.paragraph.text)
   const addressId = `${idPrefix}-address`
   return (
-    <Glass tier="thick" lens="card" spec scrim className="contact">
+    <Glass tier="thick" lens="card" spec scrim className={`contact ${wide ? 'contact--wide' : ''}`.trim()}>
       <p>
         <span className="contact-voice">{voice}</span>
         {rest && <span className="contact-body">{rest}</span>}
