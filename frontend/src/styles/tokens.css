@@ -1,150 +1,163 @@
 /*
-  SODIUM design tokens (PLAN.md section 2).
-  Dark only. Every text token is checked against every surface by
-  scripts/check-content.mjs, which parses the hex values in the first :root
-  block below. Keep one token per line in the form `--name: #RRGGBB;`.
+  v2 design tokens (DESIGN.md section 2). Light first: Plano at noon, warm.
+  Names are by role, never by value.
+
+  scripts/check-content.mjs parses the hex values in the FIRST :root block
+  below (one token per line, `--name: #RRGGBB;`): every hex literal anywhere
+  else in src must be one of them, and every text token is checked against
+  every surface it sits on, including the glass composites over the field.
+  The field colours are oklch; the check converts them.
 */
 
 :root {
   /* surfaces */
-  --night: #0B1226;
-  --deck: #121B33;
-  --deck-2: #182340;
+  --base: #FBF9F4;
+  --plate: #FFFFFF;
+  --plate-2: #F5F0E6;
 
-  /* text and light */
-  --ink: #F3ECDF;
-  --dim: #9AA7C2;
-  --sodium: #FFA53D;
-  --led: #9CC3FF;
-  --beacon: #FF5A47;
+  /* text */
+  --ink: #15120E;
+  --ink-2: #4A443C;
+  --ink-3: #5E574D;
+  --on-ink: #FBF9F4;
 
-  /* roads */
-  --trace: #2A3757;
-  --trace-lit: #5A6C96;
-
-  /* rules */
-  --hairline: rgba(243, 236, 223, 0.10);
-
-  /* horizon band, written by SkyWord from the sun over Plano */
-  --horizon: transparent;
-
-  /* type scale (desktop values; the phone ones are below). In rem, so a
-     reader's larger default font size scales the page; the display sizes keep
-     their vw middle term (r1 M20). At 16px: 56 to 128, 34 to 56, 24, 20, 17,
-     14, 13. */
-  --t-display: clamp(3.5rem, 9vw, 8rem);
-  --t-h2: clamp(2.125rem, 4vw, 3.5rem);
-  --t-h3: 1.5rem;
-  --t-lead: 1.25rem;
-  --t-body: 1.0625rem;
-  --t-small: 0.875rem;
-  --t-mono: 0.8125rem;
-
-  /* layout */
-  --page-pad: 40px;
-  --page-max: 1360px;
-  --gutter: 24px;
-  --rail-w: 72px;
-  --topbar-h: 56px;
-  --bottombar-h: 0px;
-  --section-gap: 96px;
-  --radius: 2px;
-
-  /* motion (PLAN.md section 6). One vocabulary for the whole page:
-     press 120 (anything pressable gives under the finger), overlays 160
-     (search, the now popover), UI states 180, lit states 220, sheets 240 on
-     the drawer curve, camera 800, the wave 1600, the first paint 1200. */
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease: ease;
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --dur-press: 120ms;
-  --dur-ui: 180ms;
-  --dur-ui-fast: 160ms;
-  --dur-ui-slow: 220ms;
-  --dur-sheet: 240ms;
-  --dur-camera: 800ms;
-  --dur-wave: 1600ms;
-  --dur-boot: 1200ms;
-  --dur-fade-reduced: 150ms;
-
-  /* focus */
-  --focus-w: 2px;
-  --focus-offset: 2px;
-
-  color-scheme: dark;
+  /* accent and status */
+  --accent: #1E4FD8;
+  --accent-ink: #163FB0;
+  --ok: #15803D;
+  --ok-ink: #11652F;
 }
 
-/* Phones: 16px gutters, 56px bottom bar, smaller body. */
-@media (max-width: 719.98px) {
+:root {
+  /* rgb triplets, used as rgb(var(--x) / alpha) */
+  --ink-rgb: 21 18 14;
+  --accent-rgb: 30 79 216;
+  --lit: 255 255 255;
+  --sh: 60 45 20;
+  --rim-dark: 70 60 40;
+
+  /* rules */
+  --hair: rgb(var(--ink-rgb) / 0.07);
+  --hair-2: rgb(var(--ink-rgb) / 0.12);
+
+  /* the field, hero (2.1): luminous, warm */
+  --f-peach: oklch(0.9 0.085 55);
+  --f-butter: oklch(0.95 0.095 95);
+  --f-sky: oklch(0.9 0.08 240);
+  --f-lilac: oklch(0.88 0.085 295);
+  --f-rose: oklch(0.86 0.09 10);
+  --f-core: oklch(0.84 0.12 60);
+
+  /* the field under content glass (12.3): deeper, so every sheet has colour to bend */
+  --f-peach-d: oklch(0.8 0.14 48);
+  --f-butter-d: oklch(0.88 0.15 90);
+  --f-sky-d: oklch(0.8 0.13 238);
+  --f-lilac-d: oklch(0.78 0.14 295);
+  --f-rose-d: oklch(0.8 0.14 8);
+
+  /* type: Instrument Serif for his voice, Inter for everything upright */
+  --serif: 'Instrument Serif', 'Instrument Serif Fallback', Georgia, serif;
+  --sans: 'Inter', 'Inter Fallback', ui-sans-serif, system-ui, sans-serif;
+
+  /* type scale, in rem so a reader's larger default size scales the page (px at 16) */
+  --t-xs: 0.8125rem; /* 13 chips, captions, footer */
+  --t-sm: 0.875rem; /* 14 buttons, nav words, dense card copy */
+  --t-md: 1rem; /* 16 body */
+  --t-lg: 1.125rem; /* 18 lede, card titles */
+  --t-xl: 1.375rem; /* 22 masthead name, section lines */
+  --t-2xl: 1.75rem; /* 28 receipt numbers */
+  --t-3xl: 2.5rem; /* 40 section words */
+  --t-display: clamp(2.5rem, 7.2vw, 6.5rem); /* 40 to 104 */
+
+  /* space */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-7: 32px;
+  --s-8: 48px;
+  --s-9: 64px;
+  --s-10: 96px;
+
+  /* layout */
+  --gutter: 64px;
+  --page-max: 1360px;
+  --section-gap: 96px;
+  --measure: 64ch;
+
+  /* radius: concentric, outer = inner + padding */
+  --r-1: 6px;
+  --r-2: 10px;
+  --r-3: 14px;
+  --r-4: 20px;
+  --r-5: 28px;
+  --r-full: 999px;
+
+  /* elevation (2.4): warm ink shadows, always down at a 1:2 ratio.
+     none is a hairline only; rest and raised are the drop parts of the glass
+     shadows (glass.css adds the inner light on top). */
+  --e-none: inset 0 0 0 1px var(--hair);
+  --e-rest: 0 14px 28px -14px rgb(var(--sh) / 0.42), 0 2px 5px -2px rgb(var(--sh) / 0.14);
+  --e-raised: 0 30px 60px -28px rgb(var(--sh) / 0.4), 0 10px 22px -12px rgb(var(--sh) / 0.2), 0 1px 2px rgb(var(--sh) / 0.08);
+  --e-raised-clear: 0 24px 50px -24px rgb(var(--sh) / 0.35), 0 10px 18px -12px rgb(var(--sh) / 0.2), 0 1px 2px rgb(var(--sh) / 0.1);
+
+  /* motion (2.5) */
+  --dur-press: 120ms;
+  --dur-hover: 160ms;
+  --dur-tip: 140ms;
+  --dur-tip-out: 100ms;
+  --dur-pop: 200ms;
+  --dur-pop-out: 150ms;
+  --dur-sheet: 320ms;
+  --dur-morph: 500ms;
+  --ease-press: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-morph: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* focus (2.6): a base-coloured gap, then the accent ring */
+  --focus: 0 0 0 2px var(--base), 0 0 0 4px var(--accent);
+
+  color-scheme: light;
+}
+
+/* Phones: 16px gutters, 64px between sections. */
+@media (max-width: 639.98px) {
   :root {
-    --t-h3: 1.375rem;
-    --t-lead: 1.125rem;
-    --t-body: 1rem;
-    --page-pad: 16px;
     --gutter: 16px;
-    --rail-w: 0px;
-    --topbar-h: 48px;
-    --bottombar-h: 56px;
     --section-gap: 64px;
   }
 }
 
-/* Tablets: the rail shows its current stop's name, so the column starts
-   24px further right than the rail alone needs (r1 T15). */
-@media (min-width: 720px) and (max-width: 1099.98px) {
+@media (min-width: 640px) and (max-width: 1099.98px) {
   :root {
-    --page-pad: 32px;
-    --rail-w: 96px;
+    --gutter: 32px;
   }
 }
 
-/* Wide screens: the name grows to about 168px, so the hero reads as a poster (r1 M16). */
-@media (min-width: 1600px) {
-  :root {
-    --t-display: clamp(3.5rem, 9vw, 10.5rem);
-  }
-}
-
-/* Wide-gamut screens get the real sodium. Contrast is computed on the sRGB hex. */
-@media (color-gamut: p3) {
-  :root {
-    --sodium: color(display-p3 1 0.63 0.18);
-    --beacon: color(display-p3 1 0.3 0.22);
-    --led: color(display-p3 0.62 0.77 1);
-  }
-}
-
-/* More contrast: the OS asks for it, or quiet mode is on. */
+/* More contrast: body text goes to full ink, hairlines get stronger. */
 @media (prefers-contrast: more) {
   :root {
-    --night: #060A18;
-    --dim: #B5BFD6;
-    --trace: #3A4A70;
-    --hairline: rgba(243, 236, 223, 0.22);
+    --ink-2: #15120E;
+    --ink-3: #4A443C;
+    --hair: rgb(var(--ink-rgb) / 0.3);
+    --hair-2: rgb(var(--ink-rgb) / 0.45);
   }
 }
 
-html[data-mode="quiet"] {
-  --night: #060A18;
-  --dim: #B5BFD6;
-  --trace: #3A4A70;
-  --hairline: rgba(243, 236, 223, 0.22);
-  --horizon: transparent;
-}
-
-/* Forced colors: system colors win. Decorative layers are hidden in base.css. */
+/* Forced colours: system colours win. The field and glass layers hide themselves. */
 @media (forced-colors: active) {
   :root {
-    --night: Canvas;
-    --deck: Canvas;
-    --deck-2: Canvas;
+    --base: Canvas;
     --ink: CanvasText;
-    --dim: CanvasText;
-    --sodium: LinkText;
-    --led: CanvasText;
-    --beacon: Highlight;
-    --trace: GrayText;
-    --trace-lit: CanvasText;
-    --hairline: CanvasText;
+    --ink-2: CanvasText;
+    --ink-3: CanvasText;
+    --on-ink: Canvas;
+    --accent: LinkText;
+    --accent-ink: LinkText;
+    --hair: CanvasText;
+    --hair-2: CanvasText;
+    --focus: 0 0 0 2px Canvas, 0 0 0 4px Highlight;
   }
 }
