@@ -127,13 +127,11 @@ try {
   const missingH2 = SECTION_IDS.filter((id) => !new RegExp(`<h2[^>]*id="${headingId(id)}"`).test(homeHtml))
   // The h1 sets each word in its own span from 1100 px up (r1 T12): compare its text, not its markup.
   const h1Text = ((plain.match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1] || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
-  check('prerender', 'h1 and h2s before JS', h1Text === HERO.name.text && !missingH2.length ? 'pass' : 'fail', missingH2.length ? `missing ${missingH2.join(', ')}` : `h1 "${h1Text}" and six h2s in the served HTML`)
-  check('prerender', 'origin pull text before JS', plain.includes(HERO.lead.text) ? 'pass' : 'fail', 'his invisible-systems paragraph in the served HTML')
-  const { ORIGIN } = await import(pathToFileURL(path.join(ROOT, 'src/content/identity.js')))
-  const sentence = ORIGIN.pull.text.slice(0, ORIGIN.pull.text.indexOf('along the way.') + 'along the way.'.length)
-  const servedSentence = ((plain.match(/<p id="sentence"[^>]*>([\s\S]*?)<\/p>/) || [])[1] || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
-  check('prerender', 'the sentence before JS', servedSentence === sentence ? 'pass' : 'fail', servedSentence === sentence ? 'his whole-map sentence, word for word, is the first screen in the served HTML' : `served "${servedSentence.slice(0, 60)}"`)
-  check('prerender', 'proof line before JS', plain.includes(HERO.proof.text) ? 'pass' : 'fail', 'the JPMorgan and RBC line under the deck is in the served HTML (r1 T7)')
+  check('prerender', 'h1 and h2s before JS', h1Text === HERO.name.text && !missingH2.length ? 'pass' : 'fail', missingH2.length ? `missing ${missingH2.join(', ')}` : `h1 "${h1Text}" and four h2s in the served HTML`)
+  check('prerender', 'the hero line before JS', plain.includes(HERO.line.text) ? 'pass' : 'fail', 'the one line under the role is in the served HTML')
+  check('prerender', 'the role line before JS', plain.includes(HERO.role.text) ? 'pass' : 'fail', 'Co-founder and Founding Engineer at Viaere. Founder of Esvo Technologies. in the served HTML')
+  const poster = (homeHtml.match(/<picture class="poster">[\s\S]*?<\/picture>/) || [])[0] || ''
+  check('prerender', 'the poster before JS', /hero-1440\.avif/.test(poster) && /hero-780\.avif/.test(poster) && /fetchpriority="high"/i.test(poster) ? 'pass' : 'fail', 'both AVIF sources and a fetchpriority high <img> in the served HTML')
   const nf = await fetch(`${url}/nothing-here`)
   const nfHtml = await nf.text()
   check('http', '404 status', nf.status === 404 && nfHtml.includes(NOT_FOUND.line.text) ? 'pass' : 'fail', `/nothing-here -> ${nf.status}, ${nfHtml.includes(NOT_FOUND.line.text) ? 'themed' : 'not themed'}`)
@@ -233,7 +231,7 @@ try {
     }
   }
   const fontFamilies = [...new Set(R.pages.flatMap((p) => p.facts.fonts.map((f) => f.replace(/ [\d ]+$/, ''))))]
-  check('fonts', 'only Instrument Serif and Inter', fontFamilies.length && fontFamilies.every((f) => /^(Instrument Serif|Inter)$/.test(f)) ? 'pass' : 'fail', fontFamilies.join(', '))
+  check('fonts', 'only Mona Sans and Geist Mono', fontFamilies.length && fontFamilies.every((f) => /^(Mona Sans|Geist Mono)$/.test(f)) ? 'pass' : 'fail', fontFamilies.join(', '))
 
   // ---------- 7. links ----------
   log('links')

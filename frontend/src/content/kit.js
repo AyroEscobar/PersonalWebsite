@@ -85,5 +85,6 @@ export const KIT = {
     skip: ui('kit-chrome-skip', 'skip link, forced visible'),
     footer: ui('kit-chrome-footer', 'footer'),
     notFound: ui('kit-chrome-404', 'the 404'),
+    closer: ui('kit-closer', 'the closer, once on the site'),
   },
 }
