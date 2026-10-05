@@ -13,8 +13,10 @@
   Every route ('/' and an unknown path for the 404) at 390, 768, 1440 and
   1920: horizontal overflow, console errors, failed or third-party requests,
   broken links and images, contrast spot checks, target sizes, structure.
-  Then axe (390 and 1440), reduced motion and quiet mode, the keyboard walk,
-  hydration, the 404 status, interaction states, Lighthouse, and the bundle
+  Then axe (390 and 1440), reduced motion, the keyboard walk, hydration, the
+  404 status, the copy toast, print, the r1 regressions that still apply,
+  the glass checks (DESIGN.md 9: measured composite contrast, the reader
+  and the morph, forced colours, quiet mode), Lighthouse, and the bundle
   report. Writes qa-report.md and qa-report.json to the reviews dir and
   screenshots to the shots dir (tools/local.json, or .build/qa).
 
@@ -33,7 +35,7 @@ import { staticScan } from './static.mjs'
 import { runLighthouse, TARGETS } from './lighthouse.mjs'
 import * as P from './page-checks.mjs'
 import { writeReport } from './report.mjs'
-import { r2Checks } from './r2-checks.mjs'
+import { glassChecks } from './glass-checks.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const REPO = path.resolve(ROOT, '..')
@@ -126,11 +128,15 @@ try {
   // The h1 sets each word in its own span from 1100 px up (r1 T12): compare its text, not its markup.
   const h1Text = ((plain.match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1] || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
   check('prerender', 'h1 and h2s before JS', h1Text === HERO.name.text && !missingH2.length ? 'pass' : 'fail', missingH2.length ? `missing ${missingH2.join(', ')}` : `h1 "${h1Text}" and six h2s in the served HTML`)
-  check('prerender', 'hero caption before JS', plain.includes(HERO.lead.text) ? 'pass' : 'fail', 'full hero caption in the served HTML')
+  check('prerender', 'origin pull text before JS', plain.includes(HERO.lead.text) ? 'pass' : 'fail', 'his invisible-systems paragraph in the served HTML')
+  const { ORIGIN } = await import(pathToFileURL(path.join(ROOT, 'src/content/identity.js')))
+  const sentence = ORIGIN.pull.text.slice(0, ORIGIN.pull.text.indexOf('along the way.') + 'along the way.'.length)
+  const servedSentence = ((plain.match(/<p id="sentence"[^>]*>([\s\S]*?)<\/p>/) || [])[1] || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+  check('prerender', 'the sentence before JS', servedSentence === sentence ? 'pass' : 'fail', servedSentence === sentence ? 'his whole-map sentence, word for word, is the first screen in the served HTML' : `served "${servedSentence.slice(0, 60)}"`)
   check('prerender', 'proof line before JS', plain.includes(HERO.proof.text) ? 'pass' : 'fail', 'the JPMorgan and RBC line under the deck is in the served HTML (r1 T7)')
   const nf = await fetch(`${url}/nothing-here`)
   const nfHtml = await nf.text()
-  check('http', '404 status', nf.status === 404 && nfHtml.includes(NOT_FOUND.heading.text) ? 'pass' : 'fail', `/nothing-here -> ${nf.status}, ${nfHtml.includes(NOT_FOUND.heading.text) ? 'themed' : 'not themed'}`)
+  check('http', '404 status', nf.status === 404 && nfHtml.includes(NOT_FOUND.line.text) ? 'pass' : 'fail', `/nothing-here -> ${nf.status}, ${nfHtml.includes(NOT_FOUND.line.text) ? 'themed' : 'not themed'}`)
   for (const [p, mime] of [['/robots.txt', 'text/plain'], ['/sitemap.xml', 'application/xml']]) {
     const r = await fetch(url + p)
     const body = await r.text()
@@ -227,7 +233,7 @@ try {
     }
   }
   const fontFamilies = [...new Set(R.pages.flatMap((p) => p.facts.fonts.map((f) => f.replace(/ [\d ]+$/, ''))))]
-  check('fonts', 'only overpass', fontFamilies.every((f) => /Overpass/.test(f)) && fontFamilies.length ? 'pass' : 'fail', fontFamilies.join(', '))
+  check('fonts', 'only Instrument Serif and Inter', fontFamilies.length && fontFamilies.every((f) => /^(Instrument Serif|Inter)$/.test(f)) ? 'pass' : 'fail', fontFamilies.join(', '))
 
   // ---------- 7. links ----------
   log('links')
@@ -281,19 +287,14 @@ try {
     check('links', 'external', broken.length ? 'fail' : unverifiable.length ? 'warn' : 'pass', [...broken.map((l) => `${l.status} ${l.href}`), ...unverifiable.map((l) => `unverifiable ${l.status} ${l.href}`)].join(', ') || `${R.links.external.length} external links`)
   }
 
-  // ---------- 8. motion: reduced, quiet, boot, idle ----------
+  // ---------- 8. motion: reduced, idle, the entry ----------
   log('motion')
-  const motionProbe = async (label, { reduce = false, query = '', hash = '', presetSession = false, scrollTo = null } = {}) => {
+  const motionProbe = async (label, { reduce = false, query = '', hash = '', scrollTo = null } = {}) => {
     const page = await cdp.newPage({ width: 1440, height: 900 })
     await page.addInitScript(fn(P.rafCounterInit))
     await page.send('Storage.clearDataForOrigin', { origin, storageTypes: 'local_storage,session_storage' })
     if (reduce) await page.media([{ name: 'prefers-reduced-motion', value: 'reduce' }])
-    if (presetSession) {
-      await page.goto(`${url}/robots.txt`, { settle: 0 })
-      await page.eval("sessionStorage.setItem('ae.booted','1')")
-    }
     await page.goto(`${url}/${query}${hash}`, { settle: 0 })
-    const bootAtLoad = await page.eval('document.documentElement.dataset.boot || null')
     await sleep(1800)
     if (scrollTo) {
       await page.eval(`document.getElementById(${JSON.stringify(scrollTo)})?.scrollIntoView({ behavior: 'instant' })`)
@@ -304,28 +305,23 @@ try {
     const res = await page.eval(`({
       raf: window.__qa.raf,
       canvas: document.querySelectorAll('canvas').length,
-      boot: document.documentElement.dataset.boot || null,
       mode: document.documentElement.dataset.mode,
       motion: document.documentElement.dataset.motion,
       tier: document.documentElement.dataset.tier,
+      lensSeen: (() => { try { return sessionStorage.getItem('ae.lens') } catch { return null } })(),
+      nav: document.getElementById('nav')?.className || '',
     })`)
-    res.bootAtLoad = bootAtLoad
     res.animations = await page.eval(fn(P.runningAnimations))
     await page.close()
     R.motion[label] = res
     return res
   }
   const rm = await motionProbe('reduced', { reduce: true })
-  check('motion', 'reduced motion', rm.raf === 0 && rm.canvas === 0 && !rm.bootAtLoad && !rm.animations.length ? 'pass' : 'fail', `rAF ${rm.raf} in 3 s, canvas ${rm.canvas}, data-boot ${rm.bootAtLoad}, long animations ${rm.animations.length}, tier ${rm.tier}`)
-  const qm = await motionProbe('quiet', { query: '?quiet' })
-  check('motion', 'quiet mode', qm.raf === 0 && qm.canvas === 0 && !qm.bootAtLoad && qm.mode === 'quiet' && !qm.animations.length ? 'pass' : 'fail', `rAF ${qm.raf}, canvas ${qm.canvas}, data-boot ${qm.bootAtLoad}, mode ${qm.mode}, long animations ${qm.animations.length}`)
+  check('motion', 'reduced motion', rm.raf === 0 && rm.canvas === 0 && rm.mode === 'split' && !rm.animations.length ? 'pass' : 'fail', `rAF ${rm.raf} in 3 s, canvas ${rm.canvas}, mode ${rm.mode} (the nav is a pill from the start, the lens rests on the last line), long animations ${rm.animations.length}`)
   const fresh = await motionProbe('first-visit')
-  check('motion', 'first paint runs once', fresh.bootAtLoad === 'run' && !fresh.boot ? 'pass' : 'fail', `data-boot at load ${fresh.bootAtLoad}, after 1.8 s ${fresh.boot}`)
-  const again = await motionProbe('repeat-visit', { presetSession: true })
-  const deep = await motionProbe('deep-link', { hash: '#work' })
-  check('motion', 'no first paint on repeat or deep link', !again.bootAtLoad && !deep.bootAtLoad ? 'pass' : 'fail', `repeat ${again.bootAtLoad}, #work ${deep.bootAtLoad}`)
+  check('motion', 'the lens enters once per session', fresh.lensSeen === '1' && fresh.mode === 'morph' && /is-lens/.test(fresh.nav) ? 'pass' : 'fail', `ae.lens ${fresh.lensSeen} after the first visit, mode ${fresh.mode}, nav "${fresh.nav.split(' ').filter((c) => /^is-/.test(c)).join(' ')}"`)
   const idle = await motionProbe('idle-offscreen', { scrollTo: 'work' })
-  check('motion', 'rAF idle with hero offscreen', idle.raf === 0 ? 'pass' : 'fail', `${idle.raf} callbacks in 3 s, canvas ${idle.canvas}`)
+  check('motion', 'rAF idle with hero offscreen', idle.raf === 0 ? 'pass' : 'fail', `${idle.raf} callbacks in 3 s without input, canvas ${idle.canvas}`)
 
   // ---------- 9. keyboard ----------
   log('keyboard')
@@ -346,37 +342,23 @@ try {
     check('keyboard', 'skip link first', seq[0] && /skip/i.test(seq[0].name) ? 'pass' : 'fail', seq[0]?.name)
     check('keyboard', 'visible focus', noRing.length ? 'fail' : 'pass', noRing.slice(0, 5).map((f) => `${f.tag} "${f.name}"`).join(', ') || `${seq.length} stops, all with a ring`)
     check('keyboard', 'focus not obscured', obscured.length ? 'fail' : 'pass', obscured.slice(0, 5).map((f) => `${f.tag} "${f.name}"`).join(', '))
+    // v2 (DESIGN.md 5.1, 10): the skip link, the six nav words (the nav comes first; focusing a
+    // word while it is the lens turns it into the pill), the name, the quiet switch, then the hero
+    // pills. The nav word's own text is "work work" (upright and italic), so match on href.
     const EXPECT = [
       ['skip link', (f) => /skip/i.test(f.name)],
+      ...SECTION_IDS.map((id) => [`nav ${id}`, (f) => f.tag === 'a' && f.href === `#${id}` && f.name !== 'Ayro Escobar']),
       ['name', (f) => f.name === 'Ayro Escobar'],
-      ['clock chip', (f) => /plano/i.test(f.name) && f.tag !== 'a'],
-      ['contact', (f) => f.tag === 'a' && f.href === '#signal' && /^contact$/i.test(f.name)],
       ['quiet', (f) => /^quiet/i.test(f.name)],
-      ['search', (f) => /^search/i.test(f.name)],
-      ...SECTION_IDS.map((id) => [`rail ${id}`, (f) => f.href === `#${id}`]),
       ['hero email', (f) => /^mailto:/.test(f.href || '')],
-      ['ping', (f) => /^ping$/i.test(f.name)],
+      ['see the work', (f) => f.href === '#work' && /see the work/i.test(f.name)],
     ]
     let j = 0
     for (const f of seq) if (j < EXPECT.length && EXPECT[j][1](f)) j++
     const missing = EXPECT.filter(([, m]) => !seq.some(m)).map(([n]) => n)
-    check('keyboard', 'tab order spec', j === EXPECT.length ? 'pass' : missing.length ? 'pending' : 'fail', j === EXPECT.length ? 'skip, name, clock, contact, quiet, search, six stops, hero email, ping' : missing.length ? `not built yet: ${missing.join(', ')}` : `out of order at "${EXPECT[j][0]}"`)
+    check('keyboard', 'tab order spec', j === EXPECT.length ? 'pass' : 'fail', j === EXPECT.length ? 'skip, six nav words, name, quiet, hero email, see the work' : missing.length ? `never reached: ${missing.join(', ')}` : `out of order at "${EXPECT[j][0]}"`)
 
-    // Cmd+K and Esc with focus return.
-    const hasSearch = await page.eval(`!![...document.querySelectorAll('header button')].find(b => /^search/i.test(b.innerText.trim()))`)
-    if (hasSearch) {
-      await page.eval(`[...document.querySelectorAll('header button')].find(b => /^search/i.test(b.innerText.trim())).focus()`)
-      await page.key('k', { modifiers: 4, code: 'KeyK' })
-      await sleep(400)
-      const open = await page.eval(`(() => { const d = document.querySelector('dialog[open]'); return { open: !!d, inInput: !!d && d.contains(document.activeElement) && /input/i.test(document.activeElement.tagName) } })()`)
-      if (!NO_SHOTS && open.open) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, 'after-state-1440-jumplist.png'))))
-      await page.key('Escape')
-      await sleep(300)
-      const back = await page.eval(`(() => ({ closed: !document.querySelector('dialog[open]'), onChip: /^search/i.test((document.activeElement.innerText || '').trim()) }))()`)
-      check('keyboard', 'cmd+k and esc', open.open && open.inInput && back.closed && back.onChip ? 'pass' : 'fail', `open ${open.open}, focus in input ${open.inInput}, closed ${back.closed}, focus back on chip ${back.onChip}`)
-    } else check('keyboard', 'cmd+k and esc', 'pending', 'no search chip yet (B)')
-
-    // Enter on a rail stop lands the heading below the top bar.
+    // Enter on a nav word lands the heading below the pill.
     const rail = await page.eval(`!!document.querySelector('nav a[href="#work"]')`)
     if (rail) {
       // The tab walk can end with a focus scroll still in flight: jump to the top
@@ -393,119 +375,67 @@ try {
       await page.eval(`document.querySelector('nav a[href="#work"]').focus({ preventScroll: true })`)
       await page.key('Enter')
       await sleep(1300)
-      const pos = await page.eval(`(() => { const h = document.getElementById('work-h').getBoundingClientRect(); const bar = document.querySelector('header'); const b = bar ? bar.getBoundingClientRect().bottom : 0; const cur = document.querySelector('nav [aria-current]'); return { top: Math.round(h.top), bar: Math.round(b), vh: innerHeight, current: cur ? cur.textContent.trim() : null } })()`)
-      check('keyboard', 'rail stop lands below the bar', pos.top >= pos.bar && pos.top < pos.vh ? 'pass' : 'fail', `heading top ${pos.top}, bar bottom ${pos.bar}`)
+      const pos = await page.eval(`(() => { const h = document.getElementById('work-h').getBoundingClientRect(); const nav = document.getElementById('nav'); const b = getComputedStyle(nav).position === 'fixed' && nav.getBoundingClientRect().top < 100 ? nav.getBoundingClientRect().bottom : 0; const cur = document.querySelector('#nav [aria-current] .nav-sans'); return { top: Math.round(h.top), bar: Math.round(b), vh: innerHeight, current: cur ? cur.textContent.trim() : null } })()`)
+      check('keyboard', 'nav word lands below the pill', pos.top >= pos.bar && pos.top < pos.vh ? 'pass' : 'fail', `heading top ${pos.top}, pill bottom ${pos.bar}`)
       check('nav', 'aria-current tracks the section', pos.current === 'work' ? 'pass' : pos.current == null ? 'pending' : 'fail', `aria-current on "${pos.current}" after jumping to work`)
     }
     R.keyboard = { sequence: seq }
     await page.close()
   }
 
-  // ---------- 10. interaction states ----------
+  // ---------- 10. interaction states: the copy toast, quiet ----------
   log('interaction states')
   for (const w of [390, 1440]) {
     const mobile = w < 720
     const page = await cdp.newPage({ width: w, height: mobile ? 844 : 900, dpr: mobile ? 2 : 1, mobile })
     await page.send('Storage.clearDataForOrigin', { origin, storageTypes: 'local_storage,session_storage' })
     await page.goto(`${url}/`, { settle: 1800 })
-    const hasPing = await page.eval(`!![...document.querySelectorAll('button')].find(b => /^ping$/i.test(b.innerText.trim()))`)
-    if (hasPing) {
-      await page.eval(`[...document.querySelectorAll('button')].find(b => /^ping$/i.test(b.innerText.trim())).click()`)
-      await sleep(800)
-      if (!NO_SHOTS) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, `after-state-${w}-ping-800ms.png`))))
-      await sleep(900)
-      const said = await page.eval(`[...document.querySelectorAll('[role="status"]')].map(s => s.textContent.trim()).join(' | ')`)
-      check('signature', `ping status @${w}`, /pinged from plano/.test(said) ? 'pass' : 'fail', `status regions: "${said}"`)
-    } else check('signature', `ping status @${w}`, 'pending', 'no ping button yet (A)')
-    const ta = await page.eval(fn(P.domFacts)).then((f) => f.touchAction)
-    if (w === 390) check('signature', 'map touch-action pan-y', ta == null ? 'pending' : /pan-y/.test(ta) ? 'pass' : 'fail', ta == null ? 'no map yet (A)' : ta)
+    await page.eval(`document.querySelector('.contact .btn--primary').scrollIntoView({ block: 'center', behavior: 'instant' })`)
+    await sleep(400)
+    await page.eval(`document.querySelector('.contact .btn--primary').click()`)
+    await sleep(700)
+    if (!NO_SHOTS) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, `after-state-${w}-copied.png`))))
+    const said = await page.eval(`document.querySelector('.toast-region')?.textContent.trim() || ''`)
+    check('interaction', `copy email toast @${w}`, said.length > 0 ? 'pass' : 'fail', `the status region says "${said}"`)
     await page.close()
     const q = await cdp.newPage({ width: w, height: mobile ? 844 : 900, dpr: mobile ? 2 : 1, mobile })
-    await q.goto(`${url}/?quiet`, { settle: 800 })
+    await q.goto(`${url}/?quiet=1`, { settle: 800 })
     if (!NO_SHOTS) R.shots.push(path.basename(await q.screenshot(path.join(SHOTS, `after-state-${w}-quiet.png`))))
     await q.close()
   }
 
-  // Print: map, buttons and rail hidden.
+  // Print: the nav, buttons and the first screen hidden (the print masthead stands in).
   {
     const page = await cdp.newPage({ width: 816, height: 1056 })
     await page.goto(`${url}/`, { settle: 600 })
     await page.media([{ name: 'print', value: '' }])
     await page.send('Emulation.setEmulatedMedia', { media: 'print' })
     const pr = await page.eval(`(() => { const vis = (s) => [...document.querySelectorAll(s)].filter(e => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().height > 0).length; return { canvas: vis('canvas'), buttons: vis('button'), nav: vis('nav'), bg: getComputedStyle(document.body).backgroundColor } })()`)
-    check('print', 'print hides chrome', !pr.canvas && !pr.buttons && !pr.nav ? 'pass' : 'pending', `visible in print: canvas ${pr.canvas}, buttons ${pr.buttons}, nav ${pr.nav}; body ${pr.bg}`)
+    check('print', 'print hides chrome', !pr.canvas && !pr.buttons && !pr.nav ? 'pass' : 'fail', `visible in print: canvas ${pr.canvas}, buttons ${pr.buttons}, nav ${pr.nav}; body ${pr.bg}`)
     await page.close()
   }
 
-  // ---------- 10b. r1 regressions (triage T2, T5, T6, T8, T9, T11 to T14) ----------
+  // ---------- 10b. r1 regressions that still apply in v2 (T2, T6, T9, T12, T14) ----------
+  // v1's map, rail, stops sheet, ping and clock are gone (DESIGN.md 7.2), and so are their checks
+  // (T5, T11, T13, T15). What they protected that still matters is checked here or in glass-checks.
   log('r1 regressions')
   {
-    // T2 and T6: a way to write to him on the first screen, the name high on a phone.
+    // T2 and T6: a way to write to him on the first screen; the name high on a phone.
     for (const [w, h] of [[390, 844], [360, 780], [1440, 900]]) {
       const mobile = w < 720
       const page = await cdp.newPage({ width: w, height: h, dpr: mobile ? 2 : 1, mobile })
       await page.goto(`${url}/`, { settle: 1200 })
       const c = await page.eval(`(() => {
-        const m = document.querySelector('main a[href^="mailto:"]')
+        const m = document.querySelector('main .hero a[href^="mailto:"]')
         const h1 = document.querySelector('h1')
-        const ok = (e) => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden'
-        const all = [...document.querySelectorAll('a[href], button, input, summary, [tabindex]:not([tabindex="-1"])')].filter(ok)
-        const after = all.filter((e) => h1.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING)
-        const first = after.find((e) => !e.closest('.hero-deck'))
-        const ping = document.querySelector('.hero-ping')
-        const bar = document.querySelector('header').getBoundingClientRect().bottom
-        return {
-          mail: m ? Math.round(m.getBoundingClientRect().top) : null,
-          vh: innerHeight,
-          first: first ? first.getAttribute('href') : null,
-          deck: after.filter((e) => e.closest('.hero-deck')).length,
-          h1: Math.round(h1.getBoundingClientRect().top),
-          hintUnderBar: !!ping && ping.getBoundingClientRect().top < bar + 40,
-          sw: document.documentElement.scrollWidth,
-          iw: innerWidth,
-        }
+        return { mail: m ? Math.round(m.getBoundingClientRect().bottom) : null, vh: innerHeight, h1: Math.round(h1.getBoundingClientRect().top), sw: document.documentElement.scrollWidth, iw: innerWidth }
       })()`)
-      check('r1', `T2 contact on the first screen @${w}x${h}`, c.mail != null && c.mail < c.vh && /^mailto:/.test(c.first || '') ? 'pass' : 'fail', `mailto top ${c.mail} of ${c.vh}; first stop after the h1${c.deck ? ` (past ${c.deck} inline deck link)` : ''}: ${c.first}`)
-      if (mobile) check('r1', `T6 name high on a phone @${w}x${h}`, c.h1 < 300 && !c.hintUnderBar && c.sw <= w && c.iw === w ? 'pass' : 'fail', `h1 top ${c.h1}, hint under the bar ${c.hintUnderBar}, scrollWidth ${c.sw}`)
+      check('r1', `T2 email on the first screen @${w}x${h}`, c.mail != null && c.mail <= c.vh ? 'pass' : 'fail', `the hero email pill ends at ${c.mail} of ${c.vh}`)
+      if (mobile) check('r1', `T6 name high on a phone @${w}x${h}`, c.h1 < 300 && c.sw <= w && c.iw === w ? 'pass' : 'fail', `h1 top ${c.h1}, scrollWidth ${c.sw}`)
       await page.close()
     }
 
-    // T15: on a tablet the rail's names never touch the copy, at any stop.
-    {
-      const page = await cdp.newPage({ width: 768, height: 1024 })
-      await page.goto(`${url}/`, { settle: 1000 })
-      const hits = []
-      for (const id of SECTION_IDS) {
-        await page.eval(`document.getElementById(${JSON.stringify(id)}).scrollIntoView({ behavior: 'instant' })`)
-        await sleep(350)
-        const h = await page.eval(`(() => {
-          const labels = [...document.querySelectorAll('.rail-label')].filter((l) => Number(getComputedStyle(l).opacity) > 0.05).map((l) => l.getBoundingClientRect())
-          const out = []
-          const walker = document.createTreeWalker(document.querySelector('main'), NodeFilter.SHOW_TEXT)
-          for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-            if (!n.textContent.trim() || n.parentElement.closest('svg, .sr-only, .ng')) continue
-            const range = document.createRange()
-            range.selectNodeContents(n)
-            for (const r of range.getClientRects()) for (const l of labels) if (r.left < l.right && l.left < r.right && r.top < l.bottom && l.top < r.bottom) out.push(n.textContent.trim().slice(0, 24))
-          }
-          return out
-        })()`)
-        if (h.length) hits.push(`${id}: ${h.slice(0, 3).join(', ')}`)
-      }
-      check('r1', 'T15 rail names clear of the copy @768', hits.length ? 'fail' : 'pass', hits.join(' | ') || 'checked at all six stops')
-      await page.close()
-    }
-
-    // T13: the map scrolls and pinch-zooms; neither pings.
-    {
-      const page = await cdp.newPage({ width: 390, height: 844, dpr: 2, mobile: true })
-      await page.goto(`${url}/`, { settle: 600 })
-      const ta = await page.eval(`[...document.querySelectorAll('.hero-stage, .ng, svg.ng-svg')].map((e) => getComputedStyle(e).touchAction)`)
-      check('r1', 'T13 pinch zoom on the map', ta.length >= 2 && ta.every((t) => /pan-y/.test(t) && /pinch-zoom/.test(t)) ? 'pass' : 'fail', ta.join(' | '))
-      await page.close()
-    }
-
-    // T14: WCAG 1.4.12 text spacing at 320 and 390: no sideways scroll, the name never clips.
+    // T14: WCAG 1.4.12 text spacing at 320 and 390: no sideways scroll, the name and the quiet switch stay in.
     for (const w of [320, 390]) {
       const page = await cdp.newPage({ width: w, height: 800, dpr: 2, mobile: true })
       await page.goto(`${url}/`, { settle: 800 })
@@ -516,11 +446,11 @@ try {
         setTimeout(() => {
           const h1 = document.querySelector('h1')
           const b = h1.getBoundingClientRect()
-          const clock = document.querySelector('.clock-btn').getBoundingClientRect()
-          done({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, iw: innerWidth, h1Clip: h1.scrollWidth > h1.clientWidth + 1 || b.right > innerWidth + 1, clockRight: Math.round(clock.right) })
+          const q = document.querySelector('.masthead .quiet').getBoundingClientRect()
+          done({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, iw: innerWidth, h1Clip: h1.scrollWidth > h1.clientWidth + 1 || b.right > innerWidth + 1, quietRight: Math.round(q.right) })
         }, 400)
       })`)
-      check('r1', `T14 text spacing @${w}`, r.sw === r.cw && r.iw === w && !r.h1Clip && r.clockRight <= w ? 'pass' : 'fail', `scrollWidth ${r.sw}, clientWidth ${r.cw}, layout ${r.iw}, h1 clipped ${r.h1Clip}, clock right edge ${r.clockRight}`)
+      check('r1', `T14 text spacing @${w}`, r.sw === r.cw && r.iw === w && !r.h1Clip && r.quietRight <= w ? 'pass' : 'fail', `scrollWidth ${r.sw}, clientWidth ${r.cw}, layout ${r.iw}, h1 clipped ${r.h1Clip}, quiet switch right edge ${r.quietRight}`)
       await page.close()
     }
 
@@ -536,33 +466,12 @@ try {
       await page.close()
     }
 
-    // T11: the phone stops sheet hands focus back, and closes when the screen turns wide.
-    {
-      const page = await cdp.newPage({ width: 390, height: 844, dpr: 2, mobile: true })
-      await page.goto(`${url}/`, { settle: 1000 })
-      await page.eval(`document.querySelector('.bb-stop').focus()`)
-      await page.key('Enter')
-      await sleep(350)
-      const opened = await page.eval(`!!document.querySelector('dialog.stops-sheet[open]')`)
-      await page.key('Escape')
-      await sleep(350)
-      const back = await page.eval(`document.activeElement === document.querySelector('.bb-stop')`)
-      await page.eval(`document.querySelector('.bb-stop').focus()`)
-      await page.key('Enter')
-      await sleep(350)
-      await page.setViewport({ width: 844, height: 390, dpr: 2, mobile: true })
-      await sleep(500)
-      const turned = await page.eval(`(() => { const d = document.querySelector('dialog.stops-sheet'); if (!d.open) return 'closed'; const r = d.getBoundingClientRect(); return r.width > 0 && r.height > 0 ? 'visible' : 'invisible' })()`)
-      check('r1', 'T11 stops sheet focus and rotation', opened && back && turned !== 'invisible' ? 'pass' : 'fail', `opened ${opened}, focus back on the stop button ${back}, after turning to 844x390 the sheet is ${turned}`)
-      await page.close()
-    }
-
-    // T12: fonts held back 500 ms on desktop must not move the page.
+    // T12: fonts held back 500 ms must not move the page, on desktop and on a phone.
     {
       const slow = await serveDist({ port: 0, delay: (p) => (/\.woff2$/.test(p) ? 500 : 0) })
       const shifts = []
-      for (const [w, h] of [[1280, 800], [1440, 900], [1920, 1080]]) {
-        const page = await cdp.newPage({ width: w, height: h })
+      for (const [w, h, mobile] of [[1280, 800, false], [1440, 900, false], [1920, 1080, false], [390, 844, true]]) {
+        const page = await cdp.newPage({ width: w, height: h, dpr: mobile ? 2 : 1, mobile })
         await page.addInitScript(fn(P.clsInit))
         await page.send('Storage.clearDataForOrigin', { origin: new URL(slow.url).origin, storageTypes: 'local_storage,session_storage' })
         await page.goto(`${slow.url}/`, { settle: 2000 })
@@ -572,44 +481,11 @@ try {
       slow.server.close()
       check('r1', 'T12 no shift when the fonts arrive late', shifts.every(([, v]) => v <= 0.02) ? 'pass' : 'fail', shifts.map(([w, v]) => `${w}: CLS ${v}`).join(', '))
     }
-
-    // T5: the ping's frames, and the loop idle once the afterglow has cooled (4 s).
-    for (const w of [390, 1440]) {
-      const mobile = w < 720
-      const page = await cdp.newPage({ width: w, height: mobile ? 844 : 900, dpr: mobile ? 2 : 1, mobile })
-      await page.addInitScript(fn(P.rafCounterInit))
-      await page.send('Storage.clearDataForOrigin', { origin, storageTypes: 'local_storage,session_storage' })
-      await page.goto(`${url}/`, { settle: 2500 })
-      const tier = await page.eval('document.documentElement.dataset.tier || null')
-      await page.eval(`[...document.querySelectorAll('button')].find((b) => /^ping$/i.test(b.innerText.trim())).click()`)
-      const t0 = Date.now()
-      for (const t of [200, 600, 1000, 1600, 3000, 4000]) {
-        await sleep(Math.max(0, t - (Date.now() - t0)))
-        if (!NO_SHOTS) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, `after-state-${w}-ping-${t}ms.png`))))
-      }
-      await sleep(Math.max(0, 4100 - (Date.now() - t0)))
-      await page.eval('window.__qa.raf = 0')
-      await sleep(1000)
-      const raf = await page.eval('window.__qa.raf')
-      const said = await page.eval(`[...document.querySelectorAll('[role="status"]')].map((s) => s.textContent.trim()).join(' | ')`)
-      // Tier full keeps its ambient trails running until 20 s without input (by design); lite and static have none.
-      check('r1', `T5 ping settles by 4 s @${w}`, (tier === 'full' || raf === 0) && /pinged from plano/.test(said) ? 'pass' : 'fail', `tier ${tier}, rAF callbacks in the second after 4.1 s: ${raf}${tier === 'full' ? ' (ambient trails)' : ''}; status "${said}"`)
-      await page.close()
-    }
   }
 
-  // ---------- 10c. r2 regressions (triage U1 to U8, N15, N17) ----------
-  log('r2 checks')
-  await r2Checks({
-    cdp,
-    url,
-    check,
-    sleep,
-    SECTION_IDS,
-    shot: async (page, name) => {
-      if (!NO_SHOTS) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, name))))
-    },
-  })
+  // ---------- 10c. the glass checks (DESIGN.md 9; they replaced the r2 map checks) ----------
+  log('glass checks')
+  await glassChecks({ cdp, url, check, sleep })
 
   // ---------- 11. Lighthouse ----------
   if (!FAST) {
@@ -643,8 +519,10 @@ try {
 }
 
 // ---------- 12. repo hygiene and handoff ----------
-const gone = ['frontend/public/audio', 'frontend/src/assets/pfp.JPG', 'frontend/src/assets/pfp123.jpg', 'backend', 'frontend/src/components/pages/Admin.jsx', 'frontend/src/components/pages/Review.jsx'].filter((p) => existsSync(path.join(REPO, p)))
-check('repo', 'removed files', gone.length ? 'fail' : 'pass', gone.join(', ') || 'no audio, EXIF photos, backend, Admin or Review')
+// In the branch, not on disk: git leaves an emptied folder behind (backend/ after v1 removed it).
+const tracked = (p) => spawnSync('git', ['ls-files', '--', p], { cwd: REPO }).stdout.toString().trim().length > 0
+const gone = ['frontend/public/audio', 'frontend/src/assets/pfp.JPG', 'frontend/src/assets/pfp123.jpg', 'backend', 'frontend/src/components/pages/Admin.jsx', 'frontend/src/components/pages/Review.jsx'].filter(tracked)
+check('repo', 'removed files', gone.length ? 'fail' : 'pass', gone.join(', ') || 'no audio, EXIF photos, backend, Admin or Review in the branch')
 const vercel = JSON.parse(readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'))
 const csp = vercel.headers.flatMap((h) => h.headers).find((h) => h.key === 'Content-Security-Policy')?.value || ''
 check('repo', 'vercel.json', !vercel.rewrites && vercel.headers.some((h) => h.source === '/assets/(.*)' && h.headers.some((x) => /immutable/.test(x.value))) && /sha256-/.test(csp) ? 'pass' : 'fail', `rewrites ${vercel.rewrites ? 'present' : 'none'}, CSP hash ${/sha256-/.test(csp) ? 'set' : 'missing'}`)
