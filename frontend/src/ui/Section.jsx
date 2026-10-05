@@ -1,38 +1,18 @@
-import { headingId, sectionById } from '../content/sections.js'
+import { headingId } from '../content/sections.js'
+import Field from '../field/Field.jsx'
 
 /*
-  The section contract (PLAN.md 4.0). Every one of the six stops renders:
-    <section id={id} aria-labelledby="{id}-h" data-focus-node="...">
-      <h2 id="{id}-h">...</h2>
-  RouteRail, the map camera and the QA keyboard check rely on it.
+  The section contract: every one of the six renders
+    <section id={id} aria-labelledby="{id}-h"> ... <h2 id="{id}-h"> ...
+  with its own light field behind it. The prerender and QA rely on it.
 
-    <Section id="work" className="...">
-      <SectionHeading id="work" />            renders the stop label ('work')
-      ...
-    </Section>
+    <Section id="work" field="work">...</Section>
 */
-export function Section({ id, className = '', children, ...rest }) {
-  const s = sectionById(id)
+export default function Section({ id, field, className = '', children, ...rest }) {
   return (
-    <section
-      id={id}
-      aria-labelledby={headingId(id)}
-      data-focus-node={s ? s.focus.nodes.join(' ') : undefined}
-      className={`section ${className}`.trim()}
-      {...rest}
-    >
-      {children}
+    <section id={id} aria-labelledby={headingId(id)} className={`section ${className}`.trim()} {...rest}>
+      {field && <Field preset={field} />}
+      <div className="page on-field">{children}</div>
     </section>
   )
 }
-
-export function SectionHeading({ id, className = 't-h2 lower', children }) {
-  const s = sectionById(id)
-  return (
-    <h2 id={headingId(id)} className={className}>
-      {children ?? s?.heading?.text ?? s?.label.text ?? id}
-    </h2>
-  )
-}
-
-export default Section

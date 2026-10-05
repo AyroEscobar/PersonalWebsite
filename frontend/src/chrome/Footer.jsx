@@ -1,21 +1,16 @@
 import { useEffect } from 'react'
 import { FOOTER } from '../content/meta.js'
-import { MAP } from '../content/places.js'
-import { HOST, REPO } from '../content/constants.js'
+import { REPO } from '../content/constants.js'
 import BuildStamp from './BuildStamp.jsx'
 import VisitStamp from './VisitStamp.jsx'
-import QuietToggle from './QuietToggle.jsx'
-import NodeMark from './NodeMark.jsx'
 
 /*
-  Footer (PLAN.md 3.9, 4.14). Owned by B. The end of the line: who and
-  where, two real numbers (the build, and what this visit cost your device),
-  where the road data comes from, the no-tracking promise, and the three
-  controls that change how the page behaves (quiet mode, print, source).
+  Footer (DESIGN.md 5.14): base, a hairline on top, Inter 13. His line on
+  the left; the build stamp and this visit's numbers on the right; the
+  no-tracking promise and the site source. Links only.
 
-  Printing: every folded <details> in the work section (the RBC desks on a
-  phone) opens before the print dialog appears and folds again after, so
-  the desks are on paper. Specimen text equivalents stay folded.
+  Printing opens every folded <details> in the work section (the RBC desks)
+  before the print dialog and folds them again after.
 */
 function usePrintOpensDetails() {
   useEffect(() => {
@@ -37,39 +32,20 @@ function usePrintOpensDetails() {
   }, [])
 }
 
-export default function Footer() {
+export default function Footer({ className = '' }) {
   usePrintOpensDetails()
   return (
-    <footer className="footer" data-chrome="footer">
-      <div className="ft-inner">
-        <div className="ft-id">
-          <p className="ft-name">
-            <NodeMark className="ft-node" />
-            <span>{FOOTER.line.text}</span>
-          </p>
-          <p className="ft-promise">{FOOTER.noTracking.text}</p>
-        </div>
-        <div className="ft-data mono">
+    <footer className={`footer ${className}`.trim()}>
+      <div className="page ft-inner">
+        <p className="ft-line">{FOOTER.line.text}</p>
+        <p>{FOOTER.noTracking.text}</p>
+        <a className="ft-link" href={REPO}>
+          {FOOTER.source.text}
+        </a>
+        <div className="ft-stamps">
           <BuildStamp />
           <VisitStamp />
-          <p className="ft-attrib">{MAP.attribution.text}</p>
         </div>
-        <ul className="ft-controls">
-          <li className="js-only">
-            <QuietToggle variant="link" />
-          </li>
-          <li className="js-only">
-            <button type="button" className="ft-link" onClick={() => window.print()}>
-              {FOOTER.print.text}
-            </button>
-          </li>
-          <li>
-            <a className="ft-link" href={REPO}>
-              {FOOTER.source.text}
-            </a>
-          </li>
-        </ul>
-        <p className="ft-host print-only">{HOST}</p>
       </div>
     </footer>
   )

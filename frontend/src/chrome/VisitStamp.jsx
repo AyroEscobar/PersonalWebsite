@@ -4,7 +4,7 @@ import { kb, secs } from '../lib/format.js'
 import { afterLoad } from '../lib/idle.js'
 
 /*
-  VisitStamp (PLAN.md 4.14). "this visit: 184 KB, first paint 1.2 s on your
+  VisitStamp (DESIGN.md 5.14). "this visit: 184 KB, first paint 1.2 s on your
   device", or "first paint 640 ms" under a second. Measured on this visit by
   this browser: the transfer size of the document and every resource it
   pulled, and the first-contentful-paint entry. It keeps counting what the visit loads later (opening search pulls
@@ -63,8 +63,7 @@ export default function VisitStamp({ className = '' }) {
     <p className={`stamp visit-stamp ${className}`.trim()}>
       {m && (
         <>
-          <span className="stamp-key">{FOOTER.visitPrefix.text}</span> {kb(m.bytes)}, {FOOTER.visitPaint.text} {paint(m.fcp)}{' '}
-          {FOOTER.visitSuffix.text}
+          {FOOTER.visitPrefix.text} {kb(m.bytes)}, {FOOTER.visitPaint.text} {paint(m.fcp)} {FOOTER.visitSuffix.text}
         </>
       )}
     </p>
