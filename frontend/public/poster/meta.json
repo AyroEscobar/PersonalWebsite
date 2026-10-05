@@ -2,7 +2,7 @@
   "t": 2.3,
   "p": 0,
   "tier": "full",
-  "build": "50d472e",
+  "build": "bb31a6a",
   "views": {
     "hero-1440": {
       "width": 1440,
@@ -388,7 +388,7 @@
         "0.56": {
           "scrollY": 2635,
           "lines": 15,
-          "lowest": 5.98,
+          "lowest": 6.02,
           "worst": {
             "text": "experience",
             "sel": "a",
@@ -396,10 +396,10 @@
             "weight": 520,
             "large": false,
             "min": 4.5,
-            "ratio": 5.98,
+            "ratio": 6.02,
             "bg": [
-              34,
-              77,
+              33,
+              76,
               100
             ],
             "textLum": 0.64
@@ -470,7 +470,7 @@
         "0.3": {
           "scrollY": 1685,
           "lines": 16,
-          "lowest": 8.09,
+          "lowest": 8.11,
           "worst": {
             "text": "check out",
             "sel": "a",
@@ -478,7 +478,7 @@
             "weight": 520,
             "large": false,
             "min": 4.5,
-            "ratio": 8.09,
+            "ratio": 8.11,
             "bg": [
               29,
               55,
