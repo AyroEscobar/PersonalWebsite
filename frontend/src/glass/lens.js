@@ -12,7 +12,8 @@
     applyLens(el, preset, w, h, s)    give one element its map (s: lensing strength 0 to 1)
     lensFilter(preset, w, h, s)       the filter id, built once per size and cached
     lineBoxes(el)                     the rendered lines of an element's text, page coordinates
-    loupeOn(lens, line, mag) / loupeOff(lens)
+    wordLines(root)                   the word spans of root, grouped by rendered line
+    loupeOn(lens, line, mag) / loupeOff(lens)   line: a .lens-line, or one line of word spans
     materialize(el, preset, w, h)     the entry: lensing at 0.35, 0.7, 1 over 400 ms, once per session
 
   The map (research/glass.md 3): everything samples inward (a convex lens),
@@ -20,8 +21,9 @@
   interior is a rod profile, s(u) = u/M + (1 - 1/M) u^3, so the middle of a
   line reads M times larger and the ends compress back to meet the rim; the
   bezel is a convex squircle with a Snell bend. Dispersion is three
-  displacement passes (scale x 1-k, 1, 1+k) recombined per channel; at
-  k 0.010 the fringe reads as glass, not as misregistration (DESIGN.md 0.3).
+  displacement passes (scale x 1-k, 1, 1+k) recombined per channel; the
+  hero lens uses k 0.005 so the fringe reads as glass, not as
+  misregistration (DESIGN.md 0.3 asked for 0.010; it still split at 1x).
 */
 
 const NS = 'http://www.w3.org/2000/svg'
@@ -117,7 +119,9 @@ export function lensMap(w, h, r, { mag = 1, magY = mag, bezel = 16, push = 12 },
 
 // Presets (DESIGN.md 4.3), w and h in px.
 export const PRESET = {
-  lens: (w, h, phone) => ({ r: h / 2, mag: 1.16, bezel: Math.round(h * 0.2), push: Math.round(h * (phone ? 0.18 : 0.22)), blur: phone ? 0 : 0.45, disp: phone ? 0 : 0.01 }),
+  // dispersion 0.005, not DESIGN's 0.010: at 0.010 a 1x screen still showed red and cyan
+  // edges on "never has", where the rod compresses most (v2/shots/site/r1/lens-crop.png)
+  lens: (w, h, phone) => ({ r: h / 2, mag: 1.16, bezel: Math.round(h * 0.2), push: Math.round(h * (phone ? 0.18 : 0.22)), blur: phone ? 0 : 0.45, disp: phone ? 0 : 0.005 }),
   nav: (w, h) => ({ r: h / 2, mag: 1.03, bezel: 16, push: 14, blur: 11, disp: 0.03 }),
   dock: () => ({ r: 28, mag: 1.02, bezel: 16, push: 14, blur: 11, disp: 0.03 }),
   btn: (w, h) => ({ r: h / 2, mag: 1, bezel: 14, push: 12, blur: 7, disp: 0 }),
@@ -193,7 +197,8 @@ export function applyLens(el, preset, w, h, strength = 1) {
 
 function lensAll() {
   if (!lensOn()) return
-  const queue = [...document.querySelectorAll('[data-lens-preset]')]
+  // elements a controller owns (data-lens-own: the page's reader) get their maps from it
+  const queue = [...document.querySelectorAll('[data-lens-preset]:not([data-lens-own])')]
   const step = (deadline) => {
     while (queue.length && (!deadline || deadline.timeRemaining() > 4)) {
       const el = queue.shift()
@@ -232,7 +237,7 @@ export function lineBoxes(el) {
 }
 
 // ---------- the loupe: magnification where the backdrop cannot be displaced ----------
-const loupeAllowed = () =>
+export const loupeAllowed = () =>
   !lensOn() &&
   html().dataset.transparency !== 'reduced' &&
   !mq('(prefers-reduced-transparency: reduce)') &&
@@ -272,22 +277,40 @@ export function loupeOff(lens) {
   under.set(lens, [])
 }
 
+/** The word spans (.w) of `root`, grouped by rendered line, top to bottom. */
+export function wordLines(root) {
+  const lines = []
+  for (const w of root.querySelectorAll('.w')) {
+    const r = w.getBoundingClientRect()
+    if (!r.width) continue
+    const cy = (r.top + r.bottom) / 2
+    const L = lines.find((l) => Math.abs(l.cy - cy) < r.height * 0.35)
+    if (L) L.words.push(w)
+    else lines.push({ cy, words: [w] })
+  }
+  return lines.sort((a, b) => a.cy - b.cy).map((l) => l.words)
+}
+
 /**
  * Show a magnified copy of `line`'s words inside `lens`, along the same rod
  * profile as the SVG map, and fade the originals out from under the glass.
- * `line` is one line of type (a .lens-line): every word in it sits under the lens.
+ * `line` is one line of type (a .lens-line) or the word spans of one rendered
+ * line (from wordLines): every word in it sits under the lens.
  */
 export function loupeOn(lens, line, M = 1.16) {
   const lp = lens.querySelector(':scope > .loupe')
   if (!lp || !loupeAllowed()) return loupeOff(lens)
-  const words = wrapWords(line, lens)
+  const words = Array.isArray(line) ? line : wrapWords(line, lens)
+  if (!words.length) return loupeOff(lens)
   const lr = lens.getBoundingClientRect()
-  const cs = getComputedStyle(line)
+  const cs = getComputedStyle(words[0])
   const fs = parseFloat(cs.fontSize)
   const lh = parseFloat(cs.lineHeight) || fs
   const W = lr.width
   const H = lr.height
-  const oy = line.getBoundingClientRect().top - lr.top
+  // A word's box is its content area, centred on its line box: the line box starts lh/2 above that centre.
+  const wr = words[0].getBoundingClientRect()
+  const oy = (wr.top + wr.bottom) / 2 - lh / 2 - lr.top
   const ty = H / 2 + (oy - H / 2) * M
   lp.style.setProperty('--loupe-size', `${fs}px`)
   lp.style.setProperty('--loupe-lh', `${lh}px`)
@@ -321,7 +344,12 @@ function loupeAll() {
 }
 
 // ---------- the entry ----------
-export function materialize(el, preset, w, h) {
+/**
+ * Once per session. `fx: false` keeps the rim and streak as they are (the
+ * hero lens is already on screen when it takes over from its stand-in) and
+ * only raises the lensing strength.
+ */
+export function materialize(el, preset, w, h, { fx = true } = {}) {
   let seen = false
   try {
     seen = sessionStorage.getItem('ae.lens') === '1'
@@ -330,8 +358,10 @@ export function materialize(el, preset, w, h) {
     seen = true
   }
   if (seen || html().dataset.motion === 'reduced') return applyLens(el, preset, w, h)
-  el.classList.add('is-entering')
-  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('is-entering')))
+  if (fx) {
+    el.classList.add('is-entering')
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('is-entering')))
+  }
   if (!lensOn()) return
   ;[0.35, 0.7, 1].forEach((s, k) => window.setTimeout(() => applyLens(el, preset, w, h, s), k * 200))
 }
