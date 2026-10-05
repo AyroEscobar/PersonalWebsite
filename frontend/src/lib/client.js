@@ -1,13 +1,15 @@
 import { setMotion } from './store.js'
 import { syncFromHtml } from './mode.js'
 import { initPointer } from '../glass/pointer.js'
+import { initFieldLife } from '../field/live.js'
 import { onIdle } from './idle.js'
 
 /*
   Client start-up, called once from main.jsx after hydration is scheduled.
   Copies <html data-*> (set by the inline boot script) into the store,
-  follows the OS motion setting, starts the pointer specular, and loads the
-  lens maps (src/glass/lens.js, its own small chunk) after fonts and paint.
+  follows the OS motion setting, starts the pointer specular and the field
+  drift for fields near the screen, and loads the lens maps
+  (src/glass/lens.js, its own small chunk) after fonts and paint.
 */
 export function initClient() {
   syncFromHtml()
@@ -19,6 +21,7 @@ export function initClient() {
   })
 
   initPointer()
+  initFieldLife()
 
   const fonts = document.fonts?.ready ?? Promise.resolve()
   fonts.then(() =>
