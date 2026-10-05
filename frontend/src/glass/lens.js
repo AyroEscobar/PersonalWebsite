@@ -135,12 +135,23 @@ export function lensMap(w, h, r, { mag = 1, magY = mag, bezel = 16, push = 12, p
       let dy = (rod(v, magY) - v) * (h / 2)
       const t = Math.min(1, -s / bezel)
       if (t < 1) {
+        // the outward normal of the rounded box, analytically: from the corner's centre in a
+        // corner, else straight out through the nearer side
         const m = bend(t)
-        const gx = sdf(px + 0.5, py, w, h, r) - sdf(px - 0.5, py, w, h, r)
-        const gy = sdf(px, py + 0.5, w, h, r) - sdf(px, py - 0.5, w, h, r)
-        const gl = Math.hypot(gx, gy) || 1
-        dx += (-gx / gl) * m * push
-        dy += (-gy / gl) * m * push
+        const sx = px < w / 2 ? -1 : 1
+        const sy = py < h / 2 ? -1 : 1
+        const qx = Math.abs(px - w / 2) - (w / 2 - r)
+        const qy = Math.abs(py - h / 2) - (h / 2 - r)
+        let nx = 0
+        let ny = 0
+        if (qx > 0 && qy > 0) {
+          const l = Math.hypot(qx, qy) || 1
+          nx = (sx * qx) / l
+          ny = (sy * qy) / l
+        } else if (qx > qy) nx = sx
+        else ny = sy
+        dx -= nx * m * push
+        dy -= ny * m * push
       }
       DX[i] = dx * strength
       DY[i] = dy * strength
@@ -171,6 +182,12 @@ export function lensMap(w, h, r, { mag = 1, magY = mag, bezel = 16, push = 12, p
 
 const dpr = () => Math.min(3, Math.max(1, Math.round((window.devicePixelRatio || 1) * 2) / 2))
 
+// Map resolution: device pixels only for the reading lens, whose type shows through sharp
+// (the other presets pre-blur 4 to 11px, so a 1x map is already finer than what they show),
+// and only up to MAP_PX map pixels, so no map costs a long task on a slow phone.
+const MAP_PX = 150000
+const mapScale = (p, w, h) => (p.hi ? Math.max(1, Math.min(dpr(), Math.floor(Math.sqrt(MAP_PX / (w * h)) * 2) / 2)) : 1)
+
 // Presets (DESIGN.md 4.3), w and h in px.
 export const PRESET = {
   // The reading lens. Its words are magnified by the loupe (crisp in every browser), so the
@@ -179,7 +196,7 @@ export const PRESET = {
   // 1.5px backdrop blur the loupe browsers get, so the neighbouring lines' tails that reach
   // into the glass look the same everywhere. No dispersion: with no magnified type in the
   // backdrop it would only fringe those tails.
-  lens: (w, h, phone) => ({ r: h / 2, mag: 1, bezel: Math.round(h * 0.3), push: Math.max(1.5, h * 0.02), blur: phone ? 0.5 : 0.7, disp: 0, profile: 'soft' }),
+  lens: (w, h, phone) => ({ r: h / 2, mag: 1, bezel: Math.round(h * 0.3), push: Math.max(1.5, h * 0.02), blur: phone ? 0.5 : 0.7, disp: 0, profile: 'soft', hi: true }),
   nav: (w, h) => ({ r: h / 2, mag: 1.03, bezel: 16, push: 14, blur: 11, disp: 0.03 }),
   dock: () => ({ r: 28, mag: 1.02, bezel: 16, push: 14, blur: 11, disp: 0.03 }),
   btn: (w, h) => ({ r: h / 2, mag: 1, bezel: 14, push: 12, blur: 7, disp: 0 }),
@@ -204,16 +221,25 @@ function defsEl() {
 }
 
 const cache = new Map()
+const maps = new Map()
 let seq = 0
 export function lensFilter(preset, w, h, strength = 1) {
   w = Math.max(8, Math.round(w))
   h = Math.max(8, Math.round(h))
   const phone = window.innerWidth <= 640
-  const k = dpr()
-  const key = `${preset}-${w}x${h}-${strength}-${phone ? 'p' : 'd'}${k}`
-  if (cache.has(key)) return cache.get(key)
   const p = (PRESET[preset] || PRESET.btn)(w, h, phone)
-  const map = lensMap(w, h, p.r, p, strength, k)
+  const k = mapScale(p, w, h)
+  const mkey = `${preset}-${w}x${h}-${phone ? 'p' : 'd'}${k}`
+  const key = `${mkey}-${strength}`
+  if (cache.has(key)) return cache.get(key)
+  // one map per size; a weaker lens (the entry) is the same map at a smaller scale,
+  // since the displacement is the map value times the scale
+  let full = maps.get(mkey)
+  if (!full) {
+    full = lensMap(w, h, p.r, p, 1, k)
+    maps.set(mkey, full)
+  }
+  const map = { url: full.url, scale: full.scale * strength }
   const id = `lf${++seq}`
   const f = document.createElementNS(NS, 'filter')
   f.setAttribute('id', id)
@@ -453,6 +479,7 @@ export function startLens() {
     t = window.setTimeout(() => {
       if (cache.size > 64) {
         cache.clear()
+        maps.clear()
         defs?.replaceChildren()
       }
       run()
