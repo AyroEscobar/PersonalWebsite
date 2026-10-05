@@ -1,19 +1,10 @@
 /*
-  Print. White paper, ink type, no field, no glass: every glass surface
-  prints as a plain box with a hairline, so the page reads as a resume.
+  Print. White paper, ink type, no stage, no glass: every glass surface prints as a plain box
+  with a hairline, so the page reads as a resume. Hex here is allowed: check-content treats this
+  file like tokens.css.
 
-  Hooks:
-    .print-only            print only (hidden on screen)
-    [data-print='skip']    never print this
-    [data-deco]            decoration, never printed
-
-  Hex here is allowed: check-content treats this file like tokens.css.
+  Hooks: [data-print='skip'] never prints; [data-deco] is decoration, never printed.
 */
-
-.print-only {
-  display: none;
-}
-
 @page {
   size: letter;
   margin: 0.45in 0.5in 0.5in;
@@ -21,19 +12,18 @@
 
 @media print {
   :root {
-    --base: #ffffff;
+    --void: #ffffff;
+    --plate: #ffffff;
+    --plate-2: #ffffff;
     --ink: #15120e;
     --ink-2: #4a443c;
-    --ink-3: #4a443c;
+    --cyan: #0a6f7f;
     --gx-fill: #ffffff;
     --gx-bf: none;
     --gx-ring: none;
     --gx-deco: 0;
-    --gx-caustic: none;
+    --gx-scrim: transparent;
     --gx-shadow: inset 0 0 0 1px rgb(21 18 14 / 0.2);
-    --section-gap: 18pt;
-    --t-display: 22pt;
-    --t-3xl: 14pt;
     color-scheme: light;
   }
   html,
@@ -41,115 +31,55 @@
     background: #ffffff !important;
     font-size: 9pt;
   }
-  .print-only {
-    display: block;
-  }
-  /* the print masthead replaces the first screen: name, deck, proof, school, every address */
-  .hero-stage,
-  .spec-wrap,
-  .linkrow,
-  .field,
-  .lens-nav,
-  .lens-static,
-  .toast-region,
-  .quiet,
-  .btn,
+  .stage,
+  .top,
   .skip-link,
+  .btn,
+  .scene-ctl,
+  .theme-line,
   [data-print='skip'],
   [data-deco] {
     display: none !important;
   }
-  .print-masthead {
-    margin: 0 0 12pt;
-    padding-inline: var(--gutter);
+  .sec {
+    min-height: 0;
+    padding: 14pt 0 0;
   }
-  .pm-name {
-    font: 600 18pt / 1.15 var(--sans);
-    color: var(--ink);
-  }
-  .pm-deck,
-  .pm-proof,
-  .pm-school {
-    margin-top: 3pt;
-    font: 400 9.5pt / 1.45 var(--sans);
-    color: var(--ink);
-  }
-  .pm-contact {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2pt 14pt;
-    margin-top: 6pt;
-    font: 500 9pt / 1.4 var(--sans);
-  }
-  /* paper is narrow and costs pages: the sections stack, and cards sit two to a row */
-  .section {
-    padding-top: 14pt;
-  }
-  .sec-split {
-    display: block;
-  }
-  .sec-head {
-    margin-bottom: 8pt;
-  }
-  .origin-body {
+  .sec--hero {
     padding-top: 0;
-    gap: 10pt;
   }
-  .origin-voice {
-    font-size: 11pt;
-    gap: 6pt;
+  .sec--contact {
+    min-height: 0;
   }
-  .origin-closer {
-    font-size: 13pt;
+  .panel--contact {
+    position: static;
   }
-  .card,
-  .plate,
-  .profile,
-  .stack,
-  .contact {
+  .panel,
+  .card {
     padding: 10pt 12pt;
-    gap: 5pt;
+    width: auto;
+    break-inside: avoid;
   }
-  .now-sheet,
-  .crew-sheet {
-    padding: 2pt 12pt 8pt;
+  .name {
+    font-size: 22pt;
   }
-  .cards--wide,
-  .cards--half,
-  .plates {
+  .sec-title {
+    font-size: 14pt;
+  }
+  .cards {
+    width: auto;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8pt;
   }
-  .cards--half {
-    margin-top: 8pt;
-  }
-  .card-voice,
-  .plate-voice {
-    font-size: 12pt;
-  }
-  .profile-photo {
-    width: 64px;
-    height: 64px;
-  }
-  .glass,
-  .now-row,
-  .crew-row,
-  .desk {
-    break-inside: avoid;
-  }
-  /* the RBC plate with its desks open is taller than a page third: let it break */
-  .plate:has(.desks) {
-    break-inside: auto;
-    grid-column: 1 / -1;
-  }
-  .desks > :not(summary) {
-    display: block !important;
-  }
   .footer {
     margin-top: 12pt;
+    background: none;
   }
   a {
     color: inherit;
     text-decoration: none;
+  }
+  .email-row .email::after {
+    content: '';
   }
 }
