@@ -2,7 +2,7 @@
   "t": 2.3,
   "p": 0,
   "tier": "full",
-  "build": "bb31a6a",
+  "build": "5aa3deb",
   "views": {
     "hero-1440": {
       "width": 1440,
@@ -10,14 +10,14 @@
       "dpr": 1,
       "brightest": {
         "panel": [
-          30,
+          31,
           150,
           183
         ],
         "pill": [
-          166,
-          178,
-          188
+          186,
+          194,
+          203
         ],
         "theme": [
           33,
@@ -35,16 +35,16 @@
           100
         ],
         "footer": [
-          146,
-          178,
-          192
+          145,
+          179,
+          193
         ]
       },
-      "mean": 0.3074,
+      "mean": 0.3078,
       "sizes": {
-        "avif": 18977,
-        "webp": 25636,
-        "png": 920684
+        "avif": 18935,
+        "webp": 25532,
+        "png": 920681
       }
     },
     "hero-780": {
@@ -78,17 +78,17 @@
           99
         ]
       },
-      "mean": 0.3033,
+      "mean": 0.3056,
       "sizes": {
-        "avif": 17053,
-        "webp": 24934,
-        "png": 601436
+        "avif": 17076,
+        "webp": 24868,
+        "png": 600396
       }
     }
   },
   "brightest": {
     "panel": [
-      30,
+      31,
       150,
       183
     ],
@@ -113,9 +113,9 @@
       100
     ],
     "footer": [
-      146,
-      178,
-      192
+      145,
+      179,
+      193
     ]
   },
   "composite": {
@@ -164,7 +164,7 @@
         "0.3": {
           "scrollY": 1359,
           "lines": 19,
-          "lowest": 3.21,
+          "lowest": 3.27,
           "worst": {
             "text": "check out",
             "sel": "h2.sec-title",
@@ -172,11 +172,11 @@
             "weight": 650,
             "large": true,
             "min": 3,
-            "ratio": 3.21,
+            "ratio": 3.27,
             "bg": [
-              123,
-              143,
-              160
+              122,
+              142,
+              158
             ],
             "textLum": 0.958
           }
@@ -286,7 +286,7 @@
         "0.56": {
           "scrollY": 2840,
           "lines": 16,
-          "lowest": 7.25,
+          "lowest": 7.26,
           "worst": {
             "text": "Executive dashboards shipped directly with the C",
             "sel": "span.exp-note",
@@ -294,11 +294,11 @@
             "weight": 420,
             "large": false,
             "min": 4.5,
-            "ratio": 7.25,
+            "ratio": 7.26,
             "bg": [
               31,
               77,
-              99
+              100
             ],
             "textLum": 0.788
           }
@@ -306,7 +306,7 @@
         "0.8": {
           "scrollY": 4074,
           "lines": 30,
-          "lowest": 6.5,
+          "lowest": 6.51,
           "worst": {
             "text": "Firebase",
             "sel": "span.chip",
@@ -314,11 +314,11 @@
             "weight": 480,
             "large": false,
             "min": 4.5,
-            "ratio": 6.5,
+            "ratio": 6.51,
             "bg": [
-              67,
-              82,
-              89
+              68,
+              81,
+              87
             ],
             "textLum": 0.788
           }
@@ -368,7 +368,7 @@
         "0.3": {
           "scrollY": 1404,
           "lines": 15,
-          "lowest": 7.41,
+          "lowest": 7.42,
           "worst": {
             "text": "check out",
             "sel": "a",
@@ -376,7 +376,7 @@
             "weight": 520,
             "large": false,
             "min": 4.5,
-            "ratio": 7.41,
+            "ratio": 7.42,
             "bg": [
               29,
               62,
@@ -408,7 +408,7 @@
         "0.8": {
           "scrollY": 3840,
           "lines": 16,
-          "lowest": 8.44,
+          "lowest": 8.43,
           "worst": {
             "text": "experience",
             "sel": "a",
@@ -416,7 +416,7 @@
             "weight": 520,
             "large": false,
             "min": 4.5,
-            "ratio": 8.44,
+            "ratio": 8.43,
             "bg": [
               40,
               65,
@@ -470,7 +470,7 @@
         "0.3": {
           "scrollY": 1685,
           "lines": 16,
-          "lowest": 8.11,
+          "lowest": 8.13,
           "worst": {
             "text": "check out",
             "sel": "a",
@@ -478,10 +478,10 @@
             "weight": 520,
             "large": false,
             "min": 4.5,
-            "ratio": 8.11,
+            "ratio": 8.13,
             "bg": [
               29,
-              55,
+              54,
               78
             ],
             "textLum": 0.64
@@ -538,16 +538,16 @@
       "weight": 650,
       "large": true,
       "min": 3,
-      "ratio": 3.21,
+      "ratio": 3.27,
       "bg": [
-        123,
-        143,
-        160
+        122,
+        142,
+        158
       ],
       "textLum": 0.958
     },
     "failures": [],
     "method": "text hidden, 3x3 mean, worst pixel under each line box"
   },
-  "luminance": 0.3074
+  "luminance": 0.3078
 }
