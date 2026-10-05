@@ -1,13 +1,15 @@
 /*
-  Print. White paper, ink type, no stage, no glass: every glass surface prints as a plain box
-  with a hairline, so the page reads as a resume. Hex here is allowed: check-content treats this
-  file like tokens.css.
+  Print: a clean one-page resume. White paper, ink type, no stage, no glass, no controls. The page
+  reorders itself the way a resume reads: the name, role and line; a contact row (the email and the
+  three links with their addresses); experience; the two companies side by side; the stack as its
+  plain sentence; the figure credit (CC BY, every page and tier). Hex here is allowed: check-content
+  treats this file like tokens.css.
 
   Hooks: [data-print='skip'] never prints; [data-deco] is decoration, never printed.
 */
 @page {
   size: letter;
-  margin: 0.45in 0.5in 0.5in;
+  margin: 0.5in 0.55in 0.5in;
 }
 
 @media print {
@@ -18,68 +20,279 @@
     --ink: #15120e;
     --ink-2: #4a443c;
     --cyan: #0a6f7f;
-    --gx-fill: #ffffff;
+    --gx-fill: none;
     --gx-bf: none;
     --gx-ring: none;
     --gx-deco: 0;
     --gx-scrim: transparent;
-    --gx-shadow: inset 0 0 0 1px rgb(21 18 14 / 0.2);
+    --gx-scrim-rock: 0;
+    --gx-shadow: none;
     color-scheme: light;
   }
   html,
   body {
     background: #ffffff !important;
-    font-size: 9pt;
+    color: var(--ink);
+    font-size: 9.5pt;
   }
+
+  /* what never prints: the scene, the chrome, every control, the theme line, the closer */
   .stage,
   .top,
   .skip-link,
-  .btn,
-  .scene-ctl,
+  .btn:not(.card .btn),
+  .email-row button,
+  .copied,
+  .foot-row--mono,
   .theme-line,
+  .closer,
+  .contact-p,
+  .panel--contact .sec-title,
+  #stack .chips,
   [data-print='skip'],
   [data-deco] {
     display: none !important;
   }
-  .sec {
-    min-height: 0;
-    padding: 14pt 0 0;
+
+  /* glass becomes plain paper: no fill, no scrim, no rim, no sheen */
+  .glass {
+    background: none !important;
+    box-shadow: none !important;
+    border-radius: 0;
   }
-  .sec--hero {
-    padding-top: 0;
+  .glass::before,
+  .glass::after,
+  .glass > .scrim,
+  .glass > .spec,
+  .glass > .ring {
+    display: none !important;
   }
+  .reveal,
+  html[data-js] .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* the order a resume reads in */
+  main {
+    display: flex;
+    flex-direction: column;
+  }
+  #top {
+    order: 0;
+  }
+  #contact {
+    order: 1;
+  }
+  #experience {
+    order: 2;
+  }
+  #check-out {
+    order: 3;
+  }
+  #stack {
+    order: 4;
+  }
+
+  .sec,
+  .sec--hero,
+  .sec--work,
+  .sec--exp,
+  .sec--stack,
   .sec--contact {
-    min-height: 0;
-  }
-  .panel--contact {
-    position: static;
+    min-height: 0 !important;
+    padding: 0 !important;
+    display: block;
   }
   .panel,
+  .panel--contact,
   .card {
-    padding: 10pt 12pt;
-    width: auto;
+    position: static !important;
+    width: auto !important;
+    padding: 0 !important;
     break-inside: avoid;
   }
-  .name {
-    font-size: 22pt;
+  .sec + .sec,
+  #experience,
+  #check-out,
+  #stack {
+    margin-top: 11pt;
+    padding-top: 9pt !important;
+    border-top: 0.5pt solid #d9d4cc;
   }
-  .sec-title {
-    font-size: 14pt;
+  #contact {
+    border-top: 0 !important;
+    margin-top: 6pt !important;
+    padding-top: 0 !important;
   }
+
+  /* the header */
+  .panel--hero .eyebrow {
+    font-size: 7.5pt;
+    letter-spacing: 0.12em;
+    margin-bottom: 3pt;
+    color: var(--cyan);
+  }
+  .panel--hero .name {
+    font-size: 25pt;
+    line-height: 1;
+    margin: 0 0 4pt;
+  }
+  .name br {
+    display: none;
+  }
+  .panel--hero .role {
+    font-size: 11pt;
+    margin-bottom: 2pt;
+  }
+  .panel--hero .oneline {
+    font-size: 9.5pt;
+    margin: 0;
+    color: var(--ink-2);
+  }
+
+  /* contact: one row of addresses */
+  .panel--contact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2pt 16pt;
+  }
+  .email-row,
+  .elsewhere {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 2pt 12pt;
+    margin: 0 !important;
+  }
+  .email {
+    font-size: 9.5pt;
+    color: var(--cyan);
+    background: none !important;
+  }
+  .elsewhere-label {
+    display: none;
+  }
+  /* each link prints as its address (github.com/AyroEscobar), not its label */
+  .elsewhere a {
+    font-size: 0;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .elsewhere a::after {
+    content: attr(data-short);
+    font-size: 9pt;
+  }
+
+  /* section titles */
+  .sec-title,
+  .sec-title--bare {
+    font-size: 11pt;
+    letter-spacing: 0;
+    text-shadow: none !important;
+    margin: 0 0 5pt !important;
+  }
+
+  /* experience */
+  .exp {
+    gap: 4pt;
+  }
+  .exp li {
+    font-size: 9pt;
+    line-height: 1.35;
+    padding-top: 4pt;
+    box-shadow: none;
+    border-top: 0.5pt solid #ebe7e1;
+  }
+  .exp li:first-child {
+    border-top: 0;
+  }
+  .exp strong {
+    display: inline;
+    font-size: 9.5pt;
+    margin: 0 6pt 0 0;
+  }
+
+  /* the two companies side by side */
   .cards {
-    width: auto;
+    width: auto !important;
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8pt;
+    gap: 14pt;
   }
+  .card .eyebrow {
+    font-size: 7pt;
+    margin-bottom: 2pt;
+  }
+  .card-name {
+    font-size: 11.5pt;
+    margin-bottom: 2pt;
+  }
+  .card-head {
+    font-size: 9.5pt;
+    margin-bottom: 2pt;
+  }
+  .card-body {
+    font-size: 8.5pt;
+    line-height: 1.4;
+    margin-bottom: 2pt;
+  }
+  .card .btn {
+    display: inline !important;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    font-size: 8.5pt;
+    font-weight: 560;
+    color: var(--cyan);
+    background: none !important;
+    box-shadow: none !important;
+  }
+  .card .btn .ic,
+  .card .btn > .spec {
+    display: none !important;
+  }
+
+  /* the stack: its plain sentence instead of the chips */
+  #stack .sr-only {
+    position: static !important;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+    font-size: 9pt;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+
+  /* the footer: the credit and the name, small */
   .footer {
     margin-top: 12pt;
-    background: none;
+    padding: 6pt 0 0;
+    border-top: 0.5pt solid #d9d4cc;
+    background: none !important;
   }
+  .foot-row {
+    gap: 2pt 12pt;
+    font-size: 7pt;
+    color: var(--ink-2);
+  }
+  .foot-row > :not(.credit) {
+    display: none;
+  }
+  .foot-row a {
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+  .foot-row .credit a::after {
+    content: ' (' attr(href) ')';
+  }
+
   a {
     color: inherit;
     text-decoration: none;
-  }
-  .email-row .email::after {
-    content: '';
   }
 }
