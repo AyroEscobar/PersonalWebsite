@@ -20,7 +20,7 @@ export default function NotFound() {
       </a>
       <Poster />
       <header className="top">
-        <Wordmark />
+        <Wordmark href="/" />
       </header>
       <main id="main" tabIndex={-1} className="nf">
         <Panel variant="nf" reveal={false}>
