@@ -78,7 +78,6 @@ export function mount(canvas, opts = {}) {
   const sky = makeSky(); scene.add(sky)
   const stars = makeStars(); sky.add(stars)
   const ridge = makeRidge({ skyUniforms: sky.material.uniforms }); scene.add(ridge)
-  scene.environment = neonEnvironment(r, { intensity: 0.8 })
   const { cam, place } = makeCamera()
 
   // the slope frame carries the mountain and the figure; +x climbs
@@ -104,7 +103,7 @@ export function mount(canvas, opts = {}) {
   const coreMats = []
   core.traverse((o) => { if (o.material && !o.material.transparent) coreMats.push([o.material, o.material.color.clone()]) })
 
-  const post = full ? makePost(r, scene, cam, { tier }) : null
+  let post = null
 
   // ---- state ----
   const sp = makeProgress()
@@ -272,9 +271,17 @@ export function mount(canvas, opts = {}) {
   if (forcedP === null) spring.set(target)
 
   // ---- the man: fetched after the renderer is up; the poster holds the frame until he is ready ----
-  S = { r, scene, post, io, canvas, onLost, onRestored, onScroll, onResize, onPtr, onVis, sp, dead: false,
+  S = { r, scene, post: null, io, canvas, onLost, onRestored, onScroll, onResize, onPtr, onVis, sp, dead: false,
     pause: () => { userPaused = true; sync() }, play: () => { userPaused = false; sync() } }
   const me = S
+  // the mount is split across frames (DESIGN.md 9): the renderer, the world and the materials now; the
+  // neon PMREM and the composer on the next frame; the figure when its fetch lands
+  requestAnimationFrame(() => {
+    if (me.dead) return
+    scene.environment = neonEnvironment(r, { intensity: 0.8 })
+    post = full ? makePost(r, scene, cam, { tier }) : null
+    me.post = post
+  })
   loadFigure(FIGURE_URL).then((man) => {
     if (me.dead) return
     fig = makeFigure({ man, material: figMat, boulderMaterial: glass, boulderGeometry: rockGeo, R, x0: X0 })
@@ -290,7 +297,9 @@ export function mount(canvas, opts = {}) {
         advance: (d) => { t += d; tau += d * rate },
       },
     })
-    if (fixedT !== null) { render(fixedT, 0); window.__ready = true; opts.onReady?.() } else sync()
+    // the figure can land before the next frame's PMREM and composer: wait for them
+    const go = () => { if (fixedT !== null) { render(fixedT, 0); window.__ready = true; opts.onReady?.() } else sync() }
+    if (scene.environment) go(); else requestAnimationFrame(() => requestAnimationFrame(go))
   }).catch((err) => { console.error(err); opts.onError?.(err) })
   return S
 }

@@ -88,7 +88,11 @@ export default function Stage() {
       if (s.paused !== prev.paused && mod) (s.paused ? mod.pause() : mod.play())
       prev = s
     })
-    afterLoad().then(() => onIdle(start, 600))
+    // the chunk never competes with the first paint: wait for load, for the poster to decode and
+    // commit (it is the LCP element), then an idle moment, then one more frame
+    const img = canvas.parentElement?.querySelector('img')
+    const decoded = img?.decode ? img.decode().catch(() => {}) : Promise.resolve()
+    Promise.all([afterLoad(), decoded]).then(() => onIdle(() => requestAnimationFrame(() => requestAnimationFrame(start)), 1500))
     return () => {
       alive = false
       unsubscribe()
