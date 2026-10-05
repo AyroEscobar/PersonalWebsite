@@ -20,7 +20,7 @@
 */
 import * as THREE from 'three'
 import { loadFigure, makeFigure, figureMaterial } from './figure.js'
-import { glassPresets, rockGeometry, neonCore, neonEnvironment, coreGlow, droplets } from './rock.js'
+import { glassPresets, rockGeometry, rockSurface, neonCore, neonEnvironment, coreGlow, droplets } from './rock.js'
 import { makeSlopeAsync, contourMaterial, makeReflection, makeContactShadow } from './terrain.js'
 import { makeSky, makeRidge, makeStars, makeCity, makeRain } from './world.js'
 import { makeLights, LIGHT, FOG } from './lights.js'
@@ -304,7 +304,7 @@ export function mount(canvas, opts = {}) {
   })()
   Promise.all([loadFigure(FIGURE_URL), built]).then(async ([man]) => {
     if (me.dead) return
-    fig = makeFigure({ man, material: figMat, boulderMaterial: glass, boulderGeometry: rockGeo, R, x0: X0 })
+    fig = makeFigure({ man, material: figMat, boulderMaterial: glass, boulderGeometry: rockGeo, R, x0: X0, surface: rockSurface })
     slope.add(fig.group)
     fig.boulder.add(droplets(R, full ? 110 : 36, { lite: !full }))
     installHooks({
