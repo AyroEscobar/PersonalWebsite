@@ -290,7 +290,9 @@ export function focusInfo() {
     href: el.getAttribute('href'),
     role: el.getAttribute('role'),
     outline: cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0,
-    shadow: cs.boxShadow !== 'none',
+    // A card title draws its ring around the ruler that holds it on focus (the ruler would
+    // cover a ring on the link itself), so a ring on that child counts.
+    shadow: cs.boxShadow !== 'none' || [...el.querySelectorAll(':scope > .ruler')].some((r) => getComputedStyle(r).boxShadow !== 'none' && Number(getComputedStyle(r).opacity) > 0.5),
     inView,
     obscured: inView && fixedOver,
     rect: { top: Math.round(r.top), left: Math.round(r.left), w: Math.round(r.width), h: Math.round(r.height) },
