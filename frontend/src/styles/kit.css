@@ -336,7 +336,7 @@
   width: min(480px, 100%);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-aspect-ratio: 9/10) {
   .kit-main {
     max-width: none;
     padding-top: 80px;
