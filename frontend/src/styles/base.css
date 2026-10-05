@@ -122,10 +122,12 @@ summary {
   cursor: pointer;
 }
 
-/* The `notext` QA mode (?notext=1): text hidden so the contrast capture sees only the backdrop. */
+/* The `notext` QA mode (?notext=1): text and its underlines hidden so the contrast capture
+   sees only the backdrop (a link's accent underline is not what its words sit on). */
 html.notext body * {
   color: transparent !important;
   text-shadow: none !important;
+  text-decoration-color: transparent !important;
 }
 
 /* Forced colours: decorative layers go away, focus stays visible. */
