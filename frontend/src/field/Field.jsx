@@ -10,9 +10,11 @@
     dm xm ym  phone overrides (diameter in vmax, centre in percent)
     dur delay dx dy   the drift (20 to 30 s, alternate, staggered)
 
-  The hero preset follows DESIGN.md 3.2; the section presets put two or
-  three deeper blobs behind each section's glass so nothing below the hero
+  The hero preset follows DESIGN.md 3.2; the section presets put three to
+  seven deeper blobs behind each section's glass so nothing below the hero
   reads as cream paper (12.3, 12.6). Pages tune positions by passing blobs.
+  Blobs drift only while their field is near the screen (src/field/live.js
+  adds .is-live), so a long page never holds dozens of moving layers.
 */
 
 const B = (c, d, x, y, more = {}) => ({ c, d, x, y, ...more })
@@ -25,7 +27,7 @@ const FIELDS = {
     B('butter', 54, 44, -2, { dur: 22, delay: -12, dx: -4, dy: 5, dm: 80, xm: 86, ym: -6 }),
     B('sky', 62, 82, 42, { dur: 28, delay: -3, dx: -6, dy: 3, dm: 84, xm: 104, ym: 46 }),
     B('lilac', 54, 66, 100, { dur: 24, delay: -16, dx: -5, dy: -4, dm: 80, xm: 64, ym: 92 }),
-    B('rose', 52, 50, 62, { a: 0.7, dur: 30, delay: -9, dx: 6, dy: -3, dm: 76, xm: 46, ym: 56 }),
+    B('rose', 56, 54, 52, { a: 0.72, dur: 30, delay: -9, dx: 6, dy: -3, dm: 76, xm: 46, ym: 56 }),
     B('core', 34, 32, 34, { a: 0.38, dur: 25, delay: -13, dx: 4, dy: -2, dm: 56, xm: 22, ym: 24 }),
     B('sky', 40, 100, 2, { a: 0.75, dur: 27, delay: -20, dx: -3, dy: 3, dm: 60, xm: 108, ym: 0 }),
     B('butter', 40, 4, 96, { a: 0.7, dur: 23, delay: -7, dx: 4, dy: -3, dm: 60, xm: -6, ym: 70 }),
@@ -37,29 +39,42 @@ const FIELDS = {
     B('lilac-d', 38, 66, 74, { a: 0.85, dur: 29, delay: -7, dm: 64, xm: 30, ym: 84 }),
     B('butter-d', 30, 96, 88, { a: 0.8, dur: 23, delay: -15, dm: 50, xm: 100, ym: 100 }),
   ],
+  // Below the hero (12.3): every blob sits behind the section's glass. Rail sections hold
+  // their glass in the right column (x 30 to 93 percent at 1440); the layer reaches 30vh
+  // past the section at each end, so the content spans roughly the middle of y.
   now: [
-    B('sky-d', 46, 86, 34, { dur: 27, delay: -5, dm: 70, xm: 96, ym: 30 }),
-    B('peach-d', 42, 14, 72, { dur: 25, delay: -14, dm: 70, xm: 0, ym: 74 }),
-    B('butter-d', 30, 52, 108, { a: 0.8, dur: 29, delay: -8, dm: 50 }),
+    B('sky-d', 46, 80, 46, { dur: 27, delay: -5, dm: 76, xm: 100, ym: 40 }),
+    B('peach-d', 44, 42, 62, { dur: 25, delay: -14, dm: 76, xm: 0, ym: 62 }),
+    B('butter-d', 34, 60, 30, { a: 0.85, dur: 29, delay: -8, dm: 56, xm: 60, ym: 26 }),
+    B('lilac-d', 36, 98, 76, { a: 0.7, dur: 23, delay: -18, dm: 56, xm: 96, ym: 82 }),
   ],
   work: [
-    B('lilac-d', 46, 84, 22, { dur: 26, delay: -7, dm: 70, xm: 100, ym: 14 }),
-    B('peach-d', 44, 12, 52, { dur: 24, delay: -11, dm: 70, xm: 0, ym: 46 }),
-    B('sky-d', 40, 70, 88, { dur: 28, delay: -2, dm: 70, xm: 100, ym: 82 }),
+    B('lilac-d', 46, 84, 26, { dur: 26, delay: -7, dm: 76, xm: 100, ym: 22 }),
+    B('peach-d', 44, 40, 34, { dur: 24, delay: -11, dm: 76, xm: 0, ym: 36 }),
+    B('sky-d', 44, 70, 60, { dur: 28, delay: -2, dm: 76, xm: 100, ym: 56 }),
+    B('butter-d', 38, 38, 76, { a: 0.9, dur: 22, delay: -16, dm: 70, xm: 0, ym: 76 }),
+    B('rose-d', 34, 92, 84, { a: 0.8, dur: 30, delay: -9, dm: 60, xm: 90, ym: 90 }),
   ],
   builds: [
-    B('butter-d', 46, 18, 16, { dur: 21, delay: -17, dm: 70, xm: 0, ym: 10 }),
-    B('lilac-d', 46, 88, 44, { dur: 29, delay: -2, dm: 70, xm: 100, ym: 40 }),
-    B('rose-d', 40, 34, 82, { a: 0.85, dur: 27, delay: -4, dm: 70, xm: 10, ym: 76 }),
+    B('butter-d', 46, 16, 26, { dur: 21, delay: -17, dm: 76, xm: 0, ym: 16 }),
+    B('sky-d', 44, 58, 22, { dur: 26, delay: -6, dm: 72, xm: 100, ym: 28 }),
+    B('lilac-d', 46, 90, 40, { dur: 29, delay: -2, dm: 76, xm: 100, ym: 46 }),
+    B('rose-d', 42, 30, 60, { a: 0.9, dur: 27, delay: -4, dm: 72, xm: 0, ym: 58 }),
+    B('peach-d', 42, 64, 72, { dur: 25, delay: -12, dm: 72, xm: 100, ym: 72 }),
+    B('sky-d', 38, 10, 86, { a: 0.8, dur: 23, delay: -19, dm: 64, xm: 0, ym: 88 }),
+    B('butter-d', 36, 94, 86, { a: 0.8, dur: 28, delay: -10, dm: 60, xm: 96, ym: 96 }),
   ],
   crew: [
-    B('sky-d', 42, 12, 40, { dur: 26, delay: -9, dm: 70, xm: 0 }),
-    B('butter-d', 40, 84, 64, { dur: 23, delay: -3, dm: 70, xm: 100 }),
+    B('sky-d', 44, 42, 44, { dur: 26, delay: -9, dm: 76, xm: 0, ym: 36 }),
+    B('butter-d', 42, 84, 58, { dur: 23, delay: -3, dm: 76, xm: 100, ym: 64 }),
+    B('rose-d', 34, 62, 78, { a: 0.8, dur: 28, delay: -14, dm: 56, xm: 30, ym: 86 }),
   ],
+  // the end of the page warms (3.4): peach and butter pulled to the middle, the warmest screen
   signal: [
-    B('peach-d', 50, 36, 46, { a: 0.75, dur: 25, delay: -6, dm: 80, xm: 20 }),
-    B('butter-d', 46, 62, 56, { a: 0.75, dur: 22, delay: -15, dm: 80, xm: 80 }),
-    B('rose-d', 30, 20, 80, { a: 0.6, dur: 28, delay: -1, dm: 60 }),
+    B('peach-d', 50, 44, 50, { a: 0.75, dur: 25, delay: -6, dm: 84, xm: 10, ym: 44 }),
+    B('butter-d', 46, 74, 46, { a: 0.75, dur: 22, delay: -15, dm: 80, xm: 90, ym: 56 }),
+    B('rose-d', 34, 26, 72, { a: 0.6, dur: 28, delay: -1, dm: 60, xm: 30, ym: 78 }),
+    B('peach', 46, 94, 72, { a: 0.7, dur: 26, delay: -11, dm: 70, xm: 100, ym: 90 }),
   ],
 }
 
