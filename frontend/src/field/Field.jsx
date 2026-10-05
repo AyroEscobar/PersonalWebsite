@@ -18,13 +18,24 @@
 const B = (c, d, x, y, more = {}) => ({ c, d, x, y, ...more })
 
 const FIELDS = {
+  // the first screen (3.2): peach under the first lines, butter overhead, sky right, lilac low
+  // right, rose under the middle of the sentence, and a deeper core under line 2 for the lens
   hero: [
-    B('peach', 64, 18, 22, { dur: 26, delay: -6, dx: 5, dy: 4, dm: 90, xm: 4, ym: 16 }),
-    B('butter', 56, 52, 0, { dur: 22, delay: -12, dx: -4, dy: 5, dm: 80, xm: 70, ym: 4 }),
-    B('sky', 60, 92, 40, { dur: 28, delay: -3, dx: -6, dy: 3, dm: 80, xm: 100, ym: 46 }),
-    B('lilac', 54, 78, 100, { dur: 24, delay: -16, dx: -5, dy: -4, dm: 80, xm: 70, ym: 96 }),
-    B('rose', 44, 50, 55, { a: 0.45, dur: 30, delay: -9, dx: 6, dy: -3, dm: 70, xm: 30, ym: 58 }),
-    B('core', 36, 40, 34, { a: 0.4, dur: 25, delay: -13, dx: 4, dy: -2, dm: 60, xm: 46, ym: 30 }),
+    B('peach', 62, 16, 30, { dur: 26, delay: -6, dx: 5, dy: 4, dm: 92, xm: 0, ym: 30 }),
+    B('butter', 54, 44, -2, { dur: 22, delay: -12, dx: -4, dy: 5, dm: 80, xm: 86, ym: -6 }),
+    B('sky', 62, 82, 42, { dur: 28, delay: -3, dx: -6, dy: 3, dm: 84, xm: 104, ym: 46 }),
+    B('lilac', 54, 66, 100, { dur: 24, delay: -16, dx: -5, dy: -4, dm: 80, xm: 64, ym: 92 }),
+    B('rose', 52, 50, 62, { a: 0.7, dur: 30, delay: -9, dx: 6, dy: -3, dm: 76, xm: 46, ym: 56 }),
+    B('core', 34, 32, 34, { a: 0.38, dur: 25, delay: -13, dx: 4, dy: -2, dm: 56, xm: 22, ym: 24 }),
+    B('sky', 40, 100, 2, { a: 0.75, dur: 27, delay: -20, dx: -3, dy: 3, dm: 60, xm: 108, ym: 0 }),
+    B('butter', 40, 4, 96, { a: 0.7, dur: 23, delay: -7, dx: 4, dy: -3, dm: 60, xm: -6, ym: 70 }),
+  ],
+  // the origin body: light under his pull paragraphs, deeper colour behind the origin card
+  origin: [
+    B('rose', 44, 18, 40, { a: 0.5, dur: 27, delay: -4, dm: 70, xm: 10, ym: 24 }),
+    B('sky-d', 42, 86, 30, { dur: 25, delay: -11, dm: 70, xm: 96, ym: 62 }),
+    B('lilac-d', 38, 66, 74, { a: 0.85, dur: 29, delay: -7, dm: 64, xm: 30, ym: 84 }),
+    B('butter-d', 30, 96, 88, { a: 0.8, dur: 23, delay: -15, dm: 50, xm: 100, ym: 100 }),
   ],
   now: [
     B('sky-d', 46, 86, 34, { dur: 27, delay: -5, dm: 70, xm: 96, ym: 30 }),
