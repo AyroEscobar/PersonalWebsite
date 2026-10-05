@@ -1,0 +1,38 @@
+{
+  "seed": "a3 prototype poster, replaced by npm run poster",
+  "t": 2.3,
+  "p": 0,
+  "luminance": 0.3071400794495516,
+  "brightest": {
+    "panel": [
+      30,
+      150,
+      183
+    ],
+    "card": [
+      30,
+      150,
+      183
+    ],
+    "pill": [
+      30,
+      150,
+      183
+    ],
+    "theme": [
+      30,
+      150,
+      183
+    ],
+    "title": [
+      30,
+      150,
+      183
+    ],
+    "footer": [
+      30,
+      150,
+      183
+    ]
+  }
+}
