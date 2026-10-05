@@ -259,4 +259,15 @@ export const COMPOSITE_RULES = [
     text: ['accent'],
     min: 3,
   },
+  {
+    // the hero lede and proof, section lines, the builds notes, the footer, and the links among
+    // them: base.css sets every link outside glass in a token from this list (check-content)
+    glass: 'none: text and links on the raw field',
+    fill: 0,
+    brightness: 1,
+    blobs: ['peach', 'butter', 'sky', 'lilac', 'rose', 'core', 'peach-d', 'butter-d', 'sky-d', 'lilac-d', 'rose-d'],
+    text: ['ink', 'ink-2'],
+    min: 4.5,
+    links: true,
+  },
 ]

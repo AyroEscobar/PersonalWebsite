@@ -309,6 +309,17 @@ export async function checkContent({ quiet = false } = {}) {
     if (worst.ratio < rule.min) err(`contrast: --${worst.t} on ${rule.glass} over --f-${worst.b} is ${worst.ratio.toFixed(2)}, needs ${rule.min}`)
   }
 
+  // ---------- 9: links outside glass sit on the raw field, so their colour is a raw-field token ----------
+  {
+    const rule = COMPOSITE_RULES.find((r) => r.links)
+    const baseCss = readFileSync(path.join(ROOT, 'src/styles/base.css'), 'utf8')
+    const block = baseCss.match(/(^|\n)a\s*\{([^}]*)\}/)
+    const color = block?.[2].match(/(^|[\s;])color\s*:\s*var\(--([\w-]+)\)/)?.[2]
+    if (!rule) err('contrast: rules.mjs has no raw-field rule for links (COMPOSITE_RULES, links: true)')
+    else if (!color) err('contrast: src/styles/base.css has no `a { color: var(--token) }` rule for links')
+    else if (!rule.text.includes(color)) err(`contrast: links outside glass are --${color} (base.css); on the raw field they must be one of ${rule.text.map((t) => `--${t}`).join(', ')}`)
+  }
+
   if (!quiet) {
     for (const w of warnings) console.warn(`check-content: warning: ${w}`)
     if (errors.length) {
