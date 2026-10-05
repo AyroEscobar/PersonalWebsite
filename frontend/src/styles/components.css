@@ -377,6 +377,33 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
     font-size: 36px;
   }
 }
+@media (min-width: 1100px) {
+  .sec-word {
+    font-size: var(--t-4xl);
+    letter-spacing: -0.015em;
+  }
+  .sec-line {
+    font-size: 22px;
+  }
+  /* the rail: the word over its line in a column of its own, held under the nav */
+  .sec-head--rail {
+    position: sticky;
+    top: 104px;
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: var(--s-3);
+    margin-bottom: 0;
+  }
+  .sec-head--rail .sec-line {
+    max-width: 14em;
+  }
+  .sec-split {
+    display: grid;
+    grid-template-columns: 264px minmax(0, 1fr);
+    column-gap: var(--s-9);
+    align-items: start;
+  }
+}
 
 /* ============================================================
    5.5 card (a build): a glass sheet
@@ -498,6 +525,331 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
 @media (hover: hover) and (pointer: fine) {
   .card--base:hover {
     box-shadow: inset 0 0 0 1px var(--hair-2);
+  }
+}
+
+/* ============================================================
+   specimens (5.5, 6.6): a working drawing above a wide card's title.
+   A well inside the glass, not more glass (no glass on glass, 12.2).
+   ============================================================ */
+.spec {
+  display: grid;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+.spec-stage {
+  position: relative;
+  height: 188px;
+  border-radius: calc(var(--r-4) - 8px);
+  overflow: hidden;
+  background: linear-gradient(180deg, rgb(var(--lit) / 0.5), rgb(var(--lit) / 0.22));
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--rim-dark) / 0.1),
+    inset 0 1px 0 rgb(var(--lit) / 0.9),
+    inset 0 14px 26px -22px rgb(var(--sh) / 0.4);
+}
+.spec-tag {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  font: italic 400 15px / 1 var(--serif);
+  color: var(--ink-2);
+}
+.spec-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  min-height: 40px;
+}
+.spec-bar .btn {
+  margin-right: -12px;
+}
+.spec-bar-hold {
+  width: 120px;
+  height: 40px;
+}
+.spec-state {
+  font: 400 var(--t-xs) / 1.4 var(--sans);
+  color: var(--ink-2);
+}
+@media (max-width: 639.98px) {
+  .spec-bar {
+    min-height: 44px;
+  }
+  .spec-bar-hold {
+    height: 44px;
+  }
+}
+
+/* Viaere: the lamps over a 100-hour window */
+.via {
+  --green: var(--ok);
+  --amber: oklch(0.76 0.15 72);
+  --red: oklch(0.6 0.2 27);
+}
+.via-lamps {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.via-lamp {
+  --lamp: var(--green);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 500 var(--t-xs) / 1 var(--sans);
+  color: var(--ink-2);
+}
+.via-lamp[data-tier='amber'] {
+  --lamp: var(--amber);
+}
+.via-lamp[data-tier='red'] {
+  --lamp: var(--red);
+}
+.via-lamp i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgb(var(--ink-rgb) / 0.22);
+}
+.via-lamp[data-lit] {
+  color: var(--ink);
+}
+.via-lamp[data-lit] i {
+  background: var(--lamp);
+  box-shadow:
+    0 0 0 3px color-mix(in oklch, var(--lamp) 22%, transparent),
+    0 0 14px 2px color-mix(in oklch, var(--lamp) 55%, transparent);
+}
+/* the fourth tier: hollow, unlabeled, apart, never lit */
+.via-lamp--unnamed {
+  margin-left: 6px;
+}
+.via-window {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 20px;
+  height: 74px;
+}
+.via-track {
+  position: absolute;
+  left: 0;
+  width: 90%;
+  bottom: 26px;
+  height: 2px;
+  border-radius: 1px;
+  background: rgb(var(--ink-rgb) / 0.22);
+}
+.via-track::before,
+.via-track::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  width: 1.5px;
+  height: 10px;
+  background: rgb(var(--ink-rgb) / 0.35);
+}
+.via-track::before {
+  left: 0;
+}
+.via-track::after {
+  right: 0;
+}
+/* past the window */
+.via-over {
+  position: absolute;
+  left: 90%;
+  right: 0;
+  bottom: 21px;
+  height: 12px;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(90deg, color-mix(in oklch, var(--red) 22%, transparent), transparent);
+}
+.via-end {
+  position: absolute;
+  bottom: 0;
+  font: 500 12px / 1 var(--sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+.via-end[data-at='start'] {
+  left: 0;
+}
+.via-end[data-at='end'] {
+  left: 90%;
+  transform: translateX(-50%);
+}
+/* a marker is as wide as the window, moved by transform, its pip at its left edge */
+.via-mark {
+  --lamp: var(--green);
+  position: absolute;
+  left: 0;
+  bottom: 27px;
+  width: 90%;
+  height: 0;
+  pointer-events: none;
+  transform: translateX(calc(var(--x) * 100%));
+}
+.via-mark[data-tier='amber'] {
+  --lamp: var(--amber);
+}
+.via-mark[data-tier='red'] {
+  --lamp: var(--red);
+}
+.via-mark::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: -5px;
+  width: 2px;
+  height: 10px;
+  border-radius: 1px;
+  background: var(--lamp);
+}
+.via-mark b {
+  position: absolute;
+  left: 0;
+  bottom: 9px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: var(--plate);
+  box-shadow:
+    inset 0 0 0 1.5px var(--lamp),
+    0 6px 12px -6px rgb(var(--sh) / 0.45);
+  font: 600 11px / 1 var(--sans);
+  color: var(--ink);
+}
+
+/* the circle method */
+.cm {
+  display: grid;
+  grid-template-columns: 156px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--s-6);
+  padding: 0 var(--s-5);
+}
+.cm-ring {
+  position: relative;
+  width: 156px;
+  height: 156px;
+}
+.spec-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.cm-orbit {
+  stroke: rgb(var(--ink-rgb) / 0.2);
+}
+.cm-pattern {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.cm-chord-glow {
+  stroke: var(--accent);
+  stroke-opacity: 0.13;
+}
+.cm-chord {
+  stroke: var(--accent);
+}
+.cm-node {
+  fill: var(--plate);
+  stroke: var(--ink);
+}
+.cm-hub {
+  fill: var(--accent);
+}
+.cm-player {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font: 600 11px / 1 var(--sans);
+  color: var(--ink);
+}
+.cm-player--hub {
+  color: var(--plate);
+}
+.cm-side {
+  display: grid;
+  gap: var(--s-3);
+  min-width: 0;
+}
+.cm-pairs {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 4px var(--s-5);
+  font: 500 var(--t-xs) / 1.3 var(--sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.cm-matrix {
+  display: grid;
+  grid-template-columns: repeat(7, 10px);
+  gap: 3px;
+}
+.cm-cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: rgb(var(--ink-rgb) / 0.08);
+}
+.cm-cell[data-void] {
+  background: transparent;
+}
+.cm-cell[data-met] {
+  background: rgb(var(--accent-rgb) / 0.32);
+}
+.cm-cell[data-hot] {
+  background: var(--accent);
+}
+.cm-met {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 400 var(--t-xs) / 1.3 var(--sans);
+  color: var(--ink-2);
+}
+.cm-ok svg {
+  width: 12px;
+  height: 12px;
+  color: var(--ok-ink);
+}
+@media (max-width: 639.98px) {
+  .spec-stage {
+    height: 176px;
+  }
+  .cm {
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: var(--s-4);
+    padding: 0 var(--s-4);
+  }
+  .cm-ring {
+    width: 132px;
+    height: 132px;
+  }
+  .cm-pairs {
+    grid-template-columns: max-content;
+  }
+  .via-lamps {
+    gap: 12px;
+  }
+}
+@media (forced-colors: active) {
+  .spec-stage {
+    border: 1px solid CanvasText;
+  }
+  .via-lamp i,
+  .via-mark b {
+    border: 1px solid CanvasText;
   }
 }
 
@@ -953,6 +1305,31 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
 }
 .contact .linkrow {
   margin-top: var(--s-5);
+}
+@media (min-width: 900px) {
+  .contact--wide {
+    max-width: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    column-gap: var(--s-8);
+    align-items: end;
+    padding: var(--s-8);
+  }
+  .contact--wide > p {
+    grid-row: 1 / span 2;
+    align-self: start;
+  }
+  .contact--wide .contact-email {
+    margin-top: 0;
+  }
+  .contact--wide .linkrow {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: var(--s-4);
+  }
+  .contact--wide .contact-voice {
+    font-size: 2.25rem;
+  }
 }
 @media (max-width: 639.98px) {
   .contact {
