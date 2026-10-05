@@ -38,7 +38,7 @@ export default function Stage() {
     const d = document.documentElement
 
     const onFrame = (f) => {
-      setRims(f.boulder)
+      setRims(f.boulder, { fromScene: true })
       // the scrim rises with the backdrop above the weather: 0.62 + 0.08 smoothstep(0.85, 1, p)
       const k = f.dawn / 0.35
       d.style.setProperty('--scrim', (0.62 + 0.08 * k).toFixed(3))
@@ -105,7 +105,7 @@ export default function Stage() {
   }, [hydrated])
 
   return (
-    <div className="stage" aria-hidden="true">
+    <div className="stage">
       <picture className="poster">
         <source media="(max-aspect-ratio: 9/10)" type="image/avif" srcSet={POSTER.phone.avif} />
         <source media="(max-aspect-ratio: 9/10)" type="image/webp" srcSet={POSTER.phone.webp} />
