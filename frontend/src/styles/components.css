@@ -1182,13 +1182,43 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
 .linkrow a.is-focus {
   box-shadow: var(--focus);
 }
+/* phones: one deliberate shape. The wrapper (.linkrow-fit) is a size container there and
+   the row picks: every item on one line when they fit (8px item padding: four channels
+   need 285px, five links 337px), else an even grid, two by two for four, three over two
+   for five, never one item alone on a line. The glass box hugs its items either way. */
+.linkrow-fit {
+  display: contents;
+}
 @media (max-width: 639.98px) {
+  .linkrow-fit {
+    display: block;
+    container: linkrow / inline-size;
+  }
   .linkrow {
     gap: 0;
   }
   .linkrow a {
     height: 44px;
-    padding: 0 10px;
+    padding: 0 8px;
+    justify-content: center;
+  }
+}
+@container linkrow (max-width: 289.98px) {
+  .linkrow-fit[data-n='4'] > .linkrow {
+    display: inline-grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@container linkrow (max-width: 339.98px) {
+  .linkrow-fit[data-n='5'] > .linkrow {
+    display: inline-grid;
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .linkrow-fit[data-n='5'] > .linkrow a {
+    grid-column: span 2;
+  }
+  .linkrow-fit[data-n='5'] > .linkrow a:nth-of-type(4) {
+    grid-column: 2 / span 2;
   }
 }
 
