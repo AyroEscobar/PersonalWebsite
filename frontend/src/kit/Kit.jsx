@@ -348,7 +348,7 @@ export default function Kit() {
         <Group id="bits" title={`${KIT.groups.linkrow.text}, ${KIT.groups.tooltip.text}, ${KIT.groups.toast.text}`} field="bits">
           <div className="kit-bits">
             <Cell label={S.rest.text}>
-              <LinkRow />
+              <LinkRow label={`${KIT.groups.linkrow.text}, ${S.rest.text}`} />
             </Cell>
             <Cell label={KIT.linkrow.legend.text}>
               <div inert>
