@@ -56,8 +56,10 @@ function vercelHeaderRules() {
 export function serveDist({ port = 0, root = path.join(ROOT, 'dist'), host = '127.0.0.1', log = false, delay = null } = {}) {
   const rules = vercelHeaderRules()
   const packed = new Map()
+  // Keyed on mtime too: a rebuild whose file happens to keep its length (a new
+  // seven-character build hash) must not be served from the old compressed copy.
   const compress = (file, buf, enc) => {
-    const key = `${enc}:${file}:${buf.length}`
+    const key = `${enc}:${file}:${buf.length}:${statSync(file).mtimeMs}`
     if (!packed.has(key)) {
       packed.set(key, enc === 'br' ? brotliCompressSync(buf, { params: { [zc.BROTLI_PARAM_QUALITY]: 11 } }) : gzipSync(buf, { level: 9 }))
     }
