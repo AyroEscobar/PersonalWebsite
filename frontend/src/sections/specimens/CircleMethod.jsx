@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import Button from '../../ui/Button.jsx'
 
 /*
-  Pool Tournament Scheduler specimen (PLAN.md 4.9): the circle method on
-  eight players. A to G sit on a ring, H is fixed in the center. Round r
+  Pool Tournament Scheduler specimen (DESIGN.md 6.6): the circle method on
+  eight players. A to G sit on a ring, H is fixed in the centre. Round r
   pairs H with the player at step r and the rest along the three chords
   that cross that line. Every round is the same pattern turned one step,
   so "next round" literally rotates the pattern (transform only).
@@ -52,77 +53,74 @@ export default function CircleMethod({ spec }) {
   const metText = `${spec.met.text} ${met.size} ${spec.of.text} 28`
 
   return (
-    <>
-      <div className="spec-stage">
-        <div className="cm">
-          <div className="cm-ring" role="img" aria-label={spec.label.text}>
-            <svg className="spec-svg" viewBox="0 0 100 100" aria-hidden="true">
-              <circle cx="50" cy="50" r="38" fill="none" style={{ stroke: 'var(--trace)' }} strokeWidth="1" vectorEffect="non-scaling-stroke" />
-              <g className="cm-pattern" style={{ transform: `rotate(${turn * STEP}deg)` }}>
-                {P0.map(([p, q], i) => (
-                  <g key={i}>
-                    <line x1={p.x} y1={p.y} x2={q.x} y2={q.y} style={{ stroke: 'var(--sodium)' }} strokeOpacity="0.16" strokeWidth="7" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-                    <line x1={p.x} y1={p.y} x2={q.x} y2={q.y} style={{ stroke: 'var(--sodium)' }} strokeWidth="1.6" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-                  </g>
-                ))}
-              </g>
-              {Array.from({ length: RING }, (_, i) => {
-                const p = at(i)
-                return <circle key={i} cx={p.x} cy={p.y} r="2.4" style={{ fill: 'var(--night)', stroke: 'var(--ink)' }} strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
-              })}
-              <circle cx="50" cy="50" r="5.5" style={{ fill: 'var(--led)' }} />
-            </svg>
-            {Array.from({ length: RING }, (_, i) => {
-              const p = at(i, 47.5)
-              return (
-                <span key={i} className="spec-label cm-player" style={{ left: `${p.x}%`, top: `${p.y}%` }} aria-hidden="true">
-                  {name(i)}
-                </span>
-              )
-            })}
-            <span className="spec-label cm-player cm-hub" style={{ left: '50%', top: '50%' }} aria-hidden="true">
-              {name(HUB)}
-            </span>
-          </div>
-          <div className="cm-side">
-            <p className="cm-pairs mono">
-              {pairText.map((t) => (
-                <span key={t}>{t}</span>
+    <div className="spec">
+      <div className="spec-stage cm">
+        <div className="cm-ring" role="img" aria-label={spec.label.text}>
+          <svg className="spec-svg" viewBox="0 0 100 100" aria-hidden="true">
+            <circle className="cm-orbit" cx="50" cy="50" r="38" fill="none" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+            <g className="cm-pattern" style={{ transform: `rotate(${turn * STEP}deg)` }}>
+              {P0.map(([p, q], i) => (
+                <g key={i}>
+                  <line className="cm-chord-glow" x1={p.x} y1={p.y} x2={q.x} y2={q.y} strokeWidth="7" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <line className="cm-chord" x1={p.x} y1={p.y} x2={q.x} y2={q.y} strokeWidth="1.6" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                </g>
               ))}
-            </p>
-            <div className="cm-matrix" aria-hidden="true">
-              {Array.from({ length: RING * RING }, (_, n) => {
-                const row = Math.floor(n / RING) + 1 // B..H
-                const c = n % RING // A..G
-                if (c >= row) return <span key={n} className="cm-cell" data-void="" />
-                const k = key(row, c)
-                return <span key={n} className="cm-cell" data-met={met.has(k) ? '' : undefined} data-hot={hot.has(k) ? '' : undefined} />
-              })}
-            </div>
-            {done ? (
-              <p className="cm-met cm-ok">
-                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-                  <path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                </svg>
-                {spec.allMet.text}
-              </p>
-            ) : (
-              <p className="cm-met">{metText}</p>
-            )}
+            </g>
+            {Array.from({ length: RING }, (_, i) => {
+              const p = at(i)
+              return <circle key={i} className="cm-node" cx={p.x} cy={p.y} r="3" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
+            })}
+            <circle className="cm-hub" cx="50" cy="50" r="6.5" />
+          </svg>
+          {Array.from({ length: RING }, (_, i) => {
+            const p = at(i, 49)
+            return (
+              <span key={i} className="cm-player" style={{ left: `${p.x}%`, top: `${p.y}%` }} aria-hidden="true">
+                {name(i)}
+              </span>
+            )
+          })}
+          <span className="cm-player cm-player--hub" style={{ left: '50%', top: '50%' }} aria-hidden="true">
+            {name(HUB)}
+          </span>
+        </div>
+        <div className="cm-side" aria-hidden="true">
+          <p className="cm-pairs">
+            {pairText.map((t) => (
+              <span key={t}>{t}</span>
+            ))}
+          </p>
+          <div className="cm-matrix">
+            {Array.from({ length: RING * RING }, (_, n) => {
+              const row = Math.floor(n / RING) + 1 // B..H
+              const c = n % RING // A..G
+              if (c >= row) return <span key={n} className="cm-cell" data-void="" />
+              const k = key(row, c)
+              return <span key={n} className="cm-cell" data-met={met.has(k) ? '' : undefined} data-hot={hot.has(k) ? '' : undefined} />
+            })}
           </div>
+          {done ? (
+            <p className="cm-met cm-ok">
+              <svg viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" strokeWidth="1.6" />
+              </svg>
+              {spec.allMet.text}
+            </p>
+          ) : (
+            <p className="cm-met">{metText}</p>
+          )}
         </div>
       </div>
+      <p className="sr-only">{spec.words.text}</p>
       <div className="spec-bar">
         <p className="spec-state" aria-live="polite">
           {roundText}
-          <span className="sr-only">
-            {`: ${pairText.join(', ')}. ${done ? spec.allMet.text : metText}.`}
-          </span>
+          <span className="sr-only">{`: ${pairText.join(', ')}. ${done ? spec.allMet.text : metText}.`}</span>
         </p>
-        <button type="button" className="btn-fill spec-btn" onClick={() => setTurn((t) => t + 1)}>
+        <Button variant="ghost" onClick={() => setTurn((t) => t + 1)}>
           {round === RING - 1 ? spec.again.text : spec.next.text}
-        </button>
+        </Button>
       </div>
-    </>
+    </div>
   )
 }

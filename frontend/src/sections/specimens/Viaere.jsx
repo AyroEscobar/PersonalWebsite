@@ -1,21 +1,21 @@
 import { useState } from 'react'
 import { BUILDS } from '../../content/builds.js'
+import Button from '../../ui/Button.jsx'
 
 /*
-  Viaere specimen (PLAN.md 4.9, r1 T10, r2 N2): status lamps over a 100-hour
-  window. Three abstract aircraft start bunched, all due at once, and one has
-  run past its window, so the red lamp lights. Rebalance spreads them evenly,
-  the job of the spacing engine: green, green, green, and red goes out.
+  Viaere specimen (DESIGN.md 6.6; r1 T10, r2 N2): status lamps over a
+  100-hour window. Three abstract aircraft start bunched, all due at once,
+  and one has run past its window, so the red lamp lights. Rebalance spreads
+  them evenly, the job of the spacing engine: green, green, green, and red
+  goes out.
 
-  The lamps carry only the tier words viaere.com uses (green, amber, red) and
-  light in the color their word says: green in LED, amber in sodium, red in
-  the beacon, as a 10px light (the one named exception to the beacon being
-  reserved for live status, PLAN 13.23). viaere.com does not name its fourth
-  tier or say where it sits, so its lamp is drawn dim, unlabeled and set
-  apart, and nothing ever lights it. Captioned as an illustration: no
-  counts, no tail numbers, no thresholds printed.
+  The lamps carry only the tier words viaere.com uses (green, amber, red)
+  and light in the colour their word says. viaere.com does not name its
+  fourth tier or say where it sits, so its lamp is drawn hollow, unlabeled
+  and set apart, and nothing ever lights it. Captioned as an illustration:
+  no counts, no tail numbers, no thresholds printed.
 
-  Only the markers move (transform, 700ms ease-out, staggered 40ms).
+  Only the markers move (transform, motion.css, staggered 40ms).
 */
 
 const BUNCHED = [0.86, 0.92, 1.03]
@@ -30,51 +30,45 @@ export default function Viaere({ spec }) {
   const lit = new Set(tiers)
 
   return (
-    <>
-      <div className="spec-stage">
-        <div className="via" role="img" aria-label={spec.label.text}>
-          <span className="spec-tag">{BUILDS.illustration.text}</span>
-          <div className="via-lamps">
-            <ol className="via-named">
-              {LAMPS.map((k) => (
-                <li key={k} className="via-lamp" data-lit={lit.has(k) ? '' : undefined}>
-                  <i className="lamp" data-tier={k} />
-                  <span>{spec.lamps[k].text}</span>
-                </li>
-              ))}
-            </ol>
-            <span className="via-lamp via-unnamed" aria-hidden="true">
-              <i className="lamp" />
+    <div className="spec">
+      <div className="spec-stage via" role="img" aria-label={spec.label.text}>
+        <span className="spec-tag">{BUILDS.illustration.text}</span>
+        <div className="via-lamps">
+          {LAMPS.map((k) => (
+            <span key={k} className="via-lamp" data-tier={k} data-lit={lit.has(k) ? '' : undefined}>
+              <i />
+              {spec.lamps[k].text}
             </span>
-          </div>
-          <div className="via-window">
-            <div className="via-track" />
-            <span className="via-overdue" />
-            <span className="via-end mono" data-at="start">
-              {spec.start.text}
+          ))}
+          <span className="via-lamp via-lamp--unnamed">
+            <i />
+          </span>
+        </div>
+        <div className="via-window">
+          <span className="via-track" />
+          <span className="via-over" />
+          <span className="via-end" data-at="start">
+            {spec.start.text}
+          </span>
+          <span className="via-end" data-at="end">
+            {spec.end.text}
+          </span>
+          {xs.map((x, i) => (
+            <span key={i} className="via-mark" data-tier={tiers[i]} style={{ '--x': x, '--i': i }}>
+              <b>{spec.marks[i].text}</b>
             </span>
-            <span className="via-end mono" data-at="end">
-              {spec.end.text}
-            </span>
-            {xs.map((x, i) => (
-              <span key={i} className="via-mark" data-tier={tiers[i]} style={{ '--x': x }}>
-                <span>
-                  <span className="mono">{spec.marks[i].text}</span>
-                  <i />
-                </span>
-              </span>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
+      <p className="sr-only">{spec.words.text}</p>
       <div className="spec-bar">
         <p className="spec-state" aria-live="polite">
           {spread ? spec.spread.text : spec.bunched.text}
         </p>
-        <button type="button" className="btn-fill spec-btn" onClick={() => setSpread((s) => !s)}>
+        <Button variant="ghost" onClick={() => setSpread((s) => !s)}>
           {spread ? spec.reset.text : spec.rebalance.text}
-        </button>
+        </Button>
       </div>
-    </>
+    </div>
   )
 }
