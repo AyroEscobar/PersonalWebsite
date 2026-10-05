@@ -298,7 +298,8 @@ export function focusInfo() {
 }
 
 /**
- * r1 T8: share of visible text nodes set in Overpass Mono. Text inside SVG,
+ * DESIGN.md 9.3: share of visible text nodes set in any monospace face (v2
+ * ships none, so the share must be zero). Text inside SVG,
  * screen-reader-only text, closed dialogs, popovers and folded details (but
  * their summaries) is not visible type, so it is not counted.
  */
@@ -322,7 +323,7 @@ export function monoShare() {
     if (folded && !el.closest('summary')) continue
     if (!shown(el)) continue
     total++
-    if (/Overpass Mono/.test(getComputedStyle(el).fontFamily.split(',')[0])) mono++
+    if (/mono|courier|consolas|menlo/i.test(getComputedStyle(el).fontFamily.split(',')[0])) mono++
   }
   return { total, mono, share: total ? Math.round((mono / total) * 1000) / 10 : 0 }
 }

@@ -524,14 +524,14 @@ try {
       await page.close()
     }
 
-    // T8 and T9 at 1440, everything mounted: mono only for data, boxes only for plates.
+    // At 1440, everything mounted: no monospace at all (v2), boxes only for plates (T9).
     {
       const page = await cdp.newPage({ width: 1440, height: 900 })
       await page.goto(`${url}/`, { settle: 1200 })
       await page.eval(fn(P.scrollThrough))
       const m = await page.eval(fn(P.monoShare))
       const b = await page.eval(fn(P.borderedBoxes))
-      check('r1', 'T8 mono share at 1440', m.share <= 35 ? 'pass' : 'fail', `${m.mono} of ${m.total} visible text nodes (${m.share}%) are mono, limit 35%`)
+      check('v2', 'no monospace at 1440 (DESIGN.md 9.3)', m.mono === 0 ? 'pass' : 'fail', `${m.mono} of ${m.total} visible text nodes are monospace, must be 0`)
       check('r1', 'T9 bordered boxes at 1440', b.count < 40 ? 'pass' : 'fail', `${b.count} fully bordered elements in main (under 40): ${b.sample.join(', ')}`)
       await page.close()
     }

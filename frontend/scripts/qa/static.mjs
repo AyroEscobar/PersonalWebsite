@@ -4,7 +4,6 @@
 */
 import { readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
-import { pathToFileURL } from 'node:url'
 import { BANNED, DASH_RE, PRIVATE_SHAPES, loadDenylist, loadNearRules, readTokens, termRegex, walk, hexToRgb } from '../lib/rules.mjs'
 
 export async function staticScan(ROOT) {
@@ -38,13 +37,8 @@ export async function staticScan(ROOT) {
   }
   push('privacy', privacy.length ? 'fail' : deny ? 'pass' : 'warn', privacy.length ? privacy.join('; ') : deny ? 'denylist terms, proximity rules, EIN and phone shapes clean' : 'denylist missing, shape checks only')
 
-  // Map labels: only the six allowed node labels inside the map graphic.
-  const { ALLOWED_MAP_LABELS } = await import(pathToFileURL(path.join(ROOT, 'src/content/places.js')))
+  // v2 has no map (DESIGN.md 7.2): the map labels check went with it.
   const index = existsSync(path.join(DIST, 'index.html')) ? readFileSync(path.join(DIST, 'index.html'), 'utf8') : ''
-  const svgImgs = [...index.matchAll(/<svg[^>]*role="img"[\s\S]*?<\/svg>/g)].map((m) => m[0])
-  const labels = svgImgs.flatMap((s) => [...s.matchAll(/<text[^>]*>([^<]+)<\/text>/g)].map((m) => m[1].trim()))
-  const stray = labels.filter((l) => !ALLOWED_MAP_LABELS.includes(l))
-  push('map-labels', stray.length ? 'fail' : labels.length ? 'pass' : 'pending', stray.length ? `unexpected labels: ${stray.join(', ')}` : labels.length ? `${labels.length} labels, all allowed` : 'no map svg yet (A)')
 
   // CSS palette and cut effects.
   const tokens = readTokens(readFileSync(path.join(ROOT, 'src/styles/tokens.css'), 'utf8'))
