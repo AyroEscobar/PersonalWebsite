@@ -13,8 +13,8 @@
   The CSS is inlined into both pages (INLINE_CSS=0 turns it off) because it
   is small and it is the only render-blocking request.
 
-  Also asserts the contract QA relies on: one h1, the six section h2s, no
-  em or en dashes in the HTML.
+  Also asserts the contract QA relies on: one h1, the four section h2s, the poster
+  <picture> with both AVIF sources and an alt, no em or en dashes in the HTML.
 */
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
@@ -73,6 +73,18 @@ export async function prerender() {
     if (!home.includes(`id="${id}"`)) problems.push(`home is missing section #${id}`)
     if (!new RegExp(`<h2[^>]*id="${headingId(id)}"`).test(home)) problems.push(`home is missing <h2 id="${headingId(id)}">`)
   }
+  const h2s = home.match(/<h2[\s>]/g) || []
+  if (h2s.length !== SECTION_IDS.length) problems.push(`home has ${h2s.length} h2 elements, needs exactly ${SECTION_IDS.length}`)
+  const pic = home.match(/<picture class="poster">[\s\S]*?<\/picture>/)?.[0] || ''
+  if (!pic) problems.push('home has no poster <picture>')
+  else {
+    for (const f of ['/poster/hero-1440.avif', '/poster/hero-780.avif', '/poster/hero-1440.webp', '/poster/hero-780.webp']) if (!pic.includes(f)) problems.push(`the poster <picture> is missing ${f}`)
+    if (!/<img[^>]*\balt="[^"]+"/.test(pic)) problems.push('the poster <img> has no alt')
+    if (!/<img[^>]*\bfetchpriority="high"/i.test(pic)) problems.push('the poster <img> is not fetchpriority high')
+    if (!/<img[^>]*\bwidth="\d+"[^>]*\bheight="\d+"/.test(pic)) problems.push('the poster <img> has no width and height')
+  }
+  if (!/<canvas\b[^>]*aria-hidden="true"/.test(home)) problems.push('home has no aria-hidden canvas')
+  if (!/CC BY 3\.0/.test(home) || !/CC BY 3\.0/.test(notFound) || !/CC BY 3\.0/.test(kit)) problems.push('the CC BY figure credit is missing from a page footer')
   if (!/<h1[\s>]/.test(notFound)) problems.push('404 has no h1')
   if ((kit.match(/<h1[\s>]/g) || []).length !== 1) problems.push('kit needs exactly one h1')
   for (const [name, html] of [['index.html', homeHtml], ['404.html', nfHtml], ['kit/index.html', kitHtml]]) {
@@ -104,7 +116,9 @@ async function syncCsp(hashes) {
     for (const h of block.headers || []) if (h.key === 'Content-Security-Policy') csp = h
   }
   if (!csp) throw new Error('prerender: vercel.json has no Content-Security-Policy header')
-  const want = `script-src 'self'${hashes.length ? ' ' + hashes.join(' ') : ''}`
+  // 'wasm-unsafe-eval' is the meshopt decoder (three/addons/libs/meshopt_decoder) that unpacks the
+  // figure mesh: WebAssembly only, never eval, and only from this origin's scripts.
+  const want = `script-src 'self' 'wasm-unsafe-eval'${hashes.length ? ' ' + hashes.join(' ') : ''}`
   const have = (csp.value.match(/script-src[^;]*/) || [''])[0].trim()
   if (have === want) return
   if (process.env.VERCEL || process.env.CI) {

@@ -158,116 +158,42 @@ export function readTokens(tokensCss) {
   return out
 }
 
-/** The field colours (oklch) from tokens.css: { peach: [r, g, b], 'sky-d': [...], ... } in sRGB 0..255. */
-export function readFieldTokens(tokensCss) {
-  const out = {}
-  for (const m of tokensCss.matchAll(/--f-([\w-]+):\s*oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)\s*;/g)) {
-    out[m[1]] = oklchToRgb(Number(m[2]), Number(m[3]), Number(m[4]))
-  }
-  return out
-}
-
-/** OKLCH to gamma-encoded sRGB, clamped (Bjorn Ottosson's matrices, https://bottosson.github.io/posts/oklab/). */
-export function oklchToRgb(L, C, h) {
-  const a = C * Math.cos((h * Math.PI) / 180)
-  const b = C * Math.sin((h * Math.PI) / 180)
-  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
-  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
-  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3
-  const lin = [
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
-  ]
-  return lin.map((v) => {
-    const c = Math.min(1, Math.max(0, v))
-    return Math.round(255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055))
-  })
-}
-
 /** a over b at alpha (sRGB, the way the browser composites). */
 export const over = (a, b, alpha) => a.map((v, i) => v * alpha + b[i] * (1 - alpha))
 /** CSS brightness(k) on an sRGB colour, clamped. */
 export const brighten = (c, k) => c.map((v) => Math.min(255, v * k))
 
 /*
-  Token pairs (DESIGN.md 2.1, 2.6): body text on the base needs 7:1, every
-  other text token 4.5:1, the focus ring and the now dot 3:1.
+  Token pairs (DESIGN.md 2.1): body text on the void and on the plate needs 4.5:1 (ink and
+  ink-2 measure 15 to 19); cyan is eyebrows, the email link and the button fill, never body;
+  void on cyan is the primary button's ink.
 */
 export const CONTRAST_RULES = [
-  ...['ink', 'ink-2'].map((t) => ({ fg: t, bg: 'base', min: 7, kind: 'body text on the base' })),
-  ...['ink-3', 'accent', 'accent-ink', 'ok-ink'].map((t) => ({ fg: t, bg: 'base', min: 4.5, kind: 'text on the base' })),
-  ...['ink', 'ink-2', 'ink-3', 'accent'].map((t) => ({ fg: t, bg: 'plate-2', min: 4.5, kind: 'text on the solid plate (fallbacks)' })),
-  { fg: 'on-ink', bg: 'ink', min: 4.5, kind: 'text on the ink pill and the tooltip' },
-  { fg: 'plate', bg: 'accent', min: 4.5, kind: 'white on the accent' },
-  { fg: 'accent', bg: 'base', min: 3, kind: 'the focus ring' },
-  { fg: 'ok', bg: 'base', min: 3, kind: 'the now dot' },
+  ...['ink', 'ink-2'].map((t) => ({ fg: t, bg: 'void', min: 7, kind: 'body text on the void' })),
+  ...['ink', 'ink-2', 'cyan'].map((t) => ({ fg: t, bg: 'plate', min: 4.5, kind: 'text on the solid plate (fallbacks)' })),
+  ...['ink', 'ink-2', 'cyan'].map((t) => ({ fg: t, bg: 'plate-2', min: 4.5, kind: 'text on the plate gradient' })),
+  { fg: 'cyan', bg: 'void', min: 4.5, kind: 'the eyebrows and the email link on the void' },
+  { fg: 'void', bg: 'cyan', min: 4.5, kind: 'void ink on the cyan button' },
+  { fg: 'ink', bg: 'void', min: 3, kind: 'the focus ring' },
 ]
 
 /*
-  Composite contrast (DESIGN.md 9.2): text on glass is measured against what
-  is actually behind it. For each glass surface that holds text: the field
-  blob at its core (its alpha over the base), the glass's backdrop
-  brightness, then the glass's LEAST tint under copy. Saturate is left out
-  (it keeps luminance). Sheets are checked without blur or brightness, the
-  way phones and tier lite draw them. Body tokens need 4.5:1, large text
-  and the focus ring 3:1.
+  Composite contrast (DESIGN.md 4.2): text on glass is measured against what is actually
+  behind it. The worst case on this page is the BRIGHTEST backdrop pixel under a panel: the
+  poster script measures it from the real hero frame under each panel box and records it in
+  public/poster/meta.json (brightest.rgb); check-content composites the glass fill, the
+  backdrop brightness and the scrim over that pixel, and every text token on that surface
+  must reach its floor. QA re-measures on the live page at five scroll positions.
 
-  Two consequences, enforced in check-content: text on glass uses ink or
-  ink-2 (ink-3 measures 4.1:1 on a sheet over rose, so it never sets text in
-  the component styles), and links on glass use accent-ink (accent measures
-  3.9:1 there).
+    fill       the white fill alpha at its weakest point
+    brightness the backdrop-filter brightness
+    scrim      the void alpha under the copy (0 where the copy sits on the padding ring)
 */
 export const COMPOSITE_RULES = [
-  {
-    glass: 'sheet (cards, plates, now list, crew, stack)',
-    fill: 0.14,
-    brightness: 1,
-    blobs: ['peach-d', 'butter-d', 'sky-d', 'lilac-d', 'rose-d'],
-    text: ['ink', 'ink-2', 'accent-ink'],
-    min: 4.5,
-  },
-  {
-    glass: 'thick + scrim (the contact card)',
-    fill: 0.22,
-    brightness: 1.07,
-    blobs: ['peach-d', 'butter-d', 'rose-d', 'peach', 'butter'],
-    text: ['ink', 'ink-2', 'accent-ink'],
-    min: 4.5,
-  },
-  {
-    glass: 'thick pill (glass buttons, link row, quiet switch, toast)',
-    fill: 0.03,
-    brightness: 1.07,
-    blobs: ['peach', 'butter', 'sky', 'lilac', 'rose', 'core', 'peach-d', 'butter-d', 'sky-d', 'lilac-d', 'rose-d'],
-    text: ['ink'],
-    min: 4.5,
-  },
-  {
-    glass: 'clear lens (the sentence, large text)',
-    fill: 0.03,
-    brightness: 1.08,
-    blobs: ['peach', 'butter', 'sky', 'lilac', 'rose', 'core'],
-    text: ['ink'],
-    min: 3,
-  },
-  {
-    glass: 'none: the focus ring over the raw field',
-    fill: 0,
-    brightness: 1,
-    blobs: ['peach', 'butter', 'sky', 'lilac', 'rose', 'core', 'peach-d', 'butter-d', 'sky-d', 'lilac-d', 'rose-d'],
-    text: ['accent'],
-    min: 3,
-  },
-  {
-    // the hero lede and proof, section lines, the builds notes, the footer, and the links among
-    // them: base.css sets every link outside glass in a token from this list (check-content)
-    glass: 'none: text and links on the raw field',
-    fill: 0,
-    brightness: 1,
-    blobs: ['peach', 'butter', 'sky', 'lilac', 'rose', 'core', 'peach-d', 'butter-d', 'sky-d', 'lilac-d', 'rose-d'],
-    text: ['ink', 'ink-2'],
-    min: 4.5,
-    links: true,
-  },
+  { key: 'panel', glass: 'thick panel under its scrim (the hero at p 0)', fill: 0.05, brightness: 1.07, scrim: 0.62, text: ['ink', 'ink-2', 'cyan'], min: 4.5 },
+  { key: 'card', glass: 'card under its scrim (check out at p 0.2)', fill: 0.05, brightness: 1.07, scrim: 0.7, text: ['ink', 'ink-2', 'cyan'], min: 4.5 },
+  { key: 'pill', glass: 'glass pill on its void base (the nav and the glass buttons at p 0)', fill: 0.05, brightness: 1.07, scrim: 0.6, text: ['ink', 'ink-2'], min: 4.5 },
+  { key: 'theme', glass: 'the theme line on its void pool (p 0)', fill: 0, brightness: 1, scrim: 0.7, text: ['ink'], min: 4.5 },
+  { key: 'title', glass: 'the bare section title on the raw scene (p 0.2), large text', fill: 0, brightness: 1, scrim: 0, text: ['ink'], min: 3 },
+  { key: 'footer', glass: 'the footer on its void gradient (p 1)', fill: 0, brightness: 1, scrim: 0.86, text: ['ink', 'ink-2'], min: 4.5, links: true },
 ]

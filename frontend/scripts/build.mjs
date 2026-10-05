@@ -8,6 +8,7 @@
     4  vite build         client, with a manifest
     5  vite build --ssr   src/entry-server.jsx into dist-ssr
     6  prerender          dist/index.html, dist/kit/index.html, dist/404.html, CSP hash
+                          (the posters in public/poster are committed by `npm run poster`, run by hand)
     7  budget             gzip budgets and banned code
     8  tidy               manifest to .build/, dist-ssr removed
 
@@ -54,6 +55,11 @@ if (!args.has('--skip-check')) {
   const { checkContent } = await import('./check-content.mjs')
   const { errors } = await checkContent()
   if (errors.length) fail('check-content')
+}
+
+// the first paint needs the committed posters (scripts/poster.mjs renders them from the real scene)
+for (const f of ['hero-1440.avif', 'hero-1440.webp', 'hero-780.avif', 'hero-780.webp', 'meta.json']) {
+  if (!existsSync(path.join(ROOT, 'public/poster', f))) fail(`public/poster/${f} is missing: run \`npm run poster\` after a build and commit public/poster`)
 }
 
 // 4, 5

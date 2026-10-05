@@ -1,20 +1,22 @@
 #!/usr/bin/env node
 /*
-  budget (DESIGN.md 10). Runs after every build on dist, gzip -9. Fails the
-  build when a budget is blown or something banned ships.
+  budget (DESIGN.md 3.14, BRIEF.md). Runs after every build on dist, gzip -9. Fails the build
+  when a budget is blown or something banned ships. Measured, never assumed.
 
-    entry JS (entry + static imports)   110 KB gz (target 100)
-    lazy: the lens and loupe              8 KB gz (src/glass/lens.js)
-    lazy: specimens (all)                12 KB gz
+    entry JS (entry + static imports)   110 KB gz
+    the scene chunk (src/scene + three) 220 KB gz
     lazy: the kit route                  20 KB gz (src/kit/*, never loaded by /)
-    any other lazy chunk                  20 KB gz each
-    CSS                                   24 KB gz
-    HTML for /                            90 KB gz
-    preloaded fonts                       3 files, 60 KB
-    headshot files                        50 KB each
-    initial transfer                     350 KB
-    third-party requests, media files, three.js, Firebase, Mapbox,
-    framer-motion, react-router, a React development build: zero
+    lazy: the 404                        20 KB gz
+    any other lazy chunk                 20 KB gz each
+    CSS                                  24 KB gz
+    HTML for /                           90 KB gz
+    preloaded fonts                      1 file, 60 KB
+    all font files                       2 (Mona Sans, Geist Mono at 20 KB or less)
+    the figure mesh                     400 KB
+    posters                              20 KB each AVIF, 32 KB each WebP, two of each
+    initial transfer                    500 KB (html, css, entry, Mona Sans, the eager poster, the preloads)
+    three in the entry, R3F, Firebase, Mapbox, framer-motion, react-router, a React development
+    build, third-party requests, media files: zero
 
   Usage: node scripts/budget.mjs [--json]   Writes .build/budget.json.
   QA imports measure() for its bundle report.
@@ -31,16 +33,20 @@ const KB = 1024
 
 export const BUDGETS = {
   entryJs: 110 * KB,
-  lens: 8 * KB,
-  specimens: 12 * KB,
+  scene: 220 * KB,
   kit: 20 * KB,
+  notFound: 20 * KB,
   otherLazy: 20 * KB,
   css: 24 * KB,
   html: 90 * KB,
   fonts: 60 * KB,
-  fontFiles: 3,
-  image: 50 * KB,
-  initial: 350 * KB,
+  fontFiles: 1,
+  allFontFiles: 2,
+  monoFont: 20 * KB,
+  figure: 400 * KB,
+  posterAvif: 20 * KB,
+  posterWebp: 32 * KB,
+  initial: 500 * KB,
 }
 
 const gz = (buf) => gzipSync(buf, { level: 9 }).length
@@ -62,7 +68,7 @@ export function measure() {
   const add = (group, name, bytes, budget, extra = {}) => {
     const row = { group, name, gz: bytes, budget, ok: budget == null || bytes <= budget, ...extra }
     rows.push(row)
-    if (!row.ok) fails.push(`${group} ${name}: ${(bytes / KB).toFixed(1)} KB gz over ${(budget / KB).toFixed(0)} KB`)
+    if (!row.ok) fails.push(`${group} ${name}: ${(bytes / KB).toFixed(1)} KB over ${(budget / KB).toFixed(0)} KB`)
     return row
   }
 
@@ -82,20 +88,24 @@ export function measure() {
   for (const f of entryFiles) entryGz += fileGz(path.join(DIST, f))
   add('js', `entry (${entryFiles.size} file${entryFiles.size > 1 ? 's' : ''})`, entryGz, BUDGETS.entryJs, { files: [...entryFiles] })
 
-  // Lazy chunks, classified by source path.
-  const lazy = { lens: 0, kit: 0, specimens: 0 }
+  // Lazy chunks, classified by source path. The scene group is the dynamic entry whose src is under
+  // src/scene/ plus its non-entry imports (three rides in the same chunk via manualChunks).
+  const lazy = { scene: 0, kit: 0, notFound: 0 }
+  const sceneFiles = []
   for (const [key, c] of Object.entries(manifest)) {
     if (!c.isDynamicEntry) continue
-    const size = fileGz(path.join(DIST, c.file)) + (c.imports || []).filter((i) => !entryFiles.has(manifest[i]?.file)).reduce((s, i) => s + fileGz(path.join(DIST, manifest[i].file)), 0)
+    const imports = (c.imports || []).filter((i) => !entryFiles.has(manifest[i]?.file))
+    const size = fileGz(path.join(DIST, c.file)) + imports.reduce((s, i) => s + fileGz(path.join(DIST, manifest[i].file)), 0)
     const src = c.src || key
-    if (/src\/glass\/lens\.js$/.test(src)) lazy.lens += size
+    if (/src\/scene\//.test(src)) { lazy.scene += size; sceneFiles.push(c.file, ...imports.map((i) => manifest[i].file)) }
     else if (/src\/kit\//.test(src)) lazy.kit += size
-    else if (/src\/sections\/specimens\//.test(src)) lazy.specimens += size
+    else if (/NotFound\.jsx$/.test(src)) lazy.notFound += size
     else add('lazy', src, size, BUDGETS.otherLazy)
   }
-  add('lazy', 'lens and loupe (src/glass/lens.js)', lazy.lens, BUDGETS.lens)
+  add('lazy', 'scene chunk (src/scene + three)', lazy.scene, BUDGETS.scene, { files: sceneFiles })
   add('lazy', 'kit route (src/kit)', lazy.kit, BUDGETS.kit)
-  add('lazy', 'specimens (all)', lazy.specimens, BUDGETS.specimens)
+  add('lazy', 'the 404', lazy.notFound, BUDGETS.notFound)
+  if (!lazy.scene) fails.push('no scene chunk in the manifest (src/scene/boulder.js must be a dynamic import)')
 
   // CSS: every stylesheet in dist.
   const allCss = walk(path.join(DIST, 'assets'), { exts: ['.css'] })
@@ -107,37 +117,56 @@ export function measure() {
   add('html', 'index.html', htmlGz, BUDGETS.html)
   if (existsSync(path.join(DIST, '404.html'))) add('html', '404.html', fileGz(path.join(DIST, '404.html')), BUDGETS.html)
 
-  // The kit route must never ride along with the home page.
-  for (const f of entryFiles) if (/kit/i.test(f)) fails.push(`the kit route is in the entry bundle: ${f}`)
+  // The kit route and the scene must never ride along with the home page's entry.
+  for (const f of entryFiles) {
+    if (/kit/i.test(f)) fails.push(`the kit route is in the entry bundle: ${f}`)
+    if (/scene/i.test(f)) fails.push(`the scene chunk is in the entry bundle: ${f}`)
+  }
   if (/\/assets\/Kit-[\w-]+\.js/.test(indexHtml)) fails.push('index.html preloads the kit chunk')
+  if (/<link rel="modulepreload"[^>]*\/assets\/scene-[\w-]+\.js/.test(indexHtml)) fails.push('index.html preloads the scene chunk')
+  for (const f of entryFiles) {
+    const t = readFileSync(path.join(DIST, f), 'utf8')
+    if (/WebGLRenderer|three\.module|ShaderChunk/.test(t)) fails.push(`three symbols in an entry file: ${f}`)
+  }
 
-  // Fonts: the preloads in index.html.
+  // Fonts: the preloads in index.html, and every font file in dist.
   const preloads = [...indexHtml.matchAll(/<link rel="preload" href="\/([^"]+\.woff2)"/g)].map((m) => m[1])
   const fontBytes = preloads.reduce((s, f) => s + raw(path.join(DIST, f)), 0)
   add('fonts', `${preloads.length} preloaded woff2`, fontBytes, BUDGETS.fonts, { files: preloads })
   if (preloads.length > BUDGETS.fontFiles) fails.push(`fonts: ${preloads.length} preloads, budget ${BUDGETS.fontFiles}`)
   const allFonts = walk(path.join(DIST, 'assets'), { exts: ['.woff2', '.woff', '.ttf', '.otf'] })
-  if (allFonts.length > 3) fails.push(`fonts: ${allFonts.length} font files in dist, only Instrument Serif (italic, regular) and Inter are allowed`)
-  if (allFonts.some((f) => /mono/i.test(f))) fails.push('fonts: a monospace font file shipped (DESIGN.md 2.3: no monospace)')
-
-  // Images.
-  for (const f of walk(path.join(DIST, 'assets'), { exts: ['.avif', '.webp', '.jpg', '.jpeg', '.png'] })) {
-    if (/headshot/.test(f)) add('image', path.basename(f), raw(f), BUDGETS.image)
+  if (allFonts.length > BUDGETS.allFontFiles) fails.push(`fonts: ${allFonts.length} font files in dist, only Mona Sans and Geist Mono are allowed`)
+  for (const f of allFonts) {
+    if (/mono/i.test(f)) add('fonts', `monospace file ${path.basename(f)}`, raw(f), BUDGETS.monoFont)
+    if (/mono/i.test(f) && preloads.some((p) => p.endsWith(path.basename(f)))) fails.push('fonts: the monospace file is preloaded (DESIGN.md 2.2: not preloaded)')
   }
 
-  // Initial transfer: html + entry js + css + preloaded fonts + eager images + favicon.
+  // The figure mesh and the posters.
+  for (const f of walk(path.join(DIST, 'assets'), { exts: ['.glb'] })) add('figure', path.basename(f), raw(f), BUDGETS.figure)
+  const posterDir = path.join(DIST, 'poster')
+  for (const name of ['hero-1440', 'hero-780']) {
+    for (const [ext, budget] of [['avif', BUDGETS.posterAvif], ['webp', BUDGETS.posterWebp]]) {
+      const f = path.join(posterDir, `${name}.${ext}`)
+      if (!existsSync(f)) { fails.push(`poster missing: poster/${name}.${ext} (run npm run poster)`); continue }
+      add('poster', `${name}.${ext}`, raw(f), budget)
+    }
+  }
+
+  // Initial transfer: html + entry js + css + preloaded fonts + the eager poster + the preloaded AVIFs + favicon.
   const eagerImgs = [...indexHtml.matchAll(/<img\b[^>]*>/g)]
     .map((m) => m[0])
     .filter((tag) => !/loading="lazy"/.test(tag))
     .map((tag) => (tag.match(/src="\/([^"]+)"/) || [])[1])
     .filter((f) => f && existsSync(path.join(DIST, f)))
+  const preloadedImgs = [...indexHtml.matchAll(/<link rel="preload" as="image"[^>]*href="\/([^"]+)"/g)].map((m) => m[1]).filter((f) => existsSync(path.join(DIST, f)))
+  // the browser fetches the AVIF the media query picks, then the <picture> resolves to the same file; count the larger landscape AVIF once
+  const landscapeAvif = preloadedImgs.find((f) => /1440\.avif$/.test(f))
   const initial =
     htmlGz +
     entryGz +
-    // Inlined stylesheets already ride in the HTML (scripts/prerender.mjs).
     [...cssFiles].filter((f) => !indexHtml.includes(`data-href="/${f}"`)).reduce((s, f) => s + fileGz(path.join(DIST, f)), 0) +
     fontBytes +
-    eagerImgs.reduce((s, f) => s + raw(path.join(DIST, f)), 0) +
+    (landscapeAvif ? raw(path.join(DIST, landscapeAvif)) : eagerImgs.reduce((s, f) => s + raw(path.join(DIST, f)), 0)) +
     (existsSync(path.join(DIST, 'favicon.svg')) ? fileGz(path.join(DIST, 'favicon.svg')) : 0)
   add('total', 'initial transfer', initial, BUDGETS.initial)
 
@@ -145,7 +174,6 @@ export function measure() {
   const jsFiles = walk(DIST, { exts: ['.js'] })
   const htmlFiles = walk(DIST, { exts: ['.html'] })
   const BANNED = [
-    { re: /WebGLRenderer|THREE\.|three\.module/, name: 'three.js' },
     { re: /@react-three|useFrame\(/, name: 'react-three-fiber' },
     { re: /firestore|firebaseapp|initializeApp\(/i, name: 'Firebase' },
     { re: /mapbox/i, name: 'Mapbox' },
@@ -164,7 +192,6 @@ export function measure() {
   for (const f of htmlFiles) {
     const t = readFileSync(f, 'utf8')
     for (const m of t.matchAll(/<(script|link|img|source|iframe|video|audio)\b[^>]*\b(src|href|srcset)="(https?:)?\/\/[^"]+"[^>]*>/g)) {
-      // A canonical link is a URL, not a request.
       if (!/rel="canonical"/.test(m[0])) third.push(`${path.relative(DIST, f)}: ${m[0].slice(0, 100)}`)
     }
   }
@@ -186,7 +213,7 @@ export function printTable({ rows, fails }) {
   console.log('budget:')
   for (const r of rows) {
     const b = r.budget == null ? '' : `/ ${(r.budget / KB).toFixed(0)} KB`
-    console.log(`  ${r.ok ? 'ok  ' : 'FAIL'} ${pad(r.group, 6)} ${pad(r.name, 40)} ${pad((r.gz / KB).toFixed(1) + ' KB', 10)} ${b}`)
+    console.log(`  ${r.ok ? 'ok  ' : 'FAIL'} ${pad(r.group, 7)} ${pad(r.name, 40)} ${pad((r.gz / KB).toFixed(1) + ' KB', 10)} ${b}`)
   }
   if (fails.length) {
     console.error(`budget: ${fails.length} failure(s)`)

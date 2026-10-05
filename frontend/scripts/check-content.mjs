@@ -1,32 +1,31 @@
 #!/usr/bin/env node
 /*
-  check-content (PLAN.md 7, 11, 13). Runs before every build. Fails on:
+  check-content. Runs before every build. Fails on:
 
     1  a visible content string with no fact ids and no ui flag
     2  a fact id that is missing from facts.json or not public
     3  a `verbatim` item that does not match his quote in facts.json
     4  a duplicate content id
-    5  an en or em dash anywhere in src, index.html, public or og (fonts excepted)
+    5  an en or em dash anywhere in src, index.html or public (fonts and binaries excepted)
     6  a banned word (voice.md)
     7  a privacy denylist term or proximity rule, an EIN or phone shape
-    8  'twenty' outside the AGE constant; "Onto what's next." not exactly once
-    9  a token pair under its contrast floor, or text on glass under its floor
-       measured on the composite (field blob, glass brightness, least tint)
-   10  an off-palette color literal, or a cut effect (scanlines, glitch, chamfers,
-       cursor replacement) in src
-   11  an import of three, @react-three, framer-motion, firebase or react-router
+    8  "twenty" or "20 years" anywhere in src (no age on the site); "Onto what's next." not exactly once
+    9  a token pair under its contrast floor, or text on glass under its floor measured on the
+       composite: the glass fill, brightness and scrim over the brightest backdrop pixel the
+       poster script measured under a panel (public/poster/meta.json)
+   10  an off-palette color literal (#hex or rgb() in CSS and JSX; three's 0x literals are the
+       scene's own), or a cut effect (scanlines, glitch, chamfers, cursor replacement) in src
+   11  an import of @react-three, framer-motion, firebase or react-router anywhere; an import of
+       three or three/addons anywhere but src/scene/
+   12  backdrop-filter anywhere in src but src/styles/glass.css; SVG noise or displacement anywhere
+       but glass.css
+   13  a monospace face anywhere but through --mono in the footer build line, the scene controls
+       and the kit captions; <code>, <kbd>, <samp>, <pre> never
+   14  a keyframe or transition that animates backdrop-filter, box-shadow or filter
+   15  magenta, sky or dawn used as a text colour (they are the scene's)
 
-  The v2 material (DESIGN.md 9):
-   12  backdrop-filter anywhere in src but src/styles/glass.css; SVG noise or
-       displacement anywhere but glass.css and src/glass/lens.js
-   13  a monospace face: a monospace font family, or <code>, <kbd>, <samp>, <pre>
-   14  filter: blur() on a field blob; a keyframe or transition that animates
-       backdrop-filter, box-shadow or filter
-   15  ink-3 used as a text colour in the component, page or kit styles (text
-       on glass is ink or ink-2; see COMPOSITE_RULES)
-
-  facts.json and the denylist live outside the public repo. When either is
-  missing (on Vercel) those checks are skipped with a warning.
+  facts.json and the denylist live outside the public repo. When either is missing (on Vercel)
+  those checks are skipped with a warning.
 
   Usage: node scripts/check-content.mjs   (exit 1 on any error)
 */
@@ -39,7 +38,6 @@ import {
   CONTRAST_RULES,
   brighten,
   over,
-  readFieldTokens,
   DASH_RE,
   PRIVATE_SHAPES,
   contrast,
@@ -134,7 +132,6 @@ export async function checkContent({ quiet = false } = {}) {
     const name = path.basename(file, '.js')
     if (name === 'constants') continue // constants are values, not copy; scanned as text below
     for (const [exp, value] of Object.entries(mod)) {
-      // Derived lists (NODE_IDS, SECTION_IDS, ALLOWED_MAP_LABELS) repeat checked strings.
       if (/_IDS$|^ALLOWED_/.test(exp)) continue
       visit(value, `${name}.${exp}`, [], false, file)
     }
@@ -149,12 +146,11 @@ export async function checkContent({ quiet = false } = {}) {
     for (const re of BANNED) if (re.test(v.text)) err(`${v.at}: banned word ${re} in "${v.text.slice(0, 70)}"`)
   }
 
-  // ---------- 5, 6, 7, 10, 11: every source text file ----------
+  // ---------- 5, 6, 7, 10 to 15: every source text file ----------
   const textExts = ['.js', '.jsx', '.mjs', '.css', '.html', '.svg', '.txt', '.xml', '.json', '.md']
   const files = [
-    ...walk(path.join(ROOT, 'src'), { exts: textExts, skip: ['src/assets/fonts'] }),
+    ...walk(path.join(ROOT, 'src'), { exts: textExts, skip: ['src/assets/fonts', 'src/assets/figure'] }),
     ...walk(path.join(ROOT, 'public'), { exts: textExts }),
-    ...walk(path.join(ROOT, 'og'), { exts: textExts }),
     path.join(ROOT, 'index.html'),
   ].filter((f) => existsSync(f))
 
@@ -167,12 +163,14 @@ export async function checkContent({ quiet = false } = {}) {
     { re: /\bscan-?lines?\b/i, name: 'scanlines' },
     { re: /\bglitch/i, name: 'glitch' },
     { re: /chromatic[- ]aberration/i, name: 'chromatic aberration' },
-    { re: /feTurbulence|feDisplacementMap/, name: 'SVG noise or displacement outside the glass material', allow: /^src\/(styles\/glass\.css|glass\/lens\.js)$/ },
+    { re: /feTurbulence|feDisplacementMap/, name: 'SVG noise or displacement outside the glass material', allow: /^src\/styles\/glass\.css$/ },
     { re: /corner-shape\s*:/, name: 'chamfered corners' },
     { re: /cursor\s*:\s*url\(/, name: 'cursor replacement' },
     { re: /mix-blend-mode\s*:/, name: 'mix-blend-mode (never on a full-viewport layer)' },
+    { re: /\bmatrix rain\b|katakana|\bscanline\b|\bnetrunner\b|\bjack in\b|access granted|initializing/i, name: 'cringe-list vocabulary' },
   ]
-  const BANNED_IMPORTS = /from\s+['"](three|@react-three\/[\w-]+|framer-motion|motion\/react|firebase(\/[\w-]+)?|react-router(-dom)?)['"]|import\(\s*['"](three|@react-three|framer-motion|firebase|react-router)/
+  const BANNED_IMPORTS = /from\s+['"](@react-three\/[\w-]+|framer-motion|motion\/react|firebase(\/[\w-]+)?|react-router(-dom)?)['"]|import\(\s*['"](@react-three|framer-motion|firebase|react-router)/
+  const THREE_IMPORT = /from\s+['"]three(\/[\w./-]+)?['"]|import\(\s*['"]three/
 
   for (const file of files) {
     const text = readFileSync(file, 'utf8')
@@ -203,9 +201,10 @@ export async function checkContent({ quiet = false } = {}) {
       if (m) err(`${r}:${where(text, m.index)}: ${s.name}`)
     }
 
-    if (r.startsWith('src/') && !r.endsWith('src/content/constants.js')) {
-      const m = text.match(/\btwenty\b/i)
-      if (m) err(`${r}:${where(text, m.index)}: "twenty" outside the AGE constant`)
+    // 8: no age anywhere (BRIEF.md: age is never a selling point)
+    if (r.startsWith('src/')) {
+      const m = text.match(/\btwenty\b|\b20 years\b|\b\d{2} years old\b/i)
+      if (m) err(`${r}:${where(text, m.index)}: an age ("${m[0]}"); the site states no age`)
     }
 
     if (isCode && r.startsWith('src/')) {
@@ -213,11 +212,14 @@ export async function checkContent({ quiet = false } = {}) {
       if (!isTokenFile) {
         for (const m of text.matchAll(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b(?![\w-])/g)) {
           const hex = m[0].length === 4 ? '#' + [...m[0].slice(1)].map((c) => c + c).join('') : m[0]
-          // ids like href="#now" never match: they are not hex
           if (!tokenHex.has(hex.toUpperCase())) err(`${r}:${where(text, m.index)}: off-palette color ${m[0]} (use a token)`)
         }
-        for (const m of text.matchAll(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g)) {
-          if (!tokenRgb.has(`${m[1]},${m[2]},${m[3]}`)) err(`${r}:${where(text, m.index)}: off-palette color ${m[0]})`)
+        // CSS and JSX only: the scene's shaders and canvas gradients (src/scene) are not UI colour
+        if (!r.startsWith('src/scene/')) {
+          for (const m of text.matchAll(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g)) {
+            const c = `${m[1]},${m[2]},${m[3]}`
+            if (!tokenRgb.has(c) && c !== '0,0,0' && c !== '255,255,255') err(`${r}:${where(text, m.index)}: off-palette color ${m[0]})`)
+          }
         }
       }
       for (const c of CUT_EFFECTS) {
@@ -231,24 +233,28 @@ export async function checkContent({ quiet = false } = {}) {
         .replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' '))
         .replace(/(^|\s)\/\/.*$/gm, (c) => c.replace(/[^\n]/g, ' '))
 
-      // 12: the material lives in one file (DESIGN.md 4, 9.1). Feature detection
-      // (CSS.supports) is allowed; applying the property anywhere else is not.
+      // 12: the material lives in one file (DESIGN.md 4). Feature detection (CSS.supports) is allowed.
       if (r !== 'src/styles/glass.css') {
         const m = code.match(/(^|[\s;{'"`])(-webkit-)?backdrop-filter\s*:|backdropFilter|setProperty\(\s*['"](-webkit-)?backdrop-filter/)
         if (m) err(`${r}:${where(text, m.index)}: backdrop-filter outside src/styles/glass.css (render <Glass> instead)`)
       }
 
-      // 13: no monospace anywhere (DESIGN.md 2.3).
+      // 13: monospace only through --mono (tokens.css defines it; components.css and kit.css use it on
+      // .foot-row--mono, .ctl, .kit-sub and .kit-cap). Never <code>, <kbd>, <samp>, <pre>.
       {
-        const m = code.match(/\bmonospace\b|\bfont-mono\b|Overpass Mono|<(code|kbd|samp|pre)[\s>]/)
-        if (m) err(`${r}:${where(text, m.index)}: monospace (${m[0].trim()}); v2 has none, use tabular Inter`)
+        const allowMono = /^src\/styles\/(tokens|components|kit)\.css$/.test(r)
+        const m = code.match(/\bmonospace\b|\bfont-mono\b|Geist Mono|var\(--mono\)|<(code|kbd|samp|pre)[\s>]/)
+        if (m && !(allowMono && /^(var\(--mono\)|monospace|Geist Mono)$/.test(m[0])) && !(r === 'src/styles/fonts.css' && m[0] === 'Geist Mono')) err(`${r}:${where(text, m.index)}: monospace (${m[0].trim()}) outside the build line, the scene controls and the kit captions`)
       }
 
+      // 11: three only in the scene chunk; the rest never
+      const imp = code.match(BANNED_IMPORTS)
+      if (imp) err(`${r}:${where(text, imp.index)}: removed dependency imported (${imp[0]})`)
+      const three = code.match(THREE_IMPORT)
+      if (three && !r.startsWith('src/scene/')) err(`${r}:${where(text, three.index)}: three imported outside src/scene/ (the entry never loads three; DESIGN.md 3.1)`)
+
       if (r.endsWith('.css')) {
-        // 14: the field is gradients moved by transform; the material never animates.
-        for (const m of text.matchAll(/([^{}]*\.blob[^{}]*)\{([^}]*)\}/g)) {
-          if (/(^|[\s;])filter\s*:\s*[^;]*blur\(/.test(m[2])) err(`${r}:${where(text, m.index)}: filter: blur() on a field blob`)
-        }
+        // 14: the material never animates.
         for (const m of text.matchAll(/@keyframes\s+[\w-]+\s*\{([\s\S]*?\})\s*\}/g)) {
           const p = m[1].match(/(^|[\s;{])(-webkit-)?(backdrop-filter|box-shadow|filter)\s*:/)
           if (p) err(`${r}:${where(text, m.index)}: a keyframe animates ${p[3]}`)
@@ -257,15 +263,13 @@ export async function checkContent({ quiet = false } = {}) {
           const p = m[2].match(/\b(backdrop-filter|box-shadow|filter)\b/)
           if (p) err(`${r}:${where(text, m.index)}: a transition animates ${p[1]}`)
         }
-        // 15: text on glass is ink or ink-2.
-        if (/^src\/styles\/(components|page|kit)\.css$/.test(r)) {
-          for (const m of text.matchAll(/(^|[\s;{])color\s*:\s*var\(--ink-3\)/g)) {
-            err(`${r}:${where(text, m.index)}: ink-3 as text colour; text on glass is ink or ink-2 (rules.mjs COMPOSITE_RULES)`)
+        // 15: the scene's hues are never text.
+        if (/^src\/styles\/(components|page|kit|base)\.css$/.test(r)) {
+          for (const m of text.matchAll(/(^|[\s;{])color\s*:\s*var\(--(magenta|sky|dawn)\)/g)) {
+            err(`${r}:${where(text, m.index)}: --${m[2]} as a text colour; it is the scene's (DESIGN.md 2.1)`)
           }
         }
       }
-      const imp = text.match(BANNED_IMPORTS)
-      if (imp) err(`${r}:${where(text, imp.index)}: removed dependency imported (${imp[0]})`)
     }
   }
 
@@ -281,43 +285,56 @@ export async function checkContent({ quiet = false } = {}) {
     if (ratio < rule.min) err(`contrast: --${rule.fg} on --${rule.bg} is ${ratio.toFixed(2)}, needs ${rule.min} (${rule.kind})`)
   }
 
-  // ---------- 9: text on glass, on the composite ----------
-  const field = readFieldTokens(tokensCss)
-  const ALPHA = { rose: 0.45, core: 0.4 }
-  const base = tokens.base ? hexToRgb(tokens.base) : null
-  if (!base) err('contrast: --base missing from tokens.css')
-  for (const rule of COMPOSITE_RULES) {
-    if (!base) break
-    let worst = null
-    for (const b of rule.blobs) {
-      if (!field[b]) {
-        err(`contrast: field token --f-${b} missing or not oklch in tokens.css`)
+  // ---------- 9: text on glass, on the composite over the brightest measured backdrop ----------
+  const metaPath = path.join(ROOT, 'public/poster/meta.json')
+  let brightest = null
+  if (existsSync(metaPath)) {
+    try {
+      const meta = JSON.parse(readFileSync(metaPath, 'utf8'))
+      brightest = meta.brightest
+    } catch (e) {
+      err(`contrast: public/poster/meta.json is unreadable (${e.message})`)
+    }
+  }
+  if (!brightest) {
+    err('contrast: public/poster/meta.json has no `brightest` backdrop measurement; run `npm run poster` after a build so the composite is measured, not assumed')
+  } else {
+    const voidRgb = hexToRgb(tokens.void)
+    for (const rule of COMPOSITE_RULES) {
+      // the brightest pixel the poster script measured under this surface's boxes, on its frame
+      const key = rule.key
+      const px = brightest[key]
+      if (!px) {
+        err(`contrast: meta.json has no brightest.${key} measurement`)
         continue
       }
-      const behind = over([255, 255, 255], brighten(over(field[b], base, ALPHA[b] ?? 1), rule.brightness), rule.fill)
+      let behind = brighten(px, rule.brightness)
+      behind = over([255, 255, 255], behind, rule.fill)
+      behind = over(voidRgb, behind, rule.scrim)
+      let worst = null
       for (const t of rule.text) {
         if (!tokens[t]) {
           err(`contrast: token --${t} missing from tokens.css`)
           continue
         }
         const ratio = contrast(hexToRgb(tokens[t]), behind)
-        if (!worst || ratio < worst.ratio) worst = { ratio, t, b }
+        if (!worst || ratio < worst.ratio) worst = { ratio, t }
       }
+      if (!worst) continue
+      pairs.push({ fg: worst.t, bg: rule.glass, min: rule.min, ratio: worst.ratio, kind: 'composite' })
+      if (worst.ratio < rule.min) err(`contrast: --${worst.t} on ${rule.glass} over the brightest backdrop rgb(${px.join(', ')}) is ${worst.ratio.toFixed(2)}, needs ${rule.min}`)
     }
-    if (!worst) continue
-    pairs.push({ fg: worst.t, bg: `${rule.glass} over ${worst.b}`, min: rule.min, ratio: worst.ratio, kind: 'composite' })
-    if (worst.ratio < rule.min) err(`contrast: --${worst.t} on ${rule.glass} over --f-${worst.b} is ${worst.ratio.toFixed(2)}, needs ${rule.min}`)
   }
 
-  // ---------- 9: links outside glass sit on the raw field, so their colour is a raw-field token ----------
+  // ---------- 9: links outside glass sit on the raw scene, so their colour is a raw-scene token ----------
   {
     const rule = COMPOSITE_RULES.find((r) => r.links)
     const baseCss = readFileSync(path.join(ROOT, 'src/styles/base.css'), 'utf8')
     const block = baseCss.match(/(^|\n)a\s*\{([^}]*)\}/)
     const color = block?.[2].match(/(^|[\s;])color\s*:\s*var\(--([\w-]+)\)/)?.[2]
-    if (!rule) err('contrast: rules.mjs has no raw-field rule for links (COMPOSITE_RULES, links: true)')
+    if (!rule) err('contrast: rules.mjs has no raw-scene rule for links (COMPOSITE_RULES, links: true)')
     else if (!color) err('contrast: src/styles/base.css has no `a { color: var(--token) }` rule for links')
-    else if (!rule.text.includes(color)) err(`contrast: links outside glass are --${color} (base.css); on the raw field they must be one of ${rule.text.map((t) => `--${t}`).join(', ')}`)
+    else if (!rule.text.includes(color)) err(`contrast: links outside glass are --${color} (base.css); on the raw scene they must be one of ${rule.text.map((t) => `--${t}`).join(', ')}`)
   }
 
   if (!quiet) {

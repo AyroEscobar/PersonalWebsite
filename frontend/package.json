@@ -9,10 +9,10 @@
     "preview": "node scripts/serve-dist.mjs",
     "check": "node scripts/check-content.mjs",
     "budget": "node scripts/budget.mjs",
+    "poster": "node scripts/poster.mjs",
+    "og": "node scripts/og.mjs",
     "lint": "eslint .",
     "tools": "npm install --prefix tools --no-audit --no-fund",
-    "images": "node scripts/images.mjs",
-    "og": "node scripts/og.mjs",
     "qa": "node scripts/qa/run.mjs"
   },
   "dependencies": {

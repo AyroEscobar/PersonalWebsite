@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 import { HEAD } from './src/content/meta.js'
 
 /*
-  Vite config (PLAN.md 9, 11). Owned by FOUNDATION.
+  Vite config (DESIGN.md 3.1, 3.11, 6.1).
 
   - __BUILD_SHA__ and __BUILD_DATE__ are injected once per build. scripts/build.mjs
     sets BUILD_SHA and BUILD_DATE in the environment so the client build and the
@@ -15,8 +15,9 @@ import { HEAD } from './src/content/meta.js'
   - The inline boot script (src/lib/boot-inline.js) is minified and placed first
     in <head>. Its hash goes into the CSP (scripts/prerender.mjs keeps
     vercel.json in sync).
-  - The font files (Instrument Serif italic, Inter) get <link rel="preload">
-    with their hashed names.
+  - Mona Sans gets a <link rel="preload"> with its hashed name; the two poster
+    AVIFs are preloaded with media queries (the first paint).
+  - three and src/scene/* land in one lazy chunk named "scene" (budget.mjs finds it).
 */
 
 function gitSha() {
@@ -49,11 +50,13 @@ function headTags() {
   return [
     `<title>${esc(HEAD.title.text)}</title>`,
     meta('name', 'description', HEAD.description.text),
-    meta('name', 'color-scheme', 'light'),
+    meta('name', 'color-scheme', 'dark'),
     meta('name', 'theme-color', HEAD.themeColor),
     `<link rel="canonical" href="${esc(HEAD.canonical)}" />`,
     `<link rel="icon" href="/favicon.svg" type="image/svg+xml" />`,
     `<link rel="apple-touch-icon" href="/apple-touch-icon.png" />`,
+    `<link rel="preload" as="image" type="image/avif" href="/poster/hero-1440.avif" media="(min-aspect-ratio: 9/10)" fetchpriority="high" />`,
+    `<link rel="preload" as="image" type="image/avif" href="/poster/hero-780.avif" media="(max-aspect-ratio: 9/10)" fetchpriority="high" />`,
     meta('property', 'og:type', 'website'),
     meta('property', 'og:url', HEAD.canonical),
     meta('property', 'og:title', HEAD.title.text),
@@ -90,7 +93,7 @@ function sitePlugin() {
         if (ctx.bundle) {
           const fonts = Object.values(ctx.bundle)
             .map((a) => a.fileName)
-            .filter((f) => /\/(instrument-serif-(italic-)?latin|inter-var-latin)-[\w-]+\.woff2$/.test(f))
+            .filter((f) => /\/mona-sans-vf-latin-[\w-]+\.woff2$/.test(f))
             .sort()
           preloads = fonts
             .map((f) => `<link rel="preload" href="/${f}" as="font" type="font/woff2" crossorigin />`)
@@ -114,9 +117,17 @@ export default defineConfig({
   build: {
     manifest: true,
     modulePreload: { polyfill: false },
-    // Inline only tiny assets; fonts and the headshot always stay files.
+    // Inline only tiny assets; fonts and the figure always stay files.
     assetsInlineLimit: 2048,
     reportCompressedSize: false,
+    // the scene chunk is three plus the scene, about 600 KB minified before gzip; budget.mjs holds the gzip line
+    chunkSizeWarningLimit: 720,
+    rollupOptions: {
+      output: {
+        // three rides in the scene chunk, never the entry (DESIGN.md 3.1)
+        manualChunks: (id) => (id.includes('node_modules/three') || /\/src\/scene\//.test(id) ? 'scene' : undefined),
+      },
+    },
   },
   server: {
     port: 5173,
