@@ -10,10 +10,20 @@
     6  a banned word (voice.md)
     7  a privacy denylist term or proximity rule, an EIN or phone shape
     8  'twenty' outside the AGE constant; "Onto what's next." not exactly once
-    9  a token pair under its contrast floor
+    9  a token pair under its contrast floor, or text on glass under its floor
+       measured on the composite (field blob, glass brightness, least tint)
    10  an off-palette color literal, or a cut effect (scanlines, glitch, chamfers,
        cursor replacement) in src
    11  an import of three, @react-three, framer-motion, firebase or react-router
+
+  The v2 material (DESIGN.md 9):
+   12  backdrop-filter anywhere in src but src/styles/glass.css; SVG noise or
+       displacement anywhere but glass.css and src/glass/lens.js
+   13  a monospace face: a monospace font family, or <code>, <kbd>, <samp>, <pre>
+   14  filter: blur() on a field blob; a keyframe or transition that animates
+       backdrop-filter, box-shadow or filter
+   15  ink-3 used as a text colour in the component, page or kit styles (text
+       on glass is ink or ink-2; see COMPOSITE_RULES)
 
   facts.json and the denylist live outside the public repo. When either is
   missing (on Vercel) those checks are skipped with a warning.
@@ -25,7 +35,11 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
   BANNED,
+  COMPOSITE_RULES,
   CONTRAST_RULES,
+  brighten,
+  over,
+  readFieldTokens,
   DASH_RE,
   PRIVATE_SHAPES,
   contrast,
@@ -148,13 +162,12 @@ export async function checkContent({ quiet = false } = {}) {
   const tokens = readTokens(tokensCss)
   const tokenHex = new Set(Object.values(tokens).map((h) => h.toUpperCase()))
   const tokenRgb = new Set(Object.values(tokens).map((h) => hexToRgb(h).join(',')))
-  tokenRgb.add('243,236,223') // --hairline is ink at 10%
 
   const CUT_EFFECTS = [
     { re: /\bscan-?lines?\b/i, name: 'scanlines' },
     { re: /\bglitch/i, name: 'glitch' },
     { re: /chromatic[- ]aberration/i, name: 'chromatic aberration' },
-    { re: /feTurbulence|feDisplacementMap/, name: 'SVG noise filter' },
+    { re: /feTurbulence|feDisplacementMap/, name: 'SVG noise or displacement outside the glass material', allow: /^src\/(styles\/glass\.css|glass\/lens\.js)$/ },
     { re: /corner-shape\s*:/, name: 'chamfered corners' },
     { re: /cursor\s*:\s*url\(/, name: 'cursor replacement' },
     { re: /mix-blend-mode\s*:/, name: 'mix-blend-mode (never on a full-viewport layer)' },
@@ -208,8 +221,48 @@ export async function checkContent({ quiet = false } = {}) {
         }
       }
       for (const c of CUT_EFFECTS) {
+        if (c.allow?.test(r)) continue
         const m = text.match(c.re)
-        if (m) err(`${r}:${where(text, m.index)}: cut effect, ${c.name} (PLAN.md 2.4)`)
+        if (m) err(`${r}:${where(text, m.index)}: cut effect, ${c.name}`)
+      }
+
+      // Comments may name what is banned; code may not. Positions stay put.
+      const code = text
+        .replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' '))
+        .replace(/(^|\s)\/\/.*$/gm, (c) => c.replace(/[^\n]/g, ' '))
+
+      // 12: the material lives in one file (DESIGN.md 4, 9.1). Feature detection
+      // (CSS.supports) is allowed; applying the property anywhere else is not.
+      if (r !== 'src/styles/glass.css') {
+        const m = code.match(/(^|[\s;{'"`])(-webkit-)?backdrop-filter\s*:|backdropFilter|setProperty\(\s*['"](-webkit-)?backdrop-filter/)
+        if (m) err(`${r}:${where(text, m.index)}: backdrop-filter outside src/styles/glass.css (render <Glass> instead)`)
+      }
+
+      // 13: no monospace anywhere (DESIGN.md 2.3).
+      {
+        const m = code.match(/\bmonospace\b|\bfont-mono\b|Overpass Mono|<(code|kbd|samp|pre)[\s>]/)
+        if (m) err(`${r}:${where(text, m.index)}: monospace (${m[0].trim()}); v2 has none, use tabular Inter`)
+      }
+
+      if (r.endsWith('.css')) {
+        // 14: the field is gradients moved by transform; the material never animates.
+        for (const m of text.matchAll(/([^{}]*\.blob[^{}]*)\{([^}]*)\}/g)) {
+          if (/(^|[\s;])filter\s*:\s*[^;]*blur\(/.test(m[2])) err(`${r}:${where(text, m.index)}: filter: blur() on a field blob`)
+        }
+        for (const m of text.matchAll(/@keyframes\s+[\w-]+\s*\{([\s\S]*?\})\s*\}/g)) {
+          const p = m[1].match(/(^|[\s;{])(-webkit-)?(backdrop-filter|box-shadow|filter)\s*:/)
+          if (p) err(`${r}:${where(text, m.index)}: a keyframe animates ${p[3]}`)
+        }
+        for (const m of text.matchAll(/transition(-property)?\s*:([^;]*)/g)) {
+          const p = m[2].match(/\b(backdrop-filter|box-shadow|filter)\b/)
+          if (p) err(`${r}:${where(text, m.index)}: a transition animates ${p[1]}`)
+        }
+        // 15: text on glass is ink or ink-2.
+        if (/^src\/styles\/(components|page|kit)\.css$/.test(r)) {
+          for (const m of text.matchAll(/(^|[\s;{])color\s*:\s*var\(--ink-3\)/g)) {
+            err(`${r}:${where(text, m.index)}: ink-3 as text colour; text on glass is ink or ink-2 (rules.mjs COMPOSITE_RULES)`)
+          }
+        }
       }
       const imp = text.match(BANNED_IMPORTS)
       if (imp) err(`${r}:${where(text, imp.index)}: removed dependency imported (${imp[0]})`)
@@ -226,6 +279,34 @@ export async function checkContent({ quiet = false } = {}) {
     const ratio = contrast(hexToRgb(tokens[rule.fg]), hexToRgb(tokens[rule.bg]))
     pairs.push({ ...rule, ratio })
     if (ratio < rule.min) err(`contrast: --${rule.fg} on --${rule.bg} is ${ratio.toFixed(2)}, needs ${rule.min} (${rule.kind})`)
+  }
+
+  // ---------- 9: text on glass, on the composite ----------
+  const field = readFieldTokens(tokensCss)
+  const ALPHA = { rose: 0.45, core: 0.4 }
+  const base = tokens.base ? hexToRgb(tokens.base) : null
+  if (!base) err('contrast: --base missing from tokens.css')
+  for (const rule of COMPOSITE_RULES) {
+    if (!base) break
+    let worst = null
+    for (const b of rule.blobs) {
+      if (!field[b]) {
+        err(`contrast: field token --f-${b} missing or not oklch in tokens.css`)
+        continue
+      }
+      const behind = over([255, 255, 255], brighten(over(field[b], base, ALPHA[b] ?? 1), rule.brightness), rule.fill)
+      for (const t of rule.text) {
+        if (!tokens[t]) {
+          err(`contrast: token --${t} missing from tokens.css`)
+          continue
+        }
+        const ratio = contrast(hexToRgb(tokens[t]), behind)
+        if (!worst || ratio < worst.ratio) worst = { ratio, t, b }
+      }
+    }
+    if (!worst) continue
+    pairs.push({ fg: worst.t, bg: `${rule.glass} over ${worst.b}`, min: rule.min, ratio: worst.ratio, kind: 'composite' })
+    if (worst.ratio < rule.min) err(`contrast: --${worst.t} on ${rule.glass} over --f-${worst.b} is ${worst.ratio.toFixed(2)}, needs ${rule.min}`)
   }
 
   if (!quiet) {

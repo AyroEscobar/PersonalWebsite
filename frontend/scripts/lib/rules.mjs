@@ -150,7 +150,7 @@ export function contrast(a, b) {
   return (l1 + 0.05) / (l2 + 0.05)
 }
 
-/** Hex tokens from the first :root block of tokens.css: { night: '#0B1226', ... } */
+/** Hex tokens from the first :root block of tokens.css: { base: '#FBF9F4', ... } */
 export function readTokens(tokensCss) {
   const block = tokensCss.match(/:root\s*{([\s\S]*?)}/)[1]
   const out = {}
@@ -158,17 +158,105 @@ export function readTokens(tokensCss) {
   return out
 }
 
+/** The field colours (oklch) from tokens.css: { peach: [r, g, b], 'sky-d': [...], ... } in sRGB 0..255. */
+export function readFieldTokens(tokensCss) {
+  const out = {}
+  for (const m of tokensCss.matchAll(/--f-([\w-]+):\s*oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)\s*;/g)) {
+    out[m[1]] = oklchToRgb(Number(m[2]), Number(m[3]), Number(m[4]))
+  }
+  return out
+}
+
+/** OKLCH to gamma-encoded sRGB, clamped (Bjorn Ottosson's matrices, https://bottosson.github.io/posts/oklab/). */
+export function oklchToRgb(L, C, h) {
+  const a = C * Math.cos((h * Math.PI) / 180)
+  const b = C * Math.sin((h * Math.PI) / 180)
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3
+  const lin = [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ]
+  return lin.map((v) => {
+    const c = Math.min(1, Math.max(0, v))
+    return Math.round(255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055))
+  })
+}
+
+/** a over b at alpha (sRGB, the way the browser composites). */
+export const over = (a, b, alpha) => a.map((v, i) => v * alpha + b[i] * (1 - alpha))
+/** CSS brightness(k) on an sRGB colour, clamped. */
+export const brighten = (c, k) => c.map((v) => Math.min(255, v * k))
+
 /*
-  Contrast pairs (PLAN.md 2.1, acceptance 36): text tokens on every surface
-  they sit on. Body text (ink, dim) needs 7:1 on night and deck; every text
-  token needs 4.5:1; UI graphics need 3:1.
+  Token pairs (DESIGN.md 2.1, 2.6): body text on the base needs 7:1, every
+  other text token 4.5:1, the focus ring and the now dot 3:1.
 */
 export const CONTRAST_RULES = [
-  ...['night', 'deck'].flatMap((s) => ['ink', 'dim'].map((t) => ({ fg: t, bg: s, min: 7, kind: 'body text' }))),
-  ...['night', 'deck', 'deck-2'].flatMap((s) =>
-    ['ink', 'dim', 'sodium', 'led', 'beacon'].map((t) => ({ fg: t, bg: s, min: 4.5, kind: 'text' })),
-  ),
-  ...['night', 'deck'].flatMap((s) => ['trace-lit', 'sodium'].map((t) => ({ fg: t, bg: s, min: 3, kind: 'graphic' }))),
-  { fg: 'night', bg: 'sodium', min: 4.5, kind: 'text on sodium fill' },
-  { fg: 'night', bg: 'beacon', min: 4.5, kind: 'text on beacon fill' },
+  ...['ink', 'ink-2'].map((t) => ({ fg: t, bg: 'base', min: 7, kind: 'body text on the base' })),
+  ...['ink-3', 'accent', 'accent-ink', 'ok-ink'].map((t) => ({ fg: t, bg: 'base', min: 4.5, kind: 'text on the base' })),
+  ...['ink', 'ink-2', 'ink-3', 'accent'].map((t) => ({ fg: t, bg: 'plate-2', min: 4.5, kind: 'text on the solid plate (fallbacks)' })),
+  { fg: 'on-ink', bg: 'ink', min: 4.5, kind: 'text on the ink pill and the tooltip' },
+  { fg: 'plate', bg: 'accent', min: 4.5, kind: 'white on the accent' },
+  { fg: 'accent', bg: 'base', min: 3, kind: 'the focus ring' },
+  { fg: 'ok', bg: 'base', min: 3, kind: 'the now dot' },
+]
+
+/*
+  Composite contrast (DESIGN.md 9.2): text on glass is measured against what
+  is actually behind it. For each glass surface that holds text: the field
+  blob at its core (its alpha over the base), the glass's backdrop
+  brightness, then the glass's LEAST tint under copy. Saturate is left out
+  (it keeps luminance). Sheets are checked without blur or brightness, the
+  way phones and tier lite draw them. Body tokens need 4.5:1, large text
+  and the focus ring 3:1.
+
+  Two consequences, enforced in check-content: text on glass uses ink or
+  ink-2 (ink-3 measures 4.1:1 on a sheet over rose, so it never sets text in
+  the component styles), and links on glass use accent-ink (accent measures
+  3.9:1 there).
+*/
+export const COMPOSITE_RULES = [
+  {
+    glass: 'sheet (cards, plates, now list, crew, stack)',
+    fill: 0.14,
+    brightness: 1,
+    blobs: ['peach-d', 'butter-d', 'sky-d', 'lilac-d', 'rose-d'],
+    text: ['ink', 'ink-2', 'accent-ink'],
+    min: 4.5,
+  },
+  {
+    glass: 'thick + scrim (the contact card)',
+    fill: 0.22,
+    brightness: 1.07,
+    blobs: ['peach-d', 'butter-d', 'rose-d', 'peach', 'butter'],
+    text: ['ink', 'ink-2', 'accent-ink'],
+    min: 4.5,
+  },
+  {
+    glass: 'thick pill (glass buttons, link row, quiet switch, toast)',
+    fill: 0.03,
+    brightness: 1.07,
+    blobs: ['peach', 'butter', 'sky', 'lilac', 'rose', 'core', 'peach-d', 'butter-d', 'sky-d', 'lilac-d', 'rose-d'],
+    text: ['ink'],
+    min: 4.5,
+  },
+  {
+    glass: 'clear lens (the sentence, large text)',
+    fill: 0.03,
+    brightness: 1.08,
+    blobs: ['peach', 'butter', 'sky', 'lilac', 'rose', 'core'],
+    text: ['ink'],
+    min: 3,
+  },
+  {
+    glass: 'none: the focus ring over the raw field',
+    fill: 0,
+    brightness: 1,
+    blobs: ['peach', 'butter', 'sky', 'lilac', 'rose', 'core', 'peach-d', 'butter-d', 'sky-d', 'lilac-d', 'rose-d'],
+    text: ['accent'],
+    min: 3,
+  },
 ]
