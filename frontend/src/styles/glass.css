@@ -458,10 +458,11 @@ html[data-transparency='reduced'],
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
   }
+  /* (0,1,1): beats .btn and .quiet, which set border: 0 later in the cascade */
   button.glass,
   a.glass,
-  .linkrow {
-    border-color: ButtonText;
+  nav.linkrow {
+    border: 2px solid ButtonText;
   }
   .glass::before,
   .glass::after,
