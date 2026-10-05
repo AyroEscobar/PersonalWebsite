@@ -1,10 +1,11 @@
 /*
   Hooks for the tools, never for the page (DESIGN.md 3.12): window.__ready, __stats, __bench(n),
-  __frameAt(t, p), __bounds(), __feet(), __prog(), __CAM, __LIGHT, __objs. The query flags
+  __frameAt(t, p), __bounds(), __feet(), __hands(), __prog(), __CAM, __LIGHT, __objs. The query flags
   (?t ?p ?tier ?slip ?ui) are read in boulder.js.
 */
 import * as THREE from 'three'
 import { hazeT } from './world.js'
+import { rockRadius } from './rock.js'
 
 export function readQuery() {
   const q = new URLSearchParams(location.search)
@@ -84,10 +85,49 @@ export function installHooks(ctx) {
   }
   // the planted feet, in the slope frame (metres), to measure drift over a stance
   window.__feet = () => ({ balls: fig.Pw && [fig.Pw.toeL.toArray(), fig.Pw.toeR.toArray()], stance: [...fig.update(state.tau(), state.pose()).stance], tau: state.tau() })
+  // the hands against the glass: for every skinned vertex that belongs mostly to a hand bone, its signed
+  // distance to the displaced rock surface (metres; negative is inside the glass). gap = the closest
+  // palm-side vertex, depth = the deepest, touching = vertices within 1 cm of the surface. Also each hand's
+  // extent in its own frame (fingers, palm normal, lateral; from the wrist) and its screen box, for the crops
+  window.__hands = () => {
+    ctx.scene.updateMatrixWorld(); const o0 = fig.update(state.tau(), state.pose()); ctx.scene.updateMatrixWorld(); fig.mesh.skeleton.update()
+    const mesh = fig.mesh, geo = mesh.geometry, si = geo.attributes.skinIndex, sw = geo.attributes.skinWeight
+    const names = mesh.skeleton.bones.map((b) => b.name)
+    const inv = fig.boulder.matrixWorld.clone().invert(), p = new THREE.Vector3(), q = new THREE.Vector3(), lat = new THREE.Vector3()
+    const res = { tau: state.tau(), hands: [] }
+    for (const [i, s] of [[0, 'L'], [1, 'R']]) {
+      const bi = names.indexOf('hand' + s), h = o0.hands[i]
+      lat.crossVectors(h.n, h.fingers)
+      let gap = 1e9, depth = -1e9, touching = 0, n = 0
+      const ext = { along: [1e9, -1e9], palm: [1e9, -1e9], lat: [1e9, -1e9] }
+      const pts = []
+      for (let v = 0; v < si.count; v++) {
+        let w = 0
+        for (let k = 0; k < 4; k++) if (si.getComponent(v, k) === bi) w += sw.getComponent(v, k)
+        if (w < 0.5) continue
+        mesh.getVertexPosition(v, p) // skinned, mesh local (the mesh node is the identity under the rig)
+        p.applyMatrix4(mesh.matrixWorld); pts.push(p.clone())
+        q.copy(p).applyMatrix4(inv); const r = q.length(); q.divideScalar(r)
+        const d = r - rockRadius(q, R)
+        // in the hand frame: the slope-frame wrist and axes, taken to world through the group
+        const ws = h.wrist.clone().applyMatrix4(fig.group.matrixWorld)
+        const rel = p.clone().sub(ws)
+        const a = rel.dot(h.fingers.clone().transformDirection(fig.group.matrixWorld)), pn = -rel.dot(h.n.clone().transformDirection(fig.group.matrixWorld)), l = rel.dot(lat.clone().transformDirection(fig.group.matrixWorld))
+        ext.along[0] = Math.min(ext.along[0], a); ext.along[1] = Math.max(ext.along[1], a)
+        ext.palm[0] = Math.min(ext.palm[0], pn); ext.palm[1] = Math.max(ext.palm[1], pn)
+        ext.lat[0] = Math.min(ext.lat[0], l); ext.lat[1] = Math.max(ext.lat[1], l)
+        // the palm side: toward the glass of the bone axis
+        if (pn > 0.004) gap = Math.min(gap, d)
+        depth = Math.max(depth, -d); if (Math.abs(d) < 0.01) touching++; n++
+      }
+      res.hands.push({ side: s, gap, depth, touching, n, ext, box: toScreen(pts), contact: h.c.toArray(), normal: h.n.toArray(), wrist: h.wrist.toArray(), fingers: h.fingers.toArray(), head: fig.Pw['hand' + s].toArray(), elbow: fig.Pw['foreArm' + s].toArray(), shoulder: fig.Pw['upperArm' + s].toArray() })
+    }
+    return res
+  }
 }
 
 export function removeHooks() {
-  for (const k of ['__CAM', '__LIGHT', '__CITY', '__prog', '__objs', '__frameAt', '__bench', '__bounds', '__feet', '__ready', '__stats']) {
+  for (const k of ['__CAM', '__LIGHT', '__CITY', '__prog', '__objs', '__frameAt', '__bench', '__bounds', '__feet', '__hands', '__ready', '__stats']) {
     try { delete window[k] } catch { window[k] = undefined }
   }
 }
