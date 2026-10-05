@@ -60,9 +60,20 @@ export function installHooks(ctx) {
     const bp = []
     for (let i = 0; i < 400; i++) { const u = Math.acos(1 - 2 * (i + 0.5) / 400), v = i * 2.39996; bp.push(new THREE.Vector3(Math.sin(u) * Math.cos(v), Math.cos(u), Math.sin(u) * Math.sin(v)).multiplyScalar(R * 1.035).add(B)) }
     out.boulder = toScreen(bp)
+    // the city box counts only the lights the camera can see: a ray from the camera to each sampled
+    // point must not hit the mountain first (the cliff hides most of the carpet at the hero camera)
     const cp = city.userData.points.geometry.attributes.position, cpts = []
-    for (let i = 0; i < cp.count; i += 7) cpts.push(new THREE.Vector3().fromBufferAttribute(cp, i).applyMatrix4(city.userData.points.matrixWorld))
+    const ray = new THREE.Raycaster(), dir = new THREE.Vector3()
+    const ground = slope.children.find((o) => o.isMesh && o.geometry?.attributes?.position?.count > 10000)
+    for (let i = 0; i < cp.count; i += 19) {
+      const p = new THREE.Vector3().fromBufferAttribute(cp, i).applyMatrix4(city.userData.points.matrixWorld)
+      dir.copy(p).sub(cam.position); const dist = dir.length(); dir.normalize()
+      ray.set(cam.position, dir); ray.far = dist
+      if (ground && ray.intersectObject(ground, false).length) continue
+      cpts.push(p)
+    }
     out.city = toScreen(cpts)
+    out.cityVisible = cpts.length
     // the panels on screen, so a check can assert none overlaps him
     out.panels = [...document.querySelectorAll('.panel, .card, .nav')].map((el) => { const r2 = el.getBoundingClientRect(); return { x0: Math.round(r2.left), y0: Math.round(r2.top), x1: Math.round(r2.right), y1: Math.round(r2.bottom) } }).filter((b) => b.x1 > 0 && b.y1 > 0 && b.x0 < innerWidth && b.y0 < innerHeight)
     out.view = [innerWidth, innerHeight]; out.prog = state.prog(); out.dpr = r.getPixelRatio()

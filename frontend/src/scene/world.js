@@ -154,7 +154,8 @@ export function makeCity({ count = 2600, below = -225, near = 300, far = 640, cx
   const pts = new THREE.Points(g, m)
   grp.add(pts)
   grp.userData.points = pts
-  // the plain under it, with the light the city throws up into its own haze; with distance it fades
+  // the plain under it, with a little of the light the city throws up into its own haze (kept dim: the
+  // carpet is the points, never a glowing lake); with distance it fades
   // into the sky's own horizon colour (the same terms as the dome), so the two never meet on an edge
   const sky = skyUniforms || {
     uGlowAMix: { value: 1 }, uDawn: { value: 0 }, uHorizon: { value: new THREE.Color(0x12324a) }, uGlowA: { value: new THREE.Color(0x0e7a8f) }, uGlowB: { value: new THREE.Color(0x7a1860) }, uDawnCol: { value: new THREE.Color(0xa9d8f0) },
@@ -171,7 +172,7 @@ export function makeCity({ count = 2600, below = -225, near = 300, far = 640, cx
       float h21(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       void main(){ vec2 p = vW.xz - uCore;
         float core = exp(-dot(p / vec2(230.0, 150.0), p / vec2(230.0, 150.0)));
-        vec3 col = uBase + uA * core * 0.5 + uB * exp(-dot((p - vec2(160.0, 40.0)) / 140.0, (p - vec2(160.0, 40.0)) / 140.0)) * 0.3;
+        vec3 col = uBase + uA * core * 0.22 + uB * exp(-dot((p - vec2(160.0, 40.0)) / 140.0, (p - vec2(160.0, 40.0)) / 140.0)) * 0.14;
         // the sky at the horizon in this direction (the dome's terms at h = 0)
         vec3 dir = normalize(vW - cameraPosition);
         vec3 hor = uHorizon + uGlowA * smoothstep(0.2, 1.0, -dir.z) * 0.5 * uGlowAMix + uGlowB * smoothstep(0.2, 1.0, dir.z * 0.3 - dir.x * 0.7) * 0.45;

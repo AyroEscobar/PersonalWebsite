@@ -12,7 +12,7 @@
                        700 px (?tier=lite); else 'full' (?tier=full forces it)
     data-transparency  'reduced' when the quiet switch is on (ae.quiet, ?quiet=1, or the OS setting)
     data-ui            '0' for ?ui=0 (the bare scene, for posters)
-    class fixed        ?t= (a fixed clock: instant scrolls for captures)
+    class clock-fixed  ?t= (a fixed clock: instant scrolls for captures)
     class notext       ?notext=1, for the contrast capture in QA
 */
 ;(function () {
@@ -66,6 +66,6 @@
   d.setAttribute('data-tier', tier)
   d.setAttribute('data-transparency', quiet ? 'reduced' : 'full')
   if (has(/[?&]ui=0(&|$)/)) d.setAttribute('data-ui', '0')
-  if (has(/[?&]t=/)) d.className += ' fixed'
+  if (has(/[?&]t=/)) d.className += ' clock-fixed'
   if (has(/[?&]notext=1(&|$)/)) d.className += ' notext'
 })()

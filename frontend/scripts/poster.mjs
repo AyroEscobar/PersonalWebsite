@@ -118,8 +118,10 @@ try {
         const keys = ${JSON.stringify(fr.keys)}
         const rect = (el) => { const r = el.getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom } }
         const vis = (b) => b.x1 > 0 && b.y1 > 0 && b.x0 < innerWidth && b.y0 < innerHeight && b.x1 > b.x0 && b.y1 > b.y0
+        // text surfaces (the title, the theme line) measure under their glyphs' own line boxes, not the block
+        const textRects = (el) => { const r = document.createRange(); r.selectNodeContents(el); return [...r.getClientRects()].map((b) => ({ x0: b.left, y0: b.top, x1: b.right, y1: b.bottom })) }
         const out = {}
-        for (const [k, sel] of Object.entries(keys)) out[k] = [...document.querySelectorAll(sel)].map(rect).filter(vis)
+        for (const [k, sel] of Object.entries(keys)) out[k] = [...document.querySelectorAll(sel)].flatMap((el) => (k === 'title' || k === 'theme' ? textRects(el) : [rect(el)])).filter(vis)
         return out
       })()`)
       // the bare scene at the same progress
@@ -136,7 +138,7 @@ try {
         view.mean = Number(mean.toFixed(4))
         const avif = path.join(OUT, `${v.name}.avif`)
         const webp = path.join(OUT, `${v.name}.webp`)
-        await sharp(png).avif({ quality: 60, effort: 6 }).toFile(avif)
+        await sharp(png).avif({ quality: 56, effort: 6 }).toFile(avif)
         await sharp(png).webp({ quality: 78, effort: 6 }).toFile(webp)
         view.sizes = { avif: statSync(avif).size, webp: statSync(webp).size, png: statSync(png).size }
         console.log(`poster: ${v.name}  avif ${(view.sizes.avif / 1024).toFixed(1)} KB  webp ${(view.sizes.webp / 1024).toFixed(1)} KB  mean luminance ${mean.toFixed(3)}`)

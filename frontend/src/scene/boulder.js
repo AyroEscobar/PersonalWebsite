@@ -43,8 +43,9 @@ const SLIP_EVERY = 14
 const SLIP = { dist: 0.9, slide: 0.45, plant: 0.3, hold: 0.12, resume: 0.6 }
 const SPRING_W = 11     // rad/s: critically damped, settles in about 0.4 s, never overshoots
 const HOLD_MS = 260     // the clock holds this long after the first frame, while the canvas fades in over the poster
-// the city carpet: 150 m below (a3 had it at 225 m, where the cliff hid it on desktop; REFINE.md item 1)
-const CITY = { below: -150, near: 260, far: 640 }
+// the city carpet: 200 m below. a3 had it at 225 m, where the cliff hid every light on desktop; at 200 it
+// shows below his feet at the stack and the wide (measured: p 0.8 and 1) and stays off screen at the hero
+const CITY = { below: -200, near: 260, far: 640 }
 const FIGURE_URL = new URL('../assets/figure/man.glb', import.meta.url).href
 
 let S = null

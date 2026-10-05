@@ -22,7 +22,7 @@ html {
   }
 }
 /* tools: a fixed clock (?t=) also means instant scrolls, so a capture lands where it asked */
-html.fixed {
+html.clock-fixed {
   scroll-behavior: auto;
 }
 

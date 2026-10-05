@@ -192,7 +192,7 @@ export const CONTRAST_RULES = [
 export const COMPOSITE_RULES = [
   { key: 'panel', glass: 'thick panel under its scrim (the hero at p 0)', fill: 0.05, brightness: 1.07, scrim: 0.62, text: ['ink', 'ink-2', 'cyan'], min: 4.5 },
   { key: 'card', glass: 'card under its scrim (check out at p 0.2)', fill: 0.05, brightness: 1.07, scrim: 0.7, text: ['ink', 'ink-2', 'cyan'], min: 4.5 },
-  { key: 'pill', glass: 'glass pill on its void base (the nav and the glass buttons at p 0)', fill: 0.05, brightness: 1.07, scrim: 0.6, text: ['ink', 'ink-2'], min: 4.5 },
+  { key: 'pill', glass: 'glass pill on its void base (the nav and the glass buttons at p 0)', fill: 0.05, brightness: 1.07, scrim: 0.66, text: ['ink', 'ink-2'], min: 4.5 },
   { key: 'theme', glass: 'the theme line on its void pool (p 0)', fill: 0, brightness: 1, scrim: 0.7, text: ['ink'], min: 4.5 },
   { key: 'title', glass: 'the bare section title on the raw scene (p 0.2), large text', fill: 0, brightness: 1, scrim: 0, text: ['ink'], min: 3 },
   { key: 'footer', glass: 'the footer on its void gradient (p 1)', fill: 0, brightness: 1, scrim: 0.86, text: ['ink', 'ink-2'], min: 4.5, links: true },
