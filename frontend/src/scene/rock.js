@@ -55,13 +55,32 @@ export function coreGlow(R, strength = 1) {
   return sp
 }
 
+// the 3.5% sine-product displacement, evaluated at a point of the undisplaced sphere (rock local frame)
+const bump = (x, y, z, R) => Math.sin(x * 2.1 / R + 1.3) * Math.sin(y * 1.7 / R - 0.4) * Math.sin(z * 2.3 / R + 2.1) + 0.5 * Math.sin(x * 5.3 / R) * Math.sin(z * 4.7 / R)
+// the real radius of the rock along a unit direction in its local frame (what rockGeometry put there)
+export function rockRadius(dir, R) { return R * (1 + 0.035 * bump(dir.x * R, dir.y * R, dir.z * R, R)) }
+const _d1 = new THREE.Vector3(), _d2 = new THREE.Vector3(), _t1 = new THREE.Vector3(), _t2 = new THREE.Vector3(), _p1 = new THREE.Vector3(), _p2 = new THREE.Vector3()
+// the displaced surface along a unit direction (rock local frame): the point and the true outward
+// normal (from two neighbouring points 0.01 rad away), so a palm can sit flat on the bumps
+export function rockSurface(dir, R, outPoint, outNormal) {
+  const r0 = rockRadius(dir, R)
+  outPoint.copy(dir).multiplyScalar(r0)
+  _t1.set(0, 1, 0); if (Math.abs(dir.y) > 0.9) _t1.set(1, 0, 0)
+  _t1.addScaledVector(dir, -_t1.dot(dir)).normalize(); _t2.crossVectors(dir, _t1)
+  const e = 0.01
+  _d1.copy(dir).addScaledVector(_t1, e).normalize(); _p1.copy(_d1).multiplyScalar(rockRadius(_d1, R)).sub(outPoint)
+  _d2.copy(dir).addScaledVector(_t2, e).normalize(); _p2.copy(_d2).multiplyScalar(rockRadius(_d2, R)).sub(outPoint)
+  outNormal.crossVectors(_p1, _p2).normalize()
+  if (outNormal.dot(dir) < 0) outNormal.negate()
+  return r0
+}
+
 export function rockGeometry(R) {
   const g = new THREE.SphereGeometry(R, 160, 120)
   const pos = g.attributes.position, v = new THREE.Vector3()
   for (let i = 0; i < pos.count; i++) {
     v.fromBufferAttribute(pos, i)
-    const n = Math.sin(v.x * 2.1 / R + 1.3) * Math.sin(v.y * 1.7 / R - 0.4) * Math.sin(v.z * 2.3 / R + 2.1) + 0.5 * Math.sin(v.x * 5.3 / R) * Math.sin(v.z * 4.7 / R)
-    v.multiplyScalar(1 + 0.035 * n)
+    v.multiplyScalar(1 + 0.035 * bump(v.x, v.y, v.z, R))
     pos.setXYZ(i, v.x, v.y, v.z)
   }
   g.computeVertexNormals()
@@ -125,9 +144,7 @@ export function droplets(R, count = 90, { lite = false } = {}) {
     n.set(r * Math.cos(a), u, r * Math.sin(a))
     const size = R * (0.007 + h(i, 3) * 0.016)
     // seat it on the displaced surface (same sine product as rockGeometry)
-    const x = n.x * R, y = n.y * R, z = n.z * R
-    const disp = Math.sin(x * 2.1 / R + 1.3) * Math.sin(y * 1.7 / R - 0.4) * Math.sin(z * 2.3 / R + 2.1) + 0.5 * Math.sin(x * 5.3 / R) * Math.sin(z * 4.7 / R)
-    o.position.copy(n).multiplyScalar(R * (1 + 0.035 * disp) + size * 0.15)
+    o.position.copy(n).multiplyScalar(rockRadius(n, R) + size * 0.15)
     o.quaternion.setFromUnitVectors(up, n)
     o.scale.set(size, size * 0.35, size * (1 + h(i, 4) * 0.6))
     o.updateMatrix(); m.setMatrixAt(i, o.matrix)
