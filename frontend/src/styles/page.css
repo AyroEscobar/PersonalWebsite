@@ -229,6 +229,14 @@ main {
 }
 
 /* 404 */
+.nf {
+  padding-top: 28px;
+}
+@media (max-width: 639.98px) {
+  .nf {
+    padding-top: 20px;
+  }
+}
 .nf-inner {
   display: flex;
   flex-direction: column;
