@@ -511,6 +511,29 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
   gap: var(--s-4);
   font: 500 var(--t-sm) / 1 var(--sans);
 }
+/* targets (DESIGN.md 10): 24px everywhere, 44px on touch, without moving a line */
+.card-links a,
+.contact-address,
+.ft-link,
+.builds-note a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+.card-title a {
+  padding-block: 1px;
+}
+@media (pointer: coarse) {
+  .card-title a,
+  .card-links a {
+    padding-block: 11px;
+    margin-block: -11px;
+  }
+  .card-links a {
+    padding-inline: 6px;
+    margin-inline: -6px;
+  }
+}
 /* links on glass take accent-ink: accent alone measures 3.9:1 on a sheet over rose (rules.mjs) */
 .card-links a,
 .glass .tl {
