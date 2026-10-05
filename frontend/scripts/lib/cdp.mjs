@@ -9,6 +9,7 @@
     await page.screenshot(file, { fullPage: true })
     page.console                         [{ type, text }] since the last goto
     page.requests                        [{ url, status, type, bytes, failed }]
+    page.on('Fetch.requestPaused', fn)   one CDP event on this page; returns an unsubscribe
     await page.close()
     cdp.close()
 */
@@ -109,6 +110,12 @@ export async function connect(wsUrl) {
       return r.result.value
     }
     page.addInitScript = (source) => s('Page.addScriptToEvaluateOnNewDocument', { source })
+    // listen to one CDP event on this page; returns the unsubscribe function
+    page.on = (method, fn) => {
+      const f = (m) => m.sessionId === sessionId && m.method === method && fn(m.params)
+      listeners.add(f)
+      return () => listeners.delete(f)
+    }
     page.key = async (key, { modifiers = 0, code, text } = {}) => {
       const keyCode = { Tab: 9, Enter: 13, Escape: 27, ArrowDown: 40, ArrowUp: 38, ' ': 32 }[key] ?? key.toUpperCase().charCodeAt(0)
       // Enter and Space only activate links and buttons when the key event carries text.
