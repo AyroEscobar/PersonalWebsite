@@ -21,7 +21,7 @@
 import * as THREE from 'three'
 import { loadFigure, makeFigure, figureMaterial } from './figure.js'
 import { glassPresets, rockGeometry, neonCore, neonEnvironment, coreGlow, droplets } from './rock.js'
-import { makeSlope, contourMaterial, makeReflection, makeContactShadow } from './terrain.js'
+import { makeSlopeAsync, contourMaterial, makeReflection, makeContactShadow } from './terrain.js'
 import { makeSky, makeRidge, makeStars, makeCity, makeRain } from './world.js'
 import { makeLights, LIGHT, FOG } from './lights.js'
 import { makePost } from './post.js'
@@ -94,7 +94,6 @@ export function mount(canvas, opts = {}) {
   // the slope frame carries the mountain and the figure; +x climbs
   const slope = new THREE.Group(); slope.rotation.z = THREE.MathUtils.degToRad(SLOPE); scene.add(slope)
   const ground = contourMaterial({ strength: full ? 1 : 0.8, wet: 0.6 })
-  slope.add(makeSlope({ material: ground }))
   const city = makeCity({ count: full ? 2600 : 1400, ...CITY, skyUniforms: sky.material.uniforms, ridge }); scene.add(city)
   city.userData.setHaze(hazeAt(0))
   const rain = full ? makeRain({ count: 320 }) : null
@@ -102,7 +101,7 @@ export function mount(canvas, opts = {}) {
 
   const glass = full ? glassPresets.premium2(R, tier) : glassPresets.lite(R)
   const figMat = figureMaterial({ lite: !full })
-  const rockGeo = rockGeometry(R)
+  let rockGeo = null // built a task later (the mount never runs as one long task)
   let fig = null
   const core = neonCore(R, { halo: !full }); scene.add(core)
   const glow = full ? null : coreGlow(R, 1.5)
@@ -236,7 +235,7 @@ export function mount(canvas, opts = {}) {
   }
   function setDpr(v) { r.setPixelRatio(v); resize(); stats.dpr = v }
 
-  let first = true, holdUntil = 0
+  let first = true, holdUntil = 0, live = false // live: the figure is in and the shaders are compiled
   function frame(nowMs) {
     let dt = Math.min(0.05, (nowMs - last) / 1000); last = nowMs
     if (first) holdUntil = nowMs + HOLD_MS
@@ -252,7 +251,7 @@ export function mount(canvas, opts = {}) {
     if (first) { first = false; window.__ready = true; opts.onReady?.() }
   }
   function sync() {
-    const run = !!fig && visible && onScreen && !userPaused && fixedT === null && document.documentElement.dataset.gl !== 'lost'
+    const run = live && visible && onScreen && !userPaused && fixedT === null && document.documentElement.dataset.gl !== 'lost'
     stats.paused = !run
     last = performance.now()
     r.setAnimationLoop(run ? frame : null)
@@ -287,15 +286,23 @@ export function mount(canvas, opts = {}) {
   S = { r, scene, post: null, io, canvas, onLost, onRestored, onScroll, onResize, onPtr, onVis, sp, dead: false,
     pause: () => { userPaused = true; sync() }, play: () => { userPaused = false; sync() } }
   const me = S
-  // the mount is split across frames (DESIGN.md 9): the renderer, the world and the materials now; the
-  // neon PMREM and the composer on the next frame; the figure when its fetch lands
-  requestAnimationFrame(() => {
-    if (me.dead) return
+  // the mount is split across tasks (DESIGN.md 9: no long task after load on a slow phone): the renderer,
+  // the world and the materials now; the slope in slices, the rock, the neon PMREM and the composer each
+  // in a task of their own; the figure when its fetch lands; the shaders compiled off the main thread
+  // (compileAsync) before the first frame, so the first frame never stalls on a compile
+  const next = () => new Promise((res) => (globalThis.scheduler?.yield ? globalThis.scheduler.yield().then(res) : setTimeout(res, 0)))
+  const built = (async () => {
+    await next(); if (me.dead) return
+    slope.add(await makeSlopeAsync({ material: ground }, next)); if (me.dead) return
+    await next(); if (me.dead) return
+    rockGeo = rockGeometry(R)
+    await next(); if (me.dead) return
     scene.environment = neonEnvironment(r, { intensity: 0.8 })
+    await next(); if (me.dead) return
     post = full ? makePost(r, scene, cam, { tier }) : null
     me.post = post
-  })
-  loadFigure(FIGURE_URL).then((man) => {
+  })()
+  Promise.all([loadFigure(FIGURE_URL), built]).then(async ([man]) => {
     if (me.dead) return
     fig = makeFigure({ man, material: figMat, boulderMaterial: glass, boulderGeometry: rockGeo, R, x0: X0 })
     slope.add(fig.group)
@@ -310,9 +317,12 @@ export function mount(canvas, opts = {}) {
         advance: (d) => { t += d; tau += d * rate },
       },
     })
-    // the figure can land before the next frame's PMREM and composer: wait for them
-    const go = () => { if (fixedT !== null) { render(fixedT, 0); window.__ready = true; opts.onReady?.() } else sync() }
-    if (scene.environment) go(); else requestAnimationFrame(() => requestAnimationFrame(go))
+    await next(); if (me.dead) return
+    scene.updateMatrixWorld()
+    try { await r.compileAsync(scene, cam) } catch { /* the first frame compiles instead */ }
+    if (me.dead) return
+    live = true
+    if (fixedT !== null) { render(fixedT, 0); window.__ready = true; opts.onReady?.() } else sync()
   }).catch((err) => { console.error(err); opts.onError?.(err) })
   return S
 }

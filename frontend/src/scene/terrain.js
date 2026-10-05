@@ -2,7 +2,8 @@
   The mountain (DESIGN.md 3.4), ported from v3/prototypes/a3/src/scene/terrain.js.
 
     makeSlope({ length, width })           a noise-displaced slope mesh whose centre strip is a clean
-                                           ramp (so the figure's ground stays y = 0 in the slope frame)
+                                           ramp (so the figure's ground stays y = 0 in the slope frame);
+                                           makeSlopeAsync builds the same mesh in slices across tasks
     contourMaterial(opts)                  MeshStandardMaterial + stone relief (a procedural normal
                                            perturbation at 0.35 and 1.3 m), wet specular breakup, and a
                                            family of equal hairline contours, via onBeforeCompile.
@@ -25,28 +26,52 @@ function vnoise(x, y) {
 }
 export function fbm(x, y, oct = 5) { let s = 0, a = 0.5, f = 1; for (let i = 0; i < oct; i++) { s += a * vnoise(x * f, y * f); a *= 0.5; f *= 2.1 } return s }
 
-export function makeSlope({ length = 320, width = 120, segs = 440, material, pathHalf = 2.4, relief = 7, cliff = -9 } = {}) {
-  const g = new THREE.PlaneGeometry(length, width, segs, Math.round(segs * width / length))
-  g.rotateX(-Math.PI / 2) // x along the climb, z across, y up (slope frame)
-  const pos = g.attributes.position
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i), z = pos.getZ(i)
-    const az = Math.abs(z)
-    // a flat path down the centre; the near side (+z) rises gently into broken rock,
-    // the far side (-z) breaks off into a cliff that falls toward the city below.
-    // Large smooth forms only: the fine octaves are kept small so the surface reads as stone, not noise.
-    const side = THREE.MathUtils.smoothstep(az, pathHalf, pathHalf + 9)
-    const rock = (fbm(x * 0.05 + 3.1, z * 0.05) - 0.45) * relief * side + (fbm(x * 0.3, z * 0.3, 3) - 0.5) * 0.25 * side
-    // a soft swell beside the path so the contours bend even near him (never a straight line)
-    const swell = THREE.MathUtils.smoothstep(az, 0.9, pathHalf + 2) * (fbm(x * 0.11 + 7.7, z * 0.17) - 0.5) * 0.9
-    const near = z > 0 ? Math.pow(Math.max(0, z - pathHalf - 6), 1.25) * 0.12 : 0
-    const far = z < cliff ? -Math.pow(-(z - cliff), 1.6) * 0.45 - fbm(x * 0.08, z * 0.08, 3) * 6 : 0
-    pos.setY(i, rock + swell + near + far)
+// The slope's heights are computed in slices (a generator), so a slow phone never sees one long task
+// (DESIGN.md 9): makeSlope runs it to the end at once, makeSlopeAsync yields between slices. Same mesh.
+function* slopeSteps(g, { pathHalf, relief, cliff, slices }) {
+  const pos = g.attributes.position, n = pos.count, per = Math.ceil(n / slices)
+  for (let s0 = 0; s0 < n; s0 += per) {
+    for (let i = s0, e = Math.min(n, s0 + per); i < e; i++) {
+      const x = pos.getX(i), z = pos.getZ(i)
+      const az = Math.abs(z)
+      // a flat path down the centre; the near side (+z) rises gently into broken rock,
+      // the far side (-z) breaks off into a cliff that falls toward the city below.
+      // Large smooth forms only: the fine octaves are kept small so the surface reads as stone, not noise.
+      const side = THREE.MathUtils.smoothstep(az, pathHalf, pathHalf + 9)
+      const rock = (fbm(x * 0.05 + 3.1, z * 0.05) - 0.45) * relief * side + (fbm(x * 0.3, z * 0.3, 3) - 0.5) * 0.25 * side
+      // a soft swell beside the path so the contours bend even near him (never a straight line)
+      const swell = THREE.MathUtils.smoothstep(az, 0.9, pathHalf + 2) * (fbm(x * 0.11 + 7.7, z * 0.17) - 0.5) * 0.9
+      const near = z > 0 ? Math.pow(Math.max(0, z - pathHalf - 6), 1.25) * 0.12 : 0
+      const far = z < cliff ? -Math.pow(-(z - cliff), 1.6) * 0.45 - fbm(x * 0.08, z * 0.08, 3) * 6 : 0
+      pos.setY(i, rock + swell + near + far)
+    }
+    yield
   }
   g.computeVertexNormals()
+}
+
+function slopeParts({ length = 320, width = 120, segs = 440, material, pathHalf = 2.4, relief = 7, cliff = -9, slices = 8 } = {}) {
+  const g = new THREE.PlaneGeometry(length, width, segs, Math.round(segs * width / length))
+  g.rotateX(-Math.PI / 2) // x along the climb, z across, y up (slope frame)
   const m = new THREE.Mesh(g, material || contourMaterial())
   m.receiveShadow = true
-  return m
+  return { mesh: m, steps: slopeSteps(g, { pathHalf, relief, cliff, slices }) }
+}
+
+export function makeSlope(opts) {
+  const { mesh, steps } = slopeParts(opts)
+  for (const step of steps) void step
+  return mesh
+}
+
+/** next: a function returning a promise that resolves on the next task (boulder.js) */
+export async function makeSlopeAsync(opts, next) {
+  const { mesh, steps } = slopeParts(opts)
+  for (const step of steps) {
+    void step
+    await next()
+  }
+  return mesh
 }
 
 // the point-light loop of three's lights_fragment_begin, rewritten to add diffuse only (no specular)
