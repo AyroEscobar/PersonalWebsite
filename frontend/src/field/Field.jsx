@@ -21,16 +21,18 @@ const B = (c, d, x, y, more = {}) => ({ c, d, x, y, ...more })
 
 const FIELDS = {
   // the first screen (3.2): peach under the first lines, butter overhead, sky right, lilac low
-  // right, rose under the middle of the sentence, and a deeper core under line 2 for the lens
+  // right, rose under the middle of the sentence, and a deeper core under line 2 for the lens.
+  // The layer is the screen plus 30vh below it (about 1170px at 1440 by 900), so y percentages
+  // are of that: line 2 sits near 26 percent, lines 3 and 4 near 38.
   hero: [
-    B('peach', 62, 16, 30, { dur: 26, delay: -6, dx: 5, dy: 4, dm: 92, xm: 0, ym: 30 }),
-    B('butter', 54, 44, -2, { dur: 22, delay: -12, dx: -4, dy: 5, dm: 80, xm: 86, ym: -6 }),
-    B('sky', 62, 82, 42, { dur: 28, delay: -3, dx: -6, dy: 3, dm: 84, xm: 104, ym: 46 }),
-    B('lilac', 54, 66, 100, { dur: 24, delay: -16, dx: -5, dy: -4, dm: 80, xm: 64, ym: 92 }),
-    B('rose', 56, 54, 52, { a: 0.72, dur: 30, delay: -9, dx: 6, dy: -3, dm: 76, xm: 46, ym: 56 }),
-    B('core', 34, 32, 34, { a: 0.38, dur: 25, delay: -13, dx: 4, dy: -2, dm: 56, xm: 22, ym: 24 }),
+    B('peach', 62, 16, 26, { dur: 26, delay: -6, dx: 5, dy: 4, dm: 92, xm: 0, ym: 30 }),
+    B('butter', 54, 44, 0, { dur: 22, delay: -12, dx: -4, dy: 5, dm: 80, xm: 86, ym: -6 }),
+    B('sky', 62, 84, 36, { dur: 28, delay: -3, dx: -6, dy: 3, dm: 84, xm: 104, ym: 44 }),
+    B('lilac', 54, 66, 76, { dur: 24, delay: -16, dx: -5, dy: -4, dm: 80, xm: 64, ym: 90 }),
+    B('rose', 52, 56, 40, { a: 0.72, dur: 30, delay: -9, dx: 6, dy: -3, dm: 76, xm: 46, ym: 46 }),
+    B('core', 34, 32, 26, { a: 0.38, dur: 25, delay: -13, dx: 4, dy: -2, dm: 56, xm: 22, ym: 18 }),
     B('sky', 40, 100, 2, { a: 0.75, dur: 27, delay: -20, dx: -3, dy: 3, dm: 60, xm: 108, ym: 0 }),
-    B('butter', 40, 4, 96, { a: 0.7, dur: 23, delay: -7, dx: 4, dy: -3, dm: 60, xm: -6, ym: 70 }),
+    B('butter', 40, 4, 72, { a: 0.7, dur: 23, delay: -7, dx: 4, dy: -3, dm: 60, xm: -6, ym: 70 }),
   ],
   // the origin body: light under his pull paragraphs, deeper colour behind the origin card
   origin: [
