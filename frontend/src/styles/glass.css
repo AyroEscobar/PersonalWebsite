@@ -9,7 +9,7 @@
     tint              --g-fill, white, weak and never uniform
     inner shading     the inset box-shadows in --g-shadow
     .scrim     z1     a local light pool under copy on clear glass
-    .ring      z2     a nested backdrop-filter masked to the edge: the edge brightens
+    .ring      z2     clear glass only: a nested backdrop-filter feathered from the edge in
     ::after    z3     sheen, streak, light leaving the far corner, 5% grain
     .spec      z3     the pointer specular (opacity only, so it is cheap)
     ::before   z4     the 2px conic rim, dark on the shadow side, faintly iridescent
@@ -70,21 +70,33 @@
   opacity: var(--gx-deco, var(--g-fx, 1));
 }
 
-/* refraction ring: it sees the parent's filtered output (the parent is a backdrop root) */
+/* refraction ring: it sees the parent's filtered output (the parent is a backdrop root).
+   Feathered: full strength at the border, nothing --g-ring in, so no straight edge runs
+   parallel to the border (a content-box cut drew a hard inner rectangle, a "mat").
+   Clear glass only (the lens, the nav); sheets and thick glass take their edge light from
+   the inset shadows, so the field colour runs to the rim. */
 .glass > .ring {
   display: var(--gx-ring, var(--g-ring-display, block));
   position: absolute;
   inset: 0;
   z-index: 2;
   border-radius: inherit;
-  padding: var(--g-ring, 10px);
   pointer-events: none;
-  -webkit-backdrop-filter: brightness(1.16) saturate(1.35) contrast(1.04);
-  backdrop-filter: brightness(1.16) saturate(1.35) contrast(1.04);
-  -webkit-mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
-  mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  -webkit-backdrop-filter: brightness(1.12) saturate(1.3) contrast(1.03);
+  backdrop-filter: brightness(1.12) saturate(1.3) contrast(1.03);
+  --rg: var(--g-ring, 10px);
+  -webkit-mask:
+    linear-gradient(to right, black, transparent var(--rg)),
+    linear-gradient(to left, black, transparent var(--rg)),
+    linear-gradient(to bottom, black, transparent var(--rg)),
+    linear-gradient(to top, black, transparent var(--rg));
+  mask:
+    linear-gradient(to right, black, transparent var(--rg)),
+    linear-gradient(to left, black, transparent var(--rg)),
+    linear-gradient(to bottom, black, transparent var(--rg)),
+    linear-gradient(to top, black, transparent var(--rg));
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
 }
 
 /* pointer specular: hover brightens it, press illuminates from within (opacity only) */
@@ -159,12 +171,11 @@
     radial-gradient(130% 50% at 50% -14%, rgb(var(--lit) / 0.7), transparent 60%),
     linear-gradient(118deg, transparent 28%, rgb(var(--lit) / 0.42) 38%, rgb(var(--lit) / 0.55) 41%, rgb(var(--lit) / 0) 50%),
     radial-gradient(60% 40% at 100% 100%, rgb(var(--lit) / 0.35), transparent 70%);
-  --g-ring: 14px;
+  --g-ring-display: none;
 }
 
 .glass--pill {
   --g-r: var(--r-full);
-  --g-ring: 6px;
   --g-rim-w: 1.5px;
   --g-spec-size: 90px 44px;
   --g-shadow:
@@ -191,7 +202,6 @@
     linear-gradient(118deg, transparent 30%, rgb(var(--lit) / 0.3) 38%, rgb(var(--lit) / 0.4) 40.5%, rgb(var(--lit) / 0) 48%),
     radial-gradient(60% 40% at 100% 100%, rgb(var(--lit) / 0.3), transparent 70%);
   --g-bf: none;
-  --g-ring-display: none;
   --g-r: var(--r-4);
   --g-spec-size: 420px 260px;
 }
@@ -199,7 +209,6 @@
   html:not([data-tier='lite']) .glass--sheet {
     --g-bf: blur(16px) saturate(180%) brightness(1.06);
     --g-bf-tail: saturate(180%) brightness(1.06);
-    --g-ring-display: block;
   }
 }
 
@@ -229,10 +238,14 @@
   }
 }
 
-/* phones: less blur, same look */
+/* phones: less blur, same look; the 48px lens drops its ring (a 10px band is 40 percent of
+   its height and read as a highlighter stroke), so its colour runs to the rim */
 @media (max-width: 639.98px) {
   .glass--thick {
     --g-bf: blur(14px) saturate(190%) brightness(1.07);
+  }
+  .glass--clear {
+    --g-ring-display: none;
   }
 }
 

@@ -1152,7 +1152,6 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
   gap: 2px;
   padding: 4px;
   --g-r: var(--r-3);
-  --g-ring: 6px;
   --g-rim-w: 1.5px;
 }
 .linkrow a {
@@ -1273,7 +1272,6 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
   height: 44px;
   padding: 0 18px 0 14px;
   --g-r: var(--r-3);
-  --g-ring: 8px;
   color: var(--ink);
   font: 500 var(--t-sm) / 1 var(--sans);
 }
