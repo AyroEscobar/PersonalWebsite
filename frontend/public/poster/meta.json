@@ -2,7 +2,7 @@
   "t": 2.3,
   "p": 0,
   "tier": "full",
-  "build": "618e4ae",
+  "build": "50d472e",
   "views": {
     "hero-1440": {
       "width": 1440,
@@ -407,7 +407,7 @@
         },
         "0.8": {
           "scrollY": 3840,
-          "lines": 17,
+          "lines": 16,
           "lowest": 8.44,
           "worst": {
             "text": "experience",
