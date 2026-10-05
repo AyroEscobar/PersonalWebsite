@@ -132,6 +132,11 @@
   height: 52px;
   margin-bottom: 74px;
 }
+/* the bar swatch borrows the nav's pill material, not its content sizing */
+.kit-swatch.lens-nav {
+  width: 100%;
+  max-width: none;
+}
 
 /* the lens nav */
 .kit-nav {
