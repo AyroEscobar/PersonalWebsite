@@ -69,6 +69,12 @@
     flex-basis: 100%;
   }
 }
+/* tablets: the six phone lines, as large as the column allows (the longest is 8.83em wide) */
+@media (min-width: 640px) and (max-width: 819.98px) {
+  .hero-sentence {
+    font-size: calc((100vw - 2 * var(--gutter)) * 0.11);
+  }
+}
 /* phones: 40px at 390, smaller only when the longest hand-set line would not fit (6.2) */
 @media (max-width: 639.98px) {
   .hero-stage {
