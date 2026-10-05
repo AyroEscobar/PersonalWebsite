@@ -4,7 +4,8 @@ import { AGE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
 /*
   Hero and the origin body (DESIGN.md 6.1 to 6.3).
   v2 (Oct 4): the eyebrow takes a comma instead of the middle dot and the
-  deck names Viaere and MD7 in proper case (DESIGN.md 6.1). No claim changed.
+  deck names Viaere and MD7 in proper case (DESIGN.md 6.1). The hero email
+  pill reads "email me". No claim changed.
   Final copy. Builders render it; they do not rewrite it. Changes go through
   requests-<X>.md.
 
@@ -33,8 +34,9 @@ export const HERO = {
   ),
   contactLabel: ui('hero-contact-label', 'reach me'),
   contact: [
-    // The address itself, so it can be read and copied without a mail client (r2 U8).
-    { id: 'hero-contact-email', label: EMAIL, href: `mailto:${EMAIL}`, facts: ['ln-email'] },
+    // v2 (DESIGN.md 6.1): a short pill label, so both pills sit on one line at 390. The
+    // address itself is written out in the contact card, beside its copy button.
+    { id: 'hero-contact-email', label: 'email me', href: `mailto:${EMAIL}`, facts: ['ln-email'] },
     { id: 'hero-contact-linkedin', label: 'LinkedIn', href: LINKEDIN, facts: ['ln-linkedin'] },
     { id: 'hero-contact-github', label: 'GitHub', href: GITHUB, facts: ['ln-github'] },
     { id: 'hero-contact-work', label: 'see the work', href: '#work', ui: true },
