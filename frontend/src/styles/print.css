@@ -20,6 +20,8 @@
     --ink: #15120e;
     --ink-2: #4a443c;
     --cyan: #0a6f7f;
+    --print-rule: #d9d4cc;
+    --print-rule-2: #ebe7e1;
     --gx-fill: none;
     --gx-bf: none;
     --gx-ring: none;
@@ -118,7 +120,7 @@
   #stack {
     margin-top: 11pt;
     padding-top: 9pt !important;
-    border-top: 0.5pt solid #d9d4cc;
+    border-top: 0.5pt solid var(--print-rule);
   }
   #contact {
     border-top: 0 !important;
@@ -202,7 +204,7 @@
     line-height: 1.35;
     padding-top: 4pt;
     box-shadow: none;
-    border-top: 0.5pt solid #ebe7e1;
+    border-top: 0.5pt solid var(--print-rule-2);
   }
   .exp li:first-child {
     border-top: 0;
@@ -272,7 +274,7 @@
   .footer {
     margin-top: 12pt;
     padding: 6pt 0 0;
-    border-top: 0.5pt solid #d9d4cc;
+    border-top: 0.5pt solid var(--print-rule);
     background: none !important;
   }
   .foot-row {
