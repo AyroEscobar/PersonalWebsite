@@ -67,7 +67,8 @@
   --t-lg: 1.125rem; /* 18 lede, card titles */
   --t-xl: 1.375rem; /* 22 masthead name, section lines */
   --t-2xl: 1.75rem; /* 28 receipt numbers */
-  --t-3xl: 2.5rem; /* 40 section words */
+  --t-3xl: 2.5rem; /* 40 section words on phones and tablets */
+  --t-4xl: 4rem; /* 64 section words from 1100px up */
   --t-display: clamp(2.5rem, 7.2vw, 6.5rem); /* 40 to 104 */
 
   /* space */
