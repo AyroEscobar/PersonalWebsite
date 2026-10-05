@@ -1,12 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <defs>
-    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#FFA53D" stop-opacity="0.6"/>
-      <stop offset="1" stop-color="#FFA53D" stop-opacity="0"/>
+    <radialGradient id="peach" cx="0.18" cy="0.2" r="0.85">
+      <stop offset="0" stop-color="#FFC9A0"/>
+      <stop offset="1" stop-color="#FFC9A0" stop-opacity="0"/>
     </radialGradient>
+    <radialGradient id="sky" cx="0.92" cy="0.85" r="0.8">
+      <stop offset="0" stop-color="#ADD8FF"/>
+      <stop offset="1" stop-color="#ADD8FF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.55" stop-color="#FFFFFF" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.75"/>
+    </linearGradient>
   </defs>
-  <rect width="32" height="32" rx="7" fill="#0B1226"/>
-  <path d="M3 24.5 29 9.5M16 17 22.5 30" fill="none" stroke="#5A6C96" stroke-width="2.6" stroke-linecap="round"/>
-  <circle cx="16" cy="17" r="10" fill="url(#glow)"/>
-  <circle cx="16" cy="17" r="5" fill="#FFA53D"/>
+  <rect width="32" height="32" rx="8" fill="#FBF9F4"/>
+  <rect width="32" height="32" rx="8" fill="url(#peach)"/>
+  <rect width="32" height="32" rx="8" fill="url(#sky)"/>
+  <path d="M7 8.5h15M7 23.5h11" fill="none" stroke="#15120E" stroke-opacity="0.38" stroke-width="2.2" stroke-linecap="round"/>
+  <rect x="3" y="12.6" width="26" height="9.4" rx="4.7" fill="#3C2D14" fill-opacity="0.14"/>
+  <rect x="3" y="11" width="26" height="9.4" rx="4.7" fill="url(#glass)" stroke="#FFFFFF" stroke-width="1"/>
+  <path d="M7.2 15.7h17.6" fill="none" stroke="#15120E" stroke-width="2.8" stroke-linecap="round"/>
 </svg>
