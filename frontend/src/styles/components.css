@@ -964,6 +964,110 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
 }
 
 /* ============================================================
+   the origin card (6.3): the headshot, the vitals, his paragraph
+   ============================================================ */
+.profile {
+  display: grid;
+  gap: var(--s-5);
+  padding: var(--s-6);
+  align-content: start;
+}
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+}
+/* round, with a lit glass rim: the photo sits in the material, not on it */
+.profile-photo {
+  position: relative;
+  flex: none;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--plate-2);
+  box-shadow:
+    0 0 0 1px rgb(var(--rim-dark) / 0.18),
+    0 0 0 4px rgb(var(--lit) / 0.55),
+    0 12px 26px -14px rgb(var(--sh) / 0.5);
+}
+.profile-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(70% 40% at 35% 8%, rgb(var(--lit) / 0.45), transparent 70%);
+  box-shadow: inset 0 1px 0 rgb(var(--lit) / 0.7), inset 0 -10px 18px -12px rgb(var(--lit) / 0.6);
+}
+.vitals {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: var(--s-4);
+  row-gap: 6px;
+  margin: 0;
+  min-width: 0;
+}
+.vital {
+  display: contents;
+}
+.vitals dt {
+  font: 400 var(--t-xs) / 1.45 var(--sans);
+  color: var(--ink-2);
+}
+.vitals dd {
+  margin: 0;
+  font: 500 var(--t-xs) / 1.45 var(--sans);
+  color: var(--ink);
+}
+.profile-text {
+  font: 400 var(--t-md) / 1.6 var(--sans);
+  color: var(--ink-2);
+  max-width: 52ch;
+}
+.profile-off {
+  padding-top: var(--s-4);
+  box-shadow: inset 0 1px 0 var(--hair);
+  font: 400 var(--t-sm) / 1.55 var(--sans);
+  color: var(--ink-2);
+}
+@media (max-width: 639.98px) {
+  .profile {
+    padding: var(--s-5);
+  }
+  .profile-head {
+    align-items: flex-start;
+    gap: var(--s-4);
+  }
+  .profile-photo {
+    width: 84px;
+    height: 84px;
+  }
+  /* beside the photo the vitals stack, label over value */
+  .vitals {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+  }
+  .vital + .vital dt {
+    margin-top: 6px;
+  }
+}
+@media (forced-colors: active) {
+  .profile-photo {
+    border: 2px solid CanvasText;
+  }
+  .profile-photo::after {
+    display: none;
+  }
+}
+
+/* ============================================================
    5.14 footer
    ============================================================ */
 .footer {
@@ -1130,6 +1234,24 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
   opacity: 1;
 }
 
+/* the lens state: the page's reader places it on the sentence (left 0, top 0, a transform) */
+.lens-nav.is-lens {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.lens-nav.is-lens.is-fixed {
+  position: fixed;
+}
+/* in morph mode the page's nav stays unseen until the reader has placed it */
+html[data-mode='morph'] .lens-nav.is-reader:not(.is-ready) {
+  visibility: hidden;
+}
+/* while the pill grows from the lens, the words wait in the middle */
+.lens-nav.is-pill {
+  justify-content: center;
+}
+
 /* positions */
 .lens-nav.is-fixed {
   position: fixed;
@@ -1148,10 +1270,11 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
   height: 60px;
   --g-r: var(--r-5);
 }
+/* the same insets as the pinned phone dock (.is-auto), so split and morph end in one place */
 .lens-nav.is-dock.is-fixed {
-  left: 16px;
-  right: 16px;
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
 }
 .lens-nav.is-dock .nav-list {
   justify-content: space-between;
@@ -1225,6 +1348,46 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
   margin-top: -0.53em;
 }
 
+/* the reading sentence (ReadingSentence): as wide as its longest line, so the lens spans it.
+   The stand-in lens is CSS only: there at first paint, on line 2 (--lens-at, 0-based),
+   1.15 lines tall (52px on phones). The page's reader takes over from its exact box. */
+.reading {
+  --lens-at: 1;
+  --lens-pad: 0.24em;
+  --lens-h: calc(0.98em * 1.15);
+  width: fit-content;
+  max-width: 100%;
+}
+.reading > .lens-static--reading {
+  z-index: var(--gx-lens-zi, 1);
+  left: calc(-1 * var(--lens-pad));
+  right: calc(-1 * var(--lens-pad));
+  /* line i's centre is (i + 0.5) pitches down; the italic sits a touch low in its box */
+  top: calc(var(--lens-at) * 0.98em + 0.49em + 0.035em - var(--lens-h) / 2);
+  height: var(--lens-h);
+}
+/* handed to the nav: kept in layout (the reader measures it on resize), never painted */
+.lens-static.is-handed {
+  visibility: hidden;
+}
+/* phones: 46px, not DESIGN's 52: at 52 the rod's lower edge pulled the tops of line 3 under
+   it (a 39px line pitch leaves 6.5px of overlap a side; 46 leaves 3.5) */
+@media (max-width: 639.98px) {
+  .reading {
+    --lens-pad: 12px;
+    --lens-h: 46px;
+  }
+}
+/* reduced motion: the lens rests on the last line and nothing travels (4.4.5) */
+html[data-motion='reduced'] .reading {
+  --lens-at: var(--lens-last-d);
+}
+@media (max-width: 819.98px) {
+  html[data-motion='reduced'] .reading {
+    --lens-at: var(--lens-last-m);
+  }
+}
+
 /* the sentence: his voice, hand-set lines */
 .sentence {
   position: relative;
@@ -1240,7 +1403,7 @@ html[data-transparency='reduced'] .quiet:not([data-kit]) .quiet-knob,
 .sentence br.m {
   display: none;
 }
-@media (min-width: 360px) and (max-width: 819.98px) {
+@media (max-width: 819.98px) {
   .sentence br.m {
     display: inline;
   }
