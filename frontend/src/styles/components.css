@@ -1733,11 +1733,13 @@ html[data-mode='morph'] .lens-nav.is-reader:not(.is-ready) {
   position: fixed;
   z-index: 50;
 }
+/* centred by its margins, not a transform, so the box the morph measures is its layout box */
 .lens-nav.is-pill.is-fixed {
   top: 16px;
-  left: 50%;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
   height: 52px;
-  transform: translateX(-50%);
 }
 .lens-nav.is-pill {
   height: 52px;

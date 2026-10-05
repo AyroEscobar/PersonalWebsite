@@ -94,18 +94,28 @@ export function startReader({ nav, sentence, lens: L }) {
   const toViewport = (b) => ({ ...b, x: b.x - window.scrollX, y: b.y - window.scrollY })
 
   // ---------- the inline box (lens state and the morph only) ----------
-  function place(b) {
+  /*
+    b is where the nav shows; `at` is where its layout box sits, and the
+    difference is a transform. Browsers count a layout shift when a visible
+    box's layout position moves, never for a transform, so the morph keeps the
+    layout box where the morph ends (the pill's or the dock's own CSS place,
+    or the page origin for the lens, which is off screen by the time the lens
+    takes over) and only the transform travels.
+  */
+  function place(b, at = { x: 0, y: 0 }) {
     const s = nav.style
-    s.left = '0px'
-    s.top = '0px'
+    s.left = `${Math.round(at.x)}px`
+    s.top = `${Math.round(at.y)}px`
+    s.right = s.bottom = 'auto'
+    s.margin = '0'
     s.width = `${b.w}px`
     s.height = `${b.h}px`
     s.borderRadius = `${b.r}px`
-    s.transform = `translate3d(${Math.round(b.x)}px, ${Math.round(b.y)}px, 0)`
+    s.transform = `translate3d(${Math.round(b.x) - Math.round(at.x)}px, ${Math.round(b.y) - Math.round(at.y)}px, 0)`
   }
   function unplace() {
     const s = nav.style
-    s.left = s.top = s.width = s.height = s.borderRadius = s.transform = ''
+    s.left = s.top = s.right = s.bottom = s.margin = s.width = s.height = s.borderRadius = s.transform = ''
   }
   function still(fn) {
     nav.style.transition = 'none'
@@ -179,11 +189,11 @@ export function startReader({ nav, sentence, lens: L }) {
       nav.classList.add(cls, 'is-fixed')
       const r = nav.getBoundingClientRect()
       to = { x: r.left, y: r.top, w: r.width, h: r.height, r: G.phone ? 28 : r.height / 2 }
-      place(from)
+      place(from, to)
     })
     nav.dataset.morphing = ''
     nav.dataset.lensPreset = presetFor()
-    place(to)
+    place(to, to)
     window.clearTimeout(openT)
     openT = window.setTimeout(() => {
       if (state !== 'pill') return
@@ -204,15 +214,17 @@ export function startReader({ nav, sentence, lens: L }) {
     window.clearTimeout(openT)
     nav.classList.remove('is-open', 'over-content')
     idx = targetIdx(window.scrollY)
+    let at
     still(() => {
       const r = nav.getBoundingClientRect()
-      place({ x: r.left, y: r.top, w: r.width, h: r.height, r: G.phone ? 28 : r.height / 2 })
+      at = { x: r.left, y: r.top, w: r.width, h: r.height, r: G.phone ? 28 : r.height / 2 }
+      place(at, at)
     })
     nav.dataset.morphing = ''
     nav.dataset.lensPreset = 'lens'
     nav.classList.remove('is-pill', 'is-dock')
     nav.classList.add('is-lens')
-    place(toViewport(lensBox(idx)))
+    place(toViewport(lensBox(idx)), at)
     onEnd(() => {
       still(() => {
         nav.classList.remove('is-fixed')
