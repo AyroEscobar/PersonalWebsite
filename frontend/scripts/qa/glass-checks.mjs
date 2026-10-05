@@ -20,6 +20,13 @@
                 field is gone
     quiet       ?quiet=1: every glass surface is a solid plate (no
                 backdrop-filter) and the lens sits under the words
+    no blur     a browser without backdrop-filter, simulated for real: the
+                page's CSS is patched in flight (every backdrop-filter
+                declaration gone, its @supports fallbacks on) and
+                CSS.supports says no. Line 2 must read once: every word of
+                the sentence shown, no loupe, the lens a plate under them
+    scroll CLS  scrolling down past the morph and back: the session-window
+                layout shift stays at 0.02 or less at 320, 390 and 1440
 */
 
 const fn = (f, ...args) => `(${f.toString()})(${args.map((a) => JSON.stringify(a)).join(',')})`
@@ -126,6 +133,65 @@ function liveGlass() {
     const bf = cs.backdropFilter || cs.webkitBackdropFilter || 'none'
     return bf !== 'none'
   }).map((g) => g.className.split(' ').filter((c) => /^(glass--|lens-nav|btn|quiet|card|plate|contact|linkrow)/.test(c)).join('.'))
+}
+
+/** The page's CSS as a browser without backdrop-filter would apply it. */
+function noBlurCss(text) {
+  return text
+    .replace(/@supports not \(\(backdrop-filter:\s*blur\(1px\)\)\s*or\s*\(-webkit-backdrop-filter:\s*blur\(1px\)\)\)/g, '@supports (display: block)')
+    .replace(/@supports \(backdrop-filter:\s*url\(#x\)\)/g, '@supports (display: nonsense)')
+    .replace(/-webkit-backdrop-filter\s*:/g, '--x-wbf:')
+    .replace(/backdrop-filter\s*:/g, '--x-bf:')
+}
+const NO_BF_SUPPORTS = `(() => { const o = CSS.supports.bind(CSS); CSS.supports = (...a) => (a.some((x) => /backdrop-filter/.test(String(x))) ? false : o(...a)) })()`
+
+/** In the page: the sentence under a lens that cannot blur. */
+function lineReadsOnce() {
+  const words = [...document.querySelectorAll('#sentence .w')]
+  const hidden = words.filter((w) => Number(getComputedStyle(w).opacity) < 0.99).map((w) => w.textContent)
+  const loupes = [...document.querySelectorAll('.loupe')].filter((l) => getComputedStyle(l).display !== 'none' && l.querySelector('.lw') && Number(getComputedStyle(l).opacity) > 0.01).length
+  const nav = document.getElementById('nav')
+  const cs = getComputedStyle(nav)
+  const bf = cs.backdropFilter || cs.webkitBackdropFilter || 'none'
+  return { words: words.length, hidden, loupes, lens: nav.classList.contains('is-lens'), bf, z: cs.zIndex }
+}
+
+/** In the page: scroll down past the morph and back, and the worst session window of layout shifts. */
+async function scrollShift() {
+  const entries = []
+  const po = new PerformanceObserver((l) => {
+    for (const e of l.getEntries()) if (!e.hadRecentInput) entries.push(e)
+  })
+  po.observe({ type: 'layout-shift', buffered: false })
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+  const end = Math.min(document.documentElement.scrollHeight - innerHeight, 2400)
+  for (let y = 0; y <= end; y += 40) {
+    scrollTo(0, y)
+    await sleep(40)
+  }
+  await sleep(900)
+  for (let y = end; y >= 0; y -= 60) {
+    scrollTo(0, y)
+    await sleep(40)
+  }
+  await sleep(900)
+  po.disconnect()
+  let max = 0
+  let cur = 0
+  let start = 0
+  let last = -Infinity
+  for (const e of entries) {
+    if (e.startTime - last > 1000 || e.startTime - start > 5000) {
+      cur = 0
+      start = e.startTime
+    }
+    cur += e.value
+    last = e.startTime
+    max = Math.max(max, cur)
+  }
+  const top = entries.sort((a, b) => b.value - a.value)[0]
+  const who = top?.sources?.[0]?.node
+  return { cls: Math.round(max * 1000) / 1000, worst: top ? `${top.value.toFixed(3)} on ${who?.id || who?.nodeName || '?'}` : 'none' }
 }
 
 export async function glassChecks({ cdp, url, check, sleep }) {
@@ -298,6 +364,37 @@ export async function glassChecks({ cdp, url, check, sleep }) {
       return { attr: document.documentElement.dataset.transparency, glass: glass.length, blurred: blurred.length, navZ: getComputedStyle(nav).zIndex, pressed: document.querySelector('.quiet')?.getAttribute('aria-pressed') }
     })()`)
     check('glass', `quiet mode @${label}`, r.attr === 'reduced' && r.glass > 0 && !r.blurred && r.pressed === 'true' ? 'pass' : 'fail', `data-transparency ${r.attr}, ${r.glass} glass surfaces, ${r.blurred} still blurred, nav z-index ${r.navZ}, switch pressed ${r.pressed}`)
+    await page.close()
+  }
+
+  // ---------- no backdrop-filter at all: line 2 reads once, on the plate ----------
+  for (const [label, opts] of SIZES) {
+    const page = await cdp.newPage(opts)
+    await page.addInitScript(NO_BF_SUPPORTS)
+    await page.send('Fetch.enable', { patterns: [{ resourceType: 'Document', requestStage: 'Response' }, { resourceType: 'Stylesheet', requestStage: 'Response' }] })
+    const off = page.on('Fetch.requestPaused', async (p) => {
+      try {
+        const { body, base64Encoded } = await page.send('Fetch.getResponseBody', { requestId: p.requestId })
+        const text = noBlurCss(base64Encoded ? Buffer.from(body, 'base64').toString('utf8') : body)
+        const headers = (p.responseHeaders || []).filter((h) => !/^(content-encoding|content-length)$/i.test(h.name))
+        await page.send('Fetch.fulfillRequest', { requestId: p.requestId, responseCode: p.responseStatusCode || 200, responseHeaders: headers, body: Buffer.from(text).toString('base64') })
+      } catch {
+        await page.send('Fetch.continueRequest', { requestId: p.requestId }).catch(() => {})
+      }
+    })
+    await page.goto(url + '/', { settle: 2200 })
+    const r = await page.eval(fn(lineReadsOnce))
+    off()
+    const ok = r.words > 0 && r.hidden.length === 0 && r.loupes === 0 && r.bf === 'none'
+    check('glass', `no backdrop-filter: line 2 reads once @${label}`, ok ? 'pass' : 'fail', `${r.words} words, ${r.hidden.length} hidden${r.hidden.length ? ` (${r.hidden.slice(0, 4).join(' ')})` : ''}, ${r.loupes} loupe(s) showing, nav ${r.lens ? 'lens' : 'nav'} backdrop ${r.bf}, z-index ${r.z}`)
+    await page.close()
+  }
+
+  // ---------- scrolling past the morph shifts no layout ----------
+  for (const [label, opts] of [['320', { width: 320, height: 700, dpr: 2, mobile: true }], ...SIZES]) {
+    const page = await fresh(opts)
+    const r = await page.eval(`(${scrollShift.toString()})()`)
+    check('glass', `scroll layout shift @${label}`, r.cls <= 0.02 ? 'pass' : 'fail', `session-window CLS ${r.cls} (at most 0.02) scrolling down past the morph and back; largest ${r.worst}`)
     await page.close()
   }
 }
