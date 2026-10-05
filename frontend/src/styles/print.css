@@ -44,6 +44,9 @@
   .print-only {
     display: block;
   }
+  /* the print masthead replaces the first screen: name, deck, proof, school, every address */
+  .hero-stage,
+  .spec-wrap,
   .field,
   .lens-nav,
   .lens-static,
@@ -55,13 +58,94 @@
   [data-deco] {
     display: none !important;
   }
-  .glass,
+  .print-masthead {
+    margin: 0 0 12pt;
+    padding-inline: var(--gutter);
+  }
+  .pm-name {
+    font: 600 18pt / 1.15 var(--sans);
+    color: var(--ink);
+  }
+  .pm-deck,
+  .pm-proof,
+  .pm-school {
+    margin-top: 3pt;
+    font: 400 9.5pt / 1.45 var(--sans);
+    color: var(--ink);
+  }
+  .pm-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2pt 14pt;
+    margin-top: 6pt;
+    font: 500 9pt / 1.4 var(--sans);
+  }
+  /* paper is narrow and costs pages: the sections stack, and cards sit two to a row */
+  .section {
+    padding-top: 14pt;
+  }
+  .sec-split {
+    display: block;
+  }
+  .sec-head {
+    margin-bottom: 8pt;
+  }
+  .origin-body {
+    padding-top: 0;
+    gap: 10pt;
+  }
+  .origin-voice {
+    font-size: 11pt;
+    gap: 6pt;
+  }
+  .origin-closer {
+    font-size: 13pt;
+  }
   .card,
-  .plate {
+  .plate,
+  .profile,
+  .stack,
+  .contact {
+    padding: 10pt 12pt;
+    gap: 5pt;
+  }
+  .now-sheet,
+  .crew-sheet {
+    padding: 2pt 12pt 8pt;
+  }
+  .cards--wide,
+  .cards--half,
+  .plates {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8pt;
+  }
+  .cards--half {
+    margin-top: 8pt;
+  }
+  .card-voice,
+  .plate-voice {
+    font-size: 12pt;
+  }
+  .profile-photo {
+    width: 64px;
+    height: 64px;
+  }
+  .glass,
+  .now-row,
+  .crew-row,
+  .desk {
     break-inside: avoid;
+  }
+  /* the RBC plate with its desks open is taller than a page third: let it break */
+  .plate:has(.desks) {
+    break-inside: auto;
+    grid-column: 1 / -1;
   }
   .desks > :not(summary) {
     display: block !important;
+  }
+  .footer {
+    margin-top: 12pt;
   }
   a {
     color: inherit;
