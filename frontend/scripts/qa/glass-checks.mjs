@@ -2,11 +2,12 @@
   Glass checks (DESIGN.md 9, 10, 11): the v2 QA that replaced the r2 map
   checks. Run by run.mjs; each reports through check('glass', ...).
 
-    contrast    text measured on what is really behind it: at scroll 0, 900,
-                1800 and 2700, at 1440 and at 390, each text box is sampled
-                with its text hidden (html.notext), and the lowest WCAG ratio
-                between the text colour and any backdrop pixel under it must
-                reach 4.5 (3 for large text). From prototype b's capture.
+    contrast    text measured on what is really behind it: down the whole
+                page in steps of 0.8 of a screen, at 390, 768, 1440 and 1920,
+                each text box is sampled with its text hidden (html.notext),
+                and the lowest WCAG ratio between the text colour and any
+                backdrop pixel under it must reach 4.5 (3 for large text).
+                From prototype b's capture.
     surfaces    3 to 5 glass surfaces with a live backdrop-filter on the
                 first screen (12.2)
     reader      the nav takes the stand-in lens's exact box after the fonts
@@ -51,6 +52,11 @@ function textBoxes() {
   }
   const out = []
   window.__els = []
+  // the pinned nav (pill or dock) and the 16px its shadow darkens around it: text passing
+  // under it while the page scrolls is not what a reader reads there
+  const nav = document.querySelector('#nav.is-fixed')
+  const nr = nav && getComputedStyle(nav).position === 'fixed' ? nav.getBoundingClientRect() : null
+  const underNav = (r) => nr && r.bottom > nr.top - 16 && r.top < nr.bottom + 16 && r.right > nr.left && r.left < nr.right
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
     if (!n.textContent.trim()) continue
@@ -65,6 +71,7 @@ function textBoxes() {
     for (const r of range.getClientRects()) {
       if (r.width < 4 || r.height < 4) continue
       if (r.top < 0 || r.bottom > innerHeight || r.left < 0 || r.right > innerWidth) continue
+      if (underNav(r) && !el.closest('#nav')) continue
       // text under something else (the pinned nav passing over it) is not what a reader sees there
       const hit = document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2)
       if (hit && !el.contains(hit) && !hit.contains(el)) continue
@@ -135,14 +142,24 @@ export async function glassChecks({ cdp, url, check, sleep }) {
     ['390', { width: 390, height: 844, dpr: 2, mobile: true }],
   ]
 
-  // ---------- composite contrast, measured ----------
-  for (const [label, opts] of SIZES) {
+  // ---------- composite contrast, measured down the whole page ----------
+  const CONTRAST_SIZES = [
+    ...SIZES,
+    ['768', { width: 768, height: 1024, dpr: 1 }],
+    ['1920', { width: 1920, height: 1080, dpr: 1 }],
+  ]
+  for (const [label, opts] of CONTRAST_SIZES) {
     const page = await fresh(opts)
     await page.eval(SAMPLER)
     const fails = []
     let lowest = null
     let n = 0
-    for (const y of [0, 900, 1800, 2700]) {
+    const end = await page.eval('Math.max(0, document.documentElement.scrollHeight - innerHeight)')
+    const step = Math.round(opts.height * 0.8)
+    const ys = []
+    for (let y = 0; y < end; y += step) ys.push(y)
+    ys.push(end)
+    for (const y of ys) {
       await page.eval(`window.scrollTo({ top: ${y}, behavior: 'instant' })`)
       await sleep(900)
       const boxes = await page.eval(fn(textBoxes))
@@ -157,7 +174,7 @@ export async function glassChecks({ cdp, url, check, sleep }) {
         if (s.ratio < s.min) fails.push(`"${s.text}" ${s.ratio} at ${y}`)
       }
     }
-    check('glass', `measured contrast @${label}`, fails.length ? 'fail' : 'pass', fails.length ? fails.slice(0, 6).join(' | ') : `${n} text boxes at scroll 0, 900, 1800, 2700; lowest "${lowest?.text}" ${lowest?.ratio} (needs ${lowest?.min}) at ${lowest?.y}`)
+    check('glass', `measured contrast @${label}`, fails.length ? 'fail' : 'pass', fails.length ? fails.slice(0, 6).join(' | ') : `${n} text boxes at ${ys.length} scroll positions, 0 to ${end} in steps of ${step}; lowest "${lowest?.text}" ${lowest?.ratio} (needs ${lowest?.min}) at ${lowest?.y}`)
     await page.close()
   }
 

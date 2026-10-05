@@ -20,7 +20,7 @@ const CRITERIA = [
   [7, 'npm run build green: check-content, budget, prerender', ['build/npm run build', 'budget/budgets']],
   [8, 'no U+2013 or U+2014 in dist or src', ['static/dashes', 'build/npm run build']],
   [9, 'every visible string carries a public fact id or ui flag; nothing from the denylist', ['build/npm run build', 'static/privacy']],
-  [10, 'measured composite contrast at four scroll positions, 1440 and 390, zero failures', ['glass/measured contrast @1440', 'glass/measured contrast @390', 'page/home@390 contrast', 'page/home@1440 contrast']],
+  [10, 'measured composite contrast down the whole page at 390, 768, 1440 and 1920, zero failures', ['glass/measured contrast @1440', 'glass/measured contrast @390', 'glass/measured contrast @768', 'glass/measured contrast @1920', 'page/home@390 contrast', 'page/home@1440 contrast']],
   [11, '3 to 5 live glass surfaces on the first screen', ['glass/first-screen surfaces @1440', 'glass/first-screen surfaces @390']],
   [12, 'the morph under 600 ms and one #nav', ['glass/morph @1440', 'glass/morph @390']],
   [13, 'the keyboard reaches every nav word, button, link and summary, in reading order, with a visible ring', ['glass/keyboard reaches every control', 'keyboard/skip link first', 'keyboard/visible focus', 'keyboard/focus not obscured', 'keyboard/tab order spec', 'keyboard/nav word lands below the pill']],
