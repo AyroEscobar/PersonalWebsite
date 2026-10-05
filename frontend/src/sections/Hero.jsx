@@ -12,7 +12,8 @@ import { HERO } from '../content/identity.js'
 export default function Hero() {
   return (
     <Section id="top" labelledBy="name" className="sec--hero">
-      <Panel variant="hero">
+      {/* the first paint: never hidden behind a reveal that waits for JS (it is the LCP element) */}
+      <Panel variant="hero" reveal={false}>
         <Eyebrow>{HERO.eyebrow.text}</Eyebrow>
         <h1 id="name" className="name">
           {HERO.name.text}
