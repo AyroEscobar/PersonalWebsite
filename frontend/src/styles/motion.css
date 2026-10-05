@@ -55,9 +55,14 @@
 .lens-nav .nav-it,
 .glass > .loupe,
 .is-under,
+.reading .w,
 .card .ruler,
 .card-title-text {
   transition: opacity var(--dur-pop) ease;
+}
+/* tier lite: the stand-in lens reads the sentence by cross-fading from line to line */
+.lens-static--reading {
+  transition: opacity 150ms ease;
 }
 .btn .spin {
   animation: pulse 1.2s ease-in-out infinite;
@@ -129,6 +134,19 @@
       opacity: 0;
       transform: translateY(8px);
     }
+  }
+
+  /* the reading lens steps from line to line on the morph curve (DESIGN.md 2.5) */
+  html:not([data-motion='reduced']) .lens-nav.is-lens {
+    transition: transform var(--dur-morph) var(--ease-morph);
+  }
+  /* the one morph: lens to nav and back, one element (width, height and radius only here) */
+  html:not([data-motion='reduced']) .lens-nav[data-morphing] {
+    transition:
+      transform var(--dur-morph) var(--ease-morph),
+      width var(--dur-morph) var(--ease-morph),
+      height var(--dur-morph) var(--ease-morph),
+      border-radius var(--dur-morph) var(--ease-morph);
   }
 
   /* the bead follows the current word */
