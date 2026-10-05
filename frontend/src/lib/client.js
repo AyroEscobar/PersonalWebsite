@@ -22,6 +22,15 @@ export function initClient() {
   initReveals()
   initActiveSection()
   initScrolledFlag()
+  initLens()
+}
+
+/* the clear lens on the nav pill (Chromium only), its own small chunk, after load and idle */
+function initLens() {
+  const go = () => import('../glass/lens.js').then((m) => m.startLens()).catch(() => {})
+  const idle = (fn) => (window.requestIdleCallback ? window.requestIdleCallback(fn, { timeout: 2500 }) : window.setTimeout(fn, 1200))
+  if (document.readyState === 'complete') idle(go)
+  else window.addEventListener('load', () => idle(go), { once: true })
 }
 
 /* the pointer specular on glass that asked for it (fine pointers only) */

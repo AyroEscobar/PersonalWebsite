@@ -20,7 +20,7 @@
    11  an import of @react-three, framer-motion, firebase or react-router anywhere; an import of
        three or three/addons anywhere but src/scene/
    12  backdrop-filter anywhere in src but src/styles/glass.css; SVG noise or displacement anywhere
-       but glass.css
+       but glass.css and the nav's clear lens (src/glass/lens.js, DESIGN.md 4.3)
    13  a monospace face anywhere but through --mono in the footer build line, the scene controls
        and the kit captions; <code>, <kbd>, <samp>, <pre> never
    14  a keyframe or transition that animates backdrop-filter, box-shadow or filter
@@ -166,7 +166,7 @@ export async function checkContent({ quiet = false } = {}) {
     { re: /\bscan-?lines?\b/i, name: 'scanlines' },
     { re: /\bglitch/i, name: 'glitch' },
     { re: /chromatic[- ]aberration/i, name: 'chromatic aberration' },
-    { re: /feTurbulence|feDisplacementMap/, name: 'SVG noise or displacement outside the glass material', allow: /^src\/styles\/glass\.css$/ },
+    { re: /feTurbulence|feDisplacementMap/, name: 'SVG noise or displacement outside the glass material', allow: /^src\/(styles\/glass\.css|glass\/lens\.js)$/ },
     { re: /corner-shape\s*:/, name: 'chamfered corners' },
     { re: /cursor\s*:\s*url\(/, name: 'cursor replacement' },
     { re: /mix-blend-mode\s*:/, name: 'mix-blend-mode (never on a full-viewport layer)' },

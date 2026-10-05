@@ -7,6 +7,7 @@
     the scene chunk (src/scene + three) 220 KB gz
     lazy: the kit route                  20 KB gz (src/kit/*, never loaded by /)
     lazy: the 404                        20 KB gz
+    lazy: the clear lens                  8 KB gz (src/glass/lens.js, DESIGN.md 4.3)
     any other lazy chunk                 20 KB gz each
     CSS                                  24 KB gz
     HTML for /                           90 KB gz
@@ -36,6 +37,7 @@ export const BUDGETS = {
   scene: 220 * KB,
   kit: 20 * KB,
   notFound: 20 * KB,
+  lens: 8 * KB,
   otherLazy: 20 * KB,
   css: 24 * KB,
   html: 90 * KB,
@@ -100,6 +102,7 @@ export function measure() {
     if (/src\/scene\//.test(src)) { lazy.scene += size; sceneFiles.push(c.file, ...imports.map((i) => manifest[i].file)) }
     else if (/src\/kit\//.test(src)) lazy.kit += size
     else if (/NotFound\.jsx$/.test(src)) lazy.notFound += size
+    else if (/src\/glass\/lens\.js$/.test(src)) add('lazy', 'the clear lens (src/glass/lens.js)', size, BUDGETS.lens)
     else add('lazy', src, size, BUDGETS.otherLazy)
   }
   add('lazy', 'scene chunk (src/scene + three)', lazy.scene, BUDGETS.scene, { files: sceneFiles })

@@ -166,6 +166,14 @@
   }
 }
 
+/* the clear lens (src/glass/lens.js, DESIGN.md 4.3): in Chromium the nav pill's backdrop really
+   bends through a displacement map sized to it; everywhere else it stays the 6px clear glass */
+@supports (backdrop-filter: url(#x)) {
+  html[data-lens='on']:not([data-tier='lite']) .glass--clear.has-lens {
+    --g-bf: var(--g-url) saturate(200%) brightness(1.08);
+  }
+}
+
 /* ---------- pill ---------- */
 /* a pill has no padding ring for a scrim pool, so its fill carries the void base itself (0.66) */
 .glass--pill {
