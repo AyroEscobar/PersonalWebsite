@@ -2,7 +2,7 @@
   "t": 2.3,
   "p": 0,
   "tier": "full",
-  "build": "ce54137",
+  "build": "6465f1a",
   "views": {
     "hero-1440": {
       "width": 1440,
@@ -10,14 +10,14 @@
       "dpr": 1,
       "brightest": {
         "panel": [
-          70,
-          93,
-          120
+          8,
+          127,
+          167
         ],
         "pill": [
-          61,
-          86,
-          116
+          62,
+          87,
+          117
         ],
         "theme": [
           33,
@@ -58,9 +58,9 @@
           142
         ],
         "pill": [
-          55,
+          56,
           67,
-          97
+          98
         ],
         "card": [
           91,
@@ -93,9 +93,9 @@
       142
     ],
     "pill": [
-      61,
-      86,
-      116
+      62,
+      87,
+      117
     ],
     "theme": [
       33,
@@ -123,26 +123,26 @@
       "390": {
         "0": {
           "scrollY": 0,
-          "lines": 13,
-          "lowest": 11.15,
+          "lines": 12,
+          "lowest": 10.91,
           "worst": {
-            "text": "Computer science student at UT Dallas",
-            "sel": "p.eyebrow",
-            "size": 11,
-            "weight": 600,
+            "text": "I'm 20 and I study computer science at UT Dallas",
+            "sel": "p.intro",
+            "size": 16,
+            "weight": 440,
             "large": false,
             "min": 4.5,
-            "ratio": 11.15,
+            "ratio": 10.91,
             "bg": [
-              17,
-              25,
-              43
+              20,
+              27,
+              45
             ],
             "textLum": 0.618
           }
         },
         "1": {
-          "scrollY": 4895,
+          "scrollY": 5078,
           "lines": 29,
           "lowest": 7.77,
           "worst": {
@@ -162,7 +162,7 @@
           }
         },
         "0.3": {
-          "scrollY": 1342,
+          "scrollY": 1525,
           "lines": 19,
           "lowest": 9.09,
           "worst": {
@@ -182,7 +182,7 @@
           }
         },
         "0.56": {
-          "scrollY": 2637,
+          "scrollY": 2820,
           "lines": 21,
           "lowest": 9.15,
           "worst": {
@@ -202,7 +202,7 @@
           }
         },
         "0.8": {
-          "scrollY": 3840,
+          "scrollY": 4023,
           "lines": 18,
           "lowest": 9.08,
           "worst": {
@@ -225,20 +225,20 @@
       "768": {
         "0": {
           "scrollY": 0,
-          "lines": 16,
-          "lowest": 9.59,
+          "lines": 21,
+          "lowest": 9.61,
           "worst": {
-            "text": "LinkedIn",
-            "sel": "a",
+            "text": "·",
+            "sel": "span.hero-dot",
             "size": 14,
             "weight": 520,
             "large": false,
             "min": 4.5,
-            "ratio": 9.59,
+            "ratio": 9.61,
             "bg": [
-              28,
+              27,
               38,
-              59
+              58
             ],
             "textLum": 0.618
           }
@@ -327,7 +327,7 @@
       "1440": {
         "0": {
           "scrollY": 0,
-          "lines": 22,
+          "lines": 28,
           "lowest": 5.15,
           "worst": {
             "text": "work",
@@ -429,7 +429,7 @@
       "1920": {
         "0": {
           "scrollY": 0,
-          "lines": 22,
+          "lines": 28,
           "lowest": 5.9,
           "worst": {
             "text": "work",
