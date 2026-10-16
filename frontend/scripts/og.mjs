@@ -17,8 +17,9 @@ if (!existsSync(SRC)) {
   process.exit(1)
 }
 const sharp = (await import('../tools/sharp.mjs')).default
-// 1440x900 -> a 1200x630 window: full width scaled to 1200 gives 750 tall; take the middle 630 nudged up
-const buf = await sharp(SRC).resize({ width: 1200, height: 750 }).extract({ left: 0, top: 70, width: 1200, height: 630 }).png({ compressionLevel: 9, effort: 10 }).toBuffer()
+// 1440x900 -> a 1200x630 window: full width scaled to 1200 gives 750 tall; v4's frame has the rock's top at
+// 106 and his feet near 850 (of 900), so the window starts at 86 of 750 and holds both whole
+const buf = await sharp(SRC).resize({ width: 1200, height: 750 }).extract({ left: 0, top: 86, width: 1200, height: 630 }).png({ compressionLevel: 9, effort: 10 }).toBuffer()
 writeFileSync(OUT, buf)
 let kb = statSync(OUT).size / 1024
 if (kb > 300) {
