@@ -4,7 +4,7 @@ import { ArrowDown, ArrowOut } from './icons.jsx'
 /*
   <Button> (DESIGN.md 5.1, 5.2): 44px pills, Mona 15/600 wdth 104.
 
-    variant   'primary' (cyan fill, void ink: the email button and nothing else) | 'glass' (thick glass pill)
+    variant   'primary' (accent fill, void ink: the coffee chat and the 404's way home) | 'glass' (glass pill)
     size      'md' (44) | 'sm' (40, 14px text: the card links, "copy", the scene controls)
     icon      'down' | 'out' | none, a trailing 14px (12px small) icon
     href      renders a link; otherwise a <button type="button">
@@ -31,7 +31,7 @@ export default function Button({ variant = 'primary', size = 'md', icon, href, d
   )
   if (variant === 'glass') {
     return (
-      <Glass as={As} tier="thick" pill spec {...props}>
+      <Glass as={As} pill {...props}>
         {inner}
       </Glass>
     )

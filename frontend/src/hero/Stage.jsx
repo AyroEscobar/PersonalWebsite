@@ -10,7 +10,7 @@ import { setRims, watchRims, posterRock } from '../lib/rims.js'
   The stage (DESIGN.md 3.11, 3.13, 5.9): the poster <picture> and the canvas, prerendered as
   plain markup so the first paint is the hero frame. On the client, after hydration, load and
   idle, it imports the scene chunk (src/scene/boulder.js) and mounts it on the canvas, unless the
-  tier is still. The scene writes CSS custom properties (--rim per glass element, --scrim and --p
+  tier is still. The scene writes CSS custom properties (the scrim pool per glass element, --scrim and --p
   on <html>) and never touches React state while running.
 
   States: poster only (before the chunk, the still tier, data-gl=lost) · canvas on (.on, 150 ms)

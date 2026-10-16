@@ -25,15 +25,6 @@ html:not([data-js]) .reveal {
   transition: opacity var(--dur-canvas) linear;
 }
 
-/* the rim brightens and the spec rises on hover (opacity and custom properties only) */
-.glass::before,
-.glass > .spec {
-  transition: opacity var(--dur-hover) var(--ease-out);
-}
-.glass::after {
-  transition: background-position var(--dur-hover) var(--ease-out);
-}
-
 /* press and hover */
 .btn {
   transition: transform var(--dur-press) var(--ease-press), background-color var(--dur-hover) var(--ease-out), color var(--dur-hover) var(--ease-out);

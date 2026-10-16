@@ -5,9 +5,9 @@ import { SECTION_IDS } from '../content/sections.js'
 /*
   Client start-up, called once from main.jsx after hydration is scheduled.
   Copies <html data-*> (set by the inline boot script) into the store,
-  follows the OS motion setting into the still tier, starts the pointer
-  specular on glass, the section reveals, the active-section watcher and the
-  wordmark's step-aside. No three here: the scene is src/scene/, mounted by
+  follows the OS motion setting into the still tier, starts the section
+  reveals, the active-section watcher and the scrolled flag (the header's
+  solid bar). No three here: the scene is src/scene/, mounted by
   src/hero/Stage.jsx after load and idle.
 */
 export function initClient() {
@@ -18,44 +18,9 @@ export function initClient() {
     if (e.matches) markStill()
   })
 
-  initPointerSpec()
   initReveals()
   initActiveSection()
   initScrolledFlag()
-  initLens()
-}
-
-/* the clear lens on the nav pill (Chromium only), its own small chunk, after load and idle */
-function initLens() {
-  const go = () => import('../glass/lens.js').then((m) => m.startLens()).catch(() => {})
-  const idle = (fn) => (window.requestIdleCallback ? window.requestIdleCallback(fn, { timeout: 2500 }) : window.setTimeout(fn, 1200))
-  if (document.readyState === 'complete') idle(go)
-  else window.addEventListener('load', () => idle(go), { once: true })
-}
-
-/* the pointer specular on glass that asked for it (fine pointers only) */
-function initPointerSpec() {
-  if (!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) return
-  let raf = 0
-  let last = null
-  const apply = () => {
-    raf = 0
-    if (!last) return
-    const { el, x, y } = last
-    const r = el.getBoundingClientRect()
-    el.style.setProperty('--mx', `${((x - r.left) / r.width) * 100}%`)
-    el.style.setProperty('--my', `${((y - r.top) / r.height) * 100}%`)
-  }
-  document.addEventListener(
-    'pointermove',
-    (e) => {
-      const el = e.target.closest?.('.glass[data-spec]')
-      if (!el) return
-      last = { el, x: e.clientX, y: e.clientY }
-      if (!raf) raf = requestAnimationFrame(apply)
-    },
-    { passive: true },
-  )
 }
 
 /* entrances: a 240 ms fade and a 16 px rise when a panel's section crosses the viewport */

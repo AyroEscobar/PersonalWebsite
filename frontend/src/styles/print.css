@@ -24,7 +24,6 @@
     --print-rule-2: #ebe7e1;
     --gx-fill: none;
     --gx-bf: none;
-    --gx-ring: none;
     --gx-deco: 0;
     --gx-scrim: transparent;
     --gx-scrim-rock: 0;
@@ -63,10 +62,7 @@
     border-radius: 0;
   }
   .glass::before,
-  .glass::after,
-  .glass > .scrim,
-  .glass > .spec,
-  .glass > .ring {
+  .glass > .scrim {
     display: none !important;
   }
   .reveal,
@@ -250,8 +246,7 @@
     background: none !important;
     box-shadow: none !important;
   }
-  .card .btn .ic,
-  .card .btn > .spec {
+  .card .btn .ic {
     display: none !important;
   }
 

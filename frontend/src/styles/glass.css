@@ -1,40 +1,30 @@
 /*
-  glass.css: the liquid-glass material over the live scene (DESIGN.md section 4).
-  The ONLY file in src that writes backdrop-filter; check-content fails the
-  build if it appears anywhere else. Components never style the material:
-  they render <Glass tier=...> (src/glass/Glass.jsx) and set layout.
+  glass.css: the frosted plate over the live scene (v4: calm). The ONLY file in src that writes
+  backdrop-filter; check-content fails the build if it appears anywhere else. Components never
+  style the material: they render <Glass> (src/glass/Glass.jsx) and set layout.
 
   Layers, back to front:
-    backdrop filter   blur + saturate + brightness (thick) or a 6px blur (clear)
-    fill              --g-fill, white at 5 to 9 percent, never uniform
-    .scrim     z1     the void pool under copy, edge to edge as in a3 (an inset pool left a bright
-                      saturated ring that read as a card inside a card); the hero's is a gradient,
-                      0.40 at the top so the scene shows through its upper third
-    inner shading     --e-inner in --g-shadow (the top line, the exit line, the rock's light leaking in)
-    .ring      z2     clear glass only: a nested backdrop-filter feathered from the edge in
-    ::after    z3     sheen, the diagonal streak, 5% grain, the pointer specular
-    .spec      z3     (the pointer specular when it is asked for as its own layer)
-    ::before   z4     the 2px conic rim: bright cyan-white on the side facing the rock (--rim, set per frame)
+    backdrop filter   a soft blur, a touch of saturation and brightness
+    fill              --g-fill, white at 5 percent, flat
+    .scrim     z1     the void pool under copy: flat at --scrim (cards 0.78), plus a radial darkening
+                      exactly where the rock shines through (src/lib/rims.js writes --rx --ry --rr), so
+                      text keeps its contrast when a panel passes over the rock on phones
+    inner shading     --e-inner in --g-shadow (one faint top line)
+    ::before   z4     the rim: a flat 1px hairline
     content    z5
 
   Variants
-    .glass--thick   every content surface, every pill and glass button
-    .glass--clear   the nav pill only (Safari and Firefox get thick with a 12px blur)
-    .glass--pill    modifier: radius 999, rim 1.5px
+    .glass--thick   every surface: panels, cards, glass buttons
+    .glass--pill    modifier: radius 999; a pill has no padding ring for a scrim, so its fill
+                    carries the void base itself (0.72)
 
-  Fallbacks are scope switches: a media query, an attribute on <html>, or a
-  .sim-* class on any ancestor sets --gx-* custom properties, and every glass
-  element reads them first. So the kit can show each fallback in place.
+  Fallbacks are scope switches: a media query, an attribute on <html>, or a .sim-* class on any
+  ancestor sets --gx-* custom properties, and every glass element reads them first. So the kit can
+  show each fallback in place.
 */
 
 /* ---------- the primitive ---------- */
 .glass {
-  --rim: 90deg;
-  --rim-o: 0.9;
-  --mx: 30%;
-  --my: 20%;
-  --g-spec: 0;
-  --g-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   position: relative;
   isolation: isolate;
   border-radius: var(--g-r, var(--r-panel));
@@ -44,78 +34,24 @@
   backdrop-filter: var(--gx-bf, var(--g-bf));
 }
 
-/* the rim: bright cyan-white on the side facing the rock, dark on the far side */
+/* the rim: a flat hairline all the way round */
 .glass::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 4;
   border-radius: inherit;
-  padding: var(--g-rim-w, 2px);
+  padding: var(--g-rim-w, 1px);
   pointer-events: none;
   background: var(--gx-rim, var(--g-rim));
-  opacity: calc(var(--rim-o) * var(--gx-deco, 1));
+  opacity: var(--gx-deco, 1);
   -webkit-mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
   mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
 .glass {
-  --g-rim: conic-gradient(from calc(var(--rim) - 180deg),
-    rgb(var(--lit) / 0.05) 0deg, rgb(var(--lit) / 0.08) 70deg,
-    rgb(var(--cyan-rgb) / 0.35) 125deg, rgb(225 252 255 / 0.95) 165deg, rgb(var(--lit) / 1) 180deg, rgb(225 252 255 / 0.95) 195deg,
-    rgb(var(--cyan-rgb) / 0.35) 235deg, rgb(var(--lit) / 0.08) 290deg, rgb(var(--lit) / 0.05) 360deg);
-}
-
-/* sheen, the diagonal streak, 5% grain, and the pointer specular */
-.glass::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    radial-gradient(var(--g-spec-size, 260px 160px) at var(--mx) var(--my), rgb(var(--lit) / calc(0.1 * var(--g-spec))), transparent 70%),
-    var(--g-sheen),
-    var(--g-grain);
-  opacity: var(--gx-deco, 1);
-}
-
-/* refraction ring: clear glass only, feathered from the edge in */
-.glass > .ring {
-  display: var(--gx-ring, var(--g-ring-display, block));
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: inherit;
-  pointer-events: none;
-  -webkit-backdrop-filter: brightness(1.12) saturate(1.3);
-  backdrop-filter: brightness(1.12) saturate(1.3);
-  --rg: var(--g-ring, 10px);
-  -webkit-mask:
-    linear-gradient(to right, black, transparent var(--rg)),
-    linear-gradient(to left, black, transparent var(--rg)),
-    linear-gradient(to bottom, black, transparent var(--rg)),
-    linear-gradient(to top, black, transparent var(--rg));
-  mask:
-    linear-gradient(to right, black, transparent var(--rg)),
-    linear-gradient(to left, black, transparent var(--rg)),
-    linear-gradient(to bottom, black, transparent var(--rg)),
-    linear-gradient(to top, black, transparent var(--rg));
-  -webkit-mask-composite: source-over;
-  mask-composite: add;
-}
-
-/* the pointer specular as its own layer (opacity only, so it is cheap) */
-.glass > .spec {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(var(--g-spec-size, 260px 160px) at var(--mx) var(--my), rgb(var(--lit) / 0.14), rgb(var(--lit) / 0.05) 45%, transparent 72%);
-  opacity: calc(var(--g-spec) * var(--gx-deco, 1));
+  --g-rim: rgb(var(--lit) / 0.14);
 }
 
 /* the void pool under copy, so text on glass keeps its contrast over the live scene */
@@ -125,88 +61,49 @@
   z-index: 1;
   border-radius: calc(var(--g-r, var(--r-panel)) - var(--g-scrim-inset, 0px));
   pointer-events: none;
-  /* the scrim follows the light: a radial darkening exactly where the rock shines through (src/lib/rims.js
-     writes --rx --ry --rr per element), over the surface's own scrim */
   background:
     radial-gradient(circle var(--rr, 1px) at var(--rx, -999px) var(--ry, -999px), rgb(var(--void-rgb) / var(--gx-scrim-rock, var(--g-scrim-rock, 0.55))), rgb(var(--void-rgb) / calc(var(--gx-scrim-rock, var(--g-scrim-rock, 0.55)) * 0.55)) 55%, transparent 100%),
     var(--gx-scrim, var(--g-scrim, rgb(var(--void-rgb) / var(--scrim))));
 }
 
-.glass > :where(:not(.ring, .spec, .scrim)) {
+.glass > :where(:not(.scrim)) {
   position: relative;
   z-index: 5;
 }
 
-/* ---------- thick: every content surface, every pill and glass button ---------- */
+/* ---------- thick: every surface ---------- */
 .glass--thick {
-  --g-fill: linear-gradient(155deg, rgb(var(--lit) / 0.09) 0%, rgb(var(--lit) / 0.05) 38%, rgb(var(--lit) / 0.06) 100%);
-  --g-bf: blur(20px) saturate(190%) brightness(1.07);
+  --g-fill: rgb(var(--lit) / 0.05);
+  --g-bf: blur(24px) saturate(120%) brightness(1.04);
   --g-shadow: var(--e-inner), var(--e-raised);
-  --g-sheen:
-    radial-gradient(120% 46% at 50% -12%, rgb(var(--lit) / 0.1), transparent 62%),
-    linear-gradient(118deg, transparent 30%, rgb(var(--lit) / 0.045) 40%, rgb(var(--lit) / 0.07) 42%, transparent 52%);
-  --g-ring-display: none;
-}
-
-/* ---------- clear: the nav pill only ---------- */
-.glass--clear {
-  --g-fill: linear-gradient(155deg, rgb(var(--lit) / 0.1) 0%, rgb(var(--lit) / 0.04) 50%, rgb(var(--lit) / 0.07) 100%);
-  --g-bf: blur(6px) saturate(200%) brightness(1.08);
-  --g-shadow: var(--e-inner), var(--e-rest);
-  --g-sheen:
-    radial-gradient(120% 60% at 50% -20%, rgb(var(--lit) / 0.12), transparent 62%),
-    linear-gradient(112deg, transparent 22%, rgb(var(--lit) / 0.05) 34%, rgb(var(--lit) / 0.08) 38%, transparent 48%);
-  --g-ring: 10px;
-}
-/* Safari and Firefox: clear is thick with a 12px blur (no lens there) */
-@supports not (backdrop-filter: url(#x)) {
-  .glass--clear {
-    --g-bf: blur(12px) saturate(190%) brightness(1.07);
-    --g-ring-display: none;
-  }
-}
-
-/* the clear lens (src/glass/lens.js, DESIGN.md 4.3): in Chromium the nav pill's backdrop really
-   bends through a displacement map sized to it; everywhere else it stays the 6px clear glass */
-@supports (backdrop-filter: url(#x)) {
-  html[data-lens='on']:not([data-tier='lite']) .glass--clear.has-lens {
-    --g-bf: var(--g-url) saturate(200%) brightness(1.08);
-  }
 }
 
 /* ---------- pill ---------- */
-/* a pill has no padding ring for a scrim pool, so its fill carries the void base itself (0.66) */
 .glass--pill {
   --g-r: var(--r-pill);
-  --g-fill: linear-gradient(155deg, rgb(var(--lit) / 0.09) 0%, rgb(var(--lit) / 0.05) 38%, rgb(var(--lit) / 0.06) 100%), rgb(var(--void-rgb) / 0.66);
-  --g-rim-w: 1.5px;
-  --g-spec-size: 110px 50px;
-  --g-shadow: inset 0 1px 0 rgb(var(--lit) / 0.5), inset 0 -1px 0 rgb(var(--lit) / 0.06), var(--e-rest);
+  --g-fill: linear-gradient(rgb(var(--lit) / 0.05), rgb(var(--lit) / 0.05)), rgb(var(--void-rgb) / 0.72);
+  --g-shadow: var(--e-inner), var(--e-rest);
 }
 
-/* ---------- pointer specular and press ---------- */
+/* ---------- hover: the hairline brightens on a glass control ---------- */
 @media (hover: hover) and (pointer: fine) {
-  .glass[data-spec]:hover {
-    --g-spec: 1;
-    --rim-o: 1;
+  a.glass:hover,
+  button.glass:hover:not(:disabled) {
+    --g-rim: rgb(var(--lit) / 0.3);
   }
 }
 .glass.is-hover {
-  --g-spec: 1;
-  --rim-o: 1;
-  --mx: 62%;
-  --my: 30%;
+  --g-rim: rgb(var(--lit) / 0.3);
 }
 
 /* ============================================================
-   fallbacks (4.4), each also reachable by a .sim-* class for the kit
+   fallbacks, each also reachable by a .sim-* class for the kit
    ============================================================ */
 
 /* 1. no backdrop-filter at all: a solid plate, rim and shadow kept, scrim transparent */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root {
     --gx-fill: linear-gradient(165deg, var(--plate), var(--plate-2));
-    --gx-ring: none;
     --gx-scrim: transparent;
     --gx-scrim-rock: 0;
   }
@@ -214,18 +111,16 @@
 .sim-noblur {
   --gx-fill: linear-gradient(165deg, var(--plate), var(--plate-2));
   --gx-bf: none;
-  --gx-ring: none;
   --gx-scrim: transparent;
   --gx-scrim-rock: 0;
 }
 
 /* 2. reduced transparency: the query, or the quiet switch (Safari ignores the query).
-      The plate, no backdrop, no ring, no spec; the rim stays as a 1px lit .16 border look. */
+      The plate, no backdrop; the rim stays as a 1px lit .16 border look. */
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --gx-fill: linear-gradient(165deg, var(--plate), var(--plate-2));
     --gx-bf: none;
-    --gx-ring: none;
     --gx-scrim: transparent;
     --gx-scrim-rock: 0;
     --gx-rim: rgb(var(--lit) / 0.16);
@@ -235,16 +130,9 @@ html[data-transparency='reduced'],
 .sim-reduced {
   --gx-fill: linear-gradient(165deg, var(--plate), var(--plate-2));
   --gx-bf: none;
-  --gx-ring: none;
   --gx-scrim: transparent;
   --gx-scrim-rock: 0;
   --gx-rim: rgb(var(--lit) / 0.16);
-}
-html[data-transparency='reduced'] .glass > .spec,
-.sim-reduced .glass > .spec,
-html[data-transparency='reduced'] .glass::after,
-.sim-reduced .glass::after {
-  opacity: 0;
 }
 
 /* 3. more contrast: the plate, a 2px ink edge, no decoration */
@@ -252,7 +140,6 @@ html[data-transparency='reduced'] .glass::after,
   :root {
     --gx-fill: var(--plate);
     --gx-bf: none;
-    --gx-ring: none;
     --gx-deco: 0;
     --gx-scrim: transparent;
     --gx-scrim-rock: 0;
@@ -262,7 +149,6 @@ html[data-transparency='reduced'] .glass::after,
 .sim-contrast {
   --gx-fill: var(--plate);
   --gx-bf: none;
-  --gx-ring: none;
   --gx-deco: 0;
   --gx-scrim: transparent;
   --gx-scrim-rock: 0;
@@ -282,9 +168,6 @@ html[data-transparency='reduced'] .glass::after,
     border: 2px solid ButtonText;
   }
   .glass::before,
-  .glass::after,
-  .glass > .ring,
-  .glass > .spec,
   .glass > .scrim {
     display: none !important;
   }
@@ -297,25 +180,19 @@ html[data-transparency='reduced'] .glass::after,
   backdrop-filter: none !important;
 }
 .sim-forced .glass::before,
-.sim-forced .glass::after,
-.sim-forced .glass > .ring,
-.sim-forced .glass > .spec,
 .sim-forced .glass > .scrim {
   display: none;
 }
 
-/* 5. tier lite: less blur, no saturate; clear is thick */
+/* 5. tier lite: less blur, no saturate */
 html[data-tier='lite'] .glass--thick,
-html[data-tier='lite'] .glass--clear,
-.sim-lite .glass--thick,
-.sim-lite .glass--clear {
-  --g-bf: blur(12px) brightness(1.06);
-  --g-ring-display: none;
+.sim-lite .glass--thick {
+  --g-bf: blur(12px) brightness(1.04);
 }
 
 /* phones: a touch less blur, same look */
 @media (max-width: 639.98px) {
   .glass--thick {
-    --g-bf: blur(16px) saturate(190%) brightness(1.07);
+    --g-bf: blur(18px) saturate(120%) brightness(1.04);
   }
 }

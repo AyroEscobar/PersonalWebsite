@@ -1,10 +1,8 @@
 /*
-  The glass faces the rock (DESIGN.md 4.2: the rim faces the rock and the scrim follows the light).
-  The scene projects the rock once a frame ({ x, y, r } in CSS px); this module writes, on every
-  .glass currently in view:
+  The scrim follows the light. The scene projects the rock once a frame ({ x, y, r } in CSS px);
+  this module writes, on every .glass currently in view (v4's rim is a flat hairline, so there is
+  no angle to write any more):
 
-    --rim           the angle from the element's centre to the rock (the conic rim's bright side),
-                    only when it moved more than 0.8 degrees
     --rx --ry --rr  the rock's centre relative to the element and its glow radius, which the scrim
                     turns into a radial darkening exactly where the rock shines through the glass,
                     so text keeps its contrast when a panel passes over the rock (phones mid-climb)
@@ -32,21 +30,13 @@ export function posterRock() {
 const GLOW = 1.3 // the scrim pool reaches past the rock's edge, over its glow
 
 let trailing = 0
-const stillTier = () => document.documentElement.dataset.tier === 'still'
 
-function applyOne(el, b, force, rim) {
+function applyOne(el, b, force) {
   const rr = Math.max(1, (b.r || 0) * GLOW)
   const r = el.getBoundingClientRect()
-  const cx = r.left + r.width / 2
-  const cy = r.top + r.height / 2
-  const ang = (Math.atan2(b.x - cx, -(b.y - cy)) * 180) / Math.PI
-  const prev = seen.get(el) ?? { ang: 999, rx: 1e9, ry: 1e9, rr: 0 }
+  const prev = seen.get(el) ?? { rx: 1e9, ry: 1e9, rr: 0 }
   const rx = b.x - r.left, ry = b.y - r.top
-  const next = { ang: prev.ang, rx: prev.rx, ry: prev.ry, rr: prev.rr }
-  if (rim && (force || Math.abs(ang - prev.ang) > 0.8)) {
-    el.style.setProperty('--rim', `${ang.toFixed(1)}deg`)
-    next.ang = ang
-  }
+  const next = { rx: prev.rx, ry: prev.ry, rr: prev.rr }
   if (force || Math.abs(rx - prev.rx) > 1 || Math.abs(ry - prev.ry) > 1 || Math.abs(rr - prev.rr) > 1) {
     el.style.setProperty('--rx', `${rx.toFixed(0)}px`)
     el.style.setProperty('--ry', `${ry.toFixed(0)}px`)
@@ -56,18 +46,18 @@ function applyOne(el, b, force, rim) {
   seen.set(el, next)
 }
 
-export function setRims(b, { force = false, fromScene = false, rim = true } = {}) {
+export function setRims(b, { force = false, fromScene = false } = {}) {
   const now = performance.now()
   if (fromScene) lastFrameAt = now
   lastB = b
   // a skipped call leaves a trailing one, so the last rock always lands (a fixed clock renders once per scroll)
   clearTimeout(trailing)
   if (!force && now - lastAt < 33) {
-    trailing = setTimeout(() => setRims(lastB, { force: true, rim: rim && !stillTier() }), 40)
+    trailing = setTimeout(() => setRims(lastB, { force: true }), 40)
     return
   }
   lastAt = now
-  for (const el of inView) applyOne(el, b, force, rim)
+  for (const el of inView) applyOne(el, b, force)
 }
 
 export function watchRims() {
@@ -76,7 +66,7 @@ export function watchRims() {
   io = new IntersectionObserver((es) => es.forEach((e) => {
     if (e.isIntersecting) {
       inView.add(e.target)
-      if (lastB) applyOne(e.target, lastB, true, !stillTier() || !seen.has(e.target))
+      if (lastB) applyOne(e.target, lastB, true)
     } else inView.delete(e.target)
   }), { rootMargin: '80px' })
   const observeAll = () => document.querySelectorAll('.glass').forEach((el) => io.observe(el))
@@ -92,8 +82,7 @@ export function watchRims() {
     if (raf) return
     raf = requestAnimationFrame(() => {
       raf = 0
-      // reduced motion keeps every rim's angle static (DESIGN.md 2.4); the scrim pool still follows
-      if (performance.now() - lastFrameAt > 120) setRims(lastB || posterRock(), { force: true, rim: !stillTier() })
+      if (performance.now() - lastFrameAt > 120) setRims(lastB || posterRock(), { force: true })
     })
   }
   lastB = posterRock()

@@ -242,7 +242,6 @@ html[data-tier='still'] .stage canvas {
 .panel--hero {
   width: min(520px, 100%);
   display: grid;
-  --g-scrim: linear-gradient(to bottom, rgb(var(--void-rgb) / 0.4), rgb(var(--void-rgb) / 0.6) 38%, rgb(var(--void-rgb) / var(--scrim)));
 }
 .panel--hero .eyebrow {
   margin-bottom: 18px;
@@ -293,16 +292,11 @@ html[data-tier='still'] .stage canvas {
   width: min(480px, 100%);
 }
 .card {
-  --g-scrim: rgb(var(--void-rgb) / 0.7);
+  --g-r: var(--r-card);
+  --g-scrim: rgb(var(--void-rgb) / 0.78);
   padding: 30px 32px 30px;
   display: grid;
   justify-items: start;
-  /* the lower rim darkens where the card overlaps the slope's glow */
-  --g-shadow:
-    var(--e-inner),
-    inset 0 -2px 0 rgb(var(--void-rgb) / 0.7),
-    inset 0 -40px 50px -44px rgb(var(--void-rgb) / 0.9),
-    var(--e-raised);
 }
 .card .eyebrow {
   margin-bottom: 12px;
@@ -334,7 +328,7 @@ html[data-tier='still'] .stage canvas {
 }
 .card.is-focus-within,
 .card:focus-within {
-  --rim-o: 1;
+  --g-rim: rgb(var(--lit) / 0.3);
 }
 
 /* ============================================================
