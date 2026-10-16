@@ -19,12 +19,12 @@ let lastAt = 0
 let lastB = null
 let lastFrameAt = 0
 
-// the poster's rock (centre and radius), measured on the poster frames (t 2.3, p 0): 1440x900 box
-// 680,40 to 1264,619; 390x844 box 88,-217 to 588,306
+// the poster's rock (centre and radius), measured with __bounds on the v4 poster frames (t 2.3, p 0):
+// 1440x900 box 767,106 to 1355,681; 390x844 box 87,73 to 378,368
 export function posterRock() {
   const w = window.innerWidth, h = window.innerHeight
   const portrait = w / h < 0.9
-  return portrait ? { x: w * 0.867, y: h * 0.052, r: h * 0.31 } : { x: w * 0.675, y: h * 0.366, r: h * 0.322 }
+  return portrait ? { x: w * 0.596, y: h * 0.261, r: h * 0.175 } : { x: w * 0.737, y: h * 0.437, r: h * 0.319 }
 }
 
 const GLOW = 1.3 // the scrim pool reaches past the rock's edge, over its glow

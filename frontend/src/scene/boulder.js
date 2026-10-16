@@ -9,7 +9,8 @@
 
   tier       'full' | 'lite' (the still tier never imports this file)
   onReady()  after the first frame is on the canvas (the page fades it in)
-  onFrame(f) once a frame: f.boulder = { x, y, r } in CSS px (for the glass rims), f.prog, f.dawn
+  onFrame(f) once a frame: f.boulder = { x, y, r } in CSS px (for the scrim pool), f.prog, f.dawn
+  frame()    the free room for the man and the rock at p 0, { x0, y0, x1, y1 } in CSS px, or null (camera.js)
   onLost(lost)  the WebGL context went (true) or came back (false)
 
   Two clocks: t is the scene's wall clock (the core's turn), tau is the gait clock, which
@@ -179,7 +180,7 @@ export function mount(canvas, opts = {}) {
     glow?.position.copy(B)
     Bcam.set(bx + pose.shift - camShift, R, 0).applyMatrix4(slope.matrixWorld)
     F.set(fx, 0, 0).applyMatrix4(slope.matrixWorld)
-    place(prog, F, Bcam, ptr, [innerWidth, innerHeight])
+    place(prog, F, Bcam, ptr, [innerWidth, innerHeight], opts.frame?.() ?? null)
     // the reflection sits under the rock and points at the camera along the ground
     { tmp.copy(cam.position); slope.worldToLocal(tmp); const ang = Math.atan2(tmp.z, tmp.x - bx); pool.rotation.z = -ang; pool.position.set(bx + Math.cos(ang) * 0.3 * R, 0.02, Math.sin(ang) * 0.3 * R); pool.scale.set(2 * R, 1.4 * R, 1) }
     pool.material.uniforms.uI.value = lerp(0.28, 0.2, sstep(0.5, 1, prog))

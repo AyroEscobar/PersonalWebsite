@@ -19,6 +19,25 @@ import { setRims, watchRims, posterRock } from '../lib/rims.js'
     <Stage />                 the home page
     <Stage kit />             the kit: the same stage, a short climb inside the hero
 */
+/*
+  The free room for the man and the rock at p 0, in CSS px (src/scene/camera.js fits the composite
+  into it): under the header (40 px of air on a laptop, 14 on a phone), right of the hero plate and
+  inside the right gutter on landscape, above the plate (12 px of air) on portrait. Null without a
+  hero plate (the kit).
+*/
+function heroFrame() {
+  const plate = document.querySelector('.panel--hero')
+  if (!plate) return null
+  const w = innerWidth, h = innerHeight
+  const portrait = w / h < 0.9
+  const head = [...document.querySelectorAll('.top .nav, .top .wordmark')].reduce((b, e) => Math.max(b, e.getBoundingClientRect().bottom), 0)
+  const r = plate.getBoundingClientRect()
+  const gutter = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter')) || 16
+  return portrait
+    ? { x0: 6, y0: head + 14, x1: w - 6, y1: r.top + scrollY - 12 }
+    : { x0: r.right + 24, y0: head + 40, x1: w - gutter, y1: h - 20 }
+}
+
 const POSTER = {
   land: { avif: '/poster/hero-1440.avif', webp: '/poster/hero-1440.webp', w: 1440, h: 900 },
   phone: { avif: '/poster/hero-780.avif', webp: '/poster/hero-780.webp', w: 780, h: 1688 },
@@ -37,6 +56,11 @@ export default function Stage() {
     let unsubscribe = () => {}
     const d = document.documentElement
 
+    // the free room at p 0, measured now, on resize and once the fonts are in (the plate's height)
+    let frame = heroFrame()
+    const measureFrame = () => { frame = heroFrame() }
+    window.addEventListener('resize', measureFrame)
+    document.fonts?.ready.then(() => alive && measureFrame())
     const onFrame = (f) => {
       setRims(f.boulder, { fromScene: true })
       // the scrim rises with the backdrop above the weather: 0.74 + 0.08 smoothstep(0.85, 1, p)
@@ -55,6 +79,7 @@ export default function Stage() {
           tier,
           onReady: () => requestAnimationFrame(() => canvas.classList.add('on')),
           onFrame,
+          frame: () => frame,
           onLost: (lost, count) => {
             setGlLost(lost)
             if (lost) setRims(posterRock(), { force: true })
@@ -95,6 +120,7 @@ export default function Stage() {
     Promise.all([afterLoad(), decoded]).then(() => onIdle(() => requestAnimationFrame(() => requestAnimationFrame(start)), 1500))
     return () => {
       alive = false
+      window.removeEventListener('resize', measureFrame)
       unsubscribe()
       stopRims()
       mod?.unmount()

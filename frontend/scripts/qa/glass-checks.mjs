@@ -22,9 +22,13 @@
     canvas on   the canvas gets .on within 3 s after load on full and on lite
     still       under reduced motion the scene chunk is never requested and no canvas draws
     hidden      a hidden document pauses the loop (__stats.paused)
-    framing     __bounds at t 2.3: the figure's mesh box 300 px or more at 1440x900 and 170 or more
+    framing     __bounds at t 2.3: the figure's mesh box 300 px or more at 1440x900 and 130 or more
                 at 390x844 at p 0, whole, no panel over it; the joints box recorded; the rock never
-                cut by the top edge on landscape
+                cut by the top edge on landscape. v4: at p 0 no .nav or .panel box touches the
+                figure's box or the rock's box, at both sizes (the nav never covers them, and on a
+                phone the whole rock and the man stand above the hero plate; with the plate that
+                says who he is, 390x844 leaves 377 px for the composite, so the man is 130 to 140
+                px there, not v3's 170)
     city        wherever a city light is visible (through the haze, past the mountain), the carpet's
                 top edge is below his feet, at p 0, 0.3, 0.56, 0.8 and 1, at 1440 and 390
     mapping     the rock's top moves at most 2.0 px per 20 px of scroll as a phase mean and 4 px as a
@@ -320,7 +324,7 @@ export async function glassChecks({ cdp, url, check, sleep, scratch }) {
   }
 
   // framing and the city, with __bounds at a fixed clock
-  for (const [label, opts, minH] of [['1440', { width: 1440, height: 900, dpr: 1 }, 300], ['390', { width: 390, height: 844, dpr: 2, mobile: true }, 170]]) {
+  for (const [label, opts, minH] of [['1440', { width: 1440, height: 900, dpr: 1 }, 300], ['390', { width: 390, height: 844, dpr: 2, mobile: true }, 130]]) {
     const page = await cdp.newPage(opts)
     await page.goto(url + '/?tier=full&t=2.3', { settle: 1200 })
     await waitReady(page)
@@ -337,6 +341,10 @@ export async function glassChecks({ cdp, url, check, sleep, scratch }) {
     const over = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0
     const covered = p0.panels.filter((b) => over(b, p0.joints)).length
     check('scene', `figure at p 0 @${label}`, H >= minH && whole && !covered ? 'pass' : 'fail', `mesh box ${H} px tall (at least ${minH}), joints box ${J} px, whole ${whole}, panels over his joints ${covered}`)
+    // the nav and the plates never touch the man or the rock on the first screen
+    const touching = p0.panels.filter((b) => over(b, p0.fig) || over(b, p0.rock))
+    const rockIn = p0.rock.x0 >= 0 && p0.rock.x1 <= p0.view[0] && p0.rock.y0 >= 0
+    check('scene', `nav and plates clear of the man and the rock at p 0 @${label}`, !touching.length && rockIn ? 'pass' : 'fail', `figure ${JSON.stringify(p0.fig)}, rock ${JSON.stringify(p0.rock)}, ${touching.length} nav or plate box(es) touching${touching.length ? ': ' + touching.map((b) => JSON.stringify(b)).join(' ') : ''}, whole rock in frame ${rockIn}`)
     if (label === '1440') {
       const cut = rows.filter((r) => r.rock.y0 < 0).map((r) => `p ${r.p} rock top ${r.rock.y0}`)
       check('scene', 'rock never cut by the top edge @1440', cut.length ? 'fail' : 'pass', cut.join(', ') || rows.map((r) => `p ${r.p} ${r.rock.y0}`).join(', '))
