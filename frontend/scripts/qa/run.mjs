@@ -257,7 +257,7 @@ try {
     // r1 M22: every link is logged as it is checked; the step has a hard
     // deadline; a timeout or a 5xx from a host the site links on purpose is a
     // warning (their outage is not our bug), a 4xx anywhere is a failure.
-    const KNOWN = /(^|\.)(github\.com|linkedin\.com|instagram\.com|viaere\.com|interview-lens\.com|ayroescobar\.com)$/
+    const KNOWN = /(^|\.)(github\.com|linkedin\.com|instagram\.com|viaere\.com|esvotech\.com|cal\.com|interview-lens\.com|ayroescobar\.com)$/
     const ext = [...allLinks.keys()].filter((h) => /^https?:/.test(h) && !h.startsWith(origin))
     const deadline = Date.now() + 75000
     for (const href of ext) {
@@ -346,27 +346,30 @@ try {
     check('keyboard', 'skip link first', seq[0] && /skip/i.test(seq[0].name) ? 'pass' : 'fail', seq[0]?.name)
     check('keyboard', 'visible focus', noRing.length ? 'fail' : 'pass', noRing.slice(0, 5).map((f) => `${f.tag} "${f.name}"`).join(', ') || `${seq.length} stops, all with a ring`)
     check('keyboard', 'focus not obscured', obscured.length ? 'fail' : 'pass', obscured.slice(0, 5).map((f) => `${f.tag} "${f.name}"`).join(', '))
-    // v3 (DESIGN.md 9): the skip link, the wordmark, the four nav words, the quiet switch, then the
-    // hero's email and "see the work", then the cards' links (Esvo first), the email, copy, the three
-    // links, the footer links, the scene controls.
+    // v4: the skip link, the wordmark, the four nav words, the quiet switch, then the hero's coffee
+    // chat, email, LinkedIn and GitHub, then the cards' links (Esvo first), the contact coffee chat,
+    // the email, copy, the three links, the footer links, the scene controls.
     const EXPECT = [
       ['skip link', (f) => /skip/i.test(f.name)],
       ['name', (f) => f.name === 'Ayro Escobar'],
       ...SECTION_IDS.map((id) => [`nav ${id}`, (f) => f.tag === 'a' && f.href === `#${id}` && f.name !== 'Ayro Escobar']),
       ['quiet', (f) => /^quiet/i.test(f.name)],
+      ['coffee', (f) => /^https:\/\/cal\.com\//.test(f.href || '')],
       ['hero email', (f) => /^mailto:/.test(f.href || '')],
-      ['see the work', (f) => f.href === '#check-out' && /see the work/i.test(f.name)],
+      ['LinkedIn', (f) => /linkedin\.com\//.test(f.href || '')],
+      ['GitHub', (f) => /github\.com\/AyroEscobar$/.test(f.href || '')],
       ['visit esvotech.com', (f) => /esvotech\.com/.test(f.href || '')],
       ['visit viaere.com', (f) => /viaere\.com/.test(f.href || '')],
+      ['contact coffee', (f) => /^https:\/\/cal\.com\//.test(f.href || '')],
       ['contact email', (f) => /^mailto:/.test(f.href || '') && /esvotech/.test(f.name)],
       ['copy', (f) => /copy/i.test(f.name)],
-      ['GitHub', (f) => /github\.com\/AyroEscobar$/.test(f.href || '')],
+      ['GitHub (elsewhere)', (f) => /github\.com\/AyroEscobar$/.test(f.href || '')],
       ['scene controls', (f) => /pause the scene|play the scene/i.test(f.name)],
     ]
     let j = 0
     for (const f of seq) if (j < EXPECT.length && EXPECT[j][1](f)) j++
     const missing = EXPECT.filter(([, m]) => !seq.some(m)).map(([n]) => n)
-    check('keyboard', 'tab order spec', j === EXPECT.length ? 'pass' : 'fail', j === EXPECT.length ? 'skip, name, four nav words, quiet, hero email, see the work, the two cards, email, copy, links, scene controls' : missing.length ? `never reached: ${missing.join(', ')}` : `out of order at "${EXPECT[j][0]}"`)
+    check('keyboard', 'tab order spec', j === EXPECT.length ? 'pass' : 'fail', j === EXPECT.length ? 'skip, name, four nav words, quiet, coffee, email, LinkedIn, GitHub, the two cards, contact coffee, contact email, copy, links, scene controls' : missing.length ? `never reached: ${missing.join(', ')}` : `out of order at "${EXPECT[j][0]}"`)
 
     // Enter on a nav word lands the heading below the pill.
     const rail = await page.eval(`!!document.querySelector('nav a[href="#check-out"]')`)
@@ -386,7 +389,7 @@ try {
       await page.key('Enter')
       await sleep(1600)
       const pos = await page.eval(`(() => { const h = document.getElementById('experience-h').getBoundingClientRect(); const nav = document.querySelector('.top .nav'); const b = nav.getBoundingClientRect().bottom; const cur = document.querySelector('.nav [aria-current="true"]'); return { top: Math.round(h.top), bar: Math.round(b), vh: innerHeight, current: cur ? cur.getAttribute('href') : null } })()`)
-      check('keyboard', 'nav word lands below the pill', pos.top >= pos.bar && pos.top < pos.vh ? 'pass' : 'fail', `heading top ${pos.top}, pill bottom ${pos.bar}`)
+      check('keyboard', 'nav word lands below the nav', pos.top >= pos.bar && pos.top < pos.vh ? 'pass' : 'fail', `heading top ${pos.top}, nav bottom ${pos.bar}`)
       check('nav', 'aria-current tracks the section', pos.current === '#experience' ? 'pass' : 'fail', `aria-current on "${pos.current}" after jumping to experience`)
     }
     R.keyboard = { sequence: seq }
