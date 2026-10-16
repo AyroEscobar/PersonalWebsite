@@ -1,30 +1,30 @@
 /*
   The lights (DESIGN.md 3.6), as built in a3's boulder.js:
 
-    hemisphere   0x9ec1ff / 0x0b0d14 at 1.3, rising to 1.6 with the dawn
-    key          DirectionalLight 0xd6ecff 2.0 along (-5, 9, 7), 12.4 m from him, a 2048 shadow (full)
+    hemisphere   0x9ec1ff / 0x0b0d14 at 1.5, rising to 1.7 with the dawn
+    key          DirectionalLight 0xd6ecff 2.2 along (-5, 9, 7), 12.4 m from him, a 2048 shadow (full)
                  whose camera snaps to its own texels every frame so the shadow never swims
     practicals   two PointLights inside the rock, raised 0.6 R so they never pool white on the ground;
                  the terrain takes their diffuse only (terrain.js)
-    rims         two SpotLights on a point 1.2 m above his feet: cyan uphill, magenta downhill, both
-                 pulsing +15% with the push-off
-    exposure     1.2 easing to 1.05 with the dawn; fog 0x0a1526, 0.011 to 0.006 over p (lite 0.015 to 0.009),
+    rims         two SpotLights on a point 1.2 m above his feet: pale sky uphill, warm white downhill,
+                 both pulsing +15% with the push-off
+    exposure     1.25 easing to 1.1 with the dawn; fog 0x0a1526, 0.011 to 0.006 over p (lite 0.015 to 0.009),
                  lerping to 0x1d3a52 with the dawn
 */
 import * as THREE from 'three'
 
-export const LIGHT = { hemi: [1.3, 1.6], exposure: [1.2, 1.05] }
+export const LIGHT = { hemi: [1.5, 1.7], exposure: [1.25, 1.1] }
 export const FOG = { full: [0x0a1526, 0.011, 0.006], lite: [0x0a1526, 0.015, 0.009], pale: 0x1d3a52 }
 
 export function makeLights(scene, { full = true, R = 1.95 } = {}) {
   const hemi = new THREE.HemisphereLight(0x9ec1ff, 0x0b0d14, LIGHT.hemi[0]); scene.add(hemi)
-  const key = new THREE.DirectionalLight(0xd6ecff, 2.0)
+  const key = new THREE.DirectionalLight(0xd6ecff, 2.2)
   key.castShadow = full
   if (full) { key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0003; key.shadow.normalBias = 0.03; key.shadow.radius = 3; Object.assign(key.shadow.camera, { left: -8, bottom: -8, right: 8, top: 8, near: 0.5, far: 40 }) }
   scene.add(key, key.target)
-  const pc = new THREE.PointLight(0x19e6ff, 14, 24, 2), pm = new THREE.PointLight(0xff3dbb, 5, 14, 2)
+  const pc = new THREE.PointLight(0xbfe6ff, 8, 24, 2), pm = new THREE.PointLight(0xffd9b8, 2.5, 14, 2)
   scene.add(pc, pm)
-  const rimA = new THREE.SpotLight(0x5ff3ff, 22, 14, 0.32, 0.7, 1.6), rimB = new THREE.SpotLight(0xff4de0, 16, 14, 0.32, 0.7, 1.6)
+  const rimA = new THREE.SpotLight(0xcfefff, 12, 14, 0.32, 0.7, 1.6), rimB = new THREE.SpotLight(0xffd9b8, 7, 14, 0.32, 0.7, 1.6)
   scene.add(rimA, rimA.target, rimB, rimB.target)
 
   const lightDir = new THREE.Vector3(-5, 9, 7).normalize()

@@ -6,7 +6,7 @@
     glassPresets.premium2(R, tier)  thick clear glass (full tier)
     glassPresets.lite(R)            no transmission pass (phones)
     rockGeometry(R)                 a sphere with a 3.5% sine-product displacement
-    neonCore(R)                     helix, ring, heart: HDR, toneMapped false, world space
+    neonCore(R)                     one pale helix thread and the heart: HDR, toneMapped false, world space
     neonEnvironment(renderer)       PMREM of a tiny procedural neon room, no HDRI file (sigma 0.1: soft lobes, no hard-edged panels)
 */
 import * as THREE from 'three'
@@ -14,17 +14,17 @@ import * as THREE from 'three'
 export const glassPresets = {
   premium2: (R, tier = 'full') => new THREE.MeshPhysicalMaterial({
     color: 0xffffff, roughness: 0.06, metalness: 0,
-    transmission: 1, thickness: R * 0.7, ior: 1.45, dispersion: tier === 'full' ? 0.3 : 0,
-    iridescence: 0.2, iridescenceIOR: 1.3, iridescenceThicknessRange: [120, 500],
+    transmission: 1, thickness: R * 0.7, ior: 1.45, dispersion: tier === 'full' ? 0.1 : 0,
+    iridescence: 0, iridescenceIOR: 1.3, iridescenceThicknessRange: [120, 500],
     attenuationColor: new THREE.Color(0.8, 0.96, 1.0), attenuationDistance: R * 2.2,
-    clearcoat: 1, clearcoatRoughness: 0.06, specularIntensity: 1, envMapIntensity: 1.6,
+    clearcoat: 1, clearcoatRoughness: 0.08, specularIntensity: 1, envMapIntensity: 1.2,
   }),
-  // lite: no transmission pass and no bloom. A thin shell: bright fresnel rim (cyan on the lit
-  // side, magenta on the far side), one sharp overhead specular, a faint white body. It sits over
-  // the same neon core plus a soft additive glow, so the phone rock stays luminous.
+  // lite: no transmission pass and no bloom. A thin shell: a soft fresnel rim (pale sky on the lit
+  // side, a warm grey on the far side), one sharp overhead specular, a faint white body. It sits
+  // over the same core plus a soft additive glow, so the phone rock stays luminous.
   lite: () => new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, toneMapped: false,
-    uniforms: { uCyan: { value: new THREE.Color(0.55, 1.9, 2.1) }, uMag: { value: new THREE.Color(1.9, 0.45, 1.4) } },
+    uniforms: { uCyan: { value: new THREE.Color(0.8, 1.3, 1.5) }, uMag: { value: new THREE.Color(1.3, 1.1, 0.95) } },
     vertexShader: 'varying vec3 vN; varying vec3 vV; varying vec3 vWN; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vWN = normalize(mat3(modelMatrix) * normal); vV = -mv.xyz; gl_Position = projectionMatrix * mv; }',
     fragmentShader: `uniform vec3 uCyan, uMag; varying vec3 vN; varying vec3 vV; varying vec3 vWN;
       void main(){
@@ -47,7 +47,7 @@ export const glassPresets = {
 export function coreGlow(R, strength = 1) {
   const c = document.createElement('canvas'); c.width = c.height = 128
   const g = c.getContext('2d'), grd = g.createRadialGradient(64, 64, 0, 64, 64, 64)
-  grd.addColorStop(0, 'rgba(255,255,255,0.9)'); grd.addColorStop(0.18, 'rgba(160,240,255,0.45)'); grd.addColorStop(0.5, 'rgba(60,170,220,0.12)'); grd.addColorStop(1, 'rgba(0,0,0,0)')
+  grd.addColorStop(0, 'rgba(255,255,255,0.9)'); grd.addColorStop(0.18, 'rgba(200,230,245,0.35)'); grd.addColorStop(0.5, 'rgba(90,140,180,0.09)'); grd.addColorStop(1, 'rgba(0,0,0,0)')
   g.fillStyle = grd; g.fillRect(0, 0, 128, 128)
   const t = new THREE.CanvasTexture(c)
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, color: new THREE.Color(1.1 * strength, 1.25 * strength, 1.35 * strength), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, toneMapped: false, fog: false }))
@@ -95,30 +95,27 @@ export function neonCore(R, { halo = false } = {}) {
     const u = i / 220, a = u * Math.PI * 4
     pts.push(new THREE.Vector3(Math.cos(a) * R * 0.42 * Math.sin(u * Math.PI), (u - 0.5) * R * 0.9, Math.sin(a) * R * 0.42 * Math.sin(u * Math.PI)))
   }
-  const helix = mk(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 220, R * 0.016, 8, false), new THREE.Color(0.4, 2.2, 2.6))
-  const ring = mk(new THREE.TorusGeometry(R * 0.5, R * 0.012, 8, 160), new THREE.Color(2.7, 0.5, 2.0))
-  ring.rotation.x = Math.PI / 2.6; ring.rotation.z = 0.3
-  const heart = mk(new THREE.SphereGeometry(R * 0.06, 24, 16), new THREE.Color(3.2, 3.2, 3.2))
-  grp.add(helix, ring, heart)
-  // lite has no bloom: a wide, faint additive copy of each tube stands in for the halo
+  const HELIX = new THREE.Color(1.0, 1.5, 1.7)
+  const helix = mk(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 220, R * 0.012, 8, false), HELIX)
+  const heart = mk(new THREE.SphereGeometry(R * 0.06, 24, 16), new THREE.Color(2.4, 2.4, 2.4))
+  grp.add(helix, heart)
+  // lite has no bloom: a wide, faint additive copy of the thread stands in for the halo
   if (halo) {
-    const hm = (geo, c) => new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: c, toneMapped: false, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending, depthWrite: false }))
-    const h1 = hm(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 160, R * 0.09, 8, false), new THREE.Color(0.4, 2.2, 2.6))
-    const h2 = hm(new THREE.TorusGeometry(R * 0.5, R * 0.075, 8, 120), new THREE.Color(2.6, 0.5, 1.9)); h2.rotation.copy(ring.rotation)
-    grp.add(h1, h2)
+    const h1 = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 160, R * 0.09, 8, false), new THREE.MeshBasicMaterial({ color: HELIX, toneMapped: false, transparent: true, opacity: 0.05, blending: THREE.AdditiveBlending, depthWrite: false }))
+    grp.add(h1)
   }
   grp.userData.spin = helix
   return grp
 }
 
-export function neonEnvironment(renderer, { intensity = 0.8 } = {}) {
+export function neonEnvironment(renderer, { intensity = 0.7 } = {}) {
   const s = new THREE.Scene()
   s.add(new THREE.Mesh(new THREE.BoxGeometry(40, 20, 40), new THREE.MeshBasicMaterial({ color: 0x0a0c14, side: THREE.BackSide })))
   const panel = (w, h, c, p, rot) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: c.multiplyScalar(intensity), side: THREE.DoubleSide })); m.position.set(...p); m.rotation.set(...rot); s.add(m) }
-  panel(18, 5, new THREE.Color(4.5, 4.6, 5.2), [0, 9.9, -2], [Math.PI / 2, 0, 0])       // wide soft overhead: the top highlight on the rock
-  panel(14, 9, new THREE.Color(0.15, 2.8, 3.8), [-19.9, 4, 0], [0, Math.PI / 2, 0])     // cyan wall
-  panel(14, 9, new THREE.Color(3.8, 0.4, 2.8), [19.9, 3, 0], [0, -Math.PI / 2, 0])      // magenta wall
-  panel(40, 0.7, new THREE.Color(1.6, 2.4, 3.0), [0, -1, -19.9], [0, 0, 0])             // cool horizon strip (the city side)
+  panel(18, 5, new THREE.Color(3.6, 3.7, 4.0), [0, 9.9, -2], [Math.PI / 2, 0, 0])       // wide soft overhead: the top highlight on the rock
+  panel(14, 9, new THREE.Color(0.6, 1.1, 1.4), [-19.9, 4, 0], [0, Math.PI / 2, 0])      // pale sky wall
+  panel(14, 9, new THREE.Color(1.3, 1.1, 0.9), [19.9, 3, 0], [0, -Math.PI / 2, 0])      // warm white wall (no pink)
+  panel(40, 0.7, new THREE.Color(1.2, 1.6, 1.9), [0, -1, -19.9], [0, 0, 0])             // cool horizon strip (the city side)
   panel(10, 3, new THREE.Color(1.2, 1.4, 2.0), [4, 6, 19.9], [0, Math.PI, 0])
   panel(40, 40, new THREE.Color(0.12, 0.14, 0.2), [0, -9.9, 0], [-Math.PI / 2, 0, 0])
   const pm = new THREE.PMREMGenerator(renderer)

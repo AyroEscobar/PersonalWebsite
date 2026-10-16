@@ -37,12 +37,12 @@ export async function loadFigure(url) {
   return { root: g.scene, mesh, heads: ex.heads, tails: ex.tails }
 }
 
-// the dark clearcoat body with c's neon Fresnel edge: cyan on the uphill-facing edge, magenta downhill
+// the dark clearcoat body with a soft Fresnel edge: pale sky on the uphill-facing edge, warm white downhill
 export function figureMaterial({ lite = false } = {}) {
   const m = new THREE.MeshPhysicalMaterial({ color: 0x151821, roughness: 0.34, metalness: 0.55, clearcoat: lite ? 0 : 1, clearcoatRoughness: 0.14, envMapIntensity: 1.9 })
   // uHand: the two palm contacts in world space; the hand brightens softly within 9 cm of its contact,
   // the glass's cyan caught in the palm, so the touch reads through the glass
-  m.userData.u = { uEdge: { value: lite ? 1.5 : 1.8 }, uUphill: { value: new THREE.Vector3(Math.cos(0.349), Math.sin(0.349), 0) }, uHand: { value: [new THREE.Vector3(0, -99, 0), new THREE.Vector3(0, -99, 0)] }, uHandGlow: { value: 0.55 } }
+  m.userData.u = { uEdge: { value: lite ? 1.0 : 1.1 }, uUphill: { value: new THREE.Vector3(Math.cos(0.349), Math.sin(0.349), 0) }, uHand: { value: [new THREE.Vector3(0, -99, 0), new THREE.Vector3(0, -99, 0)] }, uHandGlow: { value: 0.4 } }
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, m.userData.u)
     sh.vertexShader = sh.vertexShader
@@ -57,9 +57,9 @@ export function figureMaterial({ lite = false } = {}) {
           float e = pow(f, 3.2) * smoothstep(0.5, 0.95, f);
           vec3 wN = inverseTransformDirection(nV, viewMatrix);
           float side = smoothstep(-0.3, 0.3, dot(wN, uUphill));
-          totalEmissiveRadiance += mix(vec3(1.6, 0.3, 1.2), vec3(0.3, 1.5, 1.8), side) * e * uEdge;
+          totalEmissiveRadiance += mix(vec3(1.0, 0.85, 0.7), vec3(0.6, 0.95, 1.1), side) * e * uEdge;
           float hd = min(distance(vWP, uHand[0]), distance(vWP, uHand[1]));
-          totalEmissiveRadiance += vec3(0.45, 0.85, 0.95) * uHandGlow * exp(-hd * hd / 0.0081) * (0.3 + 0.7 * f);
+          totalEmissiveRadiance += vec3(0.6, 0.8, 0.9) * uHandGlow * exp(-hd * hd / 0.0081) * (0.3 + 0.7 * f);
         }`)
   }
   m.customProgramCacheKey = () => 'figure-edge-' + (lite ? 'l' : 'f')
@@ -120,7 +120,7 @@ function contactGlint(radius) {
   grd.addColorStop(0, 'rgba(255,255,255,0.75)'); grd.addColorStop(0.3, 'rgba(190,245,255,0.42)'); grd.addColorStop(0.65, 'rgba(90,200,235,0.12)'); grd.addColorStop(1, 'rgba(0,0,0,0)')
   g.fillStyle = grd; g.fillRect(0, 0, 64, 64)
   const t = new THREE.CanvasTexture(c)
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(2 * radius, 2 * radius), new THREE.MeshBasicMaterial({ map: t, color: new THREE.Color(0.7, 1.0, 1.1), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, toneMapped: false, fog: false, side: THREE.DoubleSide }))
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(2 * radius, 2 * radius), new THREE.MeshBasicMaterial({ map: t, color: new THREE.Color(0.8, 0.95, 1.0), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, toneMapped: false, fog: false, side: THREE.DoubleSide }))
   m.renderOrder = 3
   m.castShadow = false; m.receiveShadow = false
   return m

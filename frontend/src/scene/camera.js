@@ -5,7 +5,7 @@
   Check out (p 0.2 to 0.45): landscape rides 1.5 m higher beside the cards; portrait lifts him
   into the top half above the cards. The wide (p0 0.55 to 1): an eased onset then a linear ramp
   to d 19.5, h 3.2, aimed at the rock plus (-3.4, 0.4, 0), so the pale sky fills the upper 40%.
-  Pointer parallax on fine pointers only: a + 0.03 x, h + 0.03 d y, smoothed at 3 /s.
+  Pointer parallax on fine pointers only: a + 0.015 x, h + 0.015 d y, smoothed at 3 /s.
 */
 import * as THREE from 'three'
 
@@ -40,8 +40,8 @@ export function makeCamera() {
     d = lerp(d, portrait ? W.dP : W.d, c); h = lerp(h, portrait ? W.hP : W.h, c)
     const wa = portrait ? W.aimP : W.aim
     aim.lerp(aimB.copy(Bcam).add(tmpAim.set(wa[0], wa[1], wa[2])), c)
-    a += ptr.x * 0.03
-    h += ptr.y * d * 0.03
+    a += ptr.x * 0.015
+    h += ptr.y * d * 0.015
     cam.position.set(F.x + Math.sin(a) * d, F.y + h, F.z + Math.cos(a) * d)
     cam.aspect = w / h0
     cam.updateProjectionMatrix()

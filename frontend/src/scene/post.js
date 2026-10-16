@@ -14,7 +14,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js'
 
 export const GradeShader = {
-  uniforms: { tDiffuse: { value: null }, uCA: { value: 0 }, uVig: { value: 0.34 }, uLift: { value: 0.012 }, uGain: { value: 1.04 }, uSat: { value: 1.05 }, uRes: { value: new THREE.Vector2(1, 1) } },
+  uniforms: { tDiffuse: { value: null }, uCA: { value: 0 }, uVig: { value: 0.2 }, uLift: { value: 0.008 }, uGain: { value: 1.02 }, uSat: { value: 0.96 }, uRes: { value: new THREE.Vector2(1, 1) } },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
   fragmentShader: `uniform sampler2D tDiffuse; uniform float uCA, uVig, uLift, uGain, uSat; uniform vec2 uRes; varying vec2 vUv;
   void main(){
@@ -37,7 +37,8 @@ export function makePost(r, scene, cam, { tier = 'full', bloom = true, grade = t
   const comp = new EffectComposer(r, new THREE.WebGLRenderTarget(size.x, size.y, { type: THREE.HalfFloatType, samples: tier === 'full' ? 4 : 0 }))
   const passes = { render: new RenderPass(scene, cam) }
   comp.addPass(passes.render)
-  if (bloom) { passes.bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), tier === 'full' ? 0.55 : 0.4, 0.55, 0.92); comp.addPass(passes.bloom) }
+  // calm: only the core's heart and the palm glint cross the threshold
+  if (bloom) { passes.bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), tier === 'full' ? 0.22 : 0.18, 0.35, 0.97); comp.addPass(passes.bloom) }
   passes.output = new OutputPass(); comp.addPass(passes.output)
   if (grade) { passes.grade = new ShaderPass(GradeShader); passes.grade.uniforms.uRes.value.set(size.x, size.y); if (tier !== 'full') passes.grade.uniforms.uCA.value = 0; comp.addPass(passes.grade) }
   return {

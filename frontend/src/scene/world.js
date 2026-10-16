@@ -4,8 +4,8 @@
   makeCity / makeRain halves of its terrain.js.
 
     makeSky()      gradient dome drawn inside-out, not fogged, not tone mapped, dithered so the
-                   gradient never bands. Deep navy overhead, a teal band at the horizon, a soft cyan
-                   glow on the city side and a faint magenta haze opposite. uDawn (0 to 0.35 over the
+                   gradient never bands. Deep navy overhead, a teal band at the horizon, a soft
+                   blue glow on the city side and a neutral haze opposite (no pink). uDawn (0 to 0.35 over the
                    last 15% of scroll) lifts the lower third of the sky to a cold pale grey-blue: no
                    warm term anywhere.
     makeStars()    a few sharp stars, above the horizon only, that fade with the dawn band.
@@ -13,8 +13,8 @@
                    darker than the sky; lifts with uDawn.
     makeCity()     additive points far below over a plain that fades into the sky: a calm carpet of
                    light under the horizon, never beside him.
-    makeRain()     sparse tapered streaks, full tier only, below the camera's eye line and never
-                   within 1.5 m of the man.
+    makeRain()     sparse tapered streaks, below the camera's eye line and never within 1.5 m of
+                   the man (v4 does not create it: the calm scene has no rain).
 */
 import * as THREE from 'three'
 import { fbm, hash } from './terrain.js'
@@ -24,8 +24,8 @@ export function makeSky() {
     side: THREE.BackSide, depthWrite: false, fog: false,
     uniforms: {
       uGlowAMix: { value: 1 }, uDawn: { value: 0 },
-      uTop: { value: new THREE.Color(0x05070f) }, uHorizon: { value: new THREE.Color(0x143852) },
-      uGlowA: { value: new THREE.Color(0x0e7a8f) }, uGlowB: { value: new THREE.Color(0x7a1860) }, uDawnCol: { value: new THREE.Color(0xa9d8f0) },
+      uTop: { value: new THREE.Color(0x05070f) }, uHorizon: { value: new THREE.Color(0x12304a) },
+      uGlowA: { value: new THREE.Color(0x0c5a70) }, uGlowB: { value: new THREE.Color(0x2b2a3a) }, uDawnCol: { value: new THREE.Color(0xa9d8f0) },
     },
     vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: `uniform float uGlowAMix, uDawn; uniform vec3 uTop, uHorizon, uGlowA, uGlowB, uDawnCol; varying vec3 vP;
@@ -65,7 +65,7 @@ export function makeStars({ count = 260, radius = 290 } = {}) {
   }
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3))
   g.setAttribute('color', new THREE.BufferAttribute(col, 3))
-  const m = new THREE.PointsMaterial({ size: 1.6, vertexColors: true, sizeAttenuation: false, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, toneMapped: false })
+  const m = new THREE.PointsMaterial({ size: 1.6, vertexColors: true, sizeAttenuation: false, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, toneMapped: false })
   const p = new THREE.Points(g, m)
   p.frustumCulled = false
   p.renderOrder = -9
@@ -89,7 +89,7 @@ export function makeRidge({ dist = 470, width = 2400, height = 170, segs = 300, 
     if (y > 0) pos.setY(i, (fbm(x / s * 0.004 + 11, 0.3) - 0.3) * height * 1.2 + Math.sin(x / s * 0.0026) * height * 0.3)
     else pos.setY(i, -600 * s)
   }
-  const sky = skyUniforms || { uGlowAMix: { value: 1 }, uDawn: { value: 0 }, uHorizon: { value: new THREE.Color(0x12324a) }, uGlowA: { value: new THREE.Color(0x0e7a8f) }, uGlowB: { value: new THREE.Color(0x7a1860) }, uDawnCol: { value: new THREE.Color(0xa9d8f0) } }
+  const sky = skyUniforms || { uGlowAMix: { value: 1 }, uDawn: { value: 0 }, uHorizon: { value: new THREE.Color(0x12324a) }, uGlowA: { value: new THREE.Color(0x0c5a70) }, uGlowB: { value: new THREE.Color(0x2b2a3a) }, uDawnCol: { value: new THREE.Color(0xa9d8f0) } }
   const [ox, oy, oz] = origin
   const y0 = oy + (-60 - oy) * s
   const mat = new THREE.ShaderMaterial({
@@ -120,7 +120,7 @@ export function makeRidge({ dist = 470, width = 2400, height = 170, segs = 300, 
 }
 
 // The city far below: lights on a street grid over a dark valley floor, a carpet of light under the
-// cloud. Round soft points, cyan, warm white and magenta, a dense core that thins out, a few low
+// cloud. Round soft points, pale blue, warm white and peach, a dense core that thins out, a few low
 // towers. Additive, no fog, not tone mapped. Calm: small points, moderate brightness, no sparkle.
 //
 // The valley haze (REFINE.md build item 1). Haze is thick at a grazing angle and thin straight down:
@@ -167,7 +167,7 @@ export function makeCity({ count = 2600, below = -200, near = 500, far = 1100, c
     const y = below + 0.4 + (tower ? Math.pow(hash(i, 3), 1.5) * 24 : 0)
     pos.set([x, y, z], n * 3)
     const k = hash(i, 6)
-    c.set(k < 0.5 ? 0x19e6ff : k < 0.86 ? 0xfff1e6 : 0xff3dbb).multiplyScalar(0.55 + hash(i, 7) * 0.9)
+    c.set(k < 0.5 ? 0x8fc8ea : k < 0.86 ? 0xfff1e6 : 0xffd9b8).multiplyScalar(0.55 + hash(i, 7) * 0.9)
     col.set([c.r, c.g, c.b], n * 3)
     n++
   }
@@ -185,7 +185,7 @@ export function makeCity({ count = 2600, below = -200, near = 500, far = 1100, c
   grp.add(pts)
   grp.userData.points = pts
   const sky = skyUniforms || {
-    uGlowAMix: { value: 1 }, uDawn: { value: 0 }, uHorizon: { value: new THREE.Color(0x12324a) }, uGlowA: { value: new THREE.Color(0x0e7a8f) }, uGlowB: { value: new THREE.Color(0x7a1860) }, uDawnCol: { value: new THREE.Color(0xa9d8f0) },
+    uGlowAMix: { value: 1 }, uDawn: { value: 0 }, uHorizon: { value: new THREE.Color(0x12324a) }, uGlowA: { value: new THREE.Color(0x0c5a70) }, uGlowB: { value: new THREE.Color(0x2b2a3a) }, uDawnCol: { value: new THREE.Color(0xa9d8f0) },
   }
   // the valley floor: dark, with a little of the light the city throws up into its own haze (kept dim:
   // the carpet is the points, never a glowing lake), hazing into the far ridge's foot colour
@@ -193,7 +193,7 @@ export function makeCity({ count = 2600, below = -200, near = 500, far = 1100, c
   const plain = new THREE.Mesh(new THREE.PlaneGeometry(width * 4, depth * 2.4), new THREE.ShaderMaterial({
     fog: false, depthWrite: true,
     uniforms: {
-      uA: { value: new THREE.Color(0x0b4a5c) }, uB: { value: new THREE.Color(0x3a0c34) }, uBase: { value: new THREE.Color(0x04060c) },
+      uA: { value: new THREE.Color(0x0b4a5c) }, uB: { value: new THREE.Color(0x22283a) }, uBase: { value: new THREE.Color(0x04060c) },
       uCore: { value: new THREE.Vector2(cx + 30, zc) }, uSpan: { value: new THREE.Vector2(width * 0.33, span) }, uHazeK,
       uRidge: ridge.material.uniforms.uBase, uRidgeLift: ridge.material.uniforms.uLift, uY0: ridge.material.uniforms.uY0, uS: ridge.material.uniforms.uS,
       uRidgeZ: { value: ridge.position.z }, uFloorY: { value: below - 2 },

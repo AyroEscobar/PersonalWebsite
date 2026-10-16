@@ -86,7 +86,7 @@ function lightsNoPointSpecular() {
   return c.slice(0, i) + block + c.slice(j)
 }
 
-export function contourMaterial({ base = 0x1c2231, lineA = new THREE.Color(0.12, 1.05, 1.35), lineB = new THREE.Color(1.5, 0.2, 1.05), spacing = 1.0, strength = 1, wet = 0.6 } = {}) {
+export function contourMaterial({ base = 0x1c2231, lineA = new THREE.Color(0.45, 0.8, 1.0), lineB = new THREE.Color(0.45, 0.8, 1.0), spacing = 1.0, strength = 0.6, wet = 0.45 } = {}) {
   const mat = new THREE.MeshStandardMaterial({ color: base, roughness: 0.5, metalness: 0.12, envMapIntensity: 1.0 })
   mat.userData.u = {
     uLineA: { value: lineA }, uLineB: { value: lineB }, uSpacing: { value: spacing }, uStrength: { value: strength }, uWet: { value: wet },
@@ -147,7 +147,7 @@ export function contourMaterial({ base = 0x1c2231, lineA = new THREE.Color(0.12,
           float near = 0.25 + 0.75 * smoothstep(18.0, 5.0, dfig);
           float farMix = smoothstep(6.0, 30.0, dfig);
           vec3 colA = mix(uLineA, vec3(1.4, 1.8, 2.0), farMix * 0.6);
-          // a trace of magenta only just downhill of the rock
+          // lineB just downhill of the rock (v4: the same pale blue as lineA, so no second hue)
           float down = smoothstep(6.0, 1.0, distance(vW, uRock)) * step(vW.x, uRock.x);
           vec3 col = mix(colA, uLineB, down * 0.5);
           col = mix(col, vec3(2.2), 0.15 * uDawn / 0.35);
@@ -159,13 +159,13 @@ export function contourMaterial({ base = 0x1c2231, lineA = new THREE.Color(0.12,
 }
 
 // The rock's light on the wet ground: an additive pool directly under it, stretched along the
-// camera's ground direction like a reflection on wet asphalt. Cyan-white with a trace of magenta,
-// below the bloom threshold, so it never blooms and never reads as a pink blob. boulder.js sizes it
+// camera's ground direction like a reflection on wet asphalt. A soft pale blue fading to grey,
+// below the bloom threshold, so it never blooms. boulder.js sizes it
 // to the rock's footprint (2 R along the camera line, 1.4 R across, 0.3 R toward the camera).
 export function makeReflection() {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false,
-    uniforms: { uA: { value: new THREE.Color(0.10, 0.55, 0.70) }, uB: { value: new THREE.Color(0.45, 0.12, 0.40) }, uI: { value: 0.35 } },
+    uniforms: { uA: { value: new THREE.Color(0.18, 0.42, 0.55) }, uB: { value: new THREE.Color(0.3, 0.3, 0.35) }, uI: { value: 0.28 } },
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: `uniform vec3 uA, uB; uniform float uI; varying vec2 vUv;
       void main(){ vec2 c = vUv - 0.5; float r = length(c) * 2.0; float k = exp(-r * r * 4.5);

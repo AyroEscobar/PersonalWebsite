@@ -12,7 +12,7 @@
   onFrame(f) once a frame: f.boulder = { x, y, r } in CSS px (for the glass rims), f.prog, f.dawn
   onLost(lost)  the WebGL context went (true) or came back (false)
 
-  Two clocks: t is the scene's wall clock (rain, the core's turn), tau is the gait clock, which
+  Two clocks: t is the scene's wall clock (the core's turn), tau is the gait clock, which
   freezes during the slip and ramps back, so the cycle never pops.
 
   Test hooks (src/scene/hooks.js): ?t=<s> freezes the clock, ?p=<0..1> forces progress, ?slip=<s>
@@ -22,7 +22,7 @@ import * as THREE from 'three'
 import { loadFigure, makeFigure, figureMaterial } from './figure.js'
 import { glassPresets, rockGeometry, rockSurface, neonCore, neonEnvironment, coreGlow, droplets } from './rock.js'
 import { makeSlopeAsync, contourMaterial, makeReflection, makeContactShadow } from './terrain.js'
-import { makeSky, makeRidge, makeStars, makeCity, makeRain } from './world.js'
+import { makeSky, makeRidge, makeStars, makeCity } from './world.js'
 import { makeLights, LIGHT, FOG } from './lights.js'
 import { makePost } from './post.js'
 import { makeCamera, CAM } from './camera.js'
@@ -48,7 +48,7 @@ const HOLD_MS = 260     // the clock holds this long after the first frame, whil
 // so its silhouette is a3's) so the floor runs far enough to be seen under his feet. The valley
 // haze hides every light shallower than haze(p) degrees below the camera: the cloud thins as he climbs.
 const CITY = {
-  below: -200, near: 500, far: 1100, cx: -110, width: 1000, size: 4.6, ridgeScale: 2.5, ridgeOrigin: [-47.2, -11.8, 8.5],
+  below: -200, near: 500, far: 1100, cx: -110, width: 1000, size: 3.6, ridgeScale: 2.5, ridgeOrigin: [-47.2, -11.8, 8.5],
   haze: [[0, 32], [0.45, 30], [0.56, 26], [0.7, 23], [0.8, 19.5], [0.9, 16], [1, 12.8]],
 }
 const hazeAt = (p) => {
@@ -93,18 +93,16 @@ export function mount(canvas, opts = {}) {
 
   // the slope frame carries the mountain and the figure; +x climbs
   const slope = new THREE.Group(); slope.rotation.z = THREE.MathUtils.degToRad(SLOPE); scene.add(slope)
-  const ground = contourMaterial({ strength: full ? 1 : 0.8, wet: 0.6 })
-  const city = makeCity({ count: full ? 2600 : 1400, ...CITY, skyUniforms: sky.material.uniforms, ridge }); scene.add(city)
+  const ground = contourMaterial({ strength: full ? 0.6 : 0.5, wet: 0.45 })
+  const city = makeCity({ count: full ? 1600 : 900, ...CITY, skyUniforms: sky.material.uniforms, ridge }); scene.add(city)
   city.userData.setHaze(hazeAt(0))
-  const rain = full ? makeRain({ count: 320 }) : null
-  if (rain) scene.add(rain)
 
   const glass = full ? glassPresets.premium2(R, tier) : glassPresets.lite(R)
   const figMat = figureMaterial({ lite: !full })
   let rockGeo = null // built a task later (the mount never runs as one long task)
   let fig = null
   const core = neonCore(R, { halo: !full }); scene.add(core)
-  const glow = full ? null : coreGlow(R, 1.5)
+  const glow = full ? null : coreGlow(R, 0.9)
   if (glow) scene.add(glow)
   const pool = makeReflection(); slope.add(pool)
   const shFeet = [makeContactShadow(0.55, 0.5), makeContactShadow(0.55, 0.5)], shRock = makeContactShadow(2.4 * R, 0.4)
@@ -131,7 +129,7 @@ export function mount(canvas, opts = {}) {
   const fine = matchMedia('(pointer: fine)').matches
   const stats = (window.__stats = { tier, frames: 0, ms: 0, dpr: r.getPixelRatio(), paused: false })
 
-  const F = new THREE.Vector3(), B = new THREE.Vector3(), Bcam = new THREE.Vector3(), tmp = new THREE.Vector3(), proj = new THREE.Vector3(), anchor = new THREE.Vector3(), manInRain = new THREE.Vector3()
+  const F = new THREE.Vector3(), B = new THREE.Vector3(), Bcam = new THREE.Vector3(), tmp = new THREE.Vector3(), proj = new THREE.Vector3(), anchor = new THREE.Vector3()
   const boulderInfo = { x: 0, y: 0, r: 0 }
   const pose = { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0 }
   const frameInfo = { boulder: boulderInfo, prog: 0, dawn: 0 }
@@ -177,14 +175,14 @@ export function mount(canvas, opts = {}) {
     camShift += (pose.shift - camShift) * (1 - Math.exp(-dt * (slipStart >= 0 ? 0.35 : 0.9)))
     const fx = x + pose.shift - camShift
     B.set(bx, R, 0).applyMatrix4(slope.matrixWorld)
-    core.position.copy(B); core.rotation.y = now * 0.15
+    core.position.copy(B); core.rotation.y = now * 0.08
     glow?.position.copy(B)
     Bcam.set(bx + pose.shift - camShift, R, 0).applyMatrix4(slope.matrixWorld)
     F.set(fx, 0, 0).applyMatrix4(slope.matrixWorld)
     place(prog, F, Bcam, ptr, [innerWidth, innerHeight])
     // the reflection sits under the rock and points at the camera along the ground
     { tmp.copy(cam.position); slope.worldToLocal(tmp); const ang = Math.atan2(tmp.z, tmp.x - bx); pool.rotation.z = -ang; pool.position.set(bx + Math.cos(ang) * 0.3 * R, 0.02, Math.sin(ang) * 0.3 * R); pool.scale.set(2 * R, 1.4 * R, 1) }
-    pool.material.uniforms.uI.value = lerp(0.35, 0.2, sstep(0.5, 1, prog))
+    pool.material.uniforms.uI.value = lerp(0.28, 0.2, sstep(0.5, 1, prog))
     // contact shadows under the feet and the rock
     for (let i = 0; i < 2; i++) { shFeet[i].position.set(o.balls[i].x - 0.06, 0.012, o.balls[i].z); shFeet[i].material.opacity = 0.5 * (o.stance[i] ? 1 : 0.55 - 0.5 * Math.min(1, o.balls[i].y / 0.1)) }
     shRock.position.set(bx, 0.014, 0)
@@ -192,28 +190,20 @@ export function mount(canvas, opts = {}) {
     anchor.set(x - 0.2, 1.0, 0).applyMatrix4(slope.matrixWorld); anchor.y += 0.5
     const dawn = 0.35 * sstep(0.85, 1, prog)
     lights.update({ B, anchor, F, push: o.push, up: cam.up, dawn })
-    for (const [m, c] of coreMats) m.color.copy(c).multiplyScalar(1 + 0.08 * o.push)
-    // the contours bunch around him; magenta only just downhill of the rock
+    for (const [m, c] of coreMats) m.color.copy(c).multiplyScalar(1 + 0.05 * o.push)
+    // the contours bunch around him
     ground.userData.u.uFigure.value.copy(F)
     ground.userData.u.uRock.value.copy(B)
     // clearing air as he climbs; above the weather for the last 15%
     scene.fog.density = lerp(F0[1], F0[2], prog)
     scene.fog.color.copy(fogBase).lerp(fogPale, dawn / 0.35)
-    if (rain) {
-      rain.material.opacity = 0.09 * (1 - sstep(0.5, 0.9, prog)); rain.visible = rain.material.opacity > 0.002
-      rain.position.copy(cam.position).addScaledVector(cam.getWorldDirection(tmp), 11); rain.position.y = cam.position.y - rain.userData.box[1] - 0.4
-      // the man's position in the rain box, so no streak falls within 1.5 m of him
-      tmp.set(x + pose.shift - camShift - 0.3, 0.9, 0).applyMatrix4(slope.matrixWorld)
-      manInRain.copy(tmp).sub(rain.position)
-      rain.userData.update(now, manInRain)
-    }
     sky.material.uniforms.uGlowAMix.value = 1 - 0.2 * prog
     city.userData.setHaze(hazeAt(prog))
     sky.material.uniforms.uDawn.value = dawn
-    stars.material.opacity = 0.8 * (1 - dawn / 0.35 * 0.6)
+    stars.material.opacity = 0.5 * (1 - dawn / 0.35 * 0.6)
     ground.userData.u.uDawn.value = dawn
     r.toneMappingExposure = lerp(LIGHT.exposure[0], LIGHT.exposure[1], dawn / 0.35)
-    if (post) post.passes.grade.uniforms.uLift.value = 0.012 * (1 - dawn / 0.35)
+    if (post) post.passes.grade.uniforms.uLift.value = 0.008 * (1 - dawn / 0.35)
     sky.position.copy(cam.position)
     post ? post.render() : r.render(scene, cam)
     // the boulder's screen position, for the panels' rims
@@ -297,7 +287,7 @@ export function mount(canvas, opts = {}) {
     await next(); if (me.dead) return
     rockGeo = rockGeometry(R)
     await next(); if (me.dead) return
-    scene.environment = neonEnvironment(r, { intensity: 0.8 })
+    scene.environment = neonEnvironment(r, { intensity: 0.7 })
     await next(); if (me.dead) return
     post = full ? makePost(r, scene, cam, { tier }) : null
     me.post = post
@@ -306,10 +296,10 @@ export function mount(canvas, opts = {}) {
     if (me.dead) return
     fig = makeFigure({ man, material: figMat, boulderMaterial: glass, boulderGeometry: rockGeo, R, x0: X0, surface: rockSurface })
     slope.add(fig.group)
-    fig.boulder.add(droplets(R, full ? 110 : 36, { lite: !full }))
+    fig.boulder.add(droplets(R, full ? 60 : 24, { lite: !full }))
     installHooks({
       r, cam, canvas, scene, slope, fig, city, R, tier, render, CAM, LIGHT, CITY,
-      objs: { city, ridge, rain, pool, hemi: lights.hemi, key: lights.key, sky, ground, stars, fig, r, post, scene, cam },
+      objs: { city, ridge, pool, hemi: lights.hemi, key: lights.key, sky, ground, stars, fig, r, post, scene, cam },
       state: {
         prog: () => spring.pos, target: () => target, vel: () => spring.vel, t: () => t, tau: () => tau, rate: () => rate,
         pose: () => pose, B: () => B, slipping: () => slipStart >= 0,
