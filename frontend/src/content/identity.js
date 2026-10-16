@@ -1,32 +1,32 @@
 import { item, ui } from './item.js'
-import { COFFEE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
+import { AGE, COFFEE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
 
 /*
-  The hero: who he is in five seconds. The eyebrow says what he is now, the h1 his name, then three
-  lines (his company, Viaere, the internships), the one line (desktop only; the roles already say
-  it on a phone), two ways to reach him and two links. Builders render it; they do not rewrite it.
-  The theme line is the only theme line on the site: 11 px, lowercase, once, in the hero's
-  lower-left corner.
+  The hero: who he is in five seconds. The h1 is his name, then one line in his voice (his age and
+  his school, the way his own emails open), three short lines for what he is (his company, Viaere,
+  the internships), then "A few things I've built": three results in his own words, the figure in
+  each one set strong. Then two ways to reach him and two links. Builders render it; they do not
+  rewrite it. The theme line is the only theme line on the site: 11 px, lowercase, once, in the
+  hero's lower-left corner.
 */
 
 export const HERO = {
   sceneAlt: ui('scene-alt', 'A figure pushing a huge glass boulder up a mountain slope at night.'),
-  eyebrow: item('hero-eyebrow', 'Computer science student at UT Dallas', ['identity-student']),
   name: item('hero-name', 'Ayro Escobar', ['identity-name']),
+  intro: item('hero-intro', `I'm ${AGE} and I study computer science at UT Dallas.`, ['identity-age', 'identity-student']),
   roles: [
-    item('hero-role-esvo', 'Founder of Esvo Technologies, custom software and websites for any kind of business.', ['ven-esvo', 'ven-esvo-site']),
-    item('hero-role-viaere', 'Co-founder and Founding Engineer at Viaere, flight operations software built beside the hangar floor.', [
-      'ven-viaere',
-      'ven-viaere-bio',
-      'ven-viaere-tagline',
-    ]),
-    item('hero-role-internships', 'Internships at JPMorgan Chase and RBC Capital Markets.', ['exp-jpm-2026', 'exp-rbc']),
+    item('hero-role-esvo', 'Founder of Esvo Technologies', ['ven-esvo']),
+    item('hero-role-viaere', 'Co-founder and Founding Engineer at Viaere', ['ven-viaere', 'ven-viaere-bio']),
+    item('hero-role-internships', 'Internships at JPMorgan Chase and RBC Capital Markets', ['exp-jpm-2026', 'exp-rbc']),
   ],
-  line: item(
-    'hero-line',
-    'I build software that has to hold up in the real world, for the hangar floor and the trading floor.',
-    ['ven-viaere-tagline', 'ven-viaere-bio', 'exp-rbc'],
-  ),
+  built: {
+    label: ui('hero-built-label', "A few things I've built"),
+    items: [
+      item('hero-built-800k', 'Software that saved a company more than $800K in a single month', ['built-800k'], { strong: '$800K' }),
+      item('hero-built-160h', 'A store system that saves the team 160+\u00a0hours of work every week', ['built-store-160h'], { strong: '160+\u00a0hours' }),
+      item('hero-built-seconds', 'A tool that turned a 2 to 4 hour task into a few seconds', ['built-2to4h'], { strong: 'a few seconds' }),
+    ],
+  },
   coffee: { id: 'hero-coffee', label: 'Grab a coffee chat', href: COFFEE, facts: ['ln-coffee'] },
   email: { id: 'hero-email', label: 'Email me', href: `mailto:${EMAIL}`, facts: ['ln-email'] },
   links: [

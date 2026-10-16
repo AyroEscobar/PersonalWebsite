@@ -17,10 +17,12 @@ main {
   justify-content: center;
 }
 
+/* the plate sits in the middle of the room between the nav and the theme line; on a short laptop it
+   starts under the nav and the buttons still make the first screen */
 .sec--hero {
-  padding-top: 200px;
-  padding-bottom: 0;
-  justify-content: flex-start;
+  padding-top: 96px;
+  padding-bottom: 72px;
+  justify-content: center;
 }
 .theme-line {
   position: absolute;
@@ -96,5 +98,22 @@ main {
   }
   .nf {
     padding: 0 var(--gutter) 24px;
+  }
+}
+
+/* a phone: the results follow the buttons (components.css), so the hero is taller than the screen
+   by about their height (six lines at 1.5 plus the label and the hairline, less 24 px): the first
+   screen ends just under "A few things I've built", with the man and the whole rock above the plate */
+@media (max-width: 639.98px) {
+  .sec--hero {
+    min-height: calc(100vh + 9 * var(--t-body) + 48px);
+    min-height: calc(100svh + 9 * var(--t-body) + 48px);
+  }
+}
+/* under 340 px the first two results take three lines each */
+@media (max-width: 339.98px) {
+  .sec--hero {
+    min-height: calc(100vh + 12 * var(--t-body) + 48px);
+    min-height: calc(100svh + 12 * var(--t-body) + 48px);
   }
 }

@@ -5,27 +5,53 @@ import Eyebrow from '../ui/Eyebrow.jsx'
 import { ArrowOut } from '../ui/icons.jsx'
 import { HERO } from '../content/identity.js'
 
+/** A result line with its figure set strong (the figure is a substring of the line). */
+function Built({ text, strong }) {
+  const i = strong ? text.indexOf(strong) : -1
+  if (i < 0) return text
+  return (
+    <>
+      {text.slice(0, i)}
+      <strong>{strong}</strong>
+      {text.slice(i + strong.length)}
+    </>
+  )
+}
+
 /*
-  The hero: a 540 px plate (bottom left on phones) with who he is, in order: the eyebrow (a CS
-  student at UT Dallas), his name as the page's one h1, three role lines, the one line (desktop
-  only), the coffee chat and email buttons, then LinkedIn and GitHub. The theme line sits once,
-  11 px, lower-left, never a heading.
+  The hero: a 560 px plate (bottom left on phones) with who he is, in order: his name as the
+  page's one h1, the intro (his age and his school), three short role lines, "A few things I've
+  built" with three results, the coffee chat and email buttons, then LinkedIn and GitHub. On a
+  phone the results follow the buttons, below the fold, so the first screen keeps the man, the
+  whole rock, who he is and both buttons. The theme line sits once, 11 px, lower-left, never a
+  heading.
 */
 export default function Hero() {
   return (
     <Section id="top" labelledBy="name" className="sec--hero">
       {/* the first paint: never hidden behind a reveal that waits for JS (it is the LCP element) */}
       <Panel variant="hero" reveal={false}>
-        <Eyebrow>{HERO.eyebrow.text}</Eyebrow>
         <h1 id="name" className="name">
           {HERO.name.text}
         </h1>
+        <p className="intro">{HERO.intro.text}</p>
         <ul className="roles">
           {HERO.roles.map((r) => (
             <li key={r.id}>{r.text}</li>
           ))}
         </ul>
-        <p className="oneline oneline--desk">{HERO.line.text}</p>
+        <div className="built">
+          <Eyebrow id="built" className="built-label">
+            {HERO.built.label.text}
+          </Eyebrow>
+          <ul className="built-list" aria-labelledby="built">
+            {HERO.built.items.map((b) => (
+              <li key={b.id}>
+                <Built text={b.text} strong={b.strong} />
+              </li>
+            ))}
+          </ul>
+        </div>
         <div className="actions">
           <Button variant="primary" href={HERO.coffee.href} rel="noopener">
             {HERO.coffee.label}
