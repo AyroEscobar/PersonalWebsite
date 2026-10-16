@@ -1,14 +1,12 @@
 import { FOOTER } from '../content/meta.js'
 import { FIGURE_CREDIT, REPO } from '../content/constants.js'
 import BuildStamp from './BuildStamp.jsx'
-import VisitStamp from './VisitStamp.jsx'
 import SceneControls from '../ui/SceneControls.jsx'
 
 /*
   Footer (DESIGN.md 5.13): two rows. The plain row: name · place, "no cookies, no analytics.",
   "site source", "the kit", and the CC BY credit for the figure (mandatory in every tier,
-  REFINE.md item 5). The mono row: the build line with the measured first paint, and the scene
-  controls.
+  REFINE.md item 5). The mono row: the build line and the scene controls.
 */
 export default function Footer({ className = '', kit = false, controls }) {
   return (
@@ -40,7 +38,6 @@ export default function Footer({ className = '', kit = false, controls }) {
       <div className="foot-row foot-row--mono">
         <p className="build">
           <BuildStamp />
-          <VisitStamp />
         </p>
         {controls ?? <SceneControls />}
       </div>

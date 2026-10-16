@@ -52,9 +52,6 @@ export const CHROME = {
 export const FOOTER = {
   line: item('footer-line', 'Ayro Escobar · Plano, Texas', ['identity-name', 'identity-hometown']),
   build: ui('footer-build', 'build'),
-  visitPrefix: ui('footer-visit', 'this visit:'),
-  visitPaint: ui('footer-visit-paint', 'first paint'),
-  visitSuffix: ui('footer-visit-suffix', 'on your device'),
   noTracking: ui('footer-no-tracking', 'no cookies, no analytics.'),
   source: ui('footer-source', 'site source'),
   kit: ui('footer-kit', 'the kit'),
