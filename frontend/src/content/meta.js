@@ -8,11 +8,11 @@ import { CANONICAL, GITHUB, LINKEDIN } from './constants.js'
 */
 
 export const HEAD = {
-  title: item('meta-title', 'Ayro Escobar, software engineer', ['identity-name', 'identity-role']),
+  title: item('meta-title', 'Ayro Escobar', ['identity-name']),
   description: item(
     'meta-description',
-    'Software engineer in Plano, Texas. Co-founder and Founding Engineer at Viaere, Founder of Esvo Technologies, CS at UT Dallas.',
-    ['identity-role', 'identity-hometown', 'ven-viaere-bio', 'ven-esvo', 'identity-student'],
+    'Computer science student at UT Dallas. Founder of Esvo Technologies, Co-founder and Founding Engineer at Viaere. Internships at JPMorgan Chase and RBC Capital Markets.',
+    ['identity-student', 'ven-esvo', 'ven-viaere-bio', 'exp-jpm-2026', 'exp-rbc'],
   ),
   siteName: item('meta-site-name', 'Ayro Escobar', ['identity-name']),
   canonical: CANONICAL,
@@ -22,10 +22,7 @@ export const HEAD = {
     width: 1200,
     height: 630,
     type: 'image/png',
-    alt: item('meta-og-alt', 'Ayro Escobar, software engineer. A figure pushing a huge boulder up a mountain slope at night, lit by neon.', [
-      'identity-name',
-      'identity-role',
-    ]),
+    alt: item('meta-og-alt', 'Ayro Escobar. A figure pushing a huge glass boulder up a mountain slope at night.', ['identity-name']),
   },
   person: {
     name: 'Ayro Escobar',
