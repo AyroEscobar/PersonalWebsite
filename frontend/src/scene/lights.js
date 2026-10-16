@@ -1,19 +1,20 @@
 /*
   The lights (DESIGN.md 3.6), as built in a3's boulder.js:
 
-    hemisphere   0x9ec1ff / 0x0b0d14 at 1.5, rising to 1.7 with the dawn
+    hemisphere   0x9ec1ff / 0x0b0d14 at 2.0, rising to 2.25 with the dawn
     key          DirectionalLight 0xd6ecff 2.2 along (-5, 9, 7), 12.4 m from him, a 2048 shadow (full)
                  whose camera snaps to its own texels every frame so the shadow never swims
     practicals   two PointLights inside the rock, raised 0.6 R so they never pool white on the ground;
                  the terrain takes their diffuse only (terrain.js)
     rims         two SpotLights on a point 1.2 m above his feet: pale sky uphill, warm white downhill,
                  both pulsing +15% with the push-off
-    exposure     1.25 easing to 1.1 with the dawn; fog 0x0a1526, 0.011 to 0.006 over p (lite 0.015 to 0.009),
+    exposure     1.8 easing to 1.58 with the dawn (v4: with the neon down and the sky darker, this is
+                 what keeps the poster's mean luminance at 0.25 or more); fog 0x0a1526, 0.011 to 0.006 over p (lite 0.015 to 0.009),
                  lerping to 0x1d3a52 with the dawn
 */
 import * as THREE from 'three'
 
-export const LIGHT = { hemi: [1.5, 1.7], exposure: [1.25, 1.1] }
+export const LIGHT = { hemi: [2.0, 2.25], exposure: [1.8, 1.58] }
 export const FOG = { full: [0x0a1526, 0.011, 0.006], lite: [0x0a1526, 0.015, 0.009], pale: 0x1d3a52 }
 
 export function makeLights(scene, { full = true, R = 1.95 } = {}) {
