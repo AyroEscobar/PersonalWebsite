@@ -1,6 +1,7 @@
 /*
-  v3 design tokens (DESIGN.md section 2): Night Rain. Two hues and white,
-  nothing else. Names are by role, never by value.
+  v4 design tokens: calm night. One deep ink blue, soft white, one pale sky accent. Names are by
+  role, never by value (--cyan keeps its name: rules.mjs and the components key off it; its value
+  is a pale sky blue now, and magenta is a muted scene-only grey violet).
 
   scripts/check-content.mjs parses the hex values in the FIRST :root block
   below (one token per line, `--name: #RRGGBB;`): every hex literal anywhere
@@ -11,51 +12,50 @@
 
 :root {
   /* surfaces */
-  --void: #05060D;
-  --plate: #0B0E18;
-  --plate-2: #0F1320;
+  --void: #070B16;
+  --plate: #10172A;
+  --plate-2: #16203A;
 
   /* text */
-  --ink: #F6FBFF;
-  --ink-2: #DFE6F3;
+  --ink: #F2F5FA;
+  --ink-2: #C5CFDE;
 
-  /* the two hues */
-  --cyan: #19E6FF;
-  --magenta: #FF3DBB;
-
+  /* the one accent (the primary button, link underlines, the active nav word, the email link) */
+  --cyan: #9AD2FF;
   /* the scene only, never UI */
-  --sky: #12324A;
+  --magenta: #8A7F9E;
+  --sky: #12304A;
   --dawn: #A9D8F0;
 }
 
 :root {
   /* rgb triplets, used as rgb(var(--x) / alpha) */
   --lit: 255 255 255;
-  --void-rgb: 5 6 13;
-  --cyan-rgb: 25 230 255;
+  --void-rgb: 7 11 22;
+  --cyan-rgb: 154 210 255;
 
-  /* the void alpha under copy on glass; the scene raises it to 0.70 over p 0.85 to 1 */
-  --scrim: 0.62;
+  /* the void alpha under copy on glass; the scene raises it by 0.08 over p 0.85 to 1 */
+  --scrim: 0.74;
 
-  /* hairlines between experience lines */
-  --rule: rgb(var(--lit) / 0.1);
+  /* hairlines: between experience lines, the scrolled header, the phone sheet */
+  --rule: rgb(var(--lit) / 0.12);
 
   /* type: Mona Sans for every word; Geist Mono only for the build line and the scene controls */
   --sans: 'Mona Sans', 'Mona Sans Fallback', ui-sans-serif, system-ui, sans-serif;
   --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   /* type scale (2.2), in rem so a reader's larger default size scales the page (px at 16) */
-  --t-name: 6.5rem; /* 104 the one h1 */
-  --t-section: 2.5rem; /* 40 section titles */
-  --t-card-name: 1.75rem; /* 28 Esvo Technologies, Viaere */
-  --t-role: 1.25rem; /* 20 the hero role line, the card headline */
-  --t-lead: 1.0625rem; /* 17 the one line, the contact paragraph */
+  --t-name: 4rem; /* 64 the one h1, one line */
+  --t-section: 2rem; /* 32 section titles */
+  --t-card-name: 1.5rem; /* 24 Esvo Technologies, Viaere */
+  --t-role: 1.125rem; /* 18 the three hero lines, the card headline */
+  --t-lead: 1.0625rem; /* 17 the one line, the contact paragraph, the stack sentence */
   --t-body: 1rem; /* 16 card blurbs, footer row */
   --t-line: 0.96875rem; /* 15.5 the experience lines */
-  --t-org: 1.0625rem; /* 17 the org names */
+  --t-org: 1.0625rem; /* 17 the org names, the wordmark */
   --t-btn: 0.9375rem; /* 15 buttons */
-  --t-btn-sm: 0.875rem; /* 14 small buttons, nav words */
-  --t-chip: 0.8125rem; /* 13 chips, the copied status */
+  --t-btn-sm: 0.875rem; /* 14 small buttons, nav words, the hero links */
+  --t-chip: 0.8125rem; /* 13 the copied status, the credit */
   --t-eyebrow: 0.75rem; /* 12 eyebrows, "elsewhere" */
   --t-label: 0.6875rem; /* 11 the theme line */
   --t-mono: 0.71875rem; /* 11.5 the build line, the scene controls */
@@ -77,8 +77,8 @@
   --page-max: 1360px;
 
   /* radius: concentric, outer = inner + padding */
-  --r-panel: 22px;
-  --r-card: 22px;
+  --r-panel: 20px;
+  --r-card: 18px;
   --r-chip: 14px;
   --r-inner: 12px;
   --r-pill: 999px;
@@ -87,7 +87,7 @@
   /* elevation (2.3): ink shadows, down, 1:2 */
   --e-rest: 0 12px 28px -14px rgb(0 0 0 / 0.6);
   --e-raised: 0 40px 90px -40px rgb(0 0 0 / 0.85), 0 12px 28px -14px rgb(0 0 0 / 0.6);
-  --e-inner: inset 0 1px 0 rgb(var(--lit) / 0.55), inset 0 -1px 0 rgb(var(--lit) / 0.06), inset 0 -40px 60px -50px rgb(var(--cyan-rgb) / 0.18);
+  --e-inner: inset 0 1px 0 rgb(var(--lit) / 0.08);
 
   /* motion (2.4) */
   --dur-press: 120ms;
@@ -108,13 +108,14 @@
 @media (max-width: 639.98px) {
   :root {
     --gutter: 16px;
-    --t-name: 3.25rem; /* 52 */
-    --t-section: 2rem; /* 32 */
-    --t-card-name: 1.5rem; /* 24 */
-    --t-role: 1.0625rem; /* 17 */
+    --t-name: 2.75rem; /* 44 */
+    --t-section: 1.625rem; /* 26 */
+    --t-card-name: 1.375rem; /* 22 */
+    --t-role: 1rem; /* 16 */
     --t-lead: 1rem; /* 16 */
     --t-body: 0.9375rem; /* 15 */
     --t-line: 0.9375rem; /* 15 */
+    --t-eyebrow: 0.6875rem; /* 11 */
   }
 }
 @media (min-width: 640px) and (max-width: 1099.98px) {
@@ -126,7 +127,7 @@
 /* More contrast: secondary copy goes to full ink, hairlines get stronger. */
 @media (prefers-contrast: more) {
   :root {
-    --ink-2: #F6FBFF;
+    --ink-2: var(--ink);
     --rule: rgb(var(--lit) / 0.3);
   }
 }

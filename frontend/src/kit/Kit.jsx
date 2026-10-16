@@ -63,13 +63,13 @@ const Cell = ({ label, children, className = '' }) => (
 )
 
 const COLOURS = [
-  ['void', '#05060D', ''],
-  ['plate', '#0B0E18', ''],
-  ['ink', '#F6FBFF', `18.6:1 ${KIT.tokens.onVoid.text}`],
-  ['ink-2', '#DFE6F3', `15.2:1 ${KIT.tokens.onVoid.text}`],
-  ['cyan', '#19E6FF', `13.3:1 ${KIT.tokens.onVoid.text}`],
-  ['magenta', '#FF3DBB', KIT.tokens.sceneRim.text],
-  ['sky', '#12324A', KIT.tokens.sceneOnly.text],
+  ['void', '#070B16', ''],
+  ['plate', '#10172A', ''],
+  ['ink', '#F2F5FA', `18.0:1 ${KIT.tokens.onVoid.text}`],
+  ['ink-2', '#C5CFDE', `12.5:1 ${KIT.tokens.onVoid.text}`],
+  ['cyan', '#9AD2FF', `12.2:1 ${KIT.tokens.onVoid.text}`],
+  ['magenta', '#8A7F9E', KIT.tokens.sceneOnly.text],
+  ['sky', '#12304A', KIT.tokens.sceneOnly.text],
   ['dawn', '#A9D8F0', KIT.tokens.sceneOnly.text],
 ]
 const TYPE = [

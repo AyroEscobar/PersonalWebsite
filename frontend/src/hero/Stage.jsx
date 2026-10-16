@@ -39,9 +39,9 @@ export default function Stage() {
 
     const onFrame = (f) => {
       setRims(f.boulder, { fromScene: true })
-      // the scrim rises with the backdrop above the weather: 0.62 + 0.08 smoothstep(0.85, 1, p)
+      // the scrim rises with the backdrop above the weather: 0.74 + 0.08 smoothstep(0.85, 1, p)
       const k = f.dawn / 0.35
-      d.style.setProperty('--scrim', (0.62 + 0.08 * k).toFixed(3))
+      d.style.setProperty('--scrim', (0.74 + 0.08 * k).toFixed(3))
       d.style.setProperty('--p', f.prog.toFixed(3))
     }
     const start = async () => {

@@ -16,7 +16,7 @@ export const HEAD = {
   ),
   siteName: item('meta-site-name', 'Ayro Escobar', ['identity-name']),
   canonical: CANONICAL,
-  themeColor: '#05060D',
+  themeColor: '#070B16',
   ogImage: {
     href: `${CANONICAL}og.png`,
     width: 1200,
