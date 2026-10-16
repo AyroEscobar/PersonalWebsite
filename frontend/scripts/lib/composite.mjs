@@ -112,17 +112,18 @@ async function measureLines(sharp, png, dpr, lines) {
  * Run the whole measurement.
  * cdp: a connected client (scripts/lib/cdp.mjs); url: the served dist; sharp; tmpDir for the captures.
  */
-export async function measureComposite({ cdp, url, sharp, tmpDir, views = COMPOSITE_VIEWS, ps = COMPOSITE_PS, tier = 'full', log = console.log }) {
-  const result = { views: {}, lowest: null, failures: [], method: 'text hidden, 3x3 mean, worst pixel under each line box' }
+export async function measureComposite({ cdp, url, sharp, tmpDir, views = COMPOSITE_VIEWS, ps = COMPOSITE_PS, tier = 'full', scheme = 'dark', log = console.log }) {
+  const result = { scheme, views: {}, lowest: null, failures: [], method: 'text hidden, 3x3 mean, worst pixel under each line box' }
   for (const v of views) {
-    const page = await cdp.newPage({ width: v.w, height: v.h, dpr: v.dpr, mobile: v.mobile })
+    // the scheme is emulated before the first goto, so the page paints in it from the start
+    const page = await cdp.newPage({ width: v.w, height: v.h, dpr: v.dpr, mobile: v.mobile, scheme })
     result.views[v.name] = {}
     for (const p of ps) {
       await page.goto(`${url}/?tier=${tier}&t=2.3`, { settle: 600 })
       await page.eval('new Promise((r) => { let n = 0; const f = () => (window.__ready || ++n > 200) ? setTimeout(r, 300) : setTimeout(f, 50); f() })')
       const { y, lines } = await page.eval(PAGE_LIST(p))
       await page.eval(HIDE)
-      const png = `${tmpDir}/composite-${v.name}-p${p}.png`
+      const png = `${tmpDir}/composite-${scheme}-${v.name}-p${p}.png`
       await page.screenshot(png)
       const measured = await measureLines(sharp, png, v.dpr, lines)
       const fails = measured.filter((m) => m.ratio < m.min)

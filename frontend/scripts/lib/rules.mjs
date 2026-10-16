@@ -175,6 +175,12 @@ export const CONTRAST_RULES = [
   { fg: 'cyan', bg: 'void', min: 4.5, kind: 'the eyebrows and the email link on the void' },
   { fg: 'void', bg: 'cyan', min: 4.5, kind: 'void ink on the cyan button' },
   { fg: 'ink', bg: 'void', min: 3, kind: 'the focus ring' },
+  // the light scheme (tokens.css, prefers-color-scheme: light)
+  ...['ink-l', 'ink-2-l'].map((t) => ({ fg: t, bg: 'void-l', min: 7, kind: 'light: body text on paper' })),
+  ...['ink-l', 'ink-2-l', 'cyan-l'].map((t) => ({ fg: t, bg: 'plate-l', min: 4.5, kind: 'light: text on the solid plate' })),
+  ...['ink-l', 'ink-2-l', 'cyan-l'].map((t) => ({ fg: t, bg: 'plate-2-l', min: 4.5, kind: 'light: text on the plate gradient' })),
+  { fg: 'cyan-l', bg: 'void-l', min: 4.5, kind: 'light: the email link on paper' },
+  { fg: 'void-l', bg: 'cyan-l', min: 4.5, kind: 'light: paper ink on the accent button' },
 ]
 
 /*

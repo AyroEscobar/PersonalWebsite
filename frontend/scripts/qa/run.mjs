@@ -193,6 +193,13 @@ try {
       await page.goto(url + route.path, { settle: 1800 })
       const tag = `after-${route.label}-${w}`
       if (!NO_SHOTS) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, `${tag}-fold.png`))))
+      // the light scheme's first screen (v4), home at 390 and 1440
+      if (!NO_SHOTS && route.label === 'home' && [390, 1440].includes(w)) {
+        const lp = await cdp.newPage({ width: w, height: vh, dpr: mobile ? 2 : 1, mobile, scheme: 'light' })
+        await lp.goto(url + route.path, { settle: 1800 })
+        R.shots.push(path.basename(await lp.screenshot(path.join(SHOTS, `${tag}-fold-light.png`))))
+        await lp.close()
+      }
       const height = await page.eval(fn(P.scrollThrough))
       const facts = await page.eval(fn(P.domFacts))
       const overflow = await page.eval(fn(P.overflowCheck, w))
@@ -412,10 +419,12 @@ try {
     const pill = await page.eval(`document.querySelector('#contact .email-row button')?.textContent.trim() || ''`)
     check('interaction', `copy email status @${w}`, said === 'email copied' && pill === 'copied' ? 'pass' : 'fail', `the status region says "${said}", the pill reads "${pill}"`)
     await page.close()
-    const q = await cdp.newPage({ width: w, height: mobile ? 844 : 900, dpr: mobile ? 2 : 1, mobile })
-    await q.goto(`${url}/?quiet=1`, { settle: 800 })
-    if (!NO_SHOTS) R.shots.push(path.basename(await q.screenshot(path.join(SHOTS, `after-state-${w}-quiet.png`))))
-    await q.close()
+    for (const scheme of ['dark', 'light']) {
+      const q = await cdp.newPage({ width: w, height: mobile ? 844 : 900, dpr: mobile ? 2 : 1, mobile, scheme })
+      await q.goto(`${url}/?quiet=1`, { settle: 800 })
+      if (!NO_SHOTS) R.shots.push(path.basename(await q.screenshot(path.join(SHOTS, `after-state-${w}-quiet${scheme === 'light' ? '-light' : ''}.png`))))
+      await q.close()
+    }
   }
 
   // Print: the nav, buttons and the first screen hidden (the print masthead stands in).

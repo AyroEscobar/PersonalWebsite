@@ -5,7 +5,8 @@
   glass
     contrast    every visible text line measured on the real composite (scripts/lib/composite.mjs):
                 the page with its text made transparent over the frozen scene (?t=2.3) at p 0, 0.3,
-                0.56, 0.8 and 1, at 1440, 390, 768 and 1920; 4.5:1, 3:1 for large text
+                0.56, 0.8 and 1, at 1440, 390, 768 and 1920; 4.5:1, 3:1 for large text. Again in the
+                light scheme at 1440 and 390
     surfaces    1 to 3 glass surfaces with a live backdrop-filter on the first screen (v4: the hero
                 plate and the glass email button; the nav is plain words)
     deep link   /#experience lands with the experience section current in the nav
@@ -40,7 +41,7 @@
 import { readFileSync, existsSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { measureComposite } from '../lib/composite.mjs'
+import { measureComposite, COMPOSITE_VIEWS } from '../lib/composite.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const fn = (f, ...args) => `(${f.toString()})(${args.map((a) => JSON.stringify(a)).join(',')})`
@@ -142,12 +143,18 @@ export async function glassChecks({ cdp, url, check, sleep, scratch }) {
     else {
       const tmpDir = path.join(scratch || path.join(ROOT, '.build/qa'), 'composite')
       mkdirSync(tmpDir, { recursive: true })
-      const comp = await measureComposite({ cdp, url, sharp, tmpDir, log: () => {} })
-      for (const [view, ps] of Object.entries(comp.views)) {
-        const fails = comp.failures.filter((f) => f.view === view)
-        const low = Object.values(ps).reduce((a, m) => (m.worst && (!a || m.worst.ratio / m.worst.min < a.ratio / a.min) ? m.worst : a), null)
-        const lines = Object.values(ps).reduce((n, m) => n + m.lines, 0)
-        check('glass', `measured contrast @${view}`, fails.length ? 'fail' : 'pass', fails.length ? fails.slice(0, 5).map((f) => `p ${f.p} "${f.text}" ${f.ratio} (needs ${f.min})`).join(' | ') : `${lines} text lines at p 0, 0.3, 0.56, 0.8, 1; lowest "${low?.text}" ${low?.ratio} (needs ${low?.min})`)
+      // dark at four widths; the light scheme (v4) at 1440 and 390
+      const runs = [
+        ['', await measureComposite({ cdp, url, sharp, tmpDir, log: () => {} })],
+        [' light', await measureComposite({ cdp, url, sharp, tmpDir, scheme: 'light', views: COMPOSITE_VIEWS.filter((v) => ['1440', '390'].includes(v.name)), log: () => {} })],
+      ]
+      for (const [suffix, comp] of runs) {
+        for (const [view, ps] of Object.entries(comp.views)) {
+          const fails = comp.failures.filter((f) => f.view === view)
+          const low = Object.values(ps).reduce((a, m) => (m.worst && (!a || m.worst.ratio / m.worst.min < a.ratio / a.min) ? m.worst : a), null)
+          const lines = Object.values(ps).reduce((n, m) => n + m.lines, 0)
+          check('glass', `measured contrast${suffix} @${view}`, fails.length ? 'fail' : 'pass', fails.length ? fails.slice(0, 5).map((f) => `p ${f.p} "${f.text}" ${f.ratio} (needs ${f.min})`).join(' | ') : `${lines} text lines at p 0, 0.3, 0.56, 0.8, 1; lowest "${low?.text}" ${low?.ratio} (needs ${low?.min})`)
+        }
       }
     }
   }
