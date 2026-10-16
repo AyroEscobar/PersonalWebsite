@@ -46,6 +46,7 @@
   .copied,
   .foot-row--mono,
   .theme-line,
+  .hero-links,
   .closer,
   .contact-p,
   .panel--contact .sec-title,
@@ -138,9 +139,14 @@
   .name br {
     display: none;
   }
-  .panel--hero .role {
-    font-size: 11pt;
-    margin-bottom: 2pt;
+  /* who he is: the three roles, one line each */
+  .roles {
+    gap: 1pt;
+    margin-bottom: 3pt;
+  }
+  .roles li {
+    font-size: 10pt;
+    line-height: 1.3;
   }
   .panel--hero .oneline {
     font-size: 9.5pt;
