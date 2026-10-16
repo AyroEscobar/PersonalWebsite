@@ -130,7 +130,13 @@ try {
   const h1Text = ((plain.match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1] || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
   check('prerender', 'h1 and h2s before JS', h1Text === HERO.name.text && !missingH2.length ? 'pass' : 'fail', missingH2.length ? `missing ${missingH2.join(', ')}` : `h1 "${h1Text}" and four h2s in the served HTML`)
   check('prerender', 'the hero line before JS', plain.includes(HERO.line.text) ? 'pass' : 'fail', 'the one line under the role is in the served HTML')
-  check('prerender', 'the role line before JS', plain.includes(HERO.role.text) ? 'pass' : 'fail', 'Co-founder and Founding Engineer at Viaere. Founder of Esvo Technologies. in the served HTML')
+  {
+    // who he is, in order, before JS: the eyebrow, the name, the three roles, the coffee chat, the email, LinkedIn
+    const order = [HERO.eyebrow.text, HERO.name.text, ...HERO.roles.map((r) => r.text), HERO.coffee.href, HERO.coffee.label, HERO.email.href, HERO.links[0].href]
+    let at = 0
+    const miss = order.find((s) => { const i = plain.indexOf(s, at); if (i < 0) return true; at = i + s.length; return false })
+    check('prerender', 'who he is before JS', !miss ? 'pass' : 'fail', miss ? `missing or out of order: "${miss}"` : 'student, name, Esvo, Viaere, the internships, coffee chat, email, LinkedIn, in order in the served HTML')
+  }
   const poster = (homeHtml.match(/<picture class="poster">[\s\S]*?<\/picture>/) || [])[0] || ''
   check('prerender', 'the poster before JS', /hero-1440\.avif/.test(poster) && /hero-780\.avif/.test(poster) && /fetchpriority="high"/i.test(poster) ? 'pass' : 'fail', 'both AVIF sources and a fetchpriority high <img> in the served HTML')
   const nf = await fetch(`${url}/nothing-here`)

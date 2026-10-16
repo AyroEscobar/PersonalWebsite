@@ -201,8 +201,8 @@ export default function Kit() {
           <div className="kit-row" inert>
             {[['rest', {}], ['hover', { state: 'hover' }], ['focus', { state: 'focus' }], ['press', { state: 'press' }], ['disabled', { disabled: true }]].map(([k, p]) => (
               <Cell key={k} label={S[k].text}>
-                <Button variant="primary" href={HERO.email.href} {...p}>
-                  {HERO.email.label}
+                <Button variant="primary" href={HERO.coffee.href} {...p}>
+                  {HERO.coffee.label}
                 </Button>
               </Cell>
             ))}
@@ -211,8 +211,8 @@ export default function Kit() {
           <div className="kit-row" inert>
             {[['rest', {}], ['hover', { state: 'hover' }], ['focus', { state: 'focus' }], ['press', { state: 'press' }], ['disabled', { disabled: true }]].map(([k, p]) => (
               <Cell key={k} label={S[k].text}>
-                <Button variant="glass" icon="down" href={HERO.work.href} {...p}>
-                  {HERO.work.text}
+                <Button variant="glass" href={HERO.email.href} {...p}>
+                  {HERO.email.label}
                 </Button>
               </Cell>
             ))}

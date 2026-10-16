@@ -2,11 +2,13 @@ import Section from '../ui/Section.jsx'
 import Panel from '../ui/Panel.jsx'
 import Button from '../ui/Button.jsx'
 import Eyebrow from '../ui/Eyebrow.jsx'
+import { ArrowOut } from '../ui/icons.jsx'
 import { HERO } from '../content/identity.js'
 
 /*
-  The hero (DESIGN.md 6.2, 6.3; COPY.md 3.2): the 520 px panel with the scene visible through
-  its upper third, the name as the page's one h1, two calls to action, and the theme line once,
+  The hero: a 540 px plate (bottom left on phones) with who he is, in order: the eyebrow (a CS
+  student at UT Dallas), his name as the page's one h1, three role lines, the one line (desktop
+  only), the coffee chat and email buttons, then LinkedIn and GitHub. The theme line sits once,
   11 px, lower-left, never a heading.
 */
 export default function Hero() {
@@ -18,16 +20,35 @@ export default function Hero() {
         <h1 id="name" className="name">
           {HERO.name.text}
         </h1>
-        <p className="role">{HERO.role.text}</p>
-        <p className="oneline">{HERO.line.text}</p>
+        <ul className="roles">
+          {HERO.roles.map((r) => (
+            <li key={r.id}>{r.text}</li>
+          ))}
+        </ul>
+        <p className="oneline oneline--desk">{HERO.line.text}</p>
         <div className="actions">
-          <Button variant="primary" href={HERO.email.href}>
+          <Button variant="primary" href={HERO.coffee.href} rel="noopener">
+            {HERO.coffee.label}
+          </Button>
+          <Button variant="glass" href={HERO.email.href}>
             {HERO.email.label}
           </Button>
-          <Button variant="glass" icon="down" href={HERO.work.href}>
-            {HERO.work.text}
-          </Button>
         </div>
+        <p className="hero-links">
+          {HERO.links.map((l, i) => (
+            <span key={l.id} className="hero-link">
+              {i > 0 && (
+                <span className="hero-dot" aria-hidden="true">
+                  ·
+                </span>
+              )}
+              <a href={l.href} rel="me noopener">
+                {l.label}
+                <ArrowOut />
+              </a>
+            </span>
+          ))}
+        </p>
       </Panel>
       <p className="theme-line">{HERO.theme.text}</p>
     </Section>

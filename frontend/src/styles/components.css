@@ -237,28 +237,74 @@ html[data-tier='still'] .stage canvas {
    5.4 panel, 5.5 card
    ============================================================ */
 .panel {
-  padding: 36px 34px 34px;
+  padding: 40px 40px 36px;
 }
 .panel--hero {
-  width: min(520px, 100%);
+  width: min(540px, 100%);
   display: grid;
 }
 .panel--hero .eyebrow {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 .panel--hero .name {
-  margin: 0 0 22px -4px;
+  margin: 0 0 24px -2px;
 }
-.panel--hero .role {
-  margin-bottom: 14px;
+/* the three lines that say who he is */
+.roles {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.roles li {
+  font-size: var(--t-role);
+  line-height: 1.45;
+  font-weight: 560;
+  font-stretch: 104%;
+  color: var(--ink);
 }
 .panel--hero .oneline {
-  margin-bottom: 26px;
+  margin-bottom: 28px;
 }
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+.hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 16px;
+  font-size: var(--t-btn-sm);
+  font-weight: 520;
+  color: var(--ink-2);
+}
+.hero-dot {
+  padding: 0 10px;
+}
+.hero-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  color: var(--ink-2);
+  text-decoration-color: rgb(var(--cyan-rgb) / 0.55);
+}
+@media (hover: hover) {
+  .hero-links a:hover {
+    color: var(--ink);
+    text-decoration-color: var(--cyan);
+  }
+}
+.hero-links .ic {
+  width: 11px;
+  height: 11px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .panel--exp {
   width: min(600px, 100%);
@@ -639,6 +685,28 @@ html.scrolled .top {
   color: var(--ink);
 }
 
+/* the one line is the desktop's; on a phone the three roles already say it. The two buttons stay
+   on one row down to a 360 px phone, and the eyebrow stays one line */
+@media (max-width: 639.98px) {
+  .oneline--desk {
+    display: none;
+  }
+  .panel--hero .actions {
+    gap: 10px;
+  }
+  .panel--hero .actions .btn {
+    padding: 0 18px;
+  }
+}
+@media (max-width: 379.98px) {
+  .panel--hero .eyebrow {
+    letter-spacing: 0.06em;
+  }
+  .panel--hero .actions .btn {
+    font-size: var(--t-btn-sm);
+  }
+}
+
 /* ============================================================
    phones
    ============================================================ */
@@ -727,18 +795,24 @@ html.scrolled .top {
   .panel {
     padding: 24px 22px 22px;
   }
+  .panel--hero {
+    padding: 22px 20px 18px;
+  }
   .panel--hero .eyebrow {
-    margin-bottom: 10px;
-    font-size: var(--t-label);
+    margin-bottom: 12px;
   }
   .panel--hero .name {
-    margin: 0 0 12px -2px;
+    margin: 0 0 14px -1px;
   }
-  .panel--hero .role {
-    margin-bottom: 8px;
+  .roles {
+    gap: 8px;
+    margin-bottom: 18px;
   }
   .panel--hero .oneline {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+  }
+  .hero-links {
+    margin-top: 10px;
   }
   .cards {
     width: min(100%, 600px);

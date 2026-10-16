@@ -3,8 +3,11 @@
   check picks it up. No age anywhere (BRIEF.md: age is never a selling point).
 */
 
-// [ln-linkedin] questions.md #3 default.
-export const LINKEDIN = 'https://www.linkedin.com/in/ayroescobar'
+// [ln-linkedin] The slug his email signature links (Ayro, Thu Oct 15, 2026).
+export const LINKEDIN = 'https://www.linkedin.com/in/ayro-escobar'
+
+// [ln-coffee] His Cal.com coffee chat link, beside LinkedIn in his email signature.
+export const COFFEE = 'https://cal.com/ayroescobar/coffee'
 
 // [ln-email] Every way to reach him on the site (Ayro, Mon Oct 5, 2026).
 export const EMAIL = 'ayro@esvotech.com'
