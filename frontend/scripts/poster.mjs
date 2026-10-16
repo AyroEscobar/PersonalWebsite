@@ -13,7 +13,8 @@
   The composite measurement (rules.mjs COMPOSITE_RULES): for each key, the page is laid out with
   its UI at the frame's progress and scrolled to it, the boxes of that surface are read, the bare
   scene is captured at the same progress, and the brightest pixel under those boxes is kept:
-    panel   .panel at p 0        card   .card at p 0.2         pill    .nav and .btn.glass at p 0
+    panel   .panel at p 0        card   .card at p 0.2         pill    .btn.glass at p 0 (v4's nav is plain words;
+                                                                       they are measured line by line below)
     theme   .theme-line at p 0   title  .sec-title--bare at p 0.2   footer  .footer at p 1
 
   Gate (prototype b's graft): the mean luminance of the 1440 frame must be 0.09 or higher, and
@@ -42,7 +43,7 @@ const FLOOR = 0.09
 const TARGET = 0.25
 const BUDGET = { avif: 20 * 1024, webp: 32 * 1024 }
 const FRAMES = [
-  { p: 0, keys: { panel: '.panel', pill: '.nav, .btn.glass', theme: '.theme-line' }, scrollTo: null },
+  { p: 0, keys: { panel: '.panel', pill: '.btn.glass', theme: '.theme-line' }, scrollTo: null },
   { p: 0.2, keys: { card: '.card', title: '.sec-title--bare' }, scrollTo: 'check-out' },
   { p: 1, keys: { footer: '.footer' }, scrollTo: 'bottom' },
 ]
