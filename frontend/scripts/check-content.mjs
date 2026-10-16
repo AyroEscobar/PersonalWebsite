@@ -9,7 +9,8 @@
     5  an en or em dash anywhere in src, index.html or public (fonts and binaries excepted)
     6  a banned word (voice.md)
     7  a privacy denylist term or proximity rule, an EIN or phone shape
-    8  "twenty" or "20 years" anywhere in src (no age on the site); "Onto what's next." not exactly once
+    8  an age spelled out anywhere in src ("twenty", "20 years", "I'm 20"): the age is read from the
+       one AGE constant in src/content/constants.js (identity-age); "Onto what's next." not exactly once
     9  a token pair under its contrast floor, or text on glass under its floor measured on the
        composite: the glass fill, brightness and scrim over the brightest backdrop pixel the
        poster script measured under a panel (public/poster/meta.json); and every visible text line
@@ -204,10 +205,11 @@ export async function checkContent({ quiet = false } = {}) {
       if (m) err(`${r}:${where(text, m.index)}: ${s.name}`)
     }
 
-    // 8: no age anywhere (BRIEF.md: age is never a selling point)
-    if (r.startsWith('src/')) {
-      const m = text.match(/\btwenty\b|\b20 years\b|\b\d{2} years old\b/i)
-      if (m) err(`${r}:${where(text, m.index)}: an age ("${m[0]}"); the site states no age`)
+    // 8: the age comes from one constant (Ayro asked for it on the hero, Thu Oct 15, 2026), so a
+    // birthday is a one-line change; a spelled-out age anywhere else in src goes stale unseen
+    if (r.startsWith('src/') && r !== 'src/content/constants.js') {
+      const m = text.match(/\btwenty\b|\b\d{2} years\b|\b\d{2}[ -]year[ -]old\b|\bI'?m \d{2}\b|\bI am \d{2}\b/i)
+      if (m) err(`${r}:${where(text, m.index)}: an age ("${m[0]}"); read it from AGE in src/content/constants.js`)
     }
 
     if (isCode && r.startsWith('src/')) {

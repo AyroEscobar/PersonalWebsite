@@ -1,7 +1,10 @@
 /*
   Single-source constants. Change a value here and every page, meta tag and
-  check picks it up. No age anywhere (BRIEF.md: age is never a selling point).
+  check picks it up. The age lives only here (check-content rule 8).
 */
+
+// [identity-age] Ayro asked for his age on the hero (Thu Oct 15, 2026). Birthday unknown: bump it here.
+export const AGE = 20
 
 // [ln-linkedin] The slug his email signature links (Ayro, Thu Oct 15, 2026).
 export const LINKEDIN = 'https://www.linkedin.com/in/ayro-escobar'
