@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import Glass from '../glass/Glass.jsx'
 import QuietSwitch from './QuietSwitch.jsx'
 import { SECTIONS } from '../content/sections.js'
 import { CHROME } from '../content/meta.js'
@@ -7,11 +6,12 @@ import { useStore } from '../lib/store.js'
 import { MenuLines } from './icons.jsx'
 
 /*
-  <NavPill> (DESIGN.md 5.7): top right, a clear glass pill 44 px tall with the four links, the
-  active one cyan (aria-current), then the quiet switch after an inset divider. Phones: a 44 px
-  round glass button (aria-expanded, aria-controls) that opens a glass sheet of the four links
-  under it, closing on a link click or Escape with focus returned.
-  `active`, `states` and `open` force looks for the kit.
+  The nav (the file keeps its v3 name): top right, a plain row of words, 40 px tall, the active
+  one in ink with a thin accent underline (aria-current), then the quiet switch. No glass: the
+  camera frames the man and the rock under it, and after the hero the whole header gets a solid
+  bar. Phones: a 44 px round button on a dark disc (aria-expanded, aria-controls) that opens a
+  solid plate sheet of the four words and the switch, closing on a word or Escape with focus
+  returned. `active`, `states` and `open` force looks for the kit.
 */
 export default function NavPill({ active, states = {}, open: forcedOpen, fixed = true, className = '', ...rest }) {
   const focus = useStore((s) => s.focus)
@@ -35,7 +35,7 @@ export default function NavPill({ active, states = {}, open: forcedOpen, fixed =
   }, [open])
 
   return (
-    <Glass as="nav" tier="clear" pill aria-label={CHROME.sectionsNav.text} className={['nav', fixed && 'nav--fixed', isOpen && 'open', className].filter(Boolean).join(' ')} {...rest}>
+    <nav aria-label={CHROME.sectionsNav.text} className={['nav', fixed && 'nav--fixed', isOpen && 'open', className].filter(Boolean).join(' ')} {...rest}>
       <button ref={btn} type="button" className="nav-toggle" aria-expanded={isOpen} aria-controls={`${id}-links`} aria-label={CHROME.sectionsNav.text} onClick={kit ? undefined : () => setOpen((o) => !o)}>
         <MenuLines />
       </button>
@@ -49,6 +49,6 @@ export default function NavPill({ active, states = {}, open: forcedOpen, fixed =
         ))}
       </ul>
       <QuietSwitch pressed={kit ? !!states.quiet : undefined} />
-    </Glass>
+    </nav>
   )
 }

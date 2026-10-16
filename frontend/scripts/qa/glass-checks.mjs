@@ -6,7 +6,8 @@
     contrast    every visible text line measured on the real composite (scripts/lib/composite.mjs):
                 the page with its text made transparent over the frozen scene (?t=2.3) at p 0, 0.3,
                 0.56, 0.8 and 1, at 1440, 390, 768 and 1920; 4.5:1, 3:1 for large text
-    surfaces    3 to 5 glass surfaces with a live backdrop-filter on the first screen
+    surfaces    1 to 3 glass surfaces with a live backdrop-filter on the first screen (v4: the hero
+                plate and the glass email button; the nav is plain words)
     deep link   /#experience lands with the experience section current in the nav
     keyboard    a Tab walk reaches every link, button and summary
     overflow    nothing scrolls sideways at 320, 390, 768, 1024, 1440, 1920
@@ -151,7 +152,7 @@ export async function glassChecks({ cdp, url, check, sleep, scratch }) {
   for (const [label, opts] of SIZES) {
     const page = await fresh(opts)
     const live = await page.eval(fn(liveGlass))
-    check('glass', `first-screen surfaces @${label}`, live.length >= 3 && live.length <= 5 ? 'pass' : 'fail', `${live.length} live backdrop-filters (3 to 5): ${live.join(', ')}`)
+    check('glass', `first-screen surfaces @${label}`, live.length >= 1 && live.length <= 3 ? 'pass' : 'fail', `${live.length} live backdrop-filters (1 to 3): ${live.join(', ')}`)
     await page.close()
   }
 

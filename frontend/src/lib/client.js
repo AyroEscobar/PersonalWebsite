@@ -58,7 +58,7 @@ function initActiveSection() {
   }
 }
 
-/* the wordmark steps aside once the hero has scrolled by */
+/* after the hero has scrolled by, the header becomes a solid bar (html.scrolled) */
 function initScrolledFlag() {
   const d = document.documentElement
   const on = () => d.classList.toggle('scrolled', window.scrollY > window.innerHeight * 0.5)

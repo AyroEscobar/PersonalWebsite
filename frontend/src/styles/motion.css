@@ -1,7 +1,7 @@
 /*
   motion.css: every transition on the site (DESIGN.md 2.4). One easing family (--ease-out);
   240 ms reveals with a 16 px rise, 160 ms hovers, 120 ms press, 150 ms canvas fade, 200 ms
-  wordmark. Only transform, opacity, colour, background and custom properties animate: never
+  header bar. Only transform, opacity, colour, background and custom properties animate: never
   backdrop-filter, box-shadow or filter (check-content fails the build on it). Under reduced
   motion: reveals are opacity only, no rise, and nothing else moves.
 */
@@ -46,8 +46,8 @@ html:not([data-js]) .reveal {
 .email {
   transition: background-size var(--dur-nav) var(--ease-out);
 }
-.wordmark {
-  transition: opacity var(--dur-nav) var(--ease-out), visibility var(--dur-nav);
+.top {
+  transition: background-color var(--dur-nav) var(--ease-out);
 }
 
 @media (prefers-reduced-motion: reduce) {

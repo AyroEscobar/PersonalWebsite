@@ -6,7 +6,7 @@ import { ui } from './item.js'
   links, the scroll anchors and the prerender contract all key off them.
 */
 export const SECTIONS = [
-  { id: 'check-out', label: ui('stop-check-out', 'check out') },
+  { id: 'check-out', label: ui('stop-check-out', 'work') },
   { id: 'experience', label: ui('stop-experience', 'experience') },
   { id: 'stack', label: ui('stop-stack', 'stack') },
   { id: 'contact', label: ui('stop-contact', 'contact') },
