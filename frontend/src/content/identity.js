@@ -24,7 +24,7 @@ export const HERO = {
     items: [
       item('hero-built-800k', 'Software that saved a company more than $800K in a single month', ['built-800k'], { strong: '$800K' }),
       item('hero-built-160h', 'A store system that saves the team 160+\u00a0hours of work every week', ['built-store-160h'], { strong: '160+\u00a0hours' }),
-      item('hero-built-seconds', 'A tool that turned a 2 to 4 hour task into a few seconds', ['built-2to4h'], { strong: 'a few seconds' }),
+      item('hero-built-seconds', 'A tool that turned a 2\u00a0to\u00a04\u00a0hour task into a few seconds', ['built-2to4h'], { strong: 'a few seconds' }),
     ],
   },
   coffee: { id: 'hero-coffee', label: 'Grab a coffee chat', href: COFFEE, facts: ['ln-coffee'] },
