@@ -4,7 +4,7 @@ import { PROJECTS } from '../content/projects.js'
 import { headingId, sectionById } from '../content/sections.js'
 
 /*
-  Check out (DESIGN.md 6.4): the title, then the two cards stacked at the left, 480 px, 24 px gap,
+  Work (the section id stays #check-out): the title, then the two cards stacked at the left, 480 px, 24 px gap,
   vertically centred in a 140vh section; the camera rides higher so the rock fills the right.
 */
 export default function CheckOut() {
