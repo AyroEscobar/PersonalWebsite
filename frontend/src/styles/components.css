@@ -224,6 +224,7 @@ html[data-tier='still'] .stage canvas {
   font-weight: 560;
   font-stretch: 104%;
   color: var(--ink);
+  text-wrap: balance;
 }
 .panel--hero .oneline {
   margin-bottom: 28px;
@@ -656,11 +657,29 @@ html.scrolled .top {
   color: var(--ink);
 }
 
-/* the one line is the desktop's; on a phone the three roles already say it. The two buttons stay
-   on one row down to a 360 px phone, and the eyebrow stays one line */
+/* the one line is the desktop's; on a phone the three roles already say it, and LinkedIn and
+   GitHub wait in contact, so the plate stays short enough for the man and the whole rock to stand
+   above it. The two buttons stay on one row down to a 360 px phone, and the eyebrow stays one line */
 @media (max-width: 639.98px) {
-  .oneline--desk {
+  .oneline--desk,
+  .hero-links {
     display: none;
+  }
+  .panel--hero {
+    padding: 18px 18px 16px;
+  }
+  .panel--hero .eyebrow {
+    margin-bottom: 8px;
+  }
+  .panel--hero .name {
+    margin-bottom: 10px;
+  }
+  .roles {
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .roles li {
+    line-height: 1.42;
   }
   .panel--hero .actions {
     gap: 10px;

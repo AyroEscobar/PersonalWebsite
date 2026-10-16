@@ -71,7 +71,7 @@ main {
     padding: 96px var(--gutter) 56px;
   }
   .sec--hero {
-    padding: 0 var(--gutter) 16px;
+    padding: 0 var(--gutter) 12px;
     justify-content: flex-end;
   }
   .theme-line {
