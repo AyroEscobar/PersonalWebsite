@@ -32,7 +32,6 @@ html:not([data-js]) .reveal {
 .btn--primary::after {
   transition: opacity var(--dur-hover) var(--ease-out);
 }
-.chip,
 .nav-links a,
 .ctl {
   transition: color var(--dur-hover) var(--ease-out), background-color var(--dur-hover) var(--ease-out);

@@ -2,7 +2,7 @@
   Print: a clean one-page resume. White paper, ink type, no stage, no glass, no controls. The page
   reorders itself the way a resume reads: the name, role and line; a contact row (the email and the
   three links with their addresses); experience; the two companies side by side; the stack as its
-  plain sentence; the figure credit (CC BY, every page and tier). Hex here is allowed: check-content
+  one paragraph; the figure credit (CC BY, every page and tier). Hex here is allowed: check-content
   treats this file like tokens.css.
 
   Hooks: [data-print='skip'] never prints; [data-deco] is decoration, never printed.
@@ -49,7 +49,6 @@
   .closer,
   .contact-p,
   .panel--contact .sec-title,
-  #stack .chips,
   [data-print='skip'],
   [data-deco] {
     display: none !important;
@@ -250,16 +249,8 @@
     display: none !important;
   }
 
-  /* the stack: its plain sentence instead of the chips */
-  #stack .sr-only {
-    position: static !important;
-    width: auto;
-    height: auto;
-    margin: 0;
-    overflow: visible;
-    clip: auto;
-    clip-path: none;
-    white-space: normal;
+  /* the stack: its one paragraph */
+  #stack .stack-p {
     font-size: 9pt;
     line-height: 1.4;
     color: var(--ink);

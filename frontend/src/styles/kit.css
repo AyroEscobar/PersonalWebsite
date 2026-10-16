@@ -161,11 +161,6 @@
   font-weight: 600;
   font-stretch: 104%;
 }
-.chip-sample {
-  font-size: var(--t-chip);
-  font-weight: 480;
-  color: var(--ink-2);
-}
 .theme-sample {
   font-size: var(--t-label);
   font-weight: 500;

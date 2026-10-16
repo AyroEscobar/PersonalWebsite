@@ -4,7 +4,6 @@ import Glass from '../glass/Glass.jsx'
 import Wordmark from '../ui/Wordmark.jsx'
 import NavPill from '../ui/NavPill.jsx'
 import Button from '../ui/Button.jsx'
-import Chip from '../ui/Chip.jsx'
 import Panel from '../ui/Panel.jsx'
 import ProjectCard from '../ui/ProjectCard.jsx'
 import ExperienceList from '../ui/ExperienceList.jsx'
@@ -18,7 +17,6 @@ import { KIT } from '../content/kit.js'
 import { HERO, SKIP } from '../content/identity.js'
 import { PROJECTS } from '../content/projects.js'
 import { EXPERIENCE } from '../content/work.js'
-import { STACK } from '../content/stack.js'
 import { NOT_FOUND } from '../content/meta.js'
 import { SIGNAL } from '../content/signal.js'
 
@@ -81,7 +79,6 @@ const TYPE = [
   ['body', 'card-body'],
   ['line', 'exp-sample'],
   ['btn', 'btn-sample'],
-  ['chip', 'chip-sample'],
   ['eyebrow', 'eyebrow'],
   ['label', 'theme-sample'],
   ['mono', 'mono-sample'],
@@ -136,7 +133,7 @@ export default function Kit() {
             <div>
               <p className="kit-sub">{KIT.tokens.radius.text}</p>
               <ul className="kit-radii">
-                {['panel', 'card', 'chip', 'inner', 'pill'].map((r) => (
+                {['panel', 'card', 'inner', 'pill'].map((r) => (
                   <li key={r}>
                     <span className="kit-radius" style={{ borderRadius: `var(--r-${r})` }} />
                     <span className="kit-cap">{r}</span>
@@ -220,21 +217,6 @@ export default function Kit() {
               <Button variant="glass" size="sm" icon="out" href={viaere.href}>
                 {viaere.link}
               </Button>
-            </Cell>
-          </div>
-        </Group>
-
-        {/* 4. chips */}
-        <Group id="chips" title={KIT.groups.chips.text}>
-          <div className="kit-row">
-            <Cell label={S.rest.text}>
-              <Chip>{STACK.rows[0].chips[1]}</Chip>
-            </Cell>
-            <Cell label={S.hover.text}>
-              <Chip state="hover">{STACK.rows[0].chips[1]}</Chip>
-            </Cell>
-            <Cell label={S.long.text}>
-              <Chip>{STACK.rows[3].chips[0]}</Chip>
             </Cell>
           </div>
         </Group>

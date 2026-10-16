@@ -197,43 +197,6 @@ html[data-tier='still'] .stage canvas {
 }
 
 /* ============================================================
-   5.3 chips: never interactive
-   ============================================================ */
-.chips {
-  display: grid;
-  gap: 10px;
-}
-.chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 4px 13px;
-  border-radius: var(--r-chip);
-  font-size: var(--t-chip);
-  line-height: 1.3;
-  font-weight: 480;
-  font-stretch: 100%;
-  color: var(--ink-2);
-  background: rgb(var(--lit) / 0.06);
-  box-shadow: inset 0 0 0 1px rgb(var(--lit) / 0.16), inset 0 1px 0 rgb(var(--lit) / 0.22);
-}
-@media (hover: hover) {
-  .chip:hover {
-    box-shadow: inset 0 0 0 1px rgb(var(--cyan-rgb) / 0.6), inset 0 1px 0 rgb(var(--lit) / 0.4);
-    color: var(--ink);
-  }
-}
-.chip.is-hover {
-  box-shadow: inset 0 0 0 1px rgb(var(--cyan-rgb) / 0.6), inset 0 1px 0 rgb(var(--lit) / 0.4);
-  color: var(--ink);
-}
-
-/* ============================================================
    5.4 panel, 5.5 card
    ============================================================ */
 .panel {
@@ -312,12 +275,17 @@ html[data-tier='still'] .stage canvas {
 .panel--exp .sec-title {
   margin-bottom: 22px;
 }
-/* 684, not DESIGN's 660: at 660 the cloud-and-data row left GraphQL alone on a line */
 .panel--stack {
-  width: min(684px, 100%);
+  width: min(620px, 100%);
 }
 .panel--stack .sec-title {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+.stack-p {
+  font-size: var(--t-lead);
+  line-height: 1.6;
+  font-weight: 420;
+  color: var(--ink-2);
 }
 .panel--contact {
   width: min(520px, 100%);

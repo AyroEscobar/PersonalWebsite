@@ -38,7 +38,6 @@ export default {
       none: '0',
       panel: 'var(--r-panel)',
       card: 'var(--r-card)',
-      chip: 'var(--r-chip)',
       inner: 'var(--r-inner)',
       full: 'var(--r-pill)',
     },

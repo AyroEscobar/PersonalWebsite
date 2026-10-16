@@ -44,7 +44,6 @@ export const KIT = {
     tokens: ui('kit-g-tokens', 'tokens'),
     glass: ui('kit-g-glass', 'glass'),
     buttons: ui('kit-g-buttons', 'buttons'),
-    chips: ui('kit-g-chips', 'chips'),
     card: ui('kit-g-card', 'card'),
     experience: ui('kit-g-experience', 'experience list'),
     nav: ui('kit-g-nav', 'nav pill'),
