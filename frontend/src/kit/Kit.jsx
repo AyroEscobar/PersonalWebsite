@@ -1,6 +1,5 @@
 import Stage from '../hero/Stage.jsx'
 import Poster from '../hero/Poster.jsx'
-import Glass from '../glass/Glass.jsx'
 import Wordmark from '../ui/Wordmark.jsx'
 import NavPill from '../ui/NavPill.jsx'
 import Button from '../ui/Button.jsx'
@@ -186,9 +185,6 @@ export default function Kit() {
                 </Panel>
               </Cell>
             ))}
-            <Cell label={KIT.glass.clear.text}>
-              <Glass tier="clear" pill className="kit-clear-sample" />
-            </Cell>
           </div>
         </Group>
 

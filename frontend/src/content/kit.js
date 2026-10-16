@@ -46,7 +46,7 @@ export const KIT = {
     buttons: ui('kit-g-buttons', 'buttons'),
     card: ui('kit-g-card', 'card'),
     experience: ui('kit-g-experience', 'experience list'),
-    nav: ui('kit-g-nav', 'nav pill'),
+    nav: ui('kit-g-nav', 'nav'),
     contact: ui('kit-g-contact', 'copy email and link row'),
     controls: ui('kit-g-controls', 'scene controls'),
     stage: ui('kit-g-stage', 'stage'),
@@ -64,7 +64,6 @@ export const KIT = {
   },
   glass: {
     thick: ui('kit-glass-thick', 'thick panel'),
-    clear: ui('kit-glass-clear', 'clear pill'),
     noblur: ui('kit-fb-noblur', 'no backdrop-filter'),
     reduced: ui('kit-fb-reduced', 'reduced transparency, or the quiet switch'),
     contrast: ui('kit-fb-contrast', 'more contrast'),
@@ -72,7 +71,7 @@ export const KIT = {
     lite: ui('kit-fb-lite', 'tier lite'),
   },
   nav: {
-    desktop: ui('kit-nav-desktop', 'desktop pill'),
+    desktop: ui('kit-nav-desktop', 'desktop words'),
     phone: ui('kit-nav-phone', 'phone button and sheet'),
     switchOff: ui('kit-nav-switch-off', 'quiet switch off'),
     switchOn: ui('kit-nav-switch-on', 'quiet switch on'),
