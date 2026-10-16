@@ -52,7 +52,7 @@ function headTags() {
   return [
     `<title>${esc(HEAD.title.text)}</title>`,
     meta('name', 'description', HEAD.description.text),
-    meta('name', 'color-scheme', 'dark light'),
+    meta('name', 'color-scheme', 'dark'),
     meta('name', 'theme-color', HEAD.themeColor),
     `<link rel="canonical" href="${esc(HEAD.canonical)}" />`,
     `<link rel="icon" href="/favicon.svg" type="image/svg+xml" />`,

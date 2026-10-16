@@ -12,7 +12,7 @@
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: var(--night);
+  background: var(--void);
   overflow: hidden;
 }
 .poster img,
@@ -655,30 +655,6 @@ html.scrolled .top {
   font-weight: 560;
   font-stretch: 104%;
   color: var(--ink);
-}
-
-/* the light scheme: the scene stays night, so nothing dark sits on it bare. The header is a paper
-   bar from the first screen, and the bare section title gets a small paper plate */
-@media (prefers-color-scheme: light) {
-  .top {
-    background-color: rgb(var(--void-rgb) / 0.88);
-    box-shadow: 0 1px 0 var(--rule);
-  }
-  .wordmark,
-  .nav-links a,
-  .quiet {
-    text-shadow: none;
-  }
-  .sec-title--bare {
-    width: fit-content;
-    padding: 4px 14px 6px;
-    border-radius: var(--r-inner);
-    background: rgb(var(--void-rgb) / 0.88);
-    text-shadow: none;
-  }
-  .theme-line {
-    background: rgb(var(--void-rgb) / 0.88);
-  }
 }
 
 /* the one line is the desktop's; on a phone the three roles already say it, and LinkedIn and

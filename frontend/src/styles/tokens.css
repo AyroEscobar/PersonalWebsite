@@ -22,19 +22,10 @@
 
   /* the one accent (the primary button, link underlines, the active nav word, the email link) */
   --cyan: #9AD2FF;
-  /* the scene only, never UI; --night is the stage's own base, the same in both schemes */
+  /* the scene only, never UI */
   --magenta: #8A7F9E;
   --sky: #12304A;
   --dawn: #A9D8F0;
-  --night: #070B16;
-
-  /* the light scheme (the OS asks for it): warm paper, the printed resume's family; the scene stays night */
-  --void-l: #F7F6F2;
-  --plate-l: #FFFFFF;
-  --plate-2-l: #EFECE6;
-  --ink-l: #15120E;
-  --ink-2-l: #4A443C;
-  --cyan-l: #085A68;
 }
 
 :root {
@@ -110,24 +101,6 @@
   --focus: 0 0 0 2px var(--void), 0 0 0 4px var(--ink);
 
   color-scheme: dark;
-}
-
-/* The light scheme follows the OS: paper plates and dark ink over the same night scene, like a photo
-   on paper. Tokens only; components read the same names. */
-@media (prefers-color-scheme: light) {
-  :root {
-    --void: var(--void-l);
-    --plate: var(--plate-l);
-    --plate-2: var(--plate-2-l);
-    --ink: var(--ink-l);
-    --ink-2: var(--ink-2-l);
-    --cyan: var(--cyan-l);
-    --lit: 21 18 14;
-    --void-rgb: 247 246 242;
-    --cyan-rgb: 8 90 104;
-    --rule: rgb(var(--lit) / 0.12);
-    color-scheme: light;
-  }
 }
 
 /* gutters: 72 at 1100 px and up, 32 from 640 to 1099, 16 under 640 */

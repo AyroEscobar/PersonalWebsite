@@ -3,7 +3,7 @@
   built-in WebSocket. Enough for the QA run and the OG capture.
 
     const cdp = await connect(wsUrl)
-    const page = await cdp.newPage({ width: 390, height: 844, dpr: 2, mobile: true })   scheme: 'dark' (default) | 'light'
+    const page = await cdp.newPage({ width: 390, height: 844, dpr: 2, mobile: true })
     await page.goto(url)                 waits for load
     await page.eval('document.title')    returns by value, awaits promises
     await page.screenshot(file, { fullPage: true })
@@ -42,9 +42,7 @@ export async function connect(wsUrl) {
       ws.send(JSON.stringify({ id, method, params, sessionId }))
     })
 
-  // scheme: the emulated prefers-color-scheme. Headless Chrome reports light by default, and the site has
-  // a light scheme now, so every capture says which one it means (dark unless asked)
-  async function newPage({ width = 1440, height = 900, dpr = 1, mobile = false, touch = mobile, userAgent, scheme = 'dark' } = {}) {
+  async function newPage({ width = 1440, height = 900, dpr = 1, mobile = false, touch = mobile, userAgent } = {}) {
     const { targetId } = await send('Target.createTarget', { url: 'about:blank' })
     const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true })
     const s = (method, params) => send(method, params, sessionId)
@@ -85,10 +83,7 @@ export async function connect(wsUrl) {
     await page.setViewport({ width, height, dpr, mobile, touch })
     if (userAgent) await s('Emulation.setUserAgentOverride', { userAgent })
 
-    // the colour scheme rides along with every other emulated feature unless the caller sets it
-    page.scheme = scheme
-    page.media = (features = []) => s('Emulation.setEmulatedMedia', { features: features.some((f) => f.name === 'prefers-color-scheme') ? features : [...features, { name: 'prefers-color-scheme', value: page.scheme }] })
-    await page.media([])
+    page.media = (features = []) => s('Emulation.setEmulatedMedia', { features })
     page.reset = () => {
       page.console = []
       page.requests = []
