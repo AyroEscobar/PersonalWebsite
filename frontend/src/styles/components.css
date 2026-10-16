@@ -579,8 +579,11 @@ html.scrolled .top {
    ============================================================ */
 .contact-p {
   font-size: var(--t-lead);
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--ink-2);
+  margin-bottom: 24px;
+}
+.contact-coffee {
   margin-bottom: 20px;
 }
 .email-row {

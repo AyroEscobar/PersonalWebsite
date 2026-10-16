@@ -1,9 +1,9 @@
 import { item, ui } from './item.js'
-import { EMAIL, GITHUB, INSTAGRAM, LINKEDIN } from './constants.js'
+import { COFFEE, EMAIL, GITHUB, INSTAGRAM, LINKEDIN } from './constants.js'
 
 /*
-  Contact (COPY.md 3.6). "Onto what's next." appears exactly once on the whole
-  site (check-content enforces it). Three channels; Viaere has its own card.
+  Contact. The paragraph, then the coffee chat first, then the email row and three channels.
+  "Onto what's next." appears exactly once on the whole site (check-content enforces it).
 */
 
 export const SIGNAL = {
@@ -13,6 +13,7 @@ export const SIGNAL = {
     ['voice-contact'],
     { verbatim: 'voice-contact' },
   ),
+  coffee: { id: 'signal-coffee', label: 'Grab a coffee chat', href: COFFEE, facts: ['ln-coffee'] },
   email: item('signal-email', EMAIL, ['ln-email'], { mailto: `mailto:${EMAIL}` }),
   copy: ui('signal-copy', 'copy'),
   copyEmail: ui('signal-copy-email', 'copy email'),

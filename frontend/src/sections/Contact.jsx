@@ -1,13 +1,14 @@
 import Section from '../ui/Section.jsx'
 import Panel from '../ui/Panel.jsx'
+import Button from '../ui/Button.jsx'
 import CopyEmail from '../ui/CopyEmail.jsx'
 import LinkRow from '../ui/LinkRow.jsx'
 import { SIGNAL } from '../content/signal.js'
 import { headingId, sectionById } from '../content/sections.js'
 
 /*
-  Contact (DESIGN.md 6.7): the wide. A 240vh section whose 520 px panel sticks bottom-left while
-  the scene pulls out behind it; the paragraph, the email row, "elsewhere", and the closer once.
+  Contact: the wide. A 240vh section whose 520 px panel sticks bottom-left while the scene pulls
+  out behind it; the paragraph, the coffee chat, the email row, "elsewhere", and the closer once.
 */
 export default function Contact() {
   const s = sectionById('contact')
@@ -18,6 +19,11 @@ export default function Contact() {
           {s.label.text}
         </h2>
         <p className="contact-p">{SIGNAL.paragraph.text}</p>
+        <p className="contact-coffee">
+          <Button variant="primary" href={SIGNAL.coffee.href} rel="noopener" data-short={SIGNAL.coffee.href.replace(/^https?:\/\//, '')}>
+            {SIGNAL.coffee.label}
+          </Button>
+        </p>
         <CopyEmail />
         <LinkRow />
         <p className="closer">{SIGNAL.closer.text}</p>
