@@ -1,24 +1,22 @@
 /*
-  Base: the document, type defaults, links, focus, the skip link.
+  Base: the document, type defaults, links, focus, the skip link and the small helpers.
   Loaded after Tailwind's preflight (see index.css).
 */
 
 html {
-  background-color: var(--void);
+  background-color: var(--ground);
   color: var(--ink);
-  font-family: var(--sans);
+  font-family: var(--text);
   font-size: 100%;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  font-kerning: normal;
-  scroll-padding-top: 96px;
+  scroll-padding-top: calc(var(--neck-h) + 16px);
   -webkit-tap-highlight-color: transparent;
   overflow-x: clip;
-  scroll-behavior: smooth;
 }
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: no-preference) {
   html {
-    scroll-behavior: auto;
+    scroll-behavior: smooth;
   }
 }
 /* tools: a fixed clock (?t=) also means instant scrolls, so a capture lands where it asked */
@@ -26,25 +24,22 @@ html.clock-fixed {
   scroll-behavior: auto;
 }
 
-@media (max-width: 639.98px) {
-  html {
-    scroll-padding-top: 24px;
-  }
-}
-
 body {
   margin: 0;
   min-height: 100svh;
-  background-color: var(--void);
+  background-color: var(--ground);
   color: var(--ink);
-  font-size: var(--t-body);
-  line-height: 1.5;
-  font-weight: 420;
-  font-stretch: 100%;
+  font: 400 18px/1.6 var(--text);
+  font-kerning: normal;
+  font-variant-ligatures: common-ligatures;
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+}
+@media (max-width: 959.98px) {
+  body {
+    font-size: 17px;
+  }
 }
 
 #root {
@@ -52,32 +47,46 @@ body {
   min-height: 100svh;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   margin: 0;
   font-weight: inherit;
-  color: var(--ink);
+  font-size: inherit;
+  color: inherit;
 }
 
-p, li, dd {
+p,
+li,
+dd {
   text-wrap: pretty;
 }
 
-p { margin: 0; }
-ul { margin: 0; padding: 0; list-style: none; }
+p {
+  margin: 0;
+}
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 
-/* Links: ink with a cyan underline, never colour only. Links outside glass sit
-   on the raw scene; ink holds 4.5:1 on its brightest pixel (rules.mjs). */
+strong {
+  font-weight: 600;
+}
+
+/* Links take their surface's ink and a 1 px underline; never colour alone. */
 a {
-  color: var(--ink);
+  color: inherit;
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.22em;
-  text-decoration-color: rgb(var(--cyan-rgb) / 0.55);
-  transition: text-decoration-color var(--dur-hover) var(--ease-out), color var(--dur-hover) var(--ease-out);
+  text-underline-offset: 0.18em;
 }
 @media (hover: hover) and (pointer: fine) {
   a:hover {
-    text-decoration-color: var(--cyan);
+    text-decoration-thickness: 2px;
   }
 }
 
@@ -90,22 +99,27 @@ button {
   cursor: pointer;
 }
 
-/* One focus ring everywhere (2.1): a void gap, then the ink ring, as a shadow so it follows radii. */
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* One focus ring everywhere: a ground gap, then an ink ring, square like everything else. */
 :focus-visible {
   outline: none;
   box-shadow: var(--focus);
-  border-radius: var(--r-1);
 }
 :focus:not(:focus-visible) {
   outline: none;
 }
 
 ::selection {
-  background: rgb(var(--cyan-rgb) / 0.28);
-  color: var(--ink);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
-.sr-only {
+.sr-only,
+.sr {
   position: absolute !important;
   width: 1px;
   height: 1px;
@@ -117,18 +131,30 @@ button {
   border: 0;
 }
 
+/* the interpunct between words: the Roman inscriptional word divider */
+.ip {
+  display: inline-block;
+  padding: 0 0.42em;
+}
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--max) + 2 * var(--gutter));
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
 .skip-link {
   position: fixed;
-  left: 16px;
-  top: 16px;
+  left: 12px;
+  top: 12px;
   z-index: 100;
   padding: 12px 18px;
-  background: var(--cyan);
-  color: var(--void);
-  font: 600 var(--t-btn) / 1 var(--sans);
-  font-stretch: 104%;
+  background: var(--ink);
+  color: var(--ground);
+  font: 400 15px/1 var(--label);
+  letter-spacing: 0.08em;
   text-decoration: none;
-  border-radius: var(--r-pill);
   transform: translateY(-200%);
 }
 .skip-link:focus,
@@ -139,27 +165,22 @@ button {
 /* Numbers that line up: dates, the build hash. */
 .tnum,
 time {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
-/* The `notext` QA mode (?notext=1): text and its underlines hidden so the contrast capture
-   sees only the backdrop. */
+/* The `notext` QA mode (?notext=1): text and its underlines hidden so a contrast capture sees only
+   what sits behind it. */
 html.notext body * {
   color: transparent !important;
-  text-shadow: none !important;
   text-decoration-color: transparent !important;
 }
 
-/* ui=0: the bare scene, for the poster and README captures */
-html[data-ui='0'] .top,
-html[data-ui='0'] main,
-html[data-ui='0'] .footer,
+/* ui=0: the bare frieze, for captures */
+html[data-ui='0'] .neck,
+html[data-ui='0'] .hero-plate,
+html[data-ui='0'] .theme-line,
 html[data-ui='0'] .skip-link {
   visibility: hidden;
-}
-/* the stage sits inside <main> (a landmark for the poster's alt), so it opts back in */
-html[data-ui='0'] main .stage {
-  visibility: visible;
 }
 
 /* Forced colours: decorative layers go away, focus stays visible. */
