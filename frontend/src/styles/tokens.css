@@ -1,125 +1,137 @@
 /*
-  v4 design tokens: calm night. One deep ink blue, soft white, one pale sky accent. Names are by
-  role, never by value (--cyan keeps its name: rules.mjs and the components key off it; its value
-  is a pale sky blue now, and magenta is a muted scene-only grey violet).
+  v5 tokens: the amphora. The site is side A of a neck amphora: the header is the neck, the hero is the
+  shoulder frieze (the man and the boulder on the painter's ground line), the sections sit on the pale
+  slip of the belly, the footer is the black foot. Light is the black-figure vase (black on clay); dark is
+  the same vase in red-figure (clay on black).
 
-  scripts/check-content.mjs parses the hex values in the FIRST :root block
-  below (one token per line, `--name: #RRGGBB;`): every hex literal anywhere
-  else in src must be one of them, and every text token is checked against
-  every surface it sits on, including the glass composite over the brightest
-  backdrop the poster measured (public/poster/meta.json).
+  scripts/check-content.mjs reads the hex values in the FIRST :root block below (one token per line,
+  `--name: #RRGGBB;`): it is the palette of both themes, every hex literal anywhere else in src must be
+  one of them, and the contrast rules (scripts/lib/rules.mjs) are written against these names. The role
+  tokens below it, and the dark theme, only ever reference palette names.
 */
 
 :root {
-  /* surfaces */
-  --void: #070B16;
-  --plate: #10172A;
-  --plate-2: #16203A;
-
-  /* text */
-  --ink: #F2F5FA;
-  --ink-2: #C5CFDE;
-
-  /* the one accent (the primary button, link underlines, the active nav word, the email link) */
-  --cyan: #9AD2FF;
-  /* the scene only, never UI */
-  --magenta: #8A7F9E;
-  --sky: #12304A;
-  --dawn: #A9D8F0;
+  --slip: #F1E3CF;
+  --slip-2: #F7EDDD;
+  --clay: #C47D45;
+  --clay-lit: #E09249;
+  --gloss: #141110;
+  --gloss-2: #1E1916;
+  --gloss-3: #241C17;
+  --foot-dark: #0D0B0A;
+  --cream: #EFE4CC;
+  --aged: #C8B491;
+  --umber: #3A2E26;
+  --red: #6A3227;
+  --white: #F4EAD2;
 }
 
+/* roles: light, black-figure (the default) */
 :root {
-  /* rgb triplets, used as rgb(var(--x) / alpha) */
-  --lit: 255 255 255;
-  --void-rgb: 7 11 22;
-  --cyan-rgb: 154 210 255;
+  --ground: var(--slip);
+  --panel: var(--slip-2);
+  --plate: var(--slip);
+  --frieze: var(--clay);
+  --frieze-lit: var(--clay-lit);
+  --frieze-ink: var(--gloss);
+  --ink: var(--gloss);
+  --ink-2: var(--umber);
+  --accent: var(--red);
+  --accent-ink: var(--slip);
+  --plate-rule: var(--gloss);
+  --foot: var(--gloss);
+  --foot-ink: var(--cream);
+  --foot-ink-2: var(--aged);
+  --foot-band: var(--clay);
+  --foot-band-ink: var(--gloss);
+  --rule: rgb(20 17 16 / 0.18);
+  --foot-rule: rgb(239 228 204 / 0.12);
+  --ring: 1;
+  --focus: 0 0 0 2px var(--ground), 0 0 0 4px var(--ink);
 
-  /* the void alpha under copy on glass; the scene raises it by 0.08 over p 0.85 to 1 */
-  --scrim: 0.74;
-
-  /* hairlines: between experience lines, the scrolled header, the phone sheet */
-  --rule: rgb(var(--lit) / 0.12);
-
-  /* type: Mona Sans for every word; Geist Mono only for the build line and the scene controls */
-  --sans: 'Mona Sans', 'Mona Sans Fallback', ui-sans-serif, system-ui, sans-serif;
-  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-
-  /* type scale (2.2), in rem so a reader's larger default size scales the page (px at 16) */
-  --t-name: 4rem; /* 64 the one h1, one line */
-  --t-section: 2rem; /* 32 section titles */
-  --t-card-name: 1.5rem; /* 24 Esvo Technologies, Viaere */
-  --t-role: 1.125rem; /* 18 the three hero lines, the card headline */
-  --t-lead: 1.0625rem; /* 17 the one line, the contact paragraph, the stack sentence */
-  --t-body: 1rem; /* 16 card blurbs, footer row */
-  --t-line: 0.96875rem; /* 15.5 the experience lines */
-  --t-org: 1.0625rem; /* 17 the org names, the wordmark */
-  --t-btn: 0.9375rem; /* 15 buttons */
-  --t-btn-sm: 0.875rem; /* 14 small buttons, nav words, the hero links */
-  --t-chip: 0.8125rem; /* 13 the copied status, the credit */
-  --t-eyebrow: 0.75rem; /* 12 eyebrows, "elsewhere" */
-  --t-label: 0.6875rem; /* 11 the theme line */
-  --t-mono: 0.71875rem; /* 11.5 the build line, the scene controls */
-
-  /* space */
-  --s-1: 4px;
-  --s-2: 8px;
-  --s-3: 12px;
-  --s-4: 16px;
-  --s-5: 20px;
-  --s-6: 24px;
-  --s-7: 32px;
-  --s-8: 48px;
-  --s-9: 64px;
-  --s-10: 96px;
+  /* type: Roman capitals, a book face, an inscriptional label face; no monospace ships.
+     --mono is the label stack, so the kit captions and the scene controls keep one name. */
+  --display: 'Cinzel', 'Cinzel Fallback', Georgia, serif;
+  --text: 'EB Garamond', 'Garamond Fallback', Georgia, serif;
+  --label: 'Marcellus SC', 'Marcellus Fallback', Georgia, serif;
+  --mono: var(--label);
 
   /* layout */
-  --gutter: 72px;
-  --page-max: 1360px;
+  --neck-h: 68px;
+  --mu: 5px; /* the meander unit: stroke = gap = one unit */
+  --meander-h: calc(var(--mu) * 5 + 12px);
+  --gutter: clamp(20px, 4vw, 64px);
+  --max: 1320px;
+  --plate-w: 560px;
+  --frieze-h: clamp(330px, 46svh, 520px);
 
-  /* radius: concentric, outer = inner + padding */
-  --r-panel: 20px;
-  --r-card: 18px;
-  --r-inner: 12px;
-  --r-pill: 999px;
-  --r-1: 6px;
+  /* the composition box (src/scene/comp.js: ASPECT, FOOT_X, FOOT_Y; check-content holds them equal) */
+  --room-aspect: 1.3793;
+  --foot-x: 30.25%;
+  --foot-y: 90.00%;
 
-  /* elevation (2.3): ink shadows, down, 1:2 */
-  --e-rest: 0 12px 28px -14px rgb(0 0 0 / 0.6);
-  --e-raised: 0 40px 90px -40px rgb(0 0 0 / 0.85), 0 12px 28px -14px rgb(0 0 0 / 0.6);
-  --e-inner: inset 0 1px 0 rgb(var(--lit) / 0.08);
-
-  /* motion (2.4) */
-  --dur-press: 120ms;
+  /* motion */
   --dur-hover: 160ms;
-  --dur-reveal: 240ms;
-  --dur-canvas: 150ms;
-  --dur-nav: 200ms;
+  --dur-canvas: 260ms;
+  --dur-bar: 200ms;
+  --dur-ticks: 220ms;
   --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
-  --ease-press: cubic-bezier(0.23, 1, 0.32, 1);
 
-  /* focus: a void gap, then an ink ring */
-  --focus: 0 0 0 2px var(--void), 0 0 0 4px var(--ink);
+  color-scheme: light;
+}
 
+/* dark: red-figure, the same vase with clay figures on the black gloss */
+:root[data-theme='dark'] {
+  --ground: var(--gloss);
+  --panel: var(--gloss-2);
+  --plate: var(--gloss-2);
+  --frieze: var(--gloss);
+  --frieze-lit: var(--gloss-3);
+  --frieze-ink: var(--clay);
+  --ink: var(--cream);
+  --ink-2: var(--aged);
+  --accent: var(--clay-lit);
+  --accent-ink: var(--gloss);
+  --plate-rule: rgb(239 228 204 / 0.32);
+  --foot: var(--foot-dark);
+  --foot-band-ink: var(--clay);
+  --foot-band: var(--gloss);
+  --rule: rgb(239 228 204 / 0.16);
+  --ring: 0.3;
   color-scheme: dark;
 }
-
-/* gutters: 72 at 1100 px and up, 32 from 640 to 1099, 16 under 640 */
-@media (max-width: 639.98px) {
-  :root {
-    --gutter: 16px;
-    --t-name: min(2.75rem, 10.8vw); /* 44, and never wider than a 320 px phone's plate */
-    --t-section: 1.625rem; /* 26 */
-    --t-card-name: 1.375rem; /* 22 */
-    --t-role: 0.9375rem; /* 15 */
-    --t-lead: 1rem; /* 16 */
-    --t-body: 0.9375rem; /* 15 */
-    --t-line: 0.9375rem; /* 15 */
-    --t-eyebrow: 0.6875rem; /* 11 */
+/* no JavaScript and no stored choice: the system's preference */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ground: var(--gloss);
+    --panel: var(--gloss-2);
+    --plate: var(--gloss-2);
+    --frieze: var(--gloss);
+    --frieze-lit: var(--gloss-3);
+    --frieze-ink: var(--clay);
+    --ink: var(--cream);
+    --ink-2: var(--aged);
+    --accent: var(--clay-lit);
+    --accent-ink: var(--gloss);
+    --plate-rule: rgb(239 228 204 / 0.32);
+    --foot: var(--foot-dark);
+    --foot-band-ink: var(--clay);
+    --foot-band: var(--gloss);
+    --rule: rgb(239 228 204 / 0.16);
+    --ring: 0.3;
+    color-scheme: dark;
   }
 }
-@media (min-width: 640px) and (max-width: 1099.98px) {
+
+@media (max-width: 959.98px) {
   :root {
-    --gutter: 32px;
+    --neck-h: 58px;
+    --mu: 4px;
+  }
+}
+@media (min-width: 960px) and (max-width: 1180px) {
+  :root {
+    --plate-w: 500px;
   }
 }
 
@@ -127,20 +139,28 @@
 @media (prefers-contrast: more) {
   :root {
     --ink-2: var(--ink);
-    --rule: rgb(var(--lit) / 0.3);
+    --rule: currentColor;
   }
 }
 
-/* Forced colours: system colours win. The scene and the glass layers hide themselves. */
+/* Forced colours: system colours win. The scene and the clay hide themselves (components.css). */
 @media (forced-colors: active) {
   :root {
-    --void: Canvas;
+    --ground: Canvas;
+    --panel: Canvas;
     --plate: Canvas;
-    --plate-2: Canvas;
+    --frieze: Canvas;
+    --frieze-lit: Canvas;
+    --frieze-ink: CanvasText;
     --ink: CanvasText;
     --ink-2: CanvasText;
-    --cyan: LinkText;
+    --accent: LinkText;
+    --accent-ink: Canvas;
+    --plate-rule: CanvasText;
     --rule: CanvasText;
+    --foot: Canvas;
+    --foot-ink: CanvasText;
+    --foot-ink-2: CanvasText;
     --focus: 0 0 0 2px Canvas, 0 0 0 4px Highlight;
   }
 }
