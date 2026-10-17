@@ -1,36 +1,73 @@
 /*
-  Two families, two self-hosted files, Latin subsets, SIL OFL 1.1 (licences
-  beside the files in src/assets/fonts).
+  Three families, four self-hosted files, SIL OFL 1.1 (licences beside the files in src/assets/fonts,
+  sources and authors in frontend/CREDITS.md).
 
-    Mona Sans (variable, wght 200 to 900, wdth 75 to 125)   every word on the site; preloaded
-    Geist Mono (400)   the footer build line and the two scene controls only; not preloaded
+    Cinzel (variable, wght 400 to 500)       Roman inscriptional capitals: the name, the wordmark, the
+                                             section titles. Preloaded.
+    EB Garamond (variable, wght 400 to 600)  every sentence. Preloaded.
+    EB Garamond italic (400)                 the card headlines, the receipts, the closer.
+    Marcellus SC (400)                       the label face: nav, buttons, eyebrows, toggles, controls.
 
-  The sans fallback is metric matched to Arial so the swap moves nothing.
+  The two preloaded files are cut to the glyphs the site sets (scripts/fonts/subset.py). Each family has
+  a metric fallback on Georgia (size-adjust and ascent and descent overrides, measured against Georgia in
+  headless Chrome), so the swap barely moves the plate.
 */
 
 @font-face {
-  font-family: 'Mona Sans';
+  font-family: 'Cinzel';
   font-style: normal;
-  font-weight: 200 900;
-  font-stretch: 75% 125%;
+  font-weight: 400 500;
   font-display: swap;
-  src: url('../assets/fonts/mona-sans-vf-latin.woff2') format('woff2');
+  src: url('../assets/fonts/cinzel-latin-wght-normal.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Geist Mono';
+  font-family: 'EB Garamond';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('../assets/fonts/eb-garamond-latin-wght-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'EB Garamond';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/eb-garamond-latin-400-italic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Marcellus SC';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('../assets/fonts/geist-mono-latin.woff2') format('woff2');
+  src: url('../assets/fonts/marcellus-sc-latin-400-normal.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Mona Sans Fallback';
-  font-style: normal;
-  src: local('Arial'), local('ArialMT'), local('Helvetica');
-  size-adjust: 103%;
-  ascent-override: 92%;
-  descent-override: 23%;
+  font-family: 'Cinzel Fallback';
+  src: local('Georgia');
+  size-adjust: 102%;
+  ascent-override: 95.6%;
+  descent-override: 36.8%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Garamond Fallback';
+  src: local('Georgia');
+  size-adjust: 85.5%;
+  ascent-override: 117%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Marcellus Fallback';
+  src: local('Georgia');
+  size-adjust: 102.4%;
+  ascent-override: 95.2%;
+  descent-override: 26.9%;
   line-gap-override: 0%;
 }

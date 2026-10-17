@@ -15,8 +15,8 @@ import { HEAD } from './src/content/meta.js'
   - The inline boot script (src/lib/boot-inline.js) is minified and placed first
     in <head>. Its hash goes into the CSP (scripts/prerender.mjs keeps
     vercel.json in sync).
-  - Mona Sans gets a <link rel="preload"> with its hashed name; the two poster
-    AVIFs are preloaded with media queries (the first paint).
+  - Cinzel and EB Garamond (upright) get a <link rel="preload"> with their hashed names. The poster
+    is preloaded by the boot script, which knows the theme (only the one this visitor sees).
   - three and src/scene/* land in one lazy chunk named "scene" (budget.mjs finds it).
   - three's table of CSS colour keywords is emptied (noColourNames): the scene never sets a colour
     by name, and the table carries words the privacy scan holds (it is not copy, but it ships as text).
@@ -109,7 +109,7 @@ function sitePlugin() {
         if (ctx.bundle) {
           const fonts = Object.values(ctx.bundle)
             .map((a) => a.fileName)
-            .filter((f) => /\/mona-sans-vf-latin-[\w-]+\.woff2$/.test(f))
+            .filter((f) => /\/(cinzel|eb-garamond)-latin-wght-normal-[\w-]+\.woff2$/.test(f))
             .sort()
           preloads = fonts
             .map((f) => `<link rel="preload" href="/${f}" as="font" type="font/woff2" crossorigin />`)
