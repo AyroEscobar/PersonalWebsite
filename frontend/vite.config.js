@@ -13,8 +13,9 @@ import { HEAD } from './src/content/meta.js'
   - The <head> is written from src/content/meta.js, so copy has one home and
     check-content covers it. index.html only holds the <!--head--> marker.
   - The inline boot script (src/lib/boot-inline.js) is minified and placed first
-    in <head>. Its hash goes into the CSP (scripts/prerender.mjs keeps
-    vercel.json in sync).
+    in <head>: it sets data-theme before any CSS, writes the theme-color for the
+    resolved theme and preloads the one poster this visitor sees. Its hash goes
+    into the CSP (scripts/prerender.mjs keeps vercel.json in sync).
   - Cinzel and EB Garamond (upright) get a <link rel="preload"> with their hashed names. The poster
     is preloaded by the boot script, which knows the theme (only the one this visitor sees).
   - three and src/scene/* land in one lazy chunk named "scene" (budget.mjs finds it).
@@ -52,13 +53,12 @@ function headTags() {
   return [
     `<title>${esc(HEAD.title.text)}</title>`,
     meta('name', 'description', HEAD.description.text),
-    meta('name', 'color-scheme', 'dark'),
-    meta('name', 'theme-color', HEAD.themeColor),
+    meta('name', 'color-scheme', 'light dark'),
+    `<meta name="theme-color" content="${HEAD.themeColor.light}" media="(prefers-color-scheme: light)" />`,
+    `<meta name="theme-color" content="${HEAD.themeColor.dark}" media="(prefers-color-scheme: dark)" />`,
     `<link rel="canonical" href="${esc(HEAD.canonical)}" />`,
     `<link rel="icon" href="/favicon.svg" type="image/svg+xml" />`,
     `<link rel="apple-touch-icon" href="/apple-touch-icon.png" />`,
-    `<link rel="preload" as="image" type="image/avif" href="/poster/hero-1440.avif" media="(min-aspect-ratio: 9/10)" fetchpriority="high" />`,
-    `<link rel="preload" as="image" type="image/avif" href="/poster/hero-780.avif" media="(max-aspect-ratio: 9/10)" fetchpriority="high" />`,
     meta('property', 'og:type', 'website'),
     meta('property', 'og:url', HEAD.canonical),
     meta('property', 'og:title', HEAD.title.text),
