@@ -9,7 +9,9 @@ import { SECTION_IDS } from '../content/sections.js'
   State
     focus   the section in view, one of the four ids, or 'top' (the nav)
     tier    'full' | 'lite' | 'still'          (src/lib/tier.js)
-    quiet   true when the quiet switch is on (html[data-transparency='reduced'])
+    theme   'light' (black-figure) | 'dark' (red-figure), html[data-theme]
+    quiet   true when the quiet switch is on: the poster instead of the live scene
+            (html[data-transparency='reduced'])
     motion  'on' | 'off'                       (the footer's "motion off" control)
     paused  true while the viewer paused the scene
     glLost  true after a WebGL context loss that did not restore
@@ -22,6 +24,7 @@ import { SECTION_IDS } from '../content/sections.js'
 const SERVER_STATE = Object.freeze({
   focus: 'top',
   tier: 'full',
+  theme: 'light',
   quiet: false,
   motion: 'on',
   paused: false,
@@ -66,6 +69,10 @@ export function setTier(tier) {
 
 export function setMotionState(motion) {
   if (motion === 'on' || motion === 'off') set({ motion })
+}
+
+export function setThemeState(theme) {
+  if (theme === 'light' || theme === 'dark') set({ theme })
 }
 
 export function setQuietState(quiet) {

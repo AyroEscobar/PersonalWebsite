@@ -1,26 +1,30 @@
-import { getState, setMotionState, setQuietState, setTier, useStore } from './store.js'
+import { getState, setMotionState, setQuietState, setThemeState, setTier, useStore } from './store.js'
 import { STORAGE } from '../content/constants.js'
+import { HEAD } from '../content/meta.js'
 import { detectTier, readTier, writeTier } from './tier.js'
 
 /*
-  Modes (DESIGN.md 3.10, 4.5). The inline boot script (src/lib/boot-inline.js)
-  decides them before first paint and writes them on <html>. initClient()
-  copies them into the store; after that, setQuiet() and setMotion() are the
-  only writers.
+  Modes. The inline boot script (src/lib/boot-inline.js) decides them before first paint and writes
+  them on <html>. initClient() copies them into the store; after that, setTheme(), setQuiet() and
+  setMotion() are the only writers.
 
-    readHtmlMode()     { quiet, motion, tier } from <html data-*>
-    setQuiet(on)       the quiet switch: solid panels instead of glass
-                       (html[data-transparency]), persisted per viewer
-    setMotion(on)      "motion off" unmounts the scene and sets the still tier;
-                       "motion on" re-detects the tier. Persisted (ae.motion).
-    useQuiet()         false on the server and while hydrating
-    useTier()          'full' on the server and while hydrating
+    readHtmlMode()     { theme, quiet, motion, tier } from <html data-*>
+    setTheme(theme)    'light' (black-figure) or 'dark' (red-figure): html[data-theme], ae.theme, the
+                       unqualified theme-color meta (the boot script writes it first in <head>); the
+                       scene follows the store (src/lib/frieze-host.js)
+    setQuiet(on)       the quiet switch: the poster instead of the live scene (html[data-transparency]),
+                       persisted per viewer
+    setMotion(on)      "motion off" unmounts the scene and sets the still tier; "motion on" re-detects
+                       the tier. Persisted (ae.motion).
+    useTheme(), useQuiet(), useTier()   SERVER_STATE values on the server and while hydrating
 */
 
 export function readHtmlMode() {
-  if (typeof document === 'undefined') return { quiet: false, motion: 'on', tier: 'full' }
+  if (typeof document === 'undefined') return { theme: 'light', quiet: false, motion: 'on', tier: 'full' }
   const d = document.documentElement.dataset
+  const theme = d.theme === 'dark' || d.theme === 'light' ? d.theme : window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   return {
+    theme,
     quiet: d.transparency === 'reduced',
     motion: d.motion === 'off' ? 'off' : 'on',
     tier: readTier(),
@@ -33,6 +37,35 @@ function snap() {
   root.classList.add('no-transitions')
   void root.offsetWidth
   requestAnimationFrame(() => root.classList.remove('no-transitions'))
+}
+
+export function themeColorMeta() {
+  let m = document.querySelector('meta[name="theme-color"]:not([media])')
+  if (!m) {
+    m = document.createElement('meta')
+    m.name = 'theme-color'
+    document.head.prepend(m)
+  }
+  return m
+}
+
+export function setTheme(theme) {
+  if (typeof document === 'undefined' || (theme !== 'light' && theme !== 'dark')) return
+  snap()
+  document.documentElement.dataset.theme = theme
+  themeColorMeta().content = HEAD.themeColor[theme]
+  try {
+    localStorage.setItem(STORAGE.theme, theme)
+  } catch {
+    /* storage blocked: the choice lasts for this page only */
+  }
+  setThemeState(theme)
+}
+
+export function toggleTheme() {
+  const next = getState().theme === 'dark' ? 'light' : 'dark'
+  setTheme(next)
+  return next
 }
 
 export function setQuiet(on) {
@@ -70,6 +103,10 @@ export function markStill() {
   setTier('still')
 }
 
+export function useTheme() {
+  return useStore((s) => s.theme)
+}
+
 export function useQuiet() {
   return useStore((s) => s.quiet)
 }
@@ -80,6 +117,7 @@ export function useTier() {
 
 export function syncFromHtml() {
   const m = readHtmlMode()
+  setThemeState(m.theme)
   setQuietState(m.quiet)
   setMotionState(m.motion)
   setTier(m.tier)
