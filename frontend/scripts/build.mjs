@@ -58,7 +58,7 @@ if (!args.has('--skip-check')) {
 }
 
 // the first paint needs the committed posters (scripts/poster.mjs renders them from the real scene)
-for (const f of ['hero-1440.avif', 'hero-1440.webp', 'hero-780.avif', 'hero-780.webp', 'meta.json']) {
+for (const f of ['frieze-light.avif', 'frieze-light.webp', 'frieze-light-m.avif', 'frieze-light-m.webp', 'frieze-dark.avif', 'frieze-dark.webp', 'frieze-dark-m.avif', 'frieze-dark-m.webp', 'meta.json']) {
   if (!existsSync(path.join(ROOT, 'public/poster', f))) fail(`public/poster/${f} is missing: run \`npm run poster\` after a build and commit public/poster`)
 }
 
