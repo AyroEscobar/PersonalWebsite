@@ -6,8 +6,9 @@
 // [identity-age] Ayro asked for his age on the hero (Thu Oct 15, 2026). Birthday unknown: bump it here.
 export const AGE = 20
 
-// [ln-linkedin] The slug his email signature links (Ayro, Thu Oct 15, 2026).
-export const LINKEDIN = 'https://www.linkedin.com/in/ayro-escobar'
+// [ln-linkedin] His real profile (Ayro, Sat Oct 17, 2026). The other slug, on his resume and his email
+// signature, is wrong: scripts/check-content.mjs fails the build if it shows up anywhere.
+export const LINKEDIN = 'https://www.linkedin.com/in/ayroescobar/'
 
 // [ln-coffee] His Cal.com coffee chat link, beside LinkedIn in his email signature.
 export const COFFEE = 'https://cal.com/ayroescobar/coffee'
