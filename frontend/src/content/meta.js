@@ -16,13 +16,13 @@ export const HEAD = {
   ),
   siteName: item('meta-site-name', 'Ayro Escobar', ['identity-name']),
   canonical: CANONICAL,
-  themeColor: '#070B16',
+  themeColor: { light: '#C47D45', dark: '#141110' },
   ogImage: {
     href: `${CANONICAL}og.png`,
     width: 1200,
     height: 630,
     type: 'image/png',
-    alt: item('meta-og-alt', 'Ayro Escobar. A figure pushing a huge glass boulder up a mountain slope at night.', ['identity-name']),
+    alt: item('meta-og-alt', 'Ayro Escobar. A black-figure silhouette pushing a white boulder along the frieze of a Greek vase.', ['identity-name']),
   },
   person: {
     name: 'Ayro Escobar',
@@ -36,7 +36,15 @@ export const HEAD = {
 
 export const CHROME = {
   quiet: ui('quiet-off', 'quiet'),
-  quietTip: ui('quiet-tip', 'solid panels instead of glass'),
+  quietTip: ui('quiet-tip', 'poster instead of the live scene'),
+  themeLight: ui('theme-light', 'light'),
+  themeDark: ui('theme-dark', 'dark'),
+  themeDarkLabel: ui('theme-dark-label', 'dark theme'),
+  themeLightLabel: ui('theme-light-label', 'light theme'),
+  themeAnnounceDark: ui('theme-announce-dark', 'dark theme'),
+  themeAnnounceLight: ui('theme-announce-light', 'light theme'),
+  menuOpen: ui('menu-open', 'menu'),
+  menuClose: ui('menu-close', 'close'),
   sectionsNav: ui('nav-sections', 'sections'),
   home: ui('chrome-home', 'home'),
   pause: ui('scene-pause', 'pause the scene'),
@@ -54,6 +62,8 @@ export const FOOTER = {
   kit: ui('footer-kit', 'the kit'),
   credit: ui('footer-credit', '3D figure:'),
   creditBy: ui('footer-credit-by', 'by'),
+  fonts: ui('footer-fonts', 'type: Cinzel, EB Garamond and Marcellus SC,'),
+  fontsLicence: ui('footer-fonts-licence', 'SIL Open Font License'),
 }
 
 export const NOT_FOUND = {

@@ -6,12 +6,12 @@ import { AGE, COFFEE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
   his school, the way his own emails open), three short lines for what he is (his company, Viaere,
   the internships), then "A few things I've built": three results in his own words, the figure in
   each one set strong. Then two ways to reach him and two links. Builders render it; they do not
-  rewrite it. The theme line is the only theme line on the site: 11 px, lowercase, once, in the
-  hero's lower-left corner.
+  rewrite it. The theme line is the only theme line on the site: 12 px, lowercase, once, on the clay
+  in the hero's lower-left corner (lower right inside the frieze on a phone).
 */
 
 export const HERO = {
-  sceneAlt: ui('scene-alt', 'A figure pushing a huge glass boulder up a mountain slope at night.'),
+  sceneAlt: ui('scene-alt', 'A black-figure silhouette pushing a white boulder along the frieze of a Greek vase.'),
   name: item('hero-name', 'Ayro Escobar', ['identity-name']),
   intro: item('hero-intro', `I'm ${AGE} and I study computer science at UT Dallas.`, ['identity-age', 'identity-student']),
   roles: [

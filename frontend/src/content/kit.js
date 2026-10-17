@@ -1,15 +1,14 @@
 import { ui } from './item.js'
 
 /*
-  The kit page (/kit, DESIGN.md 5.14): every component in every state over
-  the live scene. Labels only; every sample inside the kit renders the real
-  content modules, so nothing here is a claim.
+  The kit page (/kit): every component in every state, with the production CSS. Labels only; every
+  sample inside the kit renders the real content modules, so nothing here is a claim.
 */
 
 export const KIT = {
   title: ui('kit-title', 'kit, Ayro Escobar'),
   word: ui('kit-word', 'the kit'),
-  line: ui('kit-line', 'every component on this site, in every state, over the live scene.'),
+  line: ui('kit-line', 'every component on this site, in every state, on the vase.'),
   back: ui('kit-back', 'back to the site'),
   simulated: ui('kit-simulated', 'simulated'),
   states: {
@@ -19,62 +18,64 @@ export const KIT = {
     press: ui('kit-state-press', 'press'),
     disabled: ui('kit-state-disabled', 'disabled'),
     active: ui('kit-state-active', 'active'),
-    entering: ui('kit-state-entering', 'entering'),
     quiet: ui('kit-state-quiet', 'quiet'),
     open: ui('kit-state-open', 'open'),
     closed: ui('kit-state-closed', 'closed'),
     on: ui('kit-state-on', 'on'),
     off: ui('kit-state-off', 'off'),
     copied: ui('kit-state-copied', 'copied'),
-    long: ui('kit-state-long', 'long'),
     small: ui('kit-state-small', 'small'),
-    focusWithin: ui('kit-state-focus-within', 'focus within'),
+    focusWithin: ui('kit-state-focus-within', 'focus within, the measured ticks'),
     still: ui('kit-state-still', 'still tier'),
-    lite: ui('kit-state-lite', 'lite'),
     paused: ui('kit-state-paused', 'paused'),
     posterOnly: ui('kit-state-poster', 'poster only'),
-    canvasOn: ui('kit-state-canvas', 'canvas on'),
-    lost: ui('kit-state-lost', 'context lost'),
+    canvasOn: ui('kit-state-canvas', 'canvas on stage'),
+    light: ui('kit-state-light', 'light, black-figure'),
+    dark: ui('kit-state-dark', 'dark, red-figure'),
   },
   variants: {
-    primary: ui('kit-var-primary', 'primary'),
-    glass: ui('kit-var-glass', 'glass'),
+    fill: ui('kit-var-fill', 'fill'),
+    line: ui('kit-var-line', 'line'),
   },
   groups: {
     tokens: ui('kit-g-tokens', 'tokens'),
-    glass: ui('kit-g-glass', 'glass'),
+    plates: ui('kit-g-plates', 'plates'),
     buttons: ui('kit-g-buttons', 'buttons'),
     card: ui('kit-g-card', 'card'),
     experience: ui('kit-g-experience', 'experience list'),
-    nav: ui('kit-g-nav', 'nav'),
+    nav: ui('kit-g-nav', 'the neck'),
+    ornament: ui('kit-g-ornament', 'ornament'),
     contact: ui('kit-g-contact', 'copy email and link row'),
     controls: ui('kit-g-controls', 'scene controls'),
     stage: ui('kit-g-stage', 'stage'),
     chrome: ui('kit-g-chrome', 'footer, skip link, 404'),
   },
   tokens: {
-    color: ui('kit-tok-color', 'colour'),
+    color: ui('kit-tok-color', 'palette'),
     type: ui('kit-tok-type', 'type'),
-    radius: ui('kit-tok-radius', 'radius'),
-    space: ui('kit-tok-space', 'space'),
-    elevation: ui('kit-tok-elevation', 'elevation'),
-    sceneOnly: ui('kit-tok-scene-only', 'scene only'),
-    sceneRim: ui('kit-tok-scene-rim', 'scene and rim only'),
-    onVoid: ui('kit-tok-on-void', 'on void'),
+    sceneOnly: ui('kit-tok-scene-only', 'scene and poster only, never text'),
   },
-  glass: {
-    thick: ui('kit-glass-thick', 'thick panel'),
-    noblur: ui('kit-fb-noblur', 'no backdrop-filter'),
-    reduced: ui('kit-fb-reduced', 'reduced transparency, or the quiet switch'),
+  plates: {
+    plate: ui('kit-plate', 'the hero plate'),
+    panel: ui('kit-panel', 'a work plate'),
+    quiet: ui('kit-fb-quiet', 'quiet: the poster instead of the live scene'),
     contrast: ui('kit-fb-contrast', 'more contrast'),
     forced: ui('kit-fb-forced', 'forced colours'),
-    lite: ui('kit-fb-lite', 'tier lite'),
   },
   nav: {
-    desktop: ui('kit-nav-desktop', 'desktop words'),
-    phone: ui('kit-nav-phone', 'phone button and sheet'),
-    switchOff: ui('kit-nav-switch-off', 'quiet switch off'),
-    switchOn: ui('kit-nav-switch-on', 'quiet switch on'),
+    desktop: ui('kit-nav-desktop', 'the neck on the clay, with the tongue band'),
+    scrolled: ui('kit-nav-scrolled', 'the neck after 80 px of scroll'),
+    phone: ui('kit-nav-phone', 'phone menu'),
+    themeLight: ui('kit-nav-theme-light', 'theme switch, light'),
+    themeDark: ui('kit-nav-theme-dark', 'theme switch, dark'),
+    switchOff: ui('kit-nav-switch-off', 'quiet off'),
+    switchOn: ui('kit-nav-switch-on', 'quiet on'),
+  },
+  ornament: {
+    meander: ui('kit-orn-meander', 'the meander, the frieze and foot edges'),
+    tongues: ui('kit-orn-tongues', 'the tongue band, under the neck'),
+    numerals: ui('kit-orn-numerals', 'section numerals'),
+    ground: ui('kit-orn-ground', "the ground line, the painter's double rule"),
   },
   stage: {
     note: ui('kit-stage-note', 'the poster paints first; the canvas fades in over it on its first frame'),

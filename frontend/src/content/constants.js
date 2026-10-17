@@ -44,8 +44,20 @@ export const FIGURE_CREDIT = {
   licenceHref: 'https://creativecommons.org/licenses/by/3.0/',
 }
 
+// The three faces (src/assets/fonts, SIL OFL 1.1; frontend/CREDITS.md). Named in every footer and the kit.
+export const FONT_CREDIT = {
+  licence: 'SIL Open Font License',
+  licenceHref: 'https://openfontlicense.org/',
+  faces: [
+    { name: 'Cinzel', author: 'Natanael Gama, The Cinzel Project Authors', href: 'https://github.com/NDISCOVER/Cinzel' },
+    { name: 'EB Garamond', author: 'Georg Duffner, Octavio Pardo', href: 'https://github.com/octaviopardo/EBGaramond12' },
+    { name: 'Marcellus SC', author: 'Brian J. Bonislawsky, Astigmatic', href: 'https://fonts.google.com/specimen/Marcellus+SC' },
+  ],
+}
+
 // localStorage keys (always behind try/catch).
 export const STORAGE = {
+  theme: 'ae.theme',
   quiet: 'ae.quiet',
   motion: 'ae.motion',
 }
