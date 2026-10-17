@@ -1,19 +1,11 @@
 import Section from '../ui/Section.jsx'
 import ProjectCard from '../ui/ProjectCard.jsx'
 import { PROJECTS } from '../content/projects.js'
-import { headingId, sectionById } from '../content/sections.js'
 
-/*
-  Work (the section id stays #check-out): the title, then the two cards stacked at the left, 480 px, 24 px gap,
-  vertically centred in a 140vh section; the camera rides higher so the rock fills the right.
-*/
+/* I · Work (the section id stays #check-out): the two work plates, Esvo first, two columns from 960 px. */
 export default function CheckOut() {
-  const s = sectionById('check-out')
   return (
     <Section id="check-out" className="sec--work">
-      <h2 id={headingId('check-out')} className="sec-title sec-title--bare reveal">
-        {s.label.text}
-      </h2>
       <div className="cards">
         {PROJECTS.map((c) => (
           <ProjectCard key={c.id} card={c} />
