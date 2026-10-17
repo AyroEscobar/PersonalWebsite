@@ -37,35 +37,6 @@ export async function loadFigure(url) {
   return { root: g.scene, mesh, heads: ex.heads, tails: ex.tails }
 }
 
-// the dark clearcoat body with a soft Fresnel edge: pale sky on the uphill-facing edge, warm white downhill
-export function figureMaterial({ lite = false } = {}) {
-  const m = new THREE.MeshPhysicalMaterial({ color: 0x151821, roughness: 0.34, metalness: 0.55, clearcoat: lite ? 0 : 1, clearcoatRoughness: 0.14, envMapIntensity: 1.9 })
-  // uHand: the two palm contacts in world space; the hand brightens softly within 9 cm of its contact,
-  // the glass's cyan caught in the palm, so the touch reads through the glass
-  m.userData.u = { uEdge: { value: lite ? 1.0 : 1.1 }, uUphill: { value: new THREE.Vector3(Math.cos(0.349), Math.sin(0.349), 0) }, uHand: { value: [new THREE.Vector3(0, -99, 0), new THREE.Vector3(0, -99, 0)] }, uHandGlow: { value: 0.4 } }
-  m.onBeforeCompile = (sh) => {
-    Object.assign(sh.uniforms, m.userData.u)
-    sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vWP;')
-      .replace('#include <skinning_vertex>', '#include <skinning_vertex>\n vWP = (modelMatrix * vec4(transformed, 1.0)).xyz;')
-    sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform float uEdge; uniform vec3 uUphill; uniform vec3 uHand[2]; uniform float uHandGlow; varying vec3 vWP;')
-      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
-        {
-          vec3 nV = normalize(normal), vV = normalize(vViewPosition);
-          float f = 1.0 - max(dot(nV, vV), 0.0);
-          float e = pow(f, 3.2) * smoothstep(0.5, 0.95, f);
-          vec3 wN = inverseTransformDirection(nV, viewMatrix);
-          float side = smoothstep(-0.3, 0.3, dot(wN, uUphill));
-          totalEmissiveRadiance += mix(vec3(1.0, 0.85, 0.7), vec3(0.6, 0.95, 1.1), side) * e * uEdge;
-          float hd = min(distance(vWP, uHand[0]), distance(vWP, uHand[1]));
-          totalEmissiveRadiance += vec3(0.6, 0.8, 0.9) * uHandGlow * exp(-hd * hd / 0.0081) * (0.3 + 0.7 * f);
-        }`)
-  }
-  m.customProgramCacheKey = () => 'figure-edge-' + (lite ? 'l' : 'f')
-  return m
-}
-
 const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _u = new THREE.Vector3()
 const _m0 = new THREE.Matrix4(), _m1 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _qr = new THREE.Quaternion(), _qr2 = new THREE.Quaternion()
 const X = new THREE.Vector3(1, 0, 0), Yv = new THREE.Vector3(0, 1, 0), Zv = new THREE.Vector3(0, 0, 1)
@@ -100,31 +71,16 @@ const sstep = (a, b, x) => { const u = THREE.MathUtils.clamp((x - a) / (b - a), 
 // line in model space for the left hand (the right is its mirror), the bone head 2.5 cm behind the plane
 // and the contact centroid 10 cm up the line.
 export const HAND = {
-  press: 0.012,   // the support points sit this far inside the displaced glass, so no gap ever shows
-  normal: [-0.9417, -0.216, -0.258], // model space, left hand: the support plane's normal, toward the glass
+  press: 0.012,   // the support points sit this far inside the displaced rock, so no gap ever shows
+  normal: [-0.9417, -0.216, -0.258], // model space, left hand: the support plane's normal, toward the rock
   axis: [0.2, -0.976, 0.09],         // model space, left hand: heel to fingertips, in the plane
   height: 0.0247, // bone head to the plane
   along: 0.10,    // head to the contact centroid along the axis
   lat: 0.019,     // ... and across (toward the thumb)
   up: 0.75,       // the finger line: up the surface ...
   out: 0.66,      // ... and turned outward, like a hand pushing a wall, so the wrist is not folded flat back
-  glint: 0.075,   // radius of the contact glint on the glass
 }
 const sphereSurface = (dir, R, p, n) => { p.copy(dir).multiplyScalar(R); n.copy(dir); return R }
-
-// a soft contact glint for the glass under a palm: additive, cyan-white, a radial falloff, flattened
-// along the fingers; it sits 4 mm outside the surface, tilted to the true normal, so nothing clips
-function contactGlint(radius) {
-  const c = document.createElement('canvas'); c.width = c.height = 64
-  const g = c.getContext('2d'), grd = g.createRadialGradient(32, 32, 0, 32, 32, 32)
-  grd.addColorStop(0, 'rgba(255,255,255,0.75)'); grd.addColorStop(0.3, 'rgba(190,245,255,0.42)'); grd.addColorStop(0.65, 'rgba(90,200,235,0.12)'); grd.addColorStop(1, 'rgba(0,0,0,0)')
-  g.fillStyle = grd; g.fillRect(0, 0, 64, 64)
-  const t = new THREE.CanvasTexture(c)
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(2 * radius, 2 * radius), new THREE.MeshBasicMaterial({ map: t, color: new THREE.Color(0.8, 0.95, 1.0), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, toneMapped: false, fog: false, side: THREE.DoubleSide }))
-  m.renderOrder = 3
-  m.castShadow = false; m.receiveShadow = false
-  return m
-}
 
 export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R = 2.1, speed = 0.33, period = 1.9, duty = 0.7, leanDeg = 50, pelvisK = 0.7, handLift = 0, frontK = 0.16, x0 = 0, surface = sphereSurface } = {}) {
   const group = new THREE.Group()
@@ -155,9 +111,10 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
   const boulder = new THREE.Mesh(boulderGeometry, boulderMaterial)
   boulder.castShadow = true; boulder.receiveShadow = false
   group.add(boulder)
-  const glints = [contactGlint(HAND.glint), contactGlint(HAND.glint)]
+  // where the palms meet the rock, kept as two empty markers (the vase has no contact glint)
+  const glints = [new THREE.Object3D(), new THREE.Object3D()]
   group.add(glints[0], glints[1])
-  const handU = material.userData.u?.uHand?.value // the figure shader's contact glow (world space)
+  const handU = material.userData.u?.uHand?.value // a material that wants the contacts (world space)
 
   const v0 = speed, T = period, d = duty
   const front = frontK // the ball lands this far behind the hips; push-off is a stance length further back
@@ -190,7 +147,7 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
   const tmp = { a: new THREE.Vector3(), b: new THREE.Vector3(), c: new THREE.Vector3(), e: new THREE.Vector3(), n: new THREE.Vector3() }
   const fl = {}, fr = {}
   const hand = () => ({ c: new THREE.Vector3(), n: new THREE.Vector3(), fingers: new THREE.Vector3(), wrist: new THREE.Vector3() })
-  const hands = [hand(), hand()] // the contact point on the glass, its true normal, the finger line and the wrist (slope frame)
+  const hands = [hand(), hand()] // the contact point on the rock, its true normal, the finger line and the wrist (slope frame)
   const out = { x: 0, bx: 0, push: 0, feet: [new THREE.Vector3(), new THREE.Vector3()], heels: [new THREE.Vector3(), new THREE.Vector3()], pitch: [0, 0], chestY: 0, hands }
   const poleArm = { L: new THREE.Vector3(-0.35, -1, -0.75).normalize(), R: new THREE.Vector3(-0.35, -1, 0.75).normalize() }
   const poleKnee = new THREE.Vector3(1, 0.1, 0)
@@ -267,12 +224,12 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
       const palm = nrm.clone().negate()                                    // palm faces into the rock
       const up = new THREE.Vector3(0, 1, 0).addScaledVector(nrm, -nrm.y).normalize() // up the surface
       const outw = new THREE.Vector3(0, 0, zSide[s]).addScaledVector(nrm, -zSide[s] * nrm.z).normalize() // outward along it
-      const fingers = up.multiplyScalar(HAND.up).addScaledVector(outw, HAND.out).normalize() // fingers lie on the glass, up and out
-      // the palm surface is pressed into the glass; the bone axis sits a palm's thickness above it
+      const fingers = up.multiplyScalar(HAND.up).addScaledVector(outw, HAND.out).normalize() // fingers lie on the rock, up and out
+      // the palm surface is pressed into the rock; the bone axis sits a palm's thickness above it
       const latS = palm.clone().cross(fingers) // across the hand, toward the thumb side (mirrors with the hand)
       const wrist = c.clone().addScaledVector(nrm, HAND.height - HAND.press).addScaledVector(fingers, -HAND.along).addScaledVector(latS, HAND.lat * zSide[s])
       hands[i].c.copy(c); hands[i].n.copy(nrm); hands[i].fingers.copy(fingers); hands[i].wrist.copy(wrist)
-      // the contact glint on the glass under the palm, and the shader's contact glow on the hand
+      // the contact marker under the palm
       const gl = glints[i]
       gl.position.copy(c).addScaledVector(nrm, 0.004)
       _m1.makeBasis(fingers, _v.crossVectors(nrm, fingers), nrm); gl.quaternion.setFromRotationMatrix(_m1)
@@ -288,7 +245,7 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
       const elbowRot = new THREE.Quaternion().setFromUnitVectors(ud, fd)
       const refT = ref.clone().applyQuaternion(elbowRot)
       // hand first, then share its twist into the forearm so the wrist does not collapse
-      // the hand's support plane (bind pose, model space, mirrored for the right) lands on the glass
+      // the hand's support plane (bind pose, model space, mirrored for the right) lands on the rock
       const qh = frameRot(handAxis[s], handNormal[s], fingers, palm, new THREE.Quaternion())
       const refFull = X.clone().applyQuaternion(qh)
       refFull.addScaledVector(fd, -refFull.dot(fd)).normalize()
