@@ -1,22 +1,40 @@
 import { EXPERIENCE } from '../content/work.js'
 
 /*
-  <ExperienceList> (DESIGN.md 5.6): a <ul> inside the experience panel; each <li> is one line
-  from COPY.md 3.4: the org in 17/650 wdth 106 ink on its own line, then the details in 15.5
-  ink-2 with middle dots, then the receipt line. Hairline --rule between items. No states beyond
-  rest; the strong org name is the only emphasis.
+  <ExperienceList>: a hairline list, newest first. Each line: the org (EB Garamond 19/500), then the
+  details with middle dots and the receipt in italic --ink-2, and from 960 px up the dates in their own
+  right-aligned column in the label face (14 px, --ink-2). Under 960 the dates fold back onto the
+  details line ("details · dates."), which is also what print shows.
 */
 export default function ExperienceList({ lines = EXPERIENCE }) {
   return (
-    <ul className="exp">
+    <ul className="lines">
       {lines.map((l) => (
-        <li key={l.id} data-id={l.id}>
-          <span className="exp-top">
-            <strong>{l.org}</strong>
+        <li key={l.id} id={l.id} data-id={l.id}>
+          <p className="org">
+            {l.org}
             <span className="sr-only"> · </span>
-            {l.details}
-          </span>
-          {l.note && <span className="exp-note">{l.note}</span>}
+          </p>
+          <div className="line-body">
+            <p className="det">
+              {l.details}
+              {l.dates ? (
+                <span className="det-date">
+                  {' · '}
+                  {l.dates}
+                </span>
+              ) : null}
+              <span className="det-end">.</span>
+            </p>
+            {l.note && <p className="note">{l.note}</p>}
+          </div>
+          {l.dates ? (
+            <p className="xp-date" aria-hidden="true">
+              {l.dates}
+            </p>
+          ) : (
+            <span className="xp-date" aria-hidden="true" />
+          )}
         </li>
       ))}
     </ul>
