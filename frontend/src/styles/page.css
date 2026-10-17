@@ -1,119 +1,459 @@
 /*
-  page.css: the composition of the home page (DESIGN.md 6). Section heights carry the climb:
-  hero 100svh, check out 140vh, experience 120vh, stack 100vh, contact 240vh with the panel
-  stuck bottom-left while the scene pulls out behind it.
+  The page: the pot from top to foot. The hero is the shoulder frieze (the plate at the left, the room
+  to its right, the meander under them); the sections sit on the slip of the belly, in a two column
+  grid from 1100 px (the numeral and title in a sticky 300 px column); contact has the plate over the
+  second frieze band; the foot closes it. Under 960 px the frieze is the top of the page and the plate
+  runs full width under it.
 */
-main {
+
+/* ---------- the hero: the shoulder frieze ---------- */
+.hero {
+  min-height: max(760px, 100svh);
+}
+.hero-inner {
   position: relative;
   z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, var(--plate-w)) minmax(0, 1fr);
+  align-items: center;
+  min-height: inherit;
+  max-width: calc(var(--max) + 2 * var(--gutter));
+  margin: 0 auto;
+  padding: calc(var(--neck-h) + 20px + 28px) var(--gutter) calc(var(--meander-h) + 40px);
 }
-.sec {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100svh;
-  padding: 120px var(--gutter) 80px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-/* the plate sits in the middle of the room between the nav and the theme line; on a short laptop it
-   starts under the nav and the buttons still make the first screen */
-.sec--hero {
-  padding-top: 96px;
-  padding-bottom: 72px;
-  justify-content: center;
-}
-.theme-line {
+.hero > .meander {
   position: absolute;
-  left: calc(var(--gutter) + 28px);
-  bottom: 26px;
-  padding: 6px 12px;
-  border-radius: var(--r-pill);
-  background: radial-gradient(closest-side, rgb(var(--void-rgb) / 0.8), rgb(var(--void-rgb) / 0.55) 65%, rgb(var(--void-rgb) / 0));
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+}
+.hero-plate {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  z-index: 3;
+}
+.hero .stage {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  align-self: end;
+  justify-self: end;
+  position: relative;
+  z-index: 2;
+  /* the room starts just clear of the plate (the slip pushes him back into that margin) and runs to
+     20 px from the edge of the screen */
+  width: calc(100% - var(--plate-w) - 8px + var(--gutter) - 20px);
+  margin-right: calc(20px - var(--gutter));
+}
+.hero .room {
+  width: min(100%, calc((100svh - var(--neck-h) - var(--meander-h) - 120px) * var(--room-aspect)));
+  margin-left: auto;
 }
 
-.sec--work {
-  min-height: 140vh;
+/* ---------- the belly: sections on the slip ---------- */
+.sec {
+  padding-top: 120px;
 }
-.sec--work .sec-title {
-  margin: 0 0 22px 4px;
-}
-
-.sec--exp {
-  min-height: 120vh;
-}
-
-.sec--stack {
-  min-height: 100vh;
-}
-
-/* the wide needs scroll runway: p 0.85 to 1 spans this section plus the footer, so the section is
-   240vh and the panel sticks to the bottom-left of the viewport while the scene pulls out behind it */
 .sec--contact {
-  min-height: 240vh;
-  justify-content: flex-end;
-  padding-bottom: 72px;
+  padding-bottom: 0;
 }
-.panel--contact {
-  position: sticky;
-  bottom: 72px;
-}
-
-/* the 404 */
-.nf {
-  min-height: 100svh;
-  display: flex;
-  align-items: flex-end;
-  padding: 120px var(--gutter) 72px;
-}
-
-@media (max-width: 760px), (max-aspect-ratio: 9/10) {
-  .sec {
-    padding: 96px var(--gutter) 56px;
+@media (min-width: 1100px) {
+  .sec-inner {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    column-gap: 56px;
+    align-items: start;
   }
-  .sec--hero {
-    padding: 0 var(--gutter) 12px;
-    justify-content: flex-end;
+  .sec-inner > .sec-title {
+    position: sticky;
+    top: calc(var(--neck-h) + 40px);
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    padding-top: 2px;
   }
-  .theme-line {
+  .sec-inner > .sec-title .num {
+    flex-basis: 100%;
+    margin-bottom: 12px;
+  }
+  .sec-inner > .sec-title .num .ip {
     display: none;
   }
-  .sec--work {
-    min-height: auto;
-    justify-content: flex-end;
-    padding-top: 58vh;
-  }
-  .sec--exp,
-  .sec--stack {
-    min-height: auto;
-    padding-top: 48vh;
-  }
-  .sec--contact {
-    min-height: 170svh;
-    padding-bottom: 24px;
-  }
-  .panel--contact {
-    bottom: 24px;
-  }
-  .nf {
-    padding: 0 var(--gutter) 24px;
+  .sec-inner > .sec-title::after {
+    margin-left: 20px;
   }
 }
 
-/* a phone: the results follow the buttons (components.css), so the hero is taller than the screen
-   by about their height (six lines at 1.5 plus the label and the hairline, less 24 px): the first
-   screen ends just under "A few things I've built", with the man and the whole rock above the plate */
-@media (max-width: 639.98px) {
-  .sec--hero {
-    min-height: calc(100vh + 9 * var(--t-body) + 48px);
-    min-height: calc(100svh + 9 * var(--t-body) + 48px);
+/* ---------- contact: the plate over the second band ---------- */
+.sec--contact .sec-title {
+  margin-bottom: 36px;
+}
+.band {
+  position: relative;
+  min-height: 660px;
+}
+.band-inner {
+  position: relative;
+  z-index: 3;
+  padding-bottom: 80px;
+}
+.contact-plate {
+  width: min(100%, 560px);
+}
+.band-clay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 150px;
+  bottom: 0;
+}
+.band-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding-bottom: 26px;
+}
+.band-stage .stage {
+  width: min(56%, 820px);
+}
+.band-stage .room {
+  width: min(100%, calc((660px - 150px - 50px) * var(--room-aspect)));
+  margin-left: auto;
+}
+
+/* ---------- the 404 ---------- */
+.nf-band {
+  height: clamp(320px, 52svh, 560px);
+}
+.poster-stage {
+  position: absolute;
+  inset: calc(var(--neck-h) + 24px) var(--gutter) calc(var(--meander-h) + 16px);
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+.poster-stage .stage {
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+.poster-stage .room {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+}
+.nf-band > .meander {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+}
+.nf-body {
+  padding-top: 56px;
+  padding-bottom: 96px;
+}
+.nf-line {
+  font: 400 34px/1.15 var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+/* ---------- tablet ---------- */
+@media (max-width: 1180px) and (min-width: 960px) {
+  .name {
+    font-size: 64px;
+  }
+  .nav li + li::before {
+    padding: 0 0.45em;
+  }
+  .neck-tools {
+    gap: 12px;
   }
 }
-/* under 340 px the first two results take three lines each */
-@media (max-width: 339.98px) {
-  .sec--hero {
-    min-height: calc(100vh + 12 * var(--t-body) + 48px);
-    min-height: calc(100svh + 12 * var(--t-body) + 48px);
+
+/* ---------- short laptop screens: a tighter plate, so the frieze and its meander stay on the first screen ---------- */
+@media (min-width: 960px) and (max-height: 860px) {
+  .name {
+    font-size: 62px;
+    margin-bottom: 16px;
+  }
+  .plate.hero-plate {
+    padding: 28px 36px 26px;
+  }
+  .intro {
+    font-size: 19px;
+    margin-bottom: 12px;
+  }
+  .roles {
+    margin-bottom: 16px;
+  }
+  .roles li {
+    padding: 5px 0;
+    font-size: 17px;
+  }
+  .built {
+    margin-bottom: 18px;
+  }
+  .built-list li {
+    font-size: 16px;
+    margin-bottom: 1px;
+  }
+  .acts {
+    margin-bottom: 12px;
+  }
+  .hero-inner {
+    padding-top: calc(var(--neck-h) + 20px + 18px);
+    padding-bottom: calc(var(--meander-h) + 26px);
+  }
+}
+
+/* ---------- phones and small tablets: the frieze on top, the plate under it ---------- */
+@media (max-width: 959.98px) {
+  .nav,
+  .neck-tools,
+  .tongues {
+    display: none;
+  }
+  .neck-row {
+    grid-template-columns: 1fr auto;
+  }
+  .menu-btn {
+    display: block;
+  }
+  .neck.is-open {
+    background: var(--ground);
+  }
+  .neck.is-open::after {
+    opacity: 1;
+  }
+  .sheet:not([hidden]) {
+    display: block;
+    padding: 8px var(--gutter) 24px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--plate-rule);
+    background: var(--ground);
+  }
+  .sheet-nav li {
+    border-bottom: 1px solid var(--rule);
+  }
+  .sheet-nav a {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 14px 0;
+    font: 400 20px/1 var(--label);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+  .sheet-nav a[aria-current='true'] {
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+  .sheet-nav .num {
+    width: 30px;
+    font-size: 14px;
+    color: var(--accent);
+  }
+  .sheet .btn {
+    width: 100%;
+    margin: 20px 0 10px;
+  }
+  .sheet-tools {
+    display: flex;
+    gap: 24px;
+  }
+
+  .hero {
+    min-height: 0;
+    background: var(--ground);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: var(--frieze-h);
+    background:
+      repeating-linear-gradient(180deg, color-mix(in srgb, var(--white) calc(2.6% * var(--ring)), transparent) 0 1px, transparent 1px 7px),
+      repeating-linear-gradient(180deg, color-mix(in srgb, var(--umber) calc(4% * var(--ring)), transparent) 0 2px, transparent 2px 19px),
+      radial-gradient(120% 90% at 58% 62%, var(--frieze-lit) 0%, color-mix(in srgb, var(--frieze-lit) 40%, var(--frieze)) 45%, var(--frieze) 85%),
+      var(--frieze);
+  }
+  .hero > .frieze-art {
+    bottom: auto;
+    height: var(--frieze-h);
+  }
+  .hero > .meander {
+    top: calc(var(--frieze-h) - var(--meander-h));
+    bottom: auto;
+  }
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    min-height: 0;
+  }
+  .hero .stage {
+    order: -1;
+    width: 100%;
+    margin: 0;
+    height: var(--frieze-h);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: clip;
+    padding: calc(var(--neck-h) + 8px) var(--gutter) calc(var(--meander-h) + 10px);
+  }
+  .hero .room {
+    width: min(100%, calc((var(--frieze-h) - var(--neck-h) - var(--meander-h) - 18px) * var(--room-aspect)));
+    margin: 0 auto;
+  }
+  .theme-line {
+    left: auto;
+    right: var(--gutter);
+    top: calc(var(--frieze-h) - var(--meander-h) - 26px);
+    bottom: auto;
+  }
+  .hero-plate {
+    border: 0;
+    background: var(--ground);
+    padding: 26px var(--gutter) 8px;
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-plate .built {
+    order: 3;
+    margin: 26px 0 18px;
+  }
+  .hero-plate .acts {
+    order: 2;
+    margin: 0;
+  }
+  .hero-plate .links {
+    order: 4;
+  }
+  .name {
+    font-size: 46px;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+  }
+  .intro {
+    font-size: 19px;
+    margin-bottom: 12px;
+  }
+  .roles {
+    margin-bottom: 18px;
+  }
+  .roles li {
+    font-size: 17px;
+    padding: 5px 0;
+  }
+  .built-list li {
+    font-size: 16px;
+  }
+  .acts .btn {
+    flex: 1 1 auto;
+  }
+
+  .sec {
+    padding-top: 84px;
+  }
+  .sec-title {
+    font-size: 22px;
+    margin-bottom: 28px;
+  }
+  .sec-title::after {
+    margin-left: 18px;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .card {
+    padding: 26px 22px 24px;
+  }
+  .card-name {
+    font-size: 24px;
+  }
+  .card-head {
+    font-size: 21px;
+  }
+  .lines li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    padding: 14px 0 13px;
+  }
+  .xp-date {
+    display: none;
+  }
+  .stack-p {
+    font-size: 18px;
+  }
+
+  .band {
+    min-height: 0;
+  }
+  .band-inner {
+    padding-bottom: 36px;
+  }
+  .contact-plate {
+    border: 0;
+    padding: 0;
+    background: none;
+    width: 100%;
+  }
+  .contact-p {
+    font-size: 19px;
+  }
+  .btn-cal {
+    width: 100%;
+  }
+  .band-clay {
+    position: relative;
+    top: auto;
+    height: clamp(300px, 44svh, 460px);
+  }
+  .band-stage {
+    padding: 0 var(--gutter) 22px;
+    justify-content: center;
+  }
+  .band-stage .stage {
+    width: 100%;
+  }
+  .band-stage .room {
+    width: min(100%, calc((clamp(300px, 44svh, 460px) - 40px) * var(--room-aspect)));
+    margin: 0 auto;
+  }
+  .foot-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .nf-line {
+    font-size: 26px;
+  }
+}
+@media (max-width: 400px) {
+  .name {
+    font-size: 42px;
+  }
+  .ip {
+    padding: 0 0.32em;
+  }
+}
+@media (max-width: 340px) {
+  .name {
+    font-size: 40px;
+  }
+  .acts .btn {
+    padding: 0 16px;
   }
 }
