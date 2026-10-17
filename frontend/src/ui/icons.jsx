@@ -1,25 +1,9 @@
 /*
-  The icon set: 14 px (12 px in small buttons), 1.6 stroke, currentColor, one family.
-  Decorative everywhere: every control that has one also has a visible word.
+  The one icon: a 10 px outward arrow, 1.2 stroke, currentColor. Decorative: every link that has it
+  also has a visible word.
 */
-const Svg = ({ children, className = 'ic' }) => (
-  <svg className={className} viewBox="0 0 14 14" aria-hidden="true" focusable="false">
-    {children}
+export const ArrowOut = ({ className = 'arr' }) => (
+  <svg className={className} viewBox="0 0 10 10" aria-hidden="true" focusable="false">
+    <path d="M2.5 7.5l5-5M3.5 2.5h4v4" />
   </svg>
-)
-
-export const ArrowDown = (p) => (
-  <Svg {...p}>
-    <path d="M7 2v9M3 7.5 7 11.5 11 7.5" />
-  </Svg>
-)
-export const ArrowOut = (p) => (
-  <Svg {...p}>
-    <path d="M4 10 10 4M5 4h5v5" />
-  </Svg>
-)
-export const MenuLines = (p) => (
-  <Svg {...p} className="ic ic--menu">
-    <path d="M2 4.5h10M2 9.5h10" />
-  </Svg>
 )

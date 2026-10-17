@@ -13,11 +13,11 @@ import { AGE, COFFEE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
 export const HERO = {
   sceneAlt: ui('scene-alt', 'A black-figure silhouette pushing a white boulder along the frieze of a Greek vase.'),
   name: item('hero-name', 'Ayro Escobar', ['identity-name']),
-  intro: item('hero-intro', `I'm ${AGE} and I study computer science at UT Dallas.`, ['identity-age', 'identity-student']),
+  intro: item('hero-intro', `I'm ${AGE} and I study computer science at UT\u00a0Dallas.`, ['identity-age', 'identity-student']),
   roles: [
     item('hero-role-esvo', 'Founder of Esvo Technologies', ['ven-esvo']),
     item('hero-role-viaere', 'Co-founder and Founding Engineer at Viaere', ['ven-viaere', 'ven-viaere-bio']),
-    item('hero-role-internships', 'Internships at JPMorgan Chase and RBC Capital Markets', ['exp-jpm-2026', 'exp-rbc']),
+    item('hero-role-internships', 'Internships at JPMorgan\u00a0Chase and RBC\u00a0Capital\u00a0Markets', ['exp-jpm-2026', 'exp-rbc']),
   ],
   built: {
     label: ui('hero-built-label', "A few things I've built"),

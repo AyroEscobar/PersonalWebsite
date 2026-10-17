@@ -1,5 +1,6 @@
 /*
-  Eyebrow (DESIGN.md 5.13): 12 px caps cyan 600, 0.14em. The "elsewhere" label uses the same class.
+  Eyebrow: the label face (Marcellus SC) 14 px, tracking 0.08em, --ink-2. "A few things I've built" and
+  "elsewhere" use it.
 */
 export default function Eyebrow({ as: As = 'p', className = '', children, ...rest }) {
   return (
