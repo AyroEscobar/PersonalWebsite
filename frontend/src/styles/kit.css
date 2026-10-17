@@ -1,348 +1,317 @@
 /*
-  kit.css: the layout of the kit page (/kit) only. The components it shows are styled in
-  components.css and glass.css; nothing here changes them. A column over the live scene
-  (the left 60 percent on desktop), every group a panel.
+  The kit page (/kit): its own layout around the production components. The frieze band at the top
+  holds the live scene (the poster in the still tier); the groups sit on the slip below it.
+  .theme-light-scope and .theme-dark-scope set one vase's roles on a sample, whatever the page theme.
 */
-.kit-main {
+.kit-band {
+  min-height: clamp(560px, 82svh, 760px);
+}
+.kit-band-inner {
   position: relative;
   z-index: 2;
-  padding: 110px var(--gutter) 40px;
   display: grid;
-  gap: 22px;
-  max-width: 60vw;
-  min-width: min(100%, 640px);
+  grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+  align-items: end;
+  gap: 32px;
+  max-width: calc(var(--max) + 2 * var(--gutter));
+  min-height: inherit;
+  margin: 0 auto;
+  padding: calc(var(--neck-h) + 48px) var(--gutter) calc(var(--meander-h) + 40px);
+}
+.kit-band > .meander {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
 }
 .kit-head {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 8px;
+  align-self: center;
 }
 .kit-back {
-  font-size: var(--t-btn-sm);
-  color: var(--cyan);
-  text-decoration-color: rgb(var(--cyan-rgb) / 0.55);
-  text-underline-offset: 4px;
-  justify-self: start;
+  font: 400 14px/1 var(--label);
+  letter-spacing: 0.08em;
+  display: inline-block;
+  padding: 6px 0;
 }
 .kit-word {
-  font-size: 72px;
-  line-height: 1;
-  font-weight: 760;
-  font-stretch: 120%;
-  letter-spacing: -0.02em;
-  text-shadow: 0 2px 20px rgb(var(--void-rgb) / 0.7);
+  font: 500 56px/1 var(--display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 18px 0 14px;
 }
-.kit-head .oneline {
-  text-shadow: 0 1px 12px rgb(var(--void-rgb) / 0.8);
+.kit-line {
+  font-size: 19px;
+  color: var(--ink-2);
+}
+.kit-band .room {
+  width: min(100%, calc((82svh - var(--neck-h) - var(--meander-h) - 120px) * var(--room-aspect)));
+  margin-left: auto;
+}
+.kit-body {
+  padding-top: 72px;
+  padding-bottom: 96px;
+}
+.kit-group {
+  margin-bottom: 72px;
 }
 .kit-h {
-  font-size: 22px;
-  font-weight: 650;
-  font-stretch: 110%;
-  letter-spacing: -0.01em;
-  margin-bottom: 16px;
   display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.kit-h--bare {
-  text-shadow: 0 2px 16px rgb(var(--void-rgb) / 0.7);
+  align-items: baseline;
+  gap: 14px;
+  font: 400 24px/1.1 var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding-bottom: 12px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--rule);
 }
 .kit-sim {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: var(--r-pill);
-  font: 500 var(--t-label) / 1 var(--sans);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font: 400 13px/1 var(--mono);
+  letter-spacing: 0.08em;
   color: var(--ink-2);
-  box-shadow: inset 0 0 0 1px rgb(var(--lit) / 0.2);
-  text-shadow: none;
-}
-.kit-sub,
-.kit-cap {
-  font-family: var(--mono);
-  font-size: var(--t-mono);
-  letter-spacing: 0.01em;
-  color: var(--ink-2);
-  text-shadow: 0 1px 10px rgb(var(--void-rgb) / 0.8);
+  text-transform: none;
 }
 .kit-sub {
-  margin: 6px 0 10px;
+  font: 400 14px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+  margin: 0 0 14px;
+}
+.kit-cap {
+  display: block;
+  margin-top: 10px;
+  font: 400 13px/1.35 var(--mono);
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+.kit-cell {
+  margin: 0;
+  min-width: 0;
 }
 .kit-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 18px 16px;
   align-items: flex-start;
-  margin-bottom: 12px;
+  gap: 28px 32px;
+  margin-bottom: 28px;
 }
-.kit-row--tokens {
-  gap: 24px 40px;
-}
-.kit-cell {
-  margin: 0;
-  display: grid;
-  gap: 8px;
-  justify-items: start;
+.kit-row--plates > .kit-cell {
+  flex: 1 1 240px;
 }
 .kit-stack {
   display: grid;
-  gap: 18px;
-  justify-items: start;
+  gap: 28px;
 }
 .kit-cards {
   display: grid;
-  gap: 18px;
-  width: min(480px, 100%);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px 28px;
+  padding-top: 16px;
 }
-.kit-cards .kit-cell {
-  width: 100%;
-}
-.kit-cards .card {
-  width: 100%;
-}
-.kit-cards .kit-cell > div {
-  width: 100%;
-}
-
-/* tokens */
 .kit-swatches {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px 16px;
-  margin-bottom: 18px;
-}
-.kit-swatches li {
-  display: grid;
-  gap: 6px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
 }
 .kit-swatch {
   display: block;
-  height: 40px;
-  border-radius: var(--r-inner);
-  box-shadow: inset 0 0 0 1px rgb(var(--lit) / 0.16);
+  height: 64px;
+  border: 1px solid var(--rule);
 }
 .kit-type {
   display: grid;
-  gap: 8px;
-  margin-bottom: 18px;
-}
-.kit-type-row {
-  position: static;
-  margin: 0;
-  display: block;
-  padding: 0;
-  background: none;
-  text-shadow: none;
-  box-shadow: none;
-  min-height: 0;
-}
-.kit-type-tag {
-  display: block;
-  margin-bottom: 2px;
-  letter-spacing: 0.01em;
-  text-transform: none;
-  font-weight: 400;
-  font-stretch: 100%;
-  color: var(--ink-2);
-}
-.kit-type .name {
-  font-size: 64px;
-}
-.exp-sample {
-  font-size: var(--t-line);
-  color: var(--ink-2);
-}
-.btn-sample {
-  font-size: var(--t-btn);
-  font-weight: 600;
-  font-stretch: 104%;
-}
-.theme-sample {
-  font-size: var(--t-label);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-}
-.mono-sample {
-  font-family: var(--mono);
-  font-size: var(--t-mono);
-  letter-spacing: 0.01em;
-  color: var(--ink-2);
-}
-.kit-radii,
-.kit-space,
-.kit-elev {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 16px;
-  align-items: flex-end;
-}
-.kit-radii li,
-.kit-space li,
-.kit-elev li {
-  display: grid;
-  gap: 6px;
-  justify-items: center;
-}
-.kit-radius {
-  display: block;
-  width: 56px;
-  height: 56px;
-  background: rgb(var(--lit) / 0.08);
-  box-shadow: inset 0 0 0 1px rgb(var(--lit) / 0.3);
-}
-.kit-spacebar {
-  display: block;
-  height: 10px;
-  min-width: 4px;
-  background: var(--cyan);
-  border-radius: 2px;
-}
-.kit-elev-box {
-  display: block;
-  width: 72px;
-  height: 48px;
-  border-radius: var(--r-inner);
-  background: var(--plate-2);
-}
-
-/* glass */
-.kit-glass {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 18px;
 }
-.kit-glass .kit-cell,
-.kit-sample-panel {
-  width: 100%;
+.kit-type-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: baseline;
+  gap: 16px;
 }
-.kit-sample-panel .card-name {
-  margin: 8px 0 6px;
+.kit-type-tag {
+  margin: 0;
 }
-.sim-entering .panel {
-  opacity: 0.35;
-  transform: translateY(16px);
+.kit-t-display {
+  font: 500 48px/1 var(--display);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
-
-/* nav samples sit in flow */
-.kit-nav {
-  position: static;
+.kit-t-section {
+  font: 400 28px/1.1 var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
-.kit-nav--phone {
-  padding: 0;
-  width: 44px;
-  justify-content: center;
+.kit-t-text {
+  font: 400 21px/1.45 var(--text);
 }
-.kit-nav--phone .nav-toggle {
-  display: inline-flex;
-  width: 44px;
-  height: 44px;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--r-pill);
+.kit-t-italic {
+  font: italic 400 22px/1.35 var(--text);
+}
+.kit-t-label {
+  font: 400 16px/1 var(--label);
+  letter-spacing: 0.08em;
+}
+.kit-sample-plate {
+  min-height: 180px;
+}
+.kit-sample-plate.plate .card-title {
+  margin-top: 0;
+}
+.sim-contrast {
+  --ink-2: var(--ink);
+  --rule: var(--ink);
+}
+.sim-forced .kit-sample-plate {
+  background: var(--ground);
+  border: 2px solid var(--ink);
   color: var(--ink);
-  background: rgb(var(--void-rgb) / 0.6);
-  box-shadow: 0 0 0 1px var(--rule);
 }
-.kit-nav--phone .nav-toggle .ic {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
+.sim-forced .card-title,
+.sim-forced .card-head {
+  color: var(--ink);
 }
-.kit-nav--phone .nav-links,
-.kit-nav--phone .quiet {
+.kit-neck {
+  position: relative;
+  border: 1px solid var(--rule);
+  overflow: hidden;
+}
+.kit-neck--phone {
+  max-width: 390px;
+}
+.kit-neck--phone .nav,
+.kit-neck--phone .neck-tools,
+.kit-neck--phone .tongues {
   display: none;
 }
-.kit-nav--phone.open {
-  width: 240px;
-  flex-direction: column;
-  align-items: stretch;
-  height: auto;
-  padding: 0 8px 10px;
-  border-radius: 16px;
-  background: var(--plate);
-  box-shadow: 0 0 0 1px var(--rule), var(--e-raised);
+.kit-neck--phone .neck-row {
+  grid-template-columns: 1fr auto;
 }
-.kit-nav--phone.open .nav-toggle {
-  align-self: flex-end;
-  margin-right: -8px;
-  background: transparent;
-  box-shadow: none;
+.kit-neck--phone .menu-btn {
+  display: block;
 }
-.kit-nav--phone.open .nav-links {
+.kit-neck--phone .sheet:not([hidden]) {
+  display: block;
+  padding: 8px var(--gutter) 24px;
+  border-top: 1px solid var(--rule);
+  background: var(--ground);
+}
+.kit-neck--phone .sheet-nav li {
+  border-bottom: 1px solid var(--rule);
+}
+.kit-neck--phone .sheet-nav a {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 0;
+  font: 400 20px/1 var(--label);
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+.kit-neck--phone .sheet-nav .num {
+  width: 30px;
+  font-size: 14px;
+  color: var(--accent);
+}
+.kit-neck--phone .sheet .btn {
+  width: 100%;
+  margin: 20px 0 10px;
+}
+.kit-neck--phone .sheet-tools {
+  display: flex;
+  gap: 24px;
+}
+.kit-orn {
+  padding: 24px 0;
+}
+.kit-orn--tongues {
+  padding: 0 0 24px;
+}
+.kit-numerals {
   display: grid;
-  gap: 2px;
-  padding: 0 4px;
+  gap: 20px;
+  max-width: 560px;
 }
-.kit-nav--phone.open .nav-links a {
-  height: 44px;
-  font-size: var(--t-body);
+.kit-numeral {
+  margin: 0;
 }
-.kit-nav--phone.open .quiet {
-  display: inline-flex;
-  height: 44px;
-  margin: 4px 0 0;
-  box-shadow: inset 0 1px 0 var(--rule);
-  border-radius: 0;
-  padding: 6px 4px 0;
-  font-size: var(--t-body);
+.kit-row--stage > .kit-cell {
+  flex: 1 1 360px;
 }
-
-/* stage samples: a 16:10 window on the poster */
-.kit-stage-sample {
-  position: relative;
-  width: 280px;
-  aspect-ratio: 16 / 10;
-  border-radius: var(--r-inner);
-  overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgb(var(--lit) / 0.16);
+.kit-poster {
+  height: 260px;
 }
-.kit-stage-sample .stage {
-  position: absolute;
+.kit-poster .poster-stage {
+  inset: 16px 16px calc(var(--meander-h) + 8px);
 }
-.kit-stage-on {
-  position: absolute;
-  inset: 0;
-  box-shadow: inset 0 0 0 2px var(--cyan);
-  border-radius: inherit;
+.kit-themes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
-.kit-stage-sample--lost .poster img {
-  opacity: 0.6;
+.kit-theme .kit-poster {
+  height: 200px;
 }
-
-/* chrome samples */
 .kit-skip {
   position: static;
   display: inline-block;
   transform: none;
 }
-.kit-nf,
+.kit-nf {
+  padding: 24px 0;
+}
 .kit-footer-sample {
-  width: 100%;
+  border: 1px solid var(--rule);
 }
-.kit-footer-sample .footer {
-  padding-inline: 0;
-  background: none;
-}
-.kit-nf .panel--nf {
-  width: min(480px, 100%);
+.kit-end {
+  margin-top: 24px;
 }
 
-@media (max-width: 760px), (max-aspect-ratio: 9/10) {
-  .kit-main {
-    max-width: none;
-    padding-top: 80px;
+/* one vase's roles on a sample, whatever the page theme */
+.kit-theme--light {
+  --ground: var(--slip);
+  --frieze: var(--clay);
+  --frieze-lit: var(--clay-lit);
+  --frieze-ink: var(--gloss);
+  --ring: 1;
+}
+.kit-theme--dark {
+  --ground: var(--gloss);
+  --frieze: var(--gloss);
+  --frieze-lit: var(--gloss-3);
+  --frieze-ink: var(--clay);
+  --ring: 0.3;
+}
+.kit-theme--light .poster--light,
+.kit-theme--dark .poster--dark {
+  display: block !important;
+}
+.kit-theme--light .poster--dark,
+.kit-theme--dark .poster--light {
+  display: none !important;
+}
+
+@media (max-width: 959.98px) {
+  .kit-band-inner {
+    grid-template-columns: 1fr;
+    align-items: start;
   }
   .kit-word {
-    font-size: 48px;
+    font-size: 40px;
   }
-  .kit-type .name {
-    font-size: 44px;
+  .kit-band .room {
+    width: min(100%, calc((46svh - var(--neck-h)) * var(--room-aspect)));
+    margin: 0 auto;
+  }
+  .kit-type-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .kit-t-display {
+    font-size: 36px;
+  }
+  .kit-themes {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,16 +1,15 @@
 import { NOT_FOUND } from '../content/meta.js'
 import { SKIP } from '../content/identity.js'
 import Button from '../ui/Button.jsx'
-import Panel from '../ui/Panel.jsx'
-import Wordmark from '../ui/Wordmark.jsx'
+import Neck from './Neck.jsx'
 import Footer from './Footer.jsx'
 import Poster from '../hero/Poster.jsx'
 import SceneControls from '../ui/SceneControls.jsx'
 
 /*
-  NotFound (DESIGN.md 5.13). Prerendered to dist/404.html and served with a real 404 for any
-  unknown path: the still poster, "not found, Ayro Escobar", "nothing here.", "back home" as a
-  primary button. No scene chunk, and the figure credit stays in the footer.
+  The 404. Prerendered to dist/404.html and served with a real 404 for any unknown path: the slip
+  ground, a small clay band with the poster (no scene chunk), "nothing here." and "back home" as the
+  fill button. The figure credit stays in the footer.
 */
 export default function NotFound() {
   return (
@@ -18,19 +17,17 @@ export default function NotFound() {
       <a className="skip-link" href="#main">
         {SKIP.text}
       </a>
-      <Poster />
-      <header className="top">
-        <Wordmark href="/" />
-      </header>
+      <Neck wordmarkHref="/" hrefBase="/" className="neck--plain" />
       <main id="main" tabIndex={-1} className="nf">
-        <Panel variant="nf" reveal={false}>
-          <h1 className="sec-title">{NOT_FOUND.line.text}</h1>
+        <Poster className="nf-band" />
+        <div className="wrap nf-body">
+          <h1 className="nf-line">{NOT_FOUND.line.text}</h1>
           <p className="nf-actions">
-            <Button variant="primary" href="/">
+            <Button variant="fill" href="/">
               {NOT_FOUND.home.text}
             </Button>
           </p>
-        </Panel>
+        </div>
       </main>
       <Footer kit controls={<SceneControls tier="still" motion="on" />} />
     </>
