@@ -1,14 +1,17 @@
 import { HERO } from '../content/identity.js'
 
 /*
-  <Wordmark>: "Ayro Escobar" top-left, plain text 17/650 wdth 110 ink with a soft void
-  text-shadow, a link to #top, always visible (after the hero it sits on the header's solid bar).
-  No mark, no logo. On a page with no #top (the 404) it links home.
+  <Wordmark>: AYRO·ESCOBAR in Cinzel 15/500, tracking 0.08em, top left, a link to #top (home on a page
+  with no #top). The DOM text is exactly "Ayro Escobar": the capitals are text-transform and the
+  interpunct is generated content with empty alternative text, so a screen reader hears his name.
 */
 export default function Wordmark({ className = '', href = '#top' }) {
+  const [first, ...rest] = HERO.name.text.split(' ')
   return (
     <a className={`wordmark ${className}`.trim()} href={href}>
-      {HERO.name.text}
+      <span className="wm-a">{first}</span>
+      <span className="sr-only"> </span>
+      <span>{rest.join(' ')}</span>
     </a>
   )
 }

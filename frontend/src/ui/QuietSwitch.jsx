@@ -3,12 +3,12 @@ import { toggleQuiet, useQuiet } from '../lib/mode.js'
 import { useHydrated } from '../lib/hydrated.js'
 
 /*
-  The quiet switch (DESIGN.md 4.5): solid panels instead of glass. A 26x16 knob and the word
-  "quiet", role="switch" with aria-checked, persisted (ae.quiet), applied before first paint by
-  the boot script. Quiet does not stop the scene; "motion off" in the footer does.
-  `pressed` forces a look for the kit (inert).
+  The quiet switch: the poster instead of the live scene. The word "quiet" in the label face,
+  role="switch" with aria-checked, underlined when on, persisted (ae.quiet) and applied before first
+  paint by the boot script. On, the scene is unmounted and the poster stays (every plate is already
+  solid). `pressed` forces a look for the kit (inert).
 */
-export default function QuietSwitch({ pressed, state, className = '' }) {
+export default function QuietSwitch({ pressed, className = '' }) {
   const quiet = useQuiet()
   const hydrated = useHydrated()
   const kit = pressed !== undefined
@@ -19,12 +19,11 @@ export default function QuietSwitch({ pressed, state, className = '' }) {
       role="switch"
       aria-checked={hydrated || kit ? on : false}
       title={CHROME.quietTip.text}
-      className={['quiet', state && `is-${state}`, kit && 'kit-static', className].filter(Boolean).join(' ')}
+      className={['tog', 'quiet', kit && 'kit-static', className].filter(Boolean).join(' ')}
       onClick={kit ? undefined : toggleQuiet}
       tabIndex={kit ? -1 : undefined}
     >
-      <span className="quiet-knob" aria-hidden="true" />
-      <span>{CHROME.quiet.text}</span>
+      {CHROME.quiet.text}
     </button>
   )
 }
