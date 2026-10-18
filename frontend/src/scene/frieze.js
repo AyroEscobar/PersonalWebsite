@@ -31,7 +31,7 @@
 */
 import * as THREE from 'three'
 import { loadFigure, makeFigure } from './figure.js'
-import { figureMaterial, boulderMaterial, hullOutline, setInks, INKS } from './vase.js'
+import { figureMaterial, boulderMaterial, hullOutline, setInks, INKS, SKETCH } from './vase.js'
 import { addCurvature } from './curvature.js'
 import { addParts, headUniforms } from './head.js'
 import { rockShape } from './rock.js'
@@ -72,6 +72,12 @@ const POSE = { pelvisK: 0.84, leanDeg: 56 }
 // the eye is incised only where his figure is drawn 200 CSS px tall or more (under that it is a speck)
 const EYE_PX = 200
 const WRAP = 240
+// the painting at Contact, once a visit, from 60% of the band in view (seconds from its start; the ground
+// lines were turned on the wheel by CSS at 20%): the sketch, the slip floods up from his feet, the incisions
+// scratch in, the disk is filled with added white and its flecks worn in, then he moves
+const PAINT = { sketch: [0, 0.3], slip: [0.3, 0.9], scratch: [0.9, 1.3], white: [1.3, 1.6], fleck: [1.6, 1.75], move: [1.75, 2.25] }
+const PAINT_AT = 0.6
+const ph01 = (u, [a, b]) => clamp((u - a) / (b - a), 0, 1)
 // where he holds on the pot when you stop reading: the push-off lunge (the poster's phase, either leg)
 const HOLD_PHASES = [((T_POSTER / GAIT.period) % 1 + 1) % 1, (((T_POSTER / GAIT.period) + 0.5) % 1 + 1) % 1]
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp
@@ -237,6 +243,11 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   let rot = potDeg ?? POT_TURN.from, rotV = 0, sun = 0, sunV = 0, holdTau = null, potDirty = true, rtTau = NaN, rtKey = '', potSeen = false
   let docVisible = !document.hidden, userPaused = false, first = true, holdUntil = 0, curTheme = theme
   const O = new THREE.Vector3(), win = {}
+  // the painting: only where the reveals run (a live tier, not quiet); the still page shows it finished
+  let paintStart = -1, painted = !document.documentElement.classList.contains('rv')
+  const fu = mats.fig.userData.u, du = mats.disk.userData.u
+  const _c = new THREE.Vector3(), _skc = new THREE.Color(), _ctc = new THREE.Color()
+  const shown = (el) => { const rc = el.getBoundingClientRect(); return (Math.min(rc.bottom, innerHeight) - Math.max(rc.top, 0)) / Math.max(1, rc.height) }
   const px = (name, d) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)) || d
 
   // line widths and pixel sizes per pass: the CSS bands in CSS px, the pot's band in its target's pixels
@@ -338,6 +349,8 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (!host) return 0
     if (host.kind === 'hero') return ADV_HERO * clamp(scrollY / heroCut, 0, 1)
     if (host.kind === 'pot') return 0
+    // a figure being painted holds his place on the line; he walks into it once he moves
+    if (paintStart >= 0 && !painted && t - paintStart < PAINT.move[0]) return adv
     const rc = host.el.getBoundingClientRect()
     const p = clamp((innerHeight - rc.top) / Math.max(1, rc.height), 0, 1)
     return lerp(ADV_CONTACT[0], ADV_CONTACT[1], sstep(0, 1, p))
@@ -487,7 +500,10 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (host.kind === 'pot') return leaving && !snap ? false : renderPot(dt, force)
     if (!fit) return false
     holdTau = null
-    const e = clamp(Math.abs(vel) / V_FULL, 0, 1)
+    // the painting starts when the contact band is 60% in view (at 35% he was still below the fold)
+    const painting = host.kind === 'contact' && !painted
+    if (painting && paintStart < 0 && fixedT === null && shown(host.el) >= PAINT_AT) { paintStart = t; tau = T_POSTER }
+    const e = painting ? 0 : clamp(Math.abs(vel) / V_FULL, 0, 1)
     // the catch: in the hero, only as a foot lands (both feet planted, the stance at its widest, so he can
     // dig in), and never while a scroll is moving him (it waits for the spring to settle)
     const ph = f.phase(tau)
@@ -496,7 +512,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     // your scroll is his push: scrolling down he leans in and steps faster, scrolling up he braces (a
     // step back of 3 cm, recovered as you stop); never on top of the catch
     pose.reachAdd = 0
-    if (catchStart < 0) {
+    if (catchStart < 0 && !painting) {
       if (vel >= 0) { rate *= 1 + 0.5 * e; pose.leanAdd += 3 * e; pose.reachAdd = 0.02 * e }
       else { rate *= 1 - 0.6 * e; pose.leanAdd += 2 * e; pose.shift += 0.03 * e }
     }
@@ -522,8 +538,46 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     aim(cam, O)
     cam.left = win.left; cam.right = win.right; cam.top = win.top; cam.bottom = win.bottom
     cam.updateProjectionMatrix()
+    if (painting) {
+      // bare clay until the band is 60% in view, then the painting; he holds still until it is done
+      if (paintStart < 0) {
+        fu.uPaintOn.value = du.uPaintOn.value = 1; fu.uPaint.value = du.uPaint.value = -0.2; fu.uSketch.value = du.uSketch.value = 0
+        gapHull.visible = false; diskHull.visible = false
+        rate = 0
+      } else rate = paintAt(t - paintStart)
+    } else if (fu.uPaintOn.value) unpaint()
     r.render(scene, cam)
     return true
+  }
+  function paintAt(u) {
+    fu.uPaintOn.value = du.uPaintOn.value = 1
+    fu.uSketch.value = du.uSketch.value = sstep(0, 1, ph01(u, PAINT.sketch))
+    fu.uPaint.value = lerp(-0.12, 1.12, easeInOut(ph01(u, PAINT.slip)))
+    fu.uScratch.value = ph01(u, PAINT.scratch)
+    fu.uPaintY.value.set(0, 0)
+    // the disk fills from its foot up, in the world (it rolls)
+    const c = f.boulder.getWorldPosition(_c)
+    du.uPaintY.value.set(c.y - R * 1.05, R * 2.1)
+    du.uPaint.value = lerp(-0.12, 1.12, ph01(u, PAINT.white))
+    du.uScratch.value = 1
+    du.uSpeck.value = 0.85 * ph01(u, PAINT.fleck)
+    diskHull.material.color.copy(_skc.set(SKETCH[curTheme] || SKETCH.light)).lerp(_ctc.set(INKS[curTheme].contour), sstep(0, 1, ph01(u, PAINT.white)))
+    gapHull.visible = u >= PAINT.scratch[0]
+    diskHull.visible = true
+    if (u >= PAINT.move[0]) {
+      painted = true
+      stats.painted = +t.toFixed(2)
+      host?.el.classList.add('painted')
+      unpaint()
+    }
+    // he leans before he steps
+    return u < PAINT.move[0] ? 0 : ph01(u, PAINT.move) ** 2
+  }
+  function unpaint() {
+    fu.uPaintOn.value = du.uPaintOn.value = 0
+    du.uSpeck.value = 0.85
+    gapHull.visible = true; diskHull.visible = true
+    diskHull.material.color.set(INKS[curTheme].contour)
   }
 
   // adaptive resolution: drop 0.25 after 30 slow frames, raise after 240 fast ones

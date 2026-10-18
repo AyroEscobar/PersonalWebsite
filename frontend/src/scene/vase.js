@@ -19,6 +19,8 @@
                                            painter's incision shows the clay of the pot. Over empty clay
                                            it changes nothing, so there is no halo.
     setInks(mats, theme)                   switch black-figure and red-figure without a recompile
+    paint uniforms (uPaintOn, uPaint, uSketch, uScratch, uPaintY)   the painting at Contact, a front that
+                                           rises through him and the disk (frieze.js drives it)
 
   Every colour is a uniform, so a theme switch is a uniform write.
 */
@@ -51,6 +53,9 @@ const PART_VERT = /* glsl */ `
 
 function common(m, u, key, vertexExtra = '') {
   m.toneMapped = false
+  // blending off: what the shader writes is what the canvas holds, so the unpainted parts of the painting
+  // (below) are holes to the page's own clay, and nothing behind him shows through them
+  m.blending = THREE.NoBlending
   m.fog = false
   m.userData.u = u
   m.onBeforeCompile = (sh) => {
@@ -58,7 +63,7 @@ function common(m, u, key, vertexExtra = '') {
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', `#include <common>
         uniform float uInflate;
-        varying float vCurv; varying vec3 vMP;
+        varying float vCurv; varying vec3 vMP; varying vec3 vWP;
         #ifdef USE_CURV
         attribute float aCurv;
         #endif
@@ -81,11 +86,13 @@ function common(m, u, key, vertexExtra = '') {
         transformed += normalize(objectNormal) * (uInflate * aPart.y + HAIR_CAP);
         #else
         transformed += normalize(objectNormal) * uInflate;
-        #endif${vertexExtra}`)
+        #endif
+        vWP = (modelMatrix * vec4(transformed, 1.0)).xyz;${vertexExtra}`)
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
         uniform vec3 uInk, uLine, uKeyDir, uFleck, uFleckSeed; uniform float uHeadY; uniform float uContour, uForm, uCrease, uLines, uGloss, uWidth, uShade, uSpeck;
-        varying float vCurv; varying vec3 vMP;
+        uniform float uPaintOn, uPaint, uSketch, uScratch; uniform vec3 uSketchCol; uniform vec2 uPaintY;
+        varying float vCurv; varying vec3 vMP; varying vec3 vWP;
         #ifdef USE_PART
         varying vec2 vPart; uniform vec4 uHair, uEye, uBeard; uniform float uEyeOn;
         #endif
@@ -133,7 +140,21 @@ function common(m, u, key, vertexExtra = '') {
           ink = mix(ink, uFleck, clamp(sp, 0.0, 1.0) * uSpeck);
           ink = mix(ink, uFleck, wear * uSpeck);
         }
-        gl_FragColor = vec4(mix(ink, uLine, line), 1.0);`)
+        vec4 outc = vec4(mix(ink, uLine, line), 1.0);
+        // the painting at Contact: bare clay with the painter's sketch, then the slip floods up from his feet
+        // with a ragged brush edge, then the incisions scratch in (the disk fills from its foot the same way).
+        // Unpainted pixels are transparent, premultiplied: the page's lit clay shows through them
+        if (uPaintOn > 0.5) {
+          float h = uPaintY.y > 0.0 ? (vWP.y - uPaintY.x) / uPaintY.y : (vMP.y + 1.0) * 0.5;
+          float pm = 1.0 - smoothstep(uPaint - 0.04, uPaint + 0.04, h + 0.06 * (fbm3l(vMP * 9.0) - 0.5));
+          float sc = step(vnoise3(vMP * 13.0 + 2.0), uScratch);
+          vec3 painted = mix(ink, uLine, line * sc);
+          float sk = aaLine(ndv, 0.06, uWidth * 1.4) * uSketch * (1.0 - pm);
+          float a = max(pm, sk);
+          vec3 c = mix(uSketchCol, painted, pm / max(a, 1e-4));
+          outc = vec4(c * a, a);
+        }
+        gl_FragColor = outc;`)
   }
   m.customProgramCacheKey = () => key
 }
@@ -146,6 +167,7 @@ function uniforms({ ink, line, contour = -2, form = 0.42, crease = -7, lines = 1
     uGloss: { value: gloss }, uWidth: { value: width }, uShade: { value: shade }, uSpeck: { value: speck },
     uInflate: { value: inflate }, uHeadY: { value: 1e9 }, uFleckSeed: { value: new THREE.Vector3(...FLECK_SEED) },
     uHair: { value: new THREE.Vector4(9, 0, 0, 0) }, uEye: { value: new THREE.Vector4(0, 0, 1, 1) }, uBeard: { value: new THREE.Vector4() }, uEyeOn: { value: 1 },
+    uPaintOn: { value: 0 }, uPaint: { value: 2 }, uSketch: { value: 0 }, uScratch: { value: 1 }, uSketchCol: { value: col(0x7f5636) }, uPaintY: { value: new THREE.Vector2(0, 0) },
   }
 }
 
@@ -232,8 +254,12 @@ export function hullOutline(mesh, { px = 2.2, color = 0x141110, cut = false, inf
 }
 
 // black-figure by day, red-figure by night: every ink is a uniform
+// the painter's sketch, in a thinned slip a little darker than the ground (black-figure) or lighter (red)
+export const SKETCH = { light: 0x7f5636, dark: 0x5c5244 }
+
 export function setInks({ fig, disk, diskHull }, theme) {
   const k = INKS[theme] || INKS.light
+  fig.userData.u.uSketchCol.value.set(SKETCH[theme] || SKETCH.light); disk.userData.u.uSketchCol.value.set(SKETCH[theme] || SKETCH.light)
   const f = fig.userData.u
   f.uInk.value.set(k.body); f.uLine.value.set(k.line); f.uShade.value = k.shade; f.uGloss.value = k.gloss
   const d = disk.userData.u

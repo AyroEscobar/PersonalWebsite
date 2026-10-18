@@ -79,14 +79,44 @@ export function initReveals() {
     { rootMargin: '0px 0px -12% 0px' },
   )
   document.querySelectorAll('main .turn').forEach((el) => blocks.observe(el))
+  // the contact band's ground line, turned on the wheel at 20% of the band in view
+  const band = document.querySelector('[data-band="contact"]')
+  const ground = band?.querySelector('.stage--contact .ground')
+  const wheel = new IntersectionObserver(
+    (es) => {
+      if (!es.some((e) => e.isIntersecting)) return
+      wheel.disconnect()
+      drawLine(band, ground)
+    },
+    { threshold: 0.2 },
+  )
+  if (band && ground) wheel.observe(band)
   // the still tier or quiet, mid-visit: everything is finished at once
   const off = subscribe(() => {
     if (allowed()) return
     d.classList.remove('rv')
     titles.disconnect()
     blocks.disconnect()
+    wheel.disconnect()
     off()
   })
+}
+
+/* the double ground line, turned on from the band's left edge (transform only: reveal.css) */
+function drawLine(band, ground) {
+  const b = band.getBoundingClientRect()
+  const g = ground.getBoundingClientRect()
+  const k = 1 / Math.cos((14 * Math.PI) / 180)
+  const dl = (g.left - b.left) * k + 8
+  const dr = (b.right - g.left) * k + 8
+  // the line runs 400vw each side of the foot point (components.css)
+  ground.style.setProperty('--dl', `${dl.toFixed(1)}px`)
+  ground.style.setProperty('--s1', ((dl + dr) / (4 * window.innerWidth + dl)).toFixed(4))
+  ground.classList.add('draw')
+  setTimeout(() => {
+    ground.classList.add('drawn')
+    ground.classList.remove('draw')
+  }, 800)
 }
 
 export function initNeckCut() {

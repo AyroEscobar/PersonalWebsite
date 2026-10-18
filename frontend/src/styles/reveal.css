@@ -10,6 +10,10 @@
     the turn    each block comes round the curve of the pot as it enters: in from the right edge, a
                 little narrow, 420 ms, 60 ms apart and 120 ms after its title begins
     the foot    the meander above the black foot draws itself, left to right (900 ms, linear)
+    the wheel   the contact band's double ground line is turned from the band's left edge as it comes into
+                view (700 ms, linear, the second rule 60 ms after the first); in a live tier the band is
+                bare clay until the scene paints him onto it (frieze.js), then the picture is the poster
+                again whenever the canvas is elsewhere
 */
 
 /* ---------- the carve ---------- */
@@ -82,6 +86,34 @@ html.rv .meander--foot.in::after {
   transform: translateX(101%);
 }
 
+/* ---------- the wheel: the contact band's ground line ---------- */
+/* reveal.js measures the band: --dl, from the foot point back along the line to the band's left edge, and
+   --s1, the scale at which the line reaches the band's right edge. The line is turned on from the band's
+   left edge by scaling about that point (transform only, so nothing shifts); past --s1 it runs off the
+   band, so the plain line it ends as is the same picture */
+html.rv .stage--contact .ground:not(.drawn)::before,
+html.rv .stage--contact .ground:not(.drawn)::after {
+  transform: rotate(-14deg) scaleX(0);
+}
+html.rv .stage--contact .ground.draw::before,
+html.rv .stage--contact .ground.draw::after {
+  animation: wheel var(--dur-line) linear both;
+}
+html.rv .stage--contact .ground.draw::after {
+  animation-delay: 60ms;
+}
+@keyframes wheel {
+  from {
+    transform: rotate(-14deg) translateX(calc(-1 * var(--dl))) scaleX(0) translateX(var(--dl));
+  }
+  to {
+    transform: rotate(-14deg) translateX(calc(-1 * var(--dl))) scaleX(var(--s1)) translateX(var(--dl));
+  }
+}
+html.rv.scene-live [data-band='contact']:not(.painted) .poster {
+  opacity: 0;
+}
+
 /* ---------- finished, whatever happens: reduced motion and paper ---------- */
 @media (prefers-reduced-motion: reduce) {
   html.rv .turn,
@@ -95,6 +127,10 @@ html.rv .meander--foot.in::after {
   }
   html.rv .sec-title::after {
     transform: translateY(-0.32em);
+  }
+  html.rv .stage--contact .ground::before,
+  html.rv .stage--contact .ground::after {
+    transform: rotate(-14deg);
   }
 }
 @media print {
