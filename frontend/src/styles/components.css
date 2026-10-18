@@ -3,7 +3,8 @@
   bands, the meander, the room and its ground line, the plates, the buttons, the work plates and their
   measured ticks, the experience lines, the contact pieces and the foot.
 
-  Ornament budget: the meander twice (the hero frieze's edge and the foot's), the tongues once,
+  Ornament budget: the meander twice (the hero frieze's edge and the foot's), the tongues once, the
+  rays once (the lower frieze's top edge, where an Attic amphora carries them above its foot),
   numerals, interpuncts. Every ornament is CSS or inline SVG. No text ever sits on the clay except the
   neck and the theme line (ink on clay, 5.7:1 and up). Nothing animates filter, box-shadow or
   backdrop-filter (motion.css holds every transition).
@@ -252,6 +253,28 @@ html.scrolled .neck--fixed .tongues,
   background: var(--frieze-ink);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 5'%3E%3Cpath d='M0 4.5H.5V.5h4v2h-2v2H6' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") 0 0 / calc(var(--mu) * 6) calc(var(--mu) * 5) repeat-x;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 5'%3E%3Cpath d='M0 4.5H.5V.5h4v2h-2v2H6' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") 0 0 / calc(var(--mu) * 6) calc(var(--mu) * 5) repeat-x;
+}
+
+/* the ray band: black rays rising from a 2 px rule, the top edge of the lower (contact) frieze, as an
+   Attic amphora carries them just above its foot; the same mask method as the tongues. The page then
+   reads as the whole pot: neck tongues, shoulder frieze, belly, rays, lower frieze, meander foot. */
+.rays {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 2;
+  height: 24px;
+  border-bottom: 2px solid var(--frieze-ink);
+  pointer-events: none;
+}
+.rays::before {
+  content: '';
+  display: block;
+  height: 22px;
+  background: var(--frieze-ink);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 22'%3E%3Cpath d='M3 22 8 1l5 21z'/%3E%3C/svg%3E") 0 0 / 16px 22px repeat-x;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 22'%3E%3Cpath d='M3 22 8 1l5 21z'/%3E%3C/svg%3E") 0 0 / 16px 22px repeat-x;
 }
 
 /* the room: the composition box (src/scene/comp.js BOX). The poster fills it; the scene fits the same
@@ -743,6 +766,7 @@ html.scrolled .neck--fixed .tongues,
   .stage,
   .frieze-art,
   .tongues,
+  .rays,
   .meander::before {
     display: none !important;
   }

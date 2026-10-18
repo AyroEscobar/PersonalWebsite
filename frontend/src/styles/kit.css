@@ -228,6 +228,9 @@
 .kit-orn--tongues {
   padding: 0 0 24px;
 }
+.kit-orn--rays {
+  height: 56px;
+}
 .kit-numerals {
   display: grid;
   gap: 20px;

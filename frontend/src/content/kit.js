@@ -74,6 +74,7 @@ export const KIT = {
   ornament: {
     meander: ui('kit-orn-meander', 'the meander, the frieze and foot edges'),
     tongues: ui('kit-orn-tongues', 'the tongue band, under the neck'),
+    rays: ui('kit-orn-rays', 'the ray band, the top edge of the lower frieze'),
     numerals: ui('kit-orn-numerals', 'section numerals'),
     ground: ui('kit-orn-ground', "the ground line, the painter's double rule"),
   },

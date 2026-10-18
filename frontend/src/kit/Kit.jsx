@@ -228,6 +228,11 @@ export default function Kit() {
                   <div className="tongues" aria-hidden="true" />
                 </div>
               </Cell>
+              <Cell label={KIT.ornament.rays.text}>
+                <div className="frieze kit-orn kit-orn--rays">
+                  <div className="rays" aria-hidden="true" />
+                </div>
+              </Cell>
               <Cell label={KIT.ornament.numerals.text}>
                 <div className="kit-numerals">
                   <SectionTitle id="check-out" as="p" className="kit-numeral" />

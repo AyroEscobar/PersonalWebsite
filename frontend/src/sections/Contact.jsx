@@ -8,8 +8,9 @@ import { SIGNAL } from '../content/signal.js'
 /*
   IV · Contact: the title, then the plate (the paragraph, the coffee chat with its short address on
   hover and in print, the email row with the copy button and its status, "elsewhere", the closer once)
-  over the second frieze band, which starts 150 px below the plate's top and holds the room at the right
-  with the man arriving near the right edge (he never crests). Under 960 px the band stacks under the
+  over the second frieze band, which starts 150 px below the plate's top, carries the ray band as its top
+  edge (the rays above an amphora's foot) and holds the room at the right with the man arriving near
+  the right edge (he never crests). Under 960 px the band stacks under the
   plate. The title sits above at every width: the band is this section's architecture.
 */
 export default function Contact() {
@@ -35,6 +36,7 @@ export default function Contact() {
             </div>
           </div>
           <Frieze band="contact" className="band-clay" meander={false}>
+            <div className="rays" aria-hidden="true" data-deco="" />
             <div className="wrap band-stage">
               <Room className="stage--contact" />
             </div>
