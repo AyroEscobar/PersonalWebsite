@@ -8,9 +8,9 @@ import { afterLoad, onIdle } from './idle.js'
 
     const stop = startFriezeHost()   once, after hydration (App and the kit call it in an effect)
 
-  Every [data-band] element on the page is a band (the hero's shoulder frieze and the contact band):
-  each holds a .frieze-art layer and a .room box (the composition, which the poster fills). The scene
-  moves the canvas into whichever band is most on screen and pauses when none is.
+  Every [data-band] element on the page is a band (the hero's shoulder frieze, the pot in the belly and
+  the contact band): each holds a .frieze-art layer and a .room box (the composition, which the poster
+  fills). The scene moves the canvas into whichever band is the host and pauses when none is near.
 
   When it starts: after window load, after the first poster has decoded and committed (it is the LCP
   element), then an idle moment and two frames, so the chunk never competes with the first paint. Never
@@ -30,10 +30,12 @@ const wants = () => {
   return alive && s.tier !== 'still' && !s.quiet
 }
 
+// every band with its art and room; the pot comes twice (the belly's rail and the band above Contact) and
+// the scene uses whichever is laid out at the moment (room.getClientRects())
 function bands() {
   return [...document.querySelectorAll('[data-band]')]
-    .map((el) => ({ kind: el.dataset.band, el, art: el.querySelector('.frieze-art'), room: el.querySelector('.room') }))
-    .filter((b) => b.art && b.room && getComputedStyle(b.room).display !== 'none')
+    .map((el) => ({ kind: el.dataset.band, el, art: el.querySelector('.frieze-art'), room: el.querySelector('.room'), belly: el.closest('.belly') }))
+    .filter((b) => b.art && b.room && (b.kind === 'pot' || getComputedStyle(b.room).display !== 'none'))
 }
 
 async function start() {

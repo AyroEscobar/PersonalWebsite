@@ -1,0 +1,91 @@
+/*
+  The amphora in the belly (src/hero/Pot.jsx, src/scene/pot.js). From 1100 px the pot stands in the
+  belly's left column (the rail), sticky in the middle of the screen under the neck, while Work, Experience
+  and Stack go by on the right; the section titles head the right column, so nothing ever crosses the pot.
+  Under 1100 px it is a band of its own above Contact. The box is reserved by its size (no layout shift);
+  the canvas fades in over it.
+*/
+:root {
+  /* the box keeps one aspect, so the still and the live frame frame the pot the same way at any size */
+  --pot-w: clamp(280px, 24vw, 340px);
+  --pot-aspect: 0.6538;
+  --pot-h: min(calc(var(--pot-w) / var(--pot-aspect)), calc(100svh - var(--neck-h) - 150px));
+}
+.belly {
+  position: relative;
+}
+.pot {
+  position: relative;
+}
+.pot .frieze-art {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.pot .room {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  aspect-ratio: auto;
+  pointer-events: none;
+}
+.pot-rail,
+.pot-band {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .pot-rail {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(max(0px, (100% - var(--max) - 2 * var(--gutter)) / 2) + var(--gutter));
+    width: var(--pot-w);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .pot-rail .pot {
+    position: sticky;
+    top: calc(var(--neck-h) + (100svh - var(--neck-h) - var(--pot-h)) / 2 + 6px);
+    width: calc(var(--pot-h) * var(--pot-aspect));
+    height: var(--pot-h);
+    margin: 110px auto 0;
+  }
+  /* the left column is the pot's: the title heads the right column */
+  .belly .sec-inner {
+    grid-template-columns: var(--pot-w) minmax(0, 1fr);
+  }
+  .belly .sec-inner > .sec-title {
+    grid-column: 2;
+    position: static;
+    margin-bottom: 40px;
+  }
+  .belly .sec-inner > .sec-body {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 1099.98px) {
+  .pot-band {
+    display: block;
+    position: relative;
+    height: clamp(360px, 60svh, 560px);
+    margin-top: 72px;
+  }
+  .pot-band .pot {
+    height: 100%;
+    aspect-ratio: var(--pot-aspect);
+    max-width: 100%;
+    margin: 0 auto;
+  }
+}
+
+/* forced colours and paper: the pot is decoration */
+@media (forced-colors: active) {
+  .pot-rail,
+  .pot-band {
+    display: none !important;
+  }
+}

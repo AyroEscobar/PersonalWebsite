@@ -6,10 +6,16 @@
     scene.mount({ canvas, bands, theme, tier, onReady, onError, onLost })
     scene.setTheme('dark') / scene.pause() / scene.play() / scene.unmount()
 
-  bands: [{ kind: 'hero' | 'contact', el, art, room }]. el is the clay band, art the layer the canvas lives
-  in, room the CSS box the composition is fitted into (the poster <img> fills the same box, contain and
-  bottom aligned, so the canvas lands on the poster pixel for pixel). One canvas and one WebGL context:
-  the canvas moves into whichever band is most on screen.
+  bands: [{ kind: 'hero' | 'pot' | 'contact', el, art, room, belly }]. el is the band, art the layer the
+  canvas lives in, room the CSS box the composition is fitted into (the poster <img> fills the same box,
+  contain and bottom aligned, so the canvas lands on the poster pixel for pixel). One canvas and one WebGL
+  context: the hero keeps it until its meander passes under the neck, then it moves to whichever laid-out
+  band shows the most of itself.
+
+  The pot (pot.js) is the belly's: a turned amphora whose shoulder band carries the same frieze, drawn
+  into a render target; the reader's scroll turns it (-70 degrees at the cut, facing 300 px later, +50 by
+  the end of Stack) and lowers its sun, and on it he steps only while you read down. It renders on demand:
+  only while the turn, the sun, his stride or the grit moves.
 
   The ground line is CSS (crisp, and there before the scene), so the camera follows him along the slope:
   the line never moves on screen, and scroll only changes how far up it he has got.
@@ -19,7 +25,8 @@
   write (vase.js setInks), never a recompile.
 
   Query flags (tools only): ?t=<s> freezes the clock (a scroll renders one still), ?slip=<s> the catch
-  period (and its first), ?effort=<0..1> a fixed effort. Hooks (hooks.js): window.__ready, __stats, __bench(n), __frameAt(t), __measure(), __bounds(),
+  period (and its first), ?effort=<0..1> a fixed effort,
+  ?pot=<deg> holds the pot at a turn. Hooks (hooks.js): window.__ready, __stats, __bench(n), __frameAt(t), __measure(), __bounds(),
   __poster(opts).
 */
 import * as THREE from 'three'
@@ -31,6 +38,7 @@ import { rockShape } from './rock.js'
 import { makeDust } from './dust.js'
 import { SLOPE_DEG, R, X0, T_POSTER, BOX } from './comp.js'
 import { installHooks, removeHooks } from './hooks.js'
+import { makePot } from './pot.js'
 
 const FIGURE_URL = new URL('../assets/figure/man.glb', import.meta.url).href
 const DPR_CAP = { full: 2, lite: 1.5 }
@@ -46,8 +54,12 @@ const HOLD_MS = 260 // the clock holds the poster frame this long while the canv
 const ADV_HERO = 0.9 // metres he climbs while the hero scrolls away (to the cut, the meander under the neck)
 const ADV_CONTACT = [-0.9, 0] // and over the contact band as it comes into view: he arrives, never crests
 const SPRING_W = 7
-// effort: the reader's scroll velocity (CSS px/s) that counts as full effort
-const V_FULL = 1200
+// effort: the reader's scroll velocity (CSS px/s) that counts as full effort; on the pot, the velocity that
+// is one ordinary stride (a reader's pace is about 110 px/s), at most 2.2 strides
+const V_FULL = 1200, V_STRIDE = 130, STRIDE_MAX = 2.2
+// the pot's turn (degrees): round the left limb at the cut, facing over the first 300 px of the belly, then
+// on round toward the far shoulder by the end of Stack; on the phone band, the same turn as it passes
+const POT_TURN = { from: -70, face: 0, to: 50, inPx: 300 }
 const INFLATE = 0.02 // metres: a little more body, closer to the vase painter's heavy silhouette
 // metres: the soles stand this far off the slope, so the inflated toes sit on the painter's ground line
 // instead of sinking into it (no dark puddle where the outline meets the 4 px line)
@@ -60,6 +72,8 @@ const POSE = { pelvisK: 0.84, leanDeg: 56 }
 // the eye is incised only where his figure is drawn 200 CSS px tall or more (under that it is a speck)
 const EYE_PX = 200
 const WRAP = 240
+// where he holds on the pot when you stop reading: the push-off lunge (the poster's phase, either leg)
+const HOLD_PHASES = [((T_POSTER / GAIT.period) % 1 + 1) % 1, (((T_POSTER / GAIT.period) + 0.5) % 1 + 1) % 1]
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp
 const sstep = (a, b, x) => { const u = clamp((x - a) / (b - a), 0, 1); return u * u * (3 - 2 * u) }
 // the site's curves, solved: --ease-out and --ease-in-out (tokens.css)
@@ -81,8 +95,9 @@ function query() {
     fixedT: q.has('t') ? Number(q.get('t')) : null,
     catchEvery: Number(q.get('slip')) || CATCH.every,
     catchFirst: Number(q.get('slip')) || CATCH.first,
-    // tools only: a fixed effort (0..1, + is scrolling down) for stills
+    // tools only: a fixed effort (0..1, + is scrolling down) for stills; the pot held at a turn (degrees)
     effort: q.has('effort') ? Number(q.get('effort')) : null,
+    potDeg: q.has('pot') ? Number(q.get('pot')) : null,
   }
 }
 
@@ -157,9 +172,29 @@ export function fitIn(cw, ch, rx, ry, rw, rh) {
 
 let S = null
 
+// the painter's double line for the pot's band (the hero and contact bands have theirs in CSS): two quads
+// in the slope frame, 4 and 2 px of the band's target, the same gap as the CSS lines
+function makeGroundLines(ink) {
+  const u = { uInk: { value: new THREE.Color(ink) } }
+  const m = new THREE.ShaderMaterial({
+    uniforms: u,
+    vertexShader: 'void main(){ gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0); }',
+    fragmentShader: 'uniform vec3 uInk; void main(){ gl_FragColor = linearToOutputTexel(vec4(uInk, 1.0)); }',
+  })
+  const geo = new THREE.PlaneGeometry(40, 1)
+  const a = new THREE.Mesh(geo, m), b = new THREE.Mesh(geo, m)
+  a.renderOrder = b.renderOrder = -1
+  a.scale.y = 0.036; a.position.y = -0.018
+  b.scale.y = 0.018; b.position.y = -0.16
+  const g = new THREE.Group()
+  g.add(a, b)
+  g.visible = false
+  return { g, u, setInk: (c) => u.uInk.value.set(c) }
+}
+
 export async function mount({ canvas, bands, theme = 'light', tier = 'full', onReady, onError, onLost } = {}) {
   if (S) unmount()
-  const { fixedT, catchEvery, catchFirst, effort: fixedEffort } = query()
+  const { fixedT, catchEvery, catchFirst, effort: fixedEffort, potDeg } = query()
   const r = makeRenderer(canvas)
   const a0 = bands[0]?.art.getBoundingClientRect()
   let cap = capFor(tier, a0?.width || 0, a0?.height || 0)
@@ -167,7 +202,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   const me = (S = { r, canvas, dead: false })
   let lost = false, losses = 0
   const onCtxLost = (e) => { e.preventDefault(); lost = true; losses++; host?.el.classList.remove('is-live'); canvas.classList.remove('on'); onLost?.(true, losses); sync() }
-  const onCtxRestored = () => { lost = false; onLost?.(false, losses); measureHost(); render(0); host?.el.classList.add('is-live'); canvas.classList.add('on'); sync() }
+  const onCtxRestored = () => { lost = false; onLost?.(false, losses); measureHost(); render(0, true); host?.el.classList.add('is-live'); canvas.classList.add('on'); sync() }
   canvas.addEventListener('webglcontextlost', onCtxLost, false)
   canvas.addEventListener('webglcontextrestored', onCtxRestored, false)
   Object.assign(me, { onCtxLost, onCtxRestored })
@@ -176,14 +211,20 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   try { W = await build({ theme }) } catch (e) { onError?.(e); return null }
   if (me.dead) return null
   const { scene, slope, f, mats, hulls, dust } = W
+  const [diskHull, gapHull] = hulls
+  // the pot, when the page has one (the home page's belly): its own scene, the frieze drawn into its band
+  const pot = bands.some((b) => b.kind === 'pot') ? makePot({ tier, theme }) : null
+  const lines = makeGroundLines(INKS[theme].body)
+  slope.add(lines.g)
+  W.pot = pot; W.lines = lines
   lineWidths(W, r.getPixelRatio())
   const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200)
   cam.position.set(0, 0, 60)
   cam.lookAt(0, 0, 0)
+  const rtCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200)
 
-  const stats = (window.__stats = { frames: 0, ms: 0, dpr: r.getPixelRatio(), host: null, paused: true, tier })
+  const stats = (window.__stats = { frames: 0, renders: 0, ms: 0, dpr: r.getPixelRatio(), host: null, paused: true, tier })
   let host = null, fit = null, cssW = 1, cssH = 1
-  const vis = new Map()
   let t = fixedT ?? T_POSTER, tau = t, rate = 1, last = performance.now()
   let catchStart = -1, nextCatch = Infinity, shiftBase = 0, camShift = 0
   const pose = { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0, lookUp: 0 }
@@ -191,11 +232,32 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   // effort: the scroll velocity through the spring (px/s, signed: + is down the page)
   let vel = fixedEffort !== null ? fixedEffort * V_FULL : 0, velV = 0, lastY = scrollY
   let heroCut = 1 // px of scroll from the top of the page to the cut (the hero's meander under the neck)
+  let NECK = 68
+  // the pot: its turn and its sun, springs on the scroll position; his stride there; on-demand rendering
+  let rot = potDeg ?? POT_TURN.from, rotV = 0, sun = 0, sunV = 0, holdTau = null, potDirty = true, rtTau = NaN, rtKey = ''
   let docVisible = !document.hidden, userPaused = false, first = true, holdUntil = 0, curTheme = theme
   const O = new THREE.Vector3(), win = {}
+  const px = (name, d) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)) || d
 
+  // line widths and pixel sizes per pass: the CSS bands in CSS px, the pot's band in its target's pixels
+  function passWidths(kind) {
+    const fu = mats.fig.userData.u, du = mats.disk.userData.u
+    if (kind === 'pot') {
+      const { width: w, height: h } = pot.rt
+      fu.uWidth.value = 1.15; du.uWidth.value = 1.5; fu.uEyeOn.value = 0
+      for (const hh of hulls) hh.material.userData.u.uRes.value.set(w, h)
+      gapHull.material.userData.u.uPx.value = 1.7; diskHull.material.userData.u.uPx.value = 1.5
+      dust.setScale(w / (pot.win.r - pot.win.l), 1)
+    } else {
+      lineWidths(W, r.getPixelRatio())
+      for (const hh of hulls) hh.material.userData.u.uRes.value.set(cssW, cssH)
+      gapHull.material.userData.u.uPx.value = 1.5; diskHull.material.userData.u.uPx.value = 1.3
+      if (fit) { fu.uEyeOn.value = 1.8 * fit.s >= EYE_PX ? 1 : 0; dust.setScale(fit.s, r.getPixelRatio()) }
+    }
+  }
   function measureHost() {
     if (!host) return
+    NECK = px('--neck-h', 68)
     const c = host.art.getBoundingClientRect(), rr = host.room.getBoundingClientRect()
     cssW = Math.max(1, Math.round(c.width)); cssH = Math.max(1, Math.round(c.height))
     // the cap follows the band's size (a phone turned to landscape is no longer a small canvas; the
@@ -203,16 +265,15 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     const c2 = capFor(tier, cssW, cssH)
     if (c2 !== cap) {
       cap = c2
-      if (r.getPixelRatio() > cap) { r.setPixelRatio(cap); lineWidths(W, cap); stats.dpr = cap }
+      if (r.getPixelRatio() > cap) { r.setPixelRatio(cap); stats.dpr = cap }
     }
     r.setSize(cssW, cssH, false)
     const m = document.querySelector('.hero > .meander')
-    const neck = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--neck-h')) || 68
-    if (m) heroCut = Math.max(1, m.getBoundingClientRect().bottom + scrollY - neck)
-    fit = fitIn(cssW, cssH, rr.left - c.left, rr.top - c.top, rr.width, rr.height)
-    for (const h of hulls) h.material.userData.u.uRes.value.set(cssW, cssH)
-    mats.fig.userData.u.uEyeOn.value = 1.8 * fit.s >= EYE_PX ? 1 : 0
-    dust.setScale(fit.s, r.getPixelRatio())
+    if (m) heroCut = Math.max(1, m.getBoundingClientRect().bottom + scrollY - NECK)
+    if (host.kind === 'pot') pot.frame(cssW, cssH)
+    else fit = fitIn(cssW, cssH, rr.left - c.left, rr.top - c.top, rr.width, rr.height)
+    passWidths(host.kind)
+    potDirty = true
   }
   function setHost(b) {
     if (b === host) return
@@ -222,14 +283,45 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (!b) return
     b.art.appendChild(canvas)
     measureHost()
-    if (!first) { render(0); b.el.classList.add('is-live') }
+    if (!first) { render(0, true); b.el.classList.add('is-live') }
+  }
+  // the host: the hero keeps the canvas until its meander has passed under the neck (the cut); then
+  // whichever laid-out band shows the most of itself (the pot, the contact band)
+  function choose() {
+    const vh = innerHeight
+    let best = null, bestV = 0
+    for (const b of bands) {
+      if (!b.room.getClientRects().length) continue
+      const rc = (b.kind === 'hero' ? b.art : b.el).getBoundingClientRect()
+      if (rc.bottom <= 0 || rc.top >= vh) continue
+      let v = Math.min(rc.bottom, vh) - Math.max(rc.top, 0)
+      if (b.kind === 'hero') v = rc.bottom > NECK + 1 ? 1e6 : 0
+      if (v > bestV) { bestV = v; best = b }
+    }
+    return best
   }
   function advTarget() {
     if (!host) return 0
-    const rc = host.el.getBoundingClientRect()
     if (host.kind === 'hero') return ADV_HERO * clamp(scrollY / heroCut, 0, 1)
+    if (host.kind === 'pot') return 0
+    const rc = host.el.getBoundingClientRect()
     const p = clamp((innerHeight - rc.top) / Math.max(1, rc.height), 0, 1)
     return lerp(ADV_CONTACT[0], ADV_CONTACT[1], sstep(0, 1, p))
+  }
+  // the pot's turn (degrees) and its sun (0..1) from the scroll position
+  function potTargets() {
+    const b = host
+    if (b.belly) {
+      const rb = b.belly.getBoundingClientRect()
+      const s = NECK - rb.top // px of the belly scrolled past the neck
+      const span = Math.max(1, rb.height - innerHeight * 0.6 - POT_TURN.inPx)
+      const turn = s < POT_TURN.inPx ? lerp(POT_TURN.from, POT_TURN.face, easeOut(clamp(s / POT_TURN.inPx, 0, 1))) : lerp(POT_TURN.face, POT_TURN.to, clamp((s - POT_TURN.inPx) / span, 0, 1))
+      return [turn, clamp(s / (span + POT_TURN.inPx), 0, 1)]
+    }
+    // the phone's band above Contact: one turn as it passes through the screen
+    const rc = b.el.getBoundingClientRect()
+    const p = clamp((innerHeight - rc.top) / (innerHeight + rc.height), 0, 1)
+    return [lerp(POT_TURN.from, POT_TURN.to, sstep(0.05, 0.95, p)), p]
   }
 
   // the catch, in scene time: writes the pose and returns the gait rate it allows
@@ -284,15 +376,86 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (dt > 0) { const w = SPRING_W, a = -w * w * (vel - v) - 2 * w * velV; velV += a * dt; vel += velV * dt }
     if (Math.abs(vel) < 0.5 && Math.abs(velV) < 0.5) { vel = 0; velV = 0 }
   }
+  // on the pot he steps only while you read down; when you stop he finishes the step and holds in the
+  // lunge (both feet planted, the rock still), so a still page is a still painting
+  function strideRate() {
+    const target = clamp(vel / V_STRIDE, 0, STRIDE_MAX)
+    if (target > 0.12) { holdTau = null; return target }
+    if (holdTau === null) {
+      const T = GAIT.period, ph = ((tau / T) % 1 + 1) % 1
+      let best = Infinity
+      for (const h of HOLD_PHASES) { let d = h - ph; if (d < 0.02) d += 1; best = Math.min(best, d) }
+      holdTau = tau + best * T
+    }
+    // ease into the hold, and land on it exactly (so the pot stops rendering)
+    if (holdTau - tau < 0.003) { tau = holdTau; return target }
+    return Math.max(target, clamp((holdTau - tau) * 2.4, 0.05, 0.9))
+  }
+  // grit kicked back from the rear toe at each push-off (never in a still or a held frame)
+  function kickAt(o, dt) {
+    if (dt > 0 && fixedT === null && rate > 0.05 && o.push > 0.6 && prevPush <= 0.6) {
+      const b = o.balls[o.pushFoot]
+      dust.kick(b.x - 0.04, 0.03, 4 + Math.round(2 * ((tau * 7.3) % 1)), { t })
+    }
+    prevPush = o.push
+  }
 
-  function render(dt) {
-    if (!fit || lost) return
+  // the pot: two passes, the frieze into the band's target, then the pot. Only while something moves: the
+  // turn or the sun on their springs, his stride, the grit; the frieze pass only when the painting changed
+  function renderPot(dt, force) {
+    const step = (x, v, target) => { const a = -SPRING_W * SPRING_W * (x - target) - 2 * SPRING_W * v; v += a * dt; return [x + v * dt, v] }
+    const [rt, st] = potTargets()
+    if (potDeg !== null) { rot = potDeg; rotV = 0 } else if (dt > 0) { ;[rot, rotV] = step(rot, rotV, rt) } else { rot = rt; rotV = 0 }
+    if (dt > 0) { ;[sun, sunV] = step(sun, sunV, st) } else { sun = st; sunV = 0 }
+    rate = fixedT === null ? strideRate() : 0
+    const dustMoving = dust.update(t, dt) > 0
+    const moving = Math.abs(rotV) > 0.02 || Math.abs(rot - rt) > 0.02 || Math.abs(sunV) > 0.0005 || rate > 0.002 || dustMoving
+    if (!moving && !potDirty && !force) return false
+    const key = `${curTheme}|${r.getPixelRatio()}`
+    const rtDirty = force || potDirty || tau !== rtTau || dustMoving || key !== rtKey
+    potDirty = false
+    if (rtDirty) {
+      rtTau = tau; rtKey = key
+      pose.shift = shiftBase; pose.leanAdd = 0; pose.crouch = 0; pose.reachAdd = 0; pose.lookUp = 0
+      scene.updateMatrixWorld()
+      const o = f.update(tau, pose)
+      kickAt(o, dt)
+      // the frieze pass: the window round his foot point, drawn into the band's target
+      const ox = o.x + pose.shift - camShift
+      O.set(ox, 0, 0).applyMatrix4(slope.matrixWorld)
+      const WN = pot.win
+      aim(rtCam, O)
+      rtCam.left = WN.l; rtCam.right = WN.r; rtCam.bottom = WN.b; rtCam.top = WN.t
+      rtCam.updateProjectionMatrix()
+      const cs = Math.cos(slope.rotation.z)
+      dust.stones(ox + WN.l / cs - 0.3, ox + WN.r / cs + 0.3)
+      lines.g.position.x = o.x
+      lines.g.visible = true
+      r.setRenderTarget(pot.rt)
+      r.setClearColor(0x000000, 0)
+      r.clear()
+      r.render(scene, rtCam)
+      r.setRenderTarget(null)
+      lines.g.visible = false
+    }
+    pot.group.rotation.y = THREE.MathUtils.degToRad(rot)
+    pot.setSun(sun)
+    r.render(pot.scene, pot.cam)
+    stats.rtSkips = (stats.rtSkips || 0) + (rtDirty ? 0 : 1)
+    return true
+  }
+
+  function render(dt, force = false) {
+    if (!host || lost) return false
     effortAt(dt)
+    if (host.kind === 'pot') return renderPot(dt, force)
+    if (!fit) return false
+    holdTau = null
     const e = clamp(Math.abs(vel) / V_FULL, 0, 1)
     // the catch: in the hero, only as a foot lands (both feet planted, the stance at its widest, so he can
     // dig in), and never while a scroll is moving him (it waits for the spring to settle)
     const ph = f.phase(tau)
-    if (catchStart < 0 && fixedT === null && host?.kind === 'hero' && t >= nextCatch && e < 0.05 && ph % 0.5 < 0.05) catchStart = t
+    if (catchStart < 0 && fixedT === null && host.kind === 'hero' && t >= nextCatch && e < 0.05 && ph % 0.5 < 0.05) catchStart = t
     rate = catchAt(t)
     // your scroll is his push: scrolling down he leans in and steps faster, scrolling up he braces (a
     // step back of 3 cm, recovered as you stop); never on top of the catch
@@ -310,12 +473,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     camShift = Math.max(camShift, pose.shift - CATCH.dist * 0.7)
     scene.updateMatrixWorld()
     const o = f.update(tau, pose)
-    // grit kicked back from the rear toe at each push-off (never in a still or a held frame)
-    if (dt > 0 && fixedT === null && rate > 0.05 && o.push > 0.6 && prevPush <= 0.6) {
-      const b = o.balls[o.pushFoot]
-      dust.kick(b.x - 0.04, 0.03, 4 + Math.round(2 * ((tau * 7.3) % 1)), { t })
-    }
-    prevPush = o.push
+    kickAt(o, dt)
     if (dt > 0) catchDustAt(t, o)
     dust.update(t, dt)
     // O, the foot point the CSS ground line passes through: his root minus the climb, minus the catch lag
@@ -329,6 +487,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     cam.left = win.left; cam.right = win.right; cam.top = win.top; cam.bottom = win.bottom
     cam.updateProjectionMatrix()
     r.render(scene, cam)
+    return true
   }
 
   // adaptive resolution: drop 0.25 after 30 slow frames, raise after 240 fast ones
@@ -338,20 +497,22 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     else if (ms < 6) { if (++fast > 240 && r.getPixelRatio() < cap) { setDpr(Math.min(cap, r.getPixelRatio() + 0.25)); fast = 0 } }
     else { slow = 0; fast = 0 }
   }
-  function setDpr(v) { r.setPixelRatio(v); lineWidths(W, v); measureHost(); stats.dpr = v }
+  function setDpr(v) { r.setPixelRatio(v); measureHost(); stats.dpr = v }
 
   function frame(now) {
     let dt = Math.min(0.05, (now - last) / 1000)
     last = now
     if (first) holdUntil = now + HOLD_MS
     if (now < holdUntil) dt = 0 // hold the poster frame while the canvas fades in over it
+    const nb = choose()
+    if (nb !== host) setHost(nb)
     t += dt; tau += dt * rate
     if (t > WRAP) { t = tau = T_POSTER; shiftBase = 0; camShift = 0; catchStart = -1; nextCatch = t + catchEvery; dust.clear() }
     const t0 = performance.now()
-    render(dt)
-    const ms = performance.now() - t0 + (dt * 1000 > 40 ? 30 : 0)
-    stats.frames++; stats.ms += (ms - stats.ms) * 0.1; stats.t = t; stats.slipping = catchStart >= 0; stats.eff = +clamp(Math.abs(vel) / V_FULL, 0, 1).toFixed(3); stats.rate = +rate.toFixed(3)
-    adapt(stats.ms)
+    const drew = render(dt)
+    const ms = performance.now() - t0
+    if (drew) { stats.renders++; stats.ms += (ms - stats.ms) * 0.1; adapt(stats.ms + (dt * 1000 > 40 ? 30 : 0)) }
+    stats.frames++; stats.t = t; stats.slipping = catchStart >= 0; stats.eff = +clamp(Math.abs(vel) / V_FULL, 0, 1).toFixed(3); stats.rate = +rate.toFixed(3); stats.rot = +rot.toFixed(1)
     if (first) live()
   }
   function live() {
@@ -364,61 +525,74 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     window.__ready = true
     onReady?.()
   }
+  // the loop runs while any band is near the screen (it picks the host itself each frame); none: it stops
+  const near = new Set()
   function sync() {
-    const run = !!host && docVisible && !userPaused && fixedT === null && !lost
+    const run = docVisible && !userPaused && fixedT === null && !lost && (!!host || near.size > 0)
     stats.paused = !run
     last = performance.now()
     lastY = scrollY
     r.setAnimationLoop(run ? frame : null)
   }
-  function pick() {
-    let best = null, bestR = 0
-    for (const b of bands) { const v = vis.get(b) || 0; if (v > bestR) { best = b; bestR = v } }
-    setHost(best)
+  const io = new IntersectionObserver((es) => {
+    for (const e of es) { const b = bands.find((x) => x.el === e.target); if (e.isIntersecting) near.add(b); else near.delete(b) }
+    if (!near.size && host) setHost(null)
+    if (still()) { const nb = choose(); if (nb !== host) setHost(nb) }
     sync()
-  }
-  const io = new IntersectionObserver((es) => { for (const e of es) vis.set(bands.find((b) => b.el === e.target), e.isIntersecting ? e.intersectionRatio + 1e-3 : 0); pick() }, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] })
+  }, { rootMargin: '10% 0px 10% 0px' })
   bands.forEach((b) => io.observe(b.el))
   const still = () => userPaused || fixedT !== null
   let lastW = innerWidth, lastH = innerHeight
   // phones change innerHeight as the URL bar moves; ignore small height-only changes
-  const onResize = () => { if (innerWidth === lastW && Math.abs(innerHeight - lastH) < 120) return; lastW = innerWidth; lastH = innerHeight; measureHost(); if (still()) render(0) }
-  const ro = new ResizeObserver(() => { measureHost(); if (still() && !first) render(0) })
+  const onResize = () => { if (innerWidth === lastW && Math.abs(innerHeight - lastH) < 120) return; lastW = innerWidth; lastH = innerHeight; measureHost(); if (still()) render(0, true) }
+  const ro = new ResizeObserver(() => { measureHost(); if (still() && !first) render(0, true) })
   bands.forEach((b) => { ro.observe(b.room); ro.observe(b.art) })
   const onVis = () => { docVisible = !document.hidden; sync() }
-  // with a fixed clock (?t=) or paused, a scroll renders one still at the scrolled climb
-  const onScroll = () => { if (still() && !first) render(0) }
+  // with a fixed clock (?t=) or paused, a scroll renders one still at the scrolled climb (and turn)
+  const onScroll = () => { if (still() && !first) { const nb = choose(); if (nb !== host) setHost(nb); render(0, true) } }
   addEventListener('resize', onResize)
   addEventListener('scroll', onScroll, { passive: true })
   document.addEventListener('visibilitychange', onVis)
 
-  // compile off the critical path before the first frame, so the first frame never stalls
+  // compile every program before the first frame (the pot's too), so no frame ever stalls on a shader
   scene.updateMatrixWorld()
   f.update(T_POSTER, pose)
   dust.kick(0, 0.05, 1, { t: 0 }); dust.update(0, 0) // the grit's program compiles with the rest
-  try { await r.compileAsync(scene, cam) } catch { /* the first frame compiles instead */ }
+  try {
+    await r.compileAsync(scene, cam)
+    if (pot) {
+      lines.g.visible = true; await r.compileAsync(scene, rtCam); lines.g.visible = false
+      pot.frame(300, 450); await r.compileAsync(pot.scene, pot.cam)
+    }
+  } catch { /* the first frame compiles instead */ }
   dust.clear()
   if (me.dead) return null
-  // start in the hero if nothing has reported yet (the observer fires on the next frame)
-  if (!host) setHost(bands[0])
+  NECK = px('--neck-h', 68)
+  setHost(choose() || bands[0])
 
   installHooks({
     r, cam, scene, slope, f, R, canvas, fit: () => fit, host: () => host, W,
-    render: (tt) => { t = tau = tt; render(0) },
-    step: (dt) => { t += dt; tau += dt * rate; render(dt) },
+    render: (tt) => { t = tau = tt; render(0, true) },
+    step: (dt) => { t += dt; tau += dt * rate; render(dt, true) },
     measure: () => measure(W),
     poster: (o) => poster(o),
   })
 
-  if (fixedT !== null) { render(0); live() } else sync()
+  if (fixedT !== null) { render(0, true); live() } else sync()
 
   Object.assign(me, {
     io, ro, onResize, onVis, onScroll, W,
     pause: () => { userPaused = true; sync() },
     play: () => { userPaused = false; sync() },
-    setTheme: (th) => { if (th === curTheme) return; curTheme = th; setInks(mats, th); dust.setInk(INKS[th].body); if (!host || still() || !stats.frames) render(0) },
+    setTheme: (th) => {
+      if (th === curTheme) return
+      curTheme = th
+      setInks(mats, th); dust.setInk(INKS[th].body); lines.setInk(INKS[th].body); pot?.setTheme(th)
+      potDirty = true
+      if (!host || still() || !stats.frames) render(0, true)
+    },
     paused: () => userPaused,
-    remeasure: () => { measureHost(); if (still()) render(0) },
+    remeasure: () => { measureHost(); if (still()) render(0, true) },
   })
   return me
 }
