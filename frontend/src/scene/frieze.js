@@ -192,6 +192,9 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     const target = advTarget()
     if (dt > 0) { const w = SPRING_W, a = -w * w * (adv - target) - 2 * w * advVel; advVel += a * dt; adv += advVel * dt } else { adv = target; advVel = 0 }
     camShift += (pose.shift - camShift) * (1 - Math.exp(-dt * (slipStart >= 0 ? 0.35 : 0.9)))
+    // the camera never lags him by more than the slip the room was measured for (measure(): SLIP.dist * 0.7),
+    // so the deepest slip stays inside the room and clear of the plate however close the slips come
+    camShift = Math.max(camShift, pose.shift - SLIP.dist * 0.7)
     scene.updateMatrixWorld()
     const o = f.update(tau, pose)
     // O, the foot point the CSS ground line passes through: his root minus the climb, minus the slip lag
