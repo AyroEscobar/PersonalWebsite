@@ -42,6 +42,9 @@ const INFLATE = 0.02 // metres: a little more body, closer to the vase painter's
 // instead of sinking into it (no dark puddle where the outline meets the 4 px line)
 const SOLE = 0.018
 export const GAIT = { speed: 0.3, period: 2.05 }
+// the vase's long diagonal lunge: the hips high and the back leg long (at pelvisK 0.7 and 50 degrees both
+// shins lay nearly flat for half the cycle and he read as kneeling)
+const POSE = { pelvisK: 0.78, leanDeg: 56 }
 const WRAP = 240
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp
 const sstep = (a, b, x) => { const u = clamp((x - a) / (b - a), 0, 1); return u * u * (3 - 2 * u) }
@@ -69,7 +72,7 @@ async function build({ theme, figureUrl = FIGURE_URL }) {
   fig.userData.u.uHeadY.value = geo.boundingBox.min.y + (1.56 / 1.8) * (geo.boundingBox.max.y - geo.boundingBox.min.y)
   const disk = boulderMaterial({ theme })
   const rs = rockShape('polished', R)
-  const f = makeFigure({ man, material: fig, boulderMaterial: disk, boulderGeometry: rs.geometry, R, x0: X0, sole: SOLE, surface: rs.surface, ...GAIT })
+  const f = makeFigure({ man, material: fig, boulderMaterial: disk, boulderGeometry: rs.geometry, R, x0: X0, sole: SOLE, surface: rs.surface, ...GAIT, ...POSE })
   f.glints.forEach((g) => { g.visible = false })
   slope.add(f.group)
   // draw order: the disk's painted contour, the disk, him, then the incised cut through whatever he overlaps

@@ -66,9 +66,9 @@
   --frieze-h: clamp(330px, 46svh, 520px);
 
   /* the composition box (src/scene/comp.js: ASPECT, FOOT_X, FOOT_Y; check-content holds them equal) */
-  --room-aspect: 1.3611;
-  --foot-x: 31.12%;
-  --foot-y: 89.58%;
+  --room-aspect: 1.5391;
+  --foot-x: 34.46%;
+  --foot-y: 91.30%;
 
   /* motion */
   --dur-hover: 160ms;

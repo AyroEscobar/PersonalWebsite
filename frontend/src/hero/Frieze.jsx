@@ -17,9 +17,9 @@
 */
 const POSTER = {
   w: 1600,
-  h: 1176,
+  h: 1040,
   mw: 960,
-  mh: 706,
+  mh: 624,
   src: (theme, m = false, ext = 'avif') => `/poster/frieze-${theme}${m ? '-m' : ''}.${ext}`,
 }
 const PHONE = '(max-width: 959.98px)'
