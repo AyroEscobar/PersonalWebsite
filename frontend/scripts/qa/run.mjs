@@ -109,7 +109,7 @@ log('static scans of dist')
 for (const s of await staticScan(ROOT)) check('static', s.id, s.status, s.detail)
 
 // ---------- 4. serve and launch ----------
-const { server, url } = await serveDist({ port: 0 })
+const { server, url } = await serveDist({ port: Number(process.env.SERVE_PORT || 0) })
 log(`serving dist at ${url}`)
 const chrome = await launchChrome({ tag: 'qa' })
 log(`chrome ${chrome.version.Browser} on :${chrome.port}, profile ${chrome.profileDir}`)
@@ -508,7 +508,7 @@ try {
 
     // T12: fonts held back 500 ms must not move the page, on desktop and on a phone.
     {
-      const slow = await serveDist({ port: 0, delay: (p) => (/\.woff2$/.test(p) ? 500 : 0) })
+      const slow = await serveDist({ port: Number(process.env.SERVE_PORT2 || 0), delay: (p) => (/\.woff2$/.test(p) ? 500 : 0) })
       const shifts = []
       for (const [w, h, mobile] of [[1280, 800, false], [1440, 900, false], [1920, 1080, false], [390, 844, true]]) {
         const page = await cdp.newPage({ width: w, height: h, dpr: mobile ? 2 : 1, mobile })

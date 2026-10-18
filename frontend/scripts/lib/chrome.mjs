@@ -9,7 +9,8 @@
   (tools/local.json "scratchDir", or SCRATCH_DIR, or the OS temp dir).
   On this Mac headless Chrome may not exit on its own, so kill() always
   follows up with pkill on the profile path and deletes it. Exit and signal
-  handlers do the same if the script dies.
+  handlers do the same if the script dies. CDP_PORT fixes the debugging port (the
+  tools may be asked to keep every port inside a range); else the OS picks one.
 */
 import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
@@ -77,7 +78,7 @@ export async function launchChrome({ tag = 'qa' } = {}) {
     [
       '--headless=new',
       `--user-data-dir=${profileDir}`,
-      '--remote-debugging-port=0',
+      `--remote-debugging-port=${process.env.CDP_PORT || 0}`,
       '--remote-allow-origins=*',
       '--mute-audio',
       '--no-first-run',
@@ -101,14 +102,32 @@ export async function launchChrome({ tag = 'qa' } = {}) {
 
   const portFile = path.join(profileDir, 'DevToolsActivePort')
   const t0 = Date.now()
-  while (!existsSync(portFile) || !readFileSync(portFile, 'utf8').includes('\n')) {
-    if (Date.now() - t0 > 20000) {
-      await kill()
-      throw new Error('chrome: DevToolsActivePort never appeared')
+  let port = Number(process.env.CDP_PORT || 0)
+  if (port) {
+    // a fixed port (CDP_PORT, so the tools stay inside the range they may use): poll it until it answers
+    for (;;) {
+      try {
+        await fetch(`http://127.0.0.1:${port}/json/version`)
+        break
+      } catch {
+        /* not up yet */
+      }
+      if (Date.now() - t0 > 20000) {
+        await kill()
+        throw new Error(`chrome: the debugging port ${port} never answered`)
+      }
+      await new Promise((r) => setTimeout(r, 100))
     }
-    await new Promise((r) => setTimeout(r, 100))
+  } else {
+    while (!existsSync(portFile) || !readFileSync(portFile, 'utf8').includes('\n')) {
+      if (Date.now() - t0 > 20000) {
+        await kill()
+        throw new Error('chrome: DevToolsActivePort never appeared')
+      }
+      await new Promise((r) => setTimeout(r, 100))
+    }
+    port = Number(readFileSync(portFile, 'utf8').split('\n')[0])
   }
-  const port = Number(readFileSync(portFile, 'utf8').split('\n')[0])
   const version = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json()
 
   async function kill() {

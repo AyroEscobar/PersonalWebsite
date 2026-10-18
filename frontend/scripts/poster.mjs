@@ -126,7 +126,7 @@ try {
   meta.build = 'dev'
 }
 
-const { server, url } = await serveDist({ port: 0 })
+const { server, url } = await serveDist({ port: Number(process.env.SERVE_PORT || 0) })
 const chrome = await launchChrome({ tag: 'poster' })
 let code = 0
 try {
