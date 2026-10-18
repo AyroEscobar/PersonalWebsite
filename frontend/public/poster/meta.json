@@ -1,553 +1,1018 @@
 {
-  "t": 2.3,
-  "p": 0,
+  "t": 2.34,
   "tier": "full",
-  "build": "6465f1a",
-  "views": {
-    "hero-1440": {
-      "width": 1440,
-      "height": 900,
-      "dpr": 1,
-      "brightest": {
-        "panel": [
-          8,
-          127,
-          167
+  "build": "3c6ed32",
+  "posters": {
+    "frieze-light": {
+      "width": 1600,
+      "height": 1176,
+      "avif": {
+        "bytes": 19446,
+        "quality": 36,
+        "ok": true
+      },
+      "webp": {
+        "bytes": 31030,
+        "quality": 74,
+        "ok": true
+      },
+      "drawn": 0.3397
+    },
+    "frieze-light-m": {
+      "width": 960,
+      "height": 706,
+      "avif": {
+        "bytes": 14729,
+        "quality": 60,
+        "ok": true
+      },
+      "webp": {
+        "bytes": 23416,
+        "quality": 86,
+        "ok": true
+      },
+      "drawn": 0.3424
+    },
+    "frieze-dark": {
+      "width": 1600,
+      "height": 1176,
+      "avif": {
+        "bytes": 20111,
+        "quality": 40,
+        "ok": true
+      },
+      "webp": {
+        "bytes": 31478,
+        "quality": 74,
+        "ok": true
+      },
+      "drawn": 0.3397
+    },
+    "frieze-dark-m": {
+      "width": 960,
+      "height": 706,
+      "avif": {
+        "bytes": 13706,
+        "quality": 60,
+        "ok": true
+      },
+      "webp": {
+        "bytes": 23490,
+        "quality": 86,
+        "ok": true
+      },
+      "drawn": 0.3424
+    }
+  },
+  "alpha": {
+    "light": 0.3397,
+    "dark": 0.3397
+  },
+  "extremes": {
+    "light": {
+      "neck": {
+        "dark": [
+          191,
+          122,
+          67
         ],
-        "pill": [
-          62,
-          87,
-          117
-        ],
-        "theme": [
-          33,
-          46,
-          75
-        ],
-        "card": [
-          76,
-          102,
-          130
-        ],
-        "title": [
-          3,
-          48,
-          79
-        ],
-        "footer": [
-          184,
-          185,
-          191
+        "light": [
+          207,
+          137,
+          77
         ]
       },
-      "mean": 0.2572,
-      "sizes": {
-        "avif": 16264,
-        "webp": 21942,
-        "png": 977329
+      "theme": {
+        "dark": [
+          190,
+          121,
+          67
+        ],
+        "light": [
+          216,
+          142,
+          76
+        ]
+      },
+      "band": {
+        "dark": [
+          241,
+          227,
+          207
+        ],
+        "light": [
+          241,
+          227,
+          207
+        ]
       }
     },
-    "hero-780": {
-      "width": 780,
-      "height": 1688,
-      "dpr": 2,
-      "brightest": {
-        "panel": [
-          90,
-          115,
-          142
+    "dark": {
+      "neck": {
+        "dark": [
+          20,
+          17,
+          16
         ],
-        "pill": [
-          56,
-          67,
-          98
-        ],
-        "card": [
-          91,
-          115,
-          142
-        ],
-        "title": [
-          36,
-          50,
-          83
-        ],
-        "footer": [
-          51,
-          73,
-          111
+        "light": [
+          28,
+          24,
+          20
         ]
       },
-      "mean": 0.2507,
-      "sizes": {
-        "avif": 15329,
-        "webp": 23150,
-        "png": 728067
+      "theme": {
+        "dark": [
+          20,
+          17,
+          16
+        ],
+        "light": [
+          33,
+          27,
+          23
+        ]
+      },
+      "band": {
+        "dark": [
+          20,
+          17,
+          16
+        ],
+        "light": [
+          20,
+          17,
+          16
+        ]
       }
     }
   },
-  "brightest": {
-    "panel": [
-      90,
-      115,
-      142
-    ],
-    "pill": [
-      62,
-      87,
-      117
-    ],
-    "theme": [
-      33,
-      46,
-      75
-    ],
-    "card": [
-      91,
-      115,
-      142
-    ],
-    "title": [
-      36,
-      50,
-      83
-    ],
-    "footer": [
-      184,
-      185,
-      191
-    ]
-  },
   "composite": {
-    "views": {
-      "390": {
-        "0": {
-          "scrollY": 0,
-          "lines": 12,
-          "lowest": 10.91,
-          "worst": {
-            "text": "I'm 20 and I study computer science at UT Dallas",
-            "sel": "p.intro",
-            "size": 16,
-            "weight": 440,
-            "large": false,
-            "min": 4.5,
-            "ratio": 10.91,
-            "bg": [
-              20,
-              27,
-              45
-            ],
-            "textLum": 0.618
+    "light": {
+      "theme": "light",
+      "views": {
+        "390": {
+          "0": {
+            "scrollY": 0,
+            "lines": 18,
+            "lowest": 5.53,
+            "worst": {
+              "text": "Ayro",
+              "sel": "span.wm-a",
+              "size": 15,
+              "weight": 500,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.53,
+              "bg": [
+                192,
+                123,
+                68
+              ],
+              "textLum": 0.006
+            }
+          },
+          "1": {
+            "scrollY": 3539,
+            "lines": 22,
+            "lowest": 9.3,
+            "worst": {
+              "text": "no cookies, no analytics.",
+              "sel": "p",
+              "size": 15,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 9.3,
+              "bg": [
+                20,
+                17,
+                16
+              ],
+              "textLum": 0.47
+            }
+          },
+          "0.3": {
+            "scrollY": 1378,
+            "lines": 27,
+            "lowest": 7.92,
+            "worst": {
+              "text": "II",
+              "sel": "span.num",
+              "size": 22,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                241,
+                227,
+                207
+              ],
+              "textLum": 0.055
+            }
+          },
+          "0.56": {
+            "scrollY": 2293,
+            "lines": 31,
+            "lowest": 7.92,
+            "worst": {
+              "text": "III",
+              "sel": "span.num",
+              "size": 22,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                241,
+                227,
+                207
+              ],
+              "textLum": 0.055
+            }
+          },
+          "0.8": {
+            "scrollY": 3002,
+            "lines": 21,
+            "lowest": 7.92,
+            "worst": {
+              "text": "IV",
+              "sel": "span.num",
+              "size": 22,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                241,
+                227,
+                207
+              ],
+              "textLum": 0.055
+            }
           }
         },
-        "1": {
-          "scrollY": 5078,
-          "lines": 29,
-          "lowest": 7.77,
-          "worst": {
-            "text": "Ayro Escobar · Plano, Texas",
-            "sel": "p.ft-line",
-            "size": 14,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 7.77,
-            "bg": [
-              37,
-              53,
-              82
-            ],
-            "textLum": 0.618
+        "768": {
+          "0": {
+            "scrollY": 0,
+            "lines": 24,
+            "lowest": 5.6,
+            "worst": {
+              "text": "Ayro",
+              "sel": "span.wm-a",
+              "size": 15,
+              "weight": 500,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.6,
+              "bg": [
+                194,
+                124,
+                68
+              ],
+              "textLum": 0.006
+            }
+          },
+          "1": {
+            "scrollY": 2949,
+            "lines": 29,
+            "lowest": 9.3,
+            "worst": {
+              "text": "no cookies, no analytics.",
+              "sel": "p",
+              "size": 15,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 9.3,
+              "bg": [
+                20,
+                17,
+                16
+              ],
+              "textLum": 0.47
+            }
+          },
+          "0.3": {
+            "scrollY": 1301,
+            "lines": 38,
+            "lowest": 7.92,
+            "worst": {
+              "text": "II",
+              "sel": "span.num",
+              "size": 22,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                241,
+                227,
+                207
+              ],
+              "textLum": 0.055
+            }
+          },
+          "0.56": {
+            "scrollY": 2082,
+            "lines": 34,
+            "lowest": 7.92,
+            "worst": {
+              "text": "III",
+              "sel": "span.num",
+              "size": 22,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                241,
+                227,
+                207
+              ],
+              "textLum": 0.055
+            }
+          },
+          "0.8": {
+            "scrollY": 2666,
+            "lines": 19,
+            "lowest": 7.92,
+            "worst": {
+              "text": "IV",
+              "sel": "span.num",
+              "size": 22,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                241,
+                227,
+                207
+              ],
+              "textLum": 0.055
+            }
           }
         },
-        "0.3": {
-          "scrollY": 1525,
-          "lines": 19,
-          "lowest": 9.09,
-          "worst": {
-            "text": "Founder",
-            "sel": "p.eyebrow",
-            "size": 11,
-            "weight": 600,
-            "large": false,
-            "min": 4.5,
-            "ratio": 9.09,
-            "bg": [
-              28,
-              44,
-              59
-            ],
-            "textLum": 0.618
+        "1440": {
+          "0": {
+            "scrollY": 0,
+            "lines": 32,
+            "lowest": 5.51,
+            "worst": {
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 12,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.51,
+              "bg": [
+                192,
+                123,
+                68
+              ],
+              "textLum": 0.006
+            }
+          },
+          "1": {
+            "scrollY": 2441,
+            "lines": 40,
+            "lowest": 7.92,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                106,
+                50,
+                39
+              ],
+              "textLum": 0.781
+            }
+          },
+          "0.3": {
+            "scrollY": 1092,
+            "lines": 62,
+            "lowest": 8.63,
+            "worst": {
+              "text": "esvotech.com",
+              "sel": "a.card-link",
+              "size": 18,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 8.63,
+              "bg": [
+                247,
+                237,
+                221
+              ],
+              "textLum": 0.055
+            }
+          },
+          "0.56": {
+            "scrollY": 1657,
+            "lines": 43,
+            "lowest": 9.22,
+            "worst": {
+              "text": "Inaugural AidenEdge cohort, 1 of 10 interns, six",
+              "sel": "p.note",
+              "size": 17,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 9.22,
+              "bg": [
+                228,
+                214,
+                196
+              ],
+              "textLum": 0.03
+            }
+          },
+          "0.8": {
+            "scrollY": 2172,
+            "lines": 27,
+            "lowest": 7.92,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                106,
+                50,
+                39
+              ],
+              "textLum": 0.781
+            }
           }
         },
-        "0.56": {
-          "scrollY": 2820,
-          "lines": 21,
-          "lowest": 9.15,
-          "worst": {
-            "text": "Software Engineer Intern · New York · January to",
-            "sel": "span.exp-top",
-            "size": 15,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 9.15,
-            "bg": [
-              36,
-              42,
-              53
-            ],
-            "textLum": 0.618
-          }
-        },
-        "0.8": {
-          "scrollY": 4023,
-          "lines": 18,
-          "lowest": 9.08,
-          "worst": {
-            "text": "Mostly Java, TypeScript, JavaScript, Python, C++",
-            "sel": "p.stack-p",
-            "size": 16,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 9.08,
-            "bg": [
-              35,
-              43,
-              54
-            ],
-            "textLum": 0.618
+        "1920": {
+          "0": {
+            "scrollY": 0,
+            "lines": 32,
+            "lowest": 5.58,
+            "worst": {
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 12,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.58,
+              "bg": [
+                193,
+                124,
+                70
+              ],
+              "textLum": 0.006
+            }
+          },
+          "1": {
+            "scrollY": 2441,
+            "lines": 44,
+            "lowest": 7.92,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                106,
+                50,
+                39
+              ],
+              "textLum": 0.781
+            }
+          },
+          "0.3": {
+            "scrollY": 1272,
+            "lines": 66,
+            "lowest": 8.63,
+            "worst": {
+              "text": "esvotech.com",
+              "sel": "a.card-link",
+              "size": 18,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 8.63,
+              "bg": [
+                247,
+                237,
+                221
+              ],
+              "textLum": 0.055
+            }
+          },
+          "0.56": {
+            "scrollY": 1837,
+            "lines": 46,
+            "lowest": 7.92,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                106,
+                50,
+                39
+              ],
+              "textLum": 0.781
+            }
+          },
+          "0.8": {
+            "scrollY": 2352,
+            "lines": 39,
+            "lowest": 7.92,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                106,
+                50,
+                39
+              ],
+              "textLum": 0.781
+            }
           }
         }
       },
-      "768": {
-        "0": {
-          "scrollY": 0,
-          "lines": 21,
-          "lowest": 9.61,
-          "worst": {
-            "text": "·",
-            "sel": "span.hero-dot",
-            "size": 14,
-            "weight": 520,
-            "large": false,
-            "min": 4.5,
-            "ratio": 9.61,
-            "bg": [
-              27,
-              38,
-              58
-            ],
-            "textLum": 0.618
-          }
-        },
-        "1": {
-          "scrollY": 5139,
-          "lines": 28,
-          "lowest": 8.62,
-          "worst": {
-            "text": "Ayro Escobar · Plano, Texas",
-            "sel": "p.ft-line",
-            "size": 14,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 8.62,
-            "bg": [
-              31,
-              46,
-              73
-            ],
-            "textLum": 0.618
-          }
-        },
-        "0.3": {
-          "scrollY": 1531,
-          "lines": 15,
-          "lowest": 10.77,
-          "worst": {
-            "text": "Custom software, AI agents, automation, integrat",
-            "sel": "p.card-body",
-            "size": 16,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 10.77,
-            "bg": [
-              21,
-              29,
-              41
-            ],
-            "textLum": 0.618
-          }
-        },
-        "0.56": {
-          "scrollY": 2816,
-          "lines": 17,
-          "lowest": 9.36,
-          "worst": {
-            "text": "Software Engineer Intern · New York · January to",
-            "sel": "span.exp-top",
-            "size": 15.5,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 9.36,
-            "bg": [
-              34,
-              40,
-              53
-            ],
-            "textLum": 0.618
-          }
-        },
-        "0.8": {
-          "scrollY": 4004,
-          "lines": 17,
-          "lowest": 9.27,
-          "worst": {
-            "text": "Mostly Java, TypeScript, JavaScript, Python, C++",
-            "sel": "p.stack-p",
-            "size": 17,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 9.27,
-            "bg": [
-              33,
-              41,
-              54
-            ],
-            "textLum": 0.618
-          }
-        }
+      "lowest": {
+        "view": "1440",
+        "p": 0,
+        "text": "uphill, on purpose.",
+        "sel": "p.theme-line",
+        "size": 12,
+        "weight": 400,
+        "large": false,
+        "min": 4.5,
+        "ratio": 5.51,
+        "bg": [
+          192,
+          123,
+          68
+        ],
+        "textLum": 0.006
       },
-      "1440": {
-        "0": {
-          "scrollY": 0,
-          "lines": 28,
-          "lowest": 5.15,
-          "worst": {
-            "text": "work",
-            "sel": "a",
-            "size": 14,
-            "weight": 520,
-            "large": false,
-            "min": 4.5,
-            "ratio": 5.15,
-            "bg": [
-              6,
-              85,
-              121
-            ],
-            "textLum": 0.618
-          }
-        },
-        "1": {
-          "scrollY": 5531,
-          "lines": 33,
-          "lowest": 5.17,
-          "worst": {
-            "text": "Ayro Escobar · Plano, Texas",
-            "sel": "p.ft-line",
-            "size": 14,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 5.17,
-            "bg": [
-              66,
-              81,
-              97
-            ],
-            "textLum": 0.618
-          }
-        },
-        "0.3": {
-          "scrollY": 1404,
-          "lines": 16,
-          "lowest": 11.48,
-          "worst": {
-            "text": "Maintenance-first fleet operations for flight sc",
-            "sel": "p.card-body",
-            "size": 16,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 11.48,
-            "bg": [
-              8,
-              23,
-              40
-            ],
-            "textLum": 0.618
-          }
-        },
-        "0.56": {
-          "scrollY": 2635,
-          "lines": 16,
-          "lowest": 11.28,
-          "worst": {
-            "text": "Inaugural AidenEdge cohort, 1 of 10 interns, six",
-            "sel": "span.exp-note",
-            "size": 15.5,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 11.28,
-            "bg": [
-              8,
-              25,
-              43
-            ],
-            "textLum": 0.618
-          }
-        },
-        "0.8": {
-          "scrollY": 3840,
-          "lines": 18,
-          "lowest": 10.95,
-          "worst": {
-            "text": "ayro@esvotech.com",
-            "sel": "a.email",
-            "size": 18,
-            "weight": 600,
-            "large": false,
-            "min": 4.5,
-            "ratio": 10.95,
-            "bg": [
-              10,
-              25,
-              43
-            ],
-            "textLum": 0.602
-          }
-        }
-      },
-      "1920": {
-        "0": {
-          "scrollY": 0,
-          "lines": 28,
-          "lowest": 5.9,
-          "worst": {
-            "text": "work",
-            "sel": "a",
-            "size": 14,
-            "weight": 520,
-            "large": false,
-            "min": 4.5,
-            "ratio": 5.9,
-            "bg": [
-              4,
-              76,
-              110
-            ],
-            "textLum": 0.618
-          }
-        },
-        "1": {
-          "scrollY": 6611,
-          "lines": 33,
-          "lowest": 4.8,
-          "worst": {
-            "text": "Ayro Escobar · Plano, Texas",
-            "sel": "p.ft-line",
-            "size": 14,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 4.8,
-            "bg": [
-              76,
-              85,
-              97
-            ],
-            "textLum": 0.618
-          }
-        },
-        "0.3": {
-          "scrollY": 1685,
-          "lines": 17,
-          "lowest": 10.55,
-          "worst": {
-            "text": "Custom software, AI agents, automation, integrat",
-            "sel": "p.card-body",
-            "size": 16,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 10.55,
-            "bg": [
-              18,
-              31,
-              47
-            ],
-            "textLum": 0.618
-          }
-        },
-        "0.56": {
-          "scrollY": 3162,
-          "lines": 17,
-          "lowest": 9.07,
-          "worst": {
-            "text": "Inaugural AidenEdge cohort, 1 of 10 interns, six",
-            "sel": "span.exp-note",
-            "size": 15.5,
-            "weight": 420,
-            "large": false,
-            "min": 4.5,
-            "ratio": 9.07,
-            "bg": [
-              18,
-              45,
-              63
-            ],
-            "textLum": 0.618
-          }
-        },
-        "0.8": {
-          "scrollY": 4608,
-          "lines": 18,
-          "lowest": 11.03,
-          "worst": {
-            "text": "ayro@esvotech.com",
-            "sel": "a.email",
-            "size": 18,
-            "weight": 600,
-            "large": false,
-            "min": 4.5,
-            "ratio": 11.03,
-            "bg": [
-              10,
-              25,
-              41
-            ],
-            "textLum": 0.602
-          }
-        }
-      }
+      "failures": [],
+      "method": "text hidden, 3x3 mean, worst pixel under each line box"
     },
-    "lowest": {
-      "view": "1920",
-      "p": 1,
-      "text": "Ayro Escobar · Plano, Texas",
-      "sel": "p.ft-line",
-      "size": 14,
-      "weight": 420,
-      "large": false,
-      "min": 4.5,
-      "ratio": 4.8,
-      "bg": [
-        76,
-        85,
-        97
-      ],
-      "textLum": 0.618
-    },
-    "failures": [],
-    "method": "text hidden, 3x3 mean, worst pixel under each line box"
+    "dark": {
+      "theme": "dark",
+      "views": {
+        "390": {
+          "0": {
+            "scrollY": 0,
+            "lines": 18,
+            "lowest": 5.21,
+            "worst": {
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 12,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.21,
+              "bg": [
+                32,
+                26,
+                22
+              ],
+              "textLum": 0.268
+            }
+          },
+          "1": {
+            "scrollY": 3539,
+            "lines": 22,
+            "lowest": 9.3,
+            "worst": {
+              "text": "Onto what's next.",
+              "sel": "p.closer",
+              "size": 19,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 9.3,
+              "bg": [
+                20,
+                17,
+                16
+              ],
+              "textLum": 0.47
+            }
+          },
+          "0.3": {
+            "scrollY": 1378,
+            "lines": 27,
+            "lowest": 6.95,
+            "worst": {
+              "text": "esvotech.com",
+              "sel": "a.card-link",
+              "size": 18,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 6.95,
+              "bg": [
+                30,
+                25,
+                22
+              ],
+              "textLum": 0.369
+            }
+          },
+          "0.56": {
+            "scrollY": 2293,
+            "lines": 31,
+            "lowest": 7.5,
+            "worst": {
+              "text": "III",
+              "sel": "span.num",
+              "size": 22,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.5,
+              "bg": [
+                20,
+                17,
+                16
+              ],
+              "textLum": 0.369
+            }
+          },
+          "0.8": {
+            "scrollY": 3002,
+            "lines": 21,
+            "lowest": 7.5,
+            "worst": {
+              "text": "IV",
+              "sel": "span.num",
+              "size": 22,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.5,
+              "bg": [
+                20,
+                17,
+                16
+              ],
+              "textLum": 0.369
+            }
+          }
+        },
+        "768": {
+          "0": {
+            "scrollY": 0,
+            "lines": 24,
+            "lowest": 5.34,
+            "worst": {
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 12,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.34,
+              "bg": [
+                30,
+                24,
+                21
+              ],
+              "textLum": 0.268
+            }
+          },
+          "1": {
+            "scrollY": 2949,
+            "lines": 29,
+            "lowest": 9.3,
+            "worst": {
+              "text": "elsewhere",
+              "sel": "span.eyebrow",
+              "size": 14,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 9.3,
+              "bg": [
+                20,
+                17,
+                16
+              ],
+              "textLum": 0.47
+            }
+          },
+          "0.3": {
+            "scrollY": 1301,
+            "lines": 38,
+            "lowest": 6.95,
+            "worst": {
+              "text": "esvotech.com",
+              "sel": "a.card-link",
+              "size": 18,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 6.95,
+              "bg": [
+                30,
+                25,
+                22
+              ],
+              "textLum": 0.369
+            }
+          },
+          "0.56": {
+            "scrollY": 2082,
+            "lines": 34,
+            "lowest": 7.5,
+            "worst": {
+              "text": "III",
+              "sel": "span.num",
+              "size": 22,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.5,
+              "bg": [
+                20,
+                17,
+                16
+              ],
+              "textLum": 0.369
+            }
+          },
+          "0.8": {
+            "scrollY": 2666,
+            "lines": 19,
+            "lowest": 7.5,
+            "worst": {
+              "text": "IV",
+              "sel": "span.num",
+              "size": 22,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.5,
+              "bg": [
+                20,
+                17,
+                16
+              ],
+              "textLum": 0.369
+            }
+          }
+        },
+        "1440": {
+          "0": {
+            "scrollY": 0,
+            "lines": 32,
+            "lowest": 5.63,
+            "worst": {
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 12,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.63,
+              "bg": [
+                22,
+                18,
+                17
+              ],
+              "textLum": 0.268
+            }
+          },
+          "1": {
+            "scrollY": 2441,
+            "lines": 40,
+            "lowest": 7.5,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.5,
+              "bg": [
+                224,
+                146,
+                73
+              ],
+              "textLum": 0.006
+            }
+          },
+          "0.3": {
+            "scrollY": 1092,
+            "lines": 62,
+            "lowest": 6.95,
+            "worst": {
+              "text": "esvotech.com",
+              "sel": "a.card-link",
+              "size": 18,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 6.95,
+              "bg": [
+                30,
+                25,
+                22
+              ],
+              "textLum": 0.369
+            }
+          },
+          "0.56": {
+            "scrollY": 1657,
+            "lines": 43,
+            "lowest": 8.35,
+            "worst": {
+              "text": "Inaugural AidenEdge cohort, 1 of 10 interns, six",
+              "sel": "p.note",
+              "size": 17,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 8.35,
+              "bg": [
+                32,
+                28,
+                26
+              ],
+              "textLum": 0.47
+            }
+          },
+          "0.8": {
+            "scrollY": 2172,
+            "lines": 27,
+            "lowest": 7.5,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.5,
+              "bg": [
+                224,
+                146,
+                73
+              ],
+              "textLum": 0.006
+            }
+          }
+        },
+        "1920": {
+          "0": {
+            "scrollY": 0,
+            "lines": 32,
+            "lowest": 5.62,
+            "worst": {
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 12,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.62,
+              "bg": [
+                22,
+                19,
+                17
+              ],
+              "textLum": 0.268
+            }
+          },
+          "1": {
+            "scrollY": 2441,
+            "lines": 44,
+            "lowest": 7.5,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.5,
+              "bg": [
+                224,
+                146,
+                73
+              ],
+              "textLum": 0.006
+            }
+          },
+          "0.3": {
+            "scrollY": 1272,
+            "lines": 66,
+            "lowest": 6.95,
+            "worst": {
+              "text": "esvotech.com",
+              "sel": "a.card-link",
+              "size": 18,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 6.95,
+              "bg": [
+                30,
+                25,
+                22
+              ],
+              "textLum": 0.369
+            }
+          },
+          "0.56": {
+            "scrollY": 1837,
+            "lines": 46,
+            "lowest": 7.5,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.5,
+              "bg": [
+                224,
+                146,
+                73
+              ],
+              "textLum": 0.006
+            }
+          },
+          "0.8": {
+            "scrollY": 2352,
+            "lines": 39,
+            "lowest": 7.5,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.5,
+              "bg": [
+                224,
+                146,
+                73
+              ],
+              "textLum": 0.006
+            }
+          }
+        }
+      },
+      "lowest": {
+        "view": "390",
+        "p": 0,
+        "text": "uphill, on purpose.",
+        "sel": "p.theme-line",
+        "size": 12,
+        "weight": 400,
+        "large": false,
+        "min": 4.5,
+        "ratio": 5.21,
+        "bg": [
+          32,
+          26,
+          22
+        ],
+        "textLum": 0.268
+      },
+      "failures": [],
+      "method": "text hidden, 3x3 mean, worst pixel under each line box"
+    }
   },
-  "luminance": 0.2572
+  "luminance": 0.6519,
+  "mean_light": 0.6519,
+  "mean_dark": 0.1766
 }
