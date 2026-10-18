@@ -26,6 +26,7 @@ import * as THREE from 'three'
 import { loadFigure, makeFigure } from './figure.js'
 import { figureMaterial, boulderMaterial, hullOutline, setInks } from './vase.js'
 import { addCurvature } from './curvature.js'
+import { addParts, headUniforms } from './head.js'
 import { rockShape } from './rock.js'
 import { SLOPE_DEG, R, X0, T_POSTER, BOX } from './comp.js'
 import { installHooks, removeHooks } from './hooks.js'
@@ -49,7 +50,9 @@ export const GAIT = { speed: 0.3, period: 2.05 }
 // the vase's long diagonal lunge: the hips high and the back leg long (at pelvisK 0.7 and 50 degrees both
 // shins lay nearly flat for half the cycle and he read as kneeling; at 0.78 the swinging knee still fell to
 // 0.31 m; at 0.84 with the joint-space swing it stays above 0.36 m and drives forward)
-const POSE = { pelvisK: 0.84, leanDeg: 56, headUp: 0 }
+const POSE = { pelvisK: 0.84, leanDeg: 56 }
+// the eye is incised only where his figure is drawn 200 CSS px tall or more (under that it is a speck)
+const EYE_PX = 200
 const WRAP = 240
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp
 const sstep = (a, b, x) => { const u = clamp((x - a) / (b - a), 0, 1); return u * u * (3 - 2 * u) }
@@ -72,9 +75,14 @@ async function build({ theme, figureUrl = FIGURE_URL }) {
   geo.computeBoundingBox()
   const objScale = 1.8 / (geo.boundingBox.max.y - geo.boundingBox.min.y)
   addCurvature(geo, { metres: objScale, smooth: 2 })
-  const fig = figureMaterial({ curv: true, inflate: INFLATE / objScale, theme })
+  const headY = geo.boundingBox.min.y + (1.56 / 1.8) * (geo.boundingBox.max.y - geo.boundingBox.min.y)
+  // the painter's head: the beard and the nape mass merged in (head.js)
+  addParts(geo, { scale: objScale })
+  const fig = figureMaterial({ curv: true, part: true, inflate: INFLATE / objScale, theme })
   // the head starts at about 1.56 m of his 1.8 m (bind pose, model units): no interior lines above it
-  fig.userData.u.uHeadY.value = geo.boundingBox.min.y + (1.56 / 1.8) * (geo.boundingBox.max.y - geo.boundingBox.min.y)
+  fig.userData.u.uHeadY.value = headY
+  const hu = headUniforms(objScale)
+  fig.userData.u.uHair.value.copy(hu.uHair); fig.userData.u.uEye.value.copy(hu.uEye); fig.userData.u.uBeard.value.copy(hu.uBeard)
   const disk = boulderMaterial({ theme })
   const rs = rockShape('polished', R)
   const f = makeFigure({ man, material: fig, boulderMaterial: disk, boulderGeometry: rs.geometry, R, x0: X0, sole: SOLE, surface: rs.surface, ...GAIT, ...POSE })
@@ -84,7 +92,7 @@ async function build({ theme, figureUrl = FIGURE_URL }) {
   const diskHull = hullOutline(f.boulder, { px: 1.6 }); diskHull.renderOrder = 0; f.boulder.add(diskHull)
   f.boulder.renderOrder = 1
   f.mesh.renderOrder = 2
-  const gapHull = hullOutline(f.mesh, { px: 1.5, cut: true, inflate: INFLATE / objScale }); gapHull.renderOrder = 3; f.mesh.parent.add(gapHull)
+  const gapHull = hullOutline(f.mesh, { px: 1.5, cut: true, inflate: INFLATE / objScale, part: fig.userData.u }); gapHull.renderOrder = 3; f.mesh.parent.add(gapHull)
   const mats = { fig, disk, gapHull, diskHull }
   setInks(mats, theme)
   return { scene, slope, f, mats, hulls: [diskHull, gapHull], rs }
@@ -171,6 +179,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     r.setSize(cssW, cssH, false)
     fit = fitIn(cssW, cssH, rr.left - c.left, rr.top - c.top, rr.width, rr.height)
     for (const h of hulls) h.material.userData.u.uRes.value.set(cssW, cssH)
+    mats.fig.userData.u.uEyeOn.value = 1.8 * fit.s >= EYE_PX ? 1 : 0
   }
   function setHost(b) {
     if (b === host) return
@@ -367,7 +376,9 @@ export async function poster({ theme = 'light', cssWidth = 800, dpr = 2, figureU
   W.scene.updateMatrixWorld()
   const o = W.f.update(t, { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0 })
   const O = new THREE.Vector3(o.x, 0, 0).applyMatrix4(W.slope.matrixWorld)
-  const win = windowFor(fitIn(cssWidth, ch, 0, 0, cssWidth, ch), {})
+  const fit0 = fitIn(cssWidth, ch, 0, 0, cssWidth, ch)
+  W.mats.fig.userData.u.uEyeOn.value = 1.8 * fit0.s >= EYE_PX ? 1 : 0
+  const win = windowFor(fit0, {})
   aim(cam, O)
   Object.assign(cam, win); cam.updateProjectionMatrix()
   await r.compileAsync(W.scene, cam).catch(() => {})
