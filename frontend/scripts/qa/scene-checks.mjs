@@ -28,13 +28,15 @@
     still        under reduced motion the scene chunk is never requested and no canvas exists
     hidden       a hidden document pauses the loop (__stats.paused)
     ground       the ground line's box relative to its band is identical at p 0, 0.5 and 1
-    framing      __bounds at T_POSTER: his mesh box 300 px or more at 1440x900 and 130 or more at
-                 390x844; no header, plate or button box touches him or the disk; the disk is never cut
-                 by the room's top or by the plate
+    framing      __bounds at T_POSTER: his mesh box 300 px or more at 1440x900, 130 or more at 390x844
+                 and 120 or more at 393x659 and 375x667 (Safari's first screen on an iPhone 15 Pro, an
+                 SE); no header, plate or button box touches him or the disk; the disk is never cut by
+                 the room's top or by the plate (on a phone it may run off the right edge)
     slip         ?slip=1: the slip and catch show within 2 s and repeat; at the deepest slip he stays
                  8 px or more right of the hero plate at 1440x900
     one canvas   exactly one <canvas>: in the hero band at the top, in the contact band when it is on
-                 screen, where he stands near the right edge and never crests
+                 screen, where he stands near the right edge and never crests; on a phone he stands
+                 further right in the contact band than in the hero (not the hero picture again)
     luminance    the light composite's mean luminance (public/poster/meta.json) is 0.25 or more
     frame cost   __bench(60): full at 1440x900 DPR 1 2.5 ms or less with 10 draws or fewer; lite at
                  390x844 DPR 1.5 2.0 ms or less (this Mac)
@@ -367,7 +369,14 @@ export async function sceneChecks({ cdp, url, check, sleep, scratch }) {
   }
 
   // framing with __bounds at the poster frame
-  for (const [label, opts, minH] of [['1440', { width: 1440, height: 900, dpr: 1 }, 300], ['390', { width: 390, height: 844, dpr: 2, mobile: true }, 130]]) {
+  // the phone sizes include what Safari shows at load (about 390x664 on an iPhone 14, 393x659 on a 15 Pro:
+  // the toolbars take the rest of the 844) and the whole screen of an SE (375x667)
+  for (const [label, opts, minH] of [
+    ['1440', { width: 1440, height: 900, dpr: 1 }, 300],
+    ['390', { width: 390, height: 844, dpr: 2, mobile: true }, 130],
+    ['393x659', { width: 393, height: 659, dpr: 3, mobile: true }, 120],
+    ['375x667', { width: 375, height: 667, dpr: 2, mobile: true }, 120],
+  ]) {
     for (const theme of ['light', 'dark']) {
       const page = await fresh(opts, `/?tier=full&t=${T_POSTER}&theme=${theme}`, 1200)
       await waitReady(page)
@@ -413,6 +422,17 @@ export async function sceneChecks({ cdp, url, check, sleep, scratch }) {
     const low = await page.eval(`(() => { const b = window.__bounds(); return { n: document.querySelectorAll('canvas').length, inContact: !!document.querySelector('[data-band="contact"] canvas'), host: window.__stats.host, fig: b.figure, disk: b.disk, room: b.room, vw: innerWidth } })()`)
     const near = low.fig && low.disk.x1 <= low.vw && low.fig.x0 > low.vw * 0.45 && low.disk.y0 >= low.room.y0 - 1
     check('scene', 'one canvas, hero then contact', top.n === 1 && top.inHero && top.host === 'hero' && low.n === 1 && low.inContact && low.host === 'contact' && near ? 'pass' : 'fail', `top: ${top.n} canvas in the hero ${top.inHero}; contact: ${low.n} canvas in the contact band ${low.inContact}, host ${low.host}, his box ${JSON.stringify(low.fig)}, disk ${JSON.stringify(low.disk)} within the room ${JSON.stringify(low.room)}`)
+    await page.close()
+  }
+  // on a phone the contact band is not the hero picture again: he stands further right, the rock running off the edge
+  {
+    const page = await fresh({ width: 390, height: 844, dpr: 2, mobile: true }, '/?tier=lite', 1500)
+    await waitReady(page)
+    const hero = await page.eval(`(() => { const f = window.__bounds().figure; return Math.round((f.x0 + f.x1) / 2) })()`)
+    await page.eval(`document.querySelector('[data-band="contact"]').scrollIntoView({ block: 'end', behavior: 'instant' })`)
+    await sleep(2200)
+    const low = await page.eval(`(() => { const b = window.__bounds(); return { host: window.__stats.host, mid: Math.round((b.figure.x0 + b.figure.x1) / 2), fig: b.figure, disk: b.disk, vw: innerWidth } })()`)
+    check('scene', 'the phone contact band is further up the line', low.host === 'contact' && low.mid >= hero + 30 && low.fig.x1 <= low.vw && low.disk.x0 < low.vw ? 'pass' : 'fail', `his centre at ${hero} px in the hero and ${low.mid} px in the contact band (at least 30 px further right), his box ${JSON.stringify(low.fig)}, disk ${JSON.stringify(low.disk)} on a ${low.vw} px screen`)
     await page.close()
   }
 

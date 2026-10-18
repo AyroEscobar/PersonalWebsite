@@ -452,18 +452,23 @@ try {
   // (T5, T11, T13, T15). What they protected that still matters is checked here or in scene-checks.
   log('r1 regressions')
   {
-    // T2 and T6: a way to write to him on the first screen; the name high on a phone.
-    for (const [w, h] of [[390, 844], [360, 780], [1440, 900]]) {
+    // T2 and T6: a way to write to him on the first screen; the name high on a phone. 393x659 and 390x664
+    // are what Safari shows at load on an iPhone 15 Pro and 14 (the toolbars take the rest of the screen),
+    // 375x667 is the whole screen of an SE; there both buttons must end on the first screen too.
+    for (const [w, h] of [[390, 844], [393, 659], [390, 664], [375, 667], [360, 780], [1440, 900]]) {
       const mobile = w < 720
       const page = await cdp.newPage({ width: w, height: h, dpr: mobile ? 2 : 1, mobile })
       await page.goto(`${url}/`, { settle: 1200 })
       const c = await page.eval(`(() => {
         const m = document.querySelector('#top a[href^="mailto:"]')
+        const acts = document.querySelector('#top .acts')
         const h1 = document.querySelector('h1')
         const sheet = document.querySelector('.hero-plate')
-        return { mail: m ? Math.round(m.getBoundingClientRect().bottom) : null, vh: innerHeight, h1: Math.round(h1.getBoundingClientRect().top), h1b: Math.round(h1.getBoundingClientRect().bottom), sheet: Math.round(sheet.getBoundingClientRect().top), sw: document.documentElement.scrollWidth, iw: innerWidth }
+        return { mail: m ? Math.round(m.getBoundingClientRect().bottom) : null, acts: acts ? Math.round(acts.getBoundingClientRect().bottom) : null, vh: innerHeight, h1: Math.round(h1.getBoundingClientRect().top), h1b: Math.round(h1.getBoundingClientRect().bottom), sheet: Math.round(sheet.getBoundingClientRect().top), sw: document.documentElement.scrollWidth, iw: innerWidth }
       })()`)
       check('r1', `T2 email on the first screen @${w}x${h}`, c.mail != null && c.mail <= c.vh ? 'pass' : 'fail', `the hero email pill ends at ${c.mail} of ${c.vh}`)
+      // on Safari's first screen of an iPhone 15 Pro the buttons row ends at 640 or less (a thumb's margin)
+      if (h < 700) check('r1', `both buttons on the first screen @${w}x${h}`, c.acts != null && c.acts <= Math.min(c.vh, w === 393 ? 640 : c.vh) ? 'pass' : 'fail', `the coffee chat and email row ends at ${c.acts} of ${c.vh}${w === 393 ? ' (at most 640)' : ''}`)
       // v5: the frieze (the man and the disk) takes the top of a phone and the plate sits under it, so the
       // plate starts in the lower 60% and the name is whole on the first screen
       if (mobile) check('r1', `T6 name on the first screen on a phone @${w}x${h}`, c.sheet >= h * 0.4 && c.h1b <= h && c.sw <= w && c.iw === w ? 'pass' : 'fail', `plate top ${c.sheet} (at least ${Math.round(h * 0.4)}), h1 ${c.h1} to ${c.h1b} of ${h}, scrollWidth ${c.sw}`)
