@@ -135,6 +135,14 @@
     --frieze-h: clamp(300px, 42svh, 520px);
   }
 }
+/* phones under 700 px tall, which is what Safari shows at load on an iPhone 14 or 15 (about 390x664 and
+   393x659) and the whole screen of an SE (375x667): the frieze stops at 300 px and the plate tightens
+   (page.css), so both buttons end on the first screen */
+@media (max-width: 959.98px) and (max-height: 700px) {
+  :root {
+    --frieze-h: clamp(250px, 45svh, 300px);
+  }
+}
 @media (min-width: 960px) and (max-width: 1180px) {
   :root {
     --plate-w: 500px;

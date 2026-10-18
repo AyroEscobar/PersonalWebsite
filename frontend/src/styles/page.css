@@ -319,13 +319,18 @@
     height: var(--frieze-h);
     display: flex;
     align-items: flex-end;
-    justify-content: center;
+    justify-content: flex-start;
     overflow: clip;
-    padding: calc(var(--neck-h) + 8px) var(--gutter) calc(var(--meander-h) + 10px);
+    padding: calc(var(--neck-h) + 4px) 0 calc(var(--meander-h) + 6px);
   }
+  /* the room's height sets the scale, never its width: where the whole room does not fit across the
+     phone it starts at the left edge (its left margin is the slip's) and the disk runs off the right
+     edge, never off the top. The stage clips at the screen's edge, and so does the canvas's band. */
   .hero .room {
-    width: min(100%, calc((var(--frieze-h) - var(--neck-h) - var(--meander-h) - 18px) * var(--room-aspect)));
-    margin: 0 auto;
+    --room-h: calc(var(--frieze-h) - var(--neck-h) - var(--meander-h) - 10px);
+    flex: none;
+    width: calc(var(--room-h) * var(--room-aspect));
+    margin: 0 0 0 max(0px, calc((100% - var(--room-h) * var(--room-aspect)) / 2));
   }
   .theme-line {
     left: auto;
@@ -428,20 +433,25 @@
     width: 100%;
   }
   .band-clay {
+    --band-h: clamp(260px, 38svh, 400px);
     position: relative;
     top: auto;
-    height: clamp(300px, 44svh, 460px);
+    height: var(--band-h);
   }
+  /* he has got further up the line: the room is anchored so the disk's centre (0.75 of the room) is the
+     band's right edge, so he stands near that edge with the rock running off it, as at 1440 */
   .band-stage {
-    padding: 0 var(--gutter) 22px;
-    justify-content: center;
+    padding: 0 0 22px var(--gutter);
+    justify-content: flex-start;
   }
   .band-stage .stage {
     width: 100%;
   }
   .band-stage .room {
-    width: min(100%, calc((clamp(300px, 44svh, 460px) - 40px) * var(--room-aspect)));
-    margin: 0 auto;
+    --room-h: calc(var(--band-h) - 40px);
+    flex: none;
+    width: calc(var(--room-h) * var(--room-aspect));
+    margin: 0 0 0 calc(100% - 0.75 * var(--room-h) * var(--room-aspect));
   }
   .foot-controls {
     flex-direction: column;
@@ -452,9 +462,34 @@
     font-size: 26px;
   }
 }
+/* short phones: the plate tightens so the coffee chat and email buttons end on the first screen */
+@media (max-width: 959.98px) and (max-height: 700px) {
+  .hero-plate {
+    padding-top: 22px;
+  }
+  .hero-plate .name {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+  .hero-plate .intro {
+    font-size: 18px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .hero-plate .roles {
+    margin-bottom: 16px;
+  }
+  .hero-plate .roles li {
+    padding: 4px 0;
+  }
+}
 @media (max-width: 400px) {
   .name {
     font-size: 42px;
+  }
+  /* the two buttons stay on one row down to 360 px */
+  .acts .btn {
+    padding: 0 14px;
   }
   .ip {
     padding: 0 0.32em;
