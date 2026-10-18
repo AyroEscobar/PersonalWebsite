@@ -101,7 +101,7 @@ function common(m, u, key, vertexExtra = '') {
         // no interior lines on the head: at this size the eye sockets read as spectacles
         float head = smoothstep(uHeadY - 0.01, uHeadY + 0.01, vMP.y);
         #ifdef USE_PART
-        // no interior lines on the beard and the hair (they are masses, as the painter laid them in)
+        // no interior lines on the hands and feet (they scribbled at the contacts), the beard or the hair
         float inner = max(l2, l3) * (1.0 - head) * (1.0 - vPart.x);
         // the painter's head: the fillet round the hair and the eye, incised, on the side we see
         float side = step(vMP.x, 0.0) * step(0.25, ndv) * step(0.5, vPart.y);
@@ -214,6 +214,8 @@ export function hullOutline(mesh, { px = 2.2, color = 0x141110, cut = false, inf
           // profile (normals across the view), the ear and the beard and hair masses keep their cut
           float ear = 1.0 - smoothstep(0.022, 0.034, distance(position.zy, vec2(-0.0333, 0.851)));
           k = 1.0 - step(uHeadY, position.y) * step(0.75, aPart.y) * smoothstep(0.3, 0.65, -normal.x) * (1.0 - ear);
+          // the hands and feet: a finer cut where he meets the rock and the ground
+          k *= 1.0 - 0.45 * aPart.x * step(0.25, aPart.y);
           #endif
           gl_Position.xy += d * uPx * k * 2.0 / uRes * gl_Position.w;
         }`)

@@ -1,12 +1,14 @@
 /*
-  The painter's head, baked into the figure's skinned geometry at load (no asset bytes, no draw calls):
+  The painter's head and the clean extremities, baked into the figure's skinned geometry at load (no asset bytes, no draw calls):
   the Munich painter's Sisyphus has a pointed beard, hair to the nape under an incised fillet, and an
   almond eye, where the base mesh had a bald round dome.
 
     addParts(geo, { scale })   merges the beard and the nape mass (closed slabs skinned to the head bone)
                                into geo and writes aPart (vec2): x = 1 where no interior line is drawn
-                               (the beard, the hair), y = the inflate scale (1 on the body, 0 on the
-                               merged slabs, which carry their own thickness)
+                               (the hands and feet, the beard, the hair), y = the inflate scale (1 on
+                               the body, 0.5 on the hands and feet, 0 on the merged slabs, which carry
+                               their own thickness). Fingers and toes scribbled where he meets the
+                               ground and the rock; the painter draws them as clean masses.
     HEAD                       the hairline, the fillet and the eye, in metres (model space, side view
                                profile: z forward, y up, x to his left); vase.js turns them into uniforms
 
@@ -15,7 +17,8 @@
 */
 import * as THREE from 'three'
 
-// bone index in the rig (tools/build-figure.mjs): the head
+// bone indices in the rig (tools/build-figure.mjs): hands, feet, toes; the head
+const HANDS_FEET = [8, 16, 11, 12, 19, 20]
 const HEAD_BONE = 4
 
 // the profiles, metres in (z, y): a pointed beard from the sideburn along the jaw to a point below and in
@@ -86,10 +89,16 @@ export function addParts(geo, { scale = 0.9 } = {}) {
   for (let i = 0; i < n0; i++) {
     P[i * 3] = p0.getX(i); P[i * 3 + 1] = p0.getY(i); P[i * 3 + 2] = p0.getZ(i)
     N[i * 3] = nr.getX(i); N[i * 3 + 1] = nr.getY(i); N[i * 3 + 2] = nr.getZ(i)
-    for (let c = 0; c < 4; c++) { SI[i * 4 + c] = si.getComponent(i, c); SW[i * 4 + c] = sw.getComponent(i, c) }
+    let m = 0
+    for (let c = 0; c < 4; c++) {
+      const b = si.getComponent(i, c), w = sw.getComponent(i, c)
+      SI[i * 4 + c] = b; SW[i * 4 + c] = w
+      if (HANDS_FEET.includes(b)) m += w
+    }
     C[i] = cv ? cv.getX(i) : 0
-    A[i * 2] = 0
-    A[i * 2 + 1] = 1
+    m = THREE.MathUtils.smoothstep(m, 0.25, 0.75)
+    A[i * 2] = m
+    A[i * 2 + 1] = 1 - 0.5 * m
   }
   const index = Array.from(geo.index.array)
   let o = n0
