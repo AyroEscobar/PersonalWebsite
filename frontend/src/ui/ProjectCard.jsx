@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import { ArrowOut } from './icons.jsx'
 
 /*
@@ -6,31 +5,14 @@ import { ArrowOut } from './icons.jsx'
   26/500), the title (the label face), the headline in italic, the blurb in --ink-2, the domain link in
   the accent with the 10 px outward arrow. Exactly two instances, Esvo first.
 
-  The measured drawing: on hover or focus within, a 1 px dimension line with end ticks along the
-  plate's top edge and the plate's width in px, like an architect's elevation (a ResizeObserver keeps
-  the number true). Hidden on touch; no movement under reduced motion. `state` forces a look for the kit.
+  Hover or focus within: the link's underline and its arrow 2 px out, 160 ms; nothing else on the plate
+  moves (the drafting tool's dimension line is gone: it was a screen's tell on a Greek vase). The plate
+  turns into view as it enters (.turn, src/lib/reveal.js). `state` forces a look for the kit.
 */
 export default function ProjectCard({ card, state, className = '' }) {
-  const ref = useRef(null)
-  const num = useRef(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el || typeof ResizeObserver === 'undefined') return undefined
-    const ro = new ResizeObserver((es) => {
-      for (const e of es) {
-        const w = Math.round(e.borderBoxSize?.[0]?.inlineSize ?? el.offsetWidth)
-        if (num.current) num.current.textContent = `${w} px`
-      }
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-  const cls = ['card', state === 'hover' && 'is-hover', state === 'focus' && 'is-focus-within', className].filter(Boolean).join(' ')
+  const cls = ['card', 'turn', state === 'hover' && 'is-hover', state === 'focus' && 'is-focus-within', className].filter(Boolean).join(' ')
   return (
-    <article ref={ref} id={card.id} className={cls} aria-labelledby={`${card.id}-name`}>
-      <span className="ticks" aria-hidden="true" data-deco="">
-        <span ref={num} className="ticks-n" />
-      </span>
+    <article id={card.id} className={cls} aria-labelledby={`${card.id}-name`}>
       <h3 id={`${card.id}-name`} className="card-name">
         {card.name}
       </h3>

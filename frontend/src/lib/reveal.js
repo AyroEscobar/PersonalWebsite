@@ -1,6 +1,12 @@
 /*
   The page's own motion, in the entry (no three):
 
+    initReveals()   below the fold the belly is made the way the pot was made (reveal.css): each section
+                    title is cut in as it reaches 20% in view; each block (a work plate, an experience
+                    row, the stack paragraph, the contact plate) turns in from the right as it enters, the
+                    ones arriving together 60 ms apart; the foot's meander draws itself. Once each. Only
+                    under html.rv, which the boot script sets in a live tier, not quiet, not under ?t=; on
+                    the home page only; and rv goes the moment the tier turns still or quiet.
     initNeckCut()   the neck stays the pot's clay, with its tongues, until whichever comes first under it:
                     the hero's plate (at 1440, so the big name never passes under the nav words on a clear
                     neck) or its meander (on a phone, where the plate is under the frieze). At that frame
@@ -12,6 +18,8 @@
                 nothing; elsewhere it writes the same transform from the band's position on a frame.
                 Never in the still tier, never under reduced motion.
 */
+import { getState, subscribe } from './store.js'
+
 const html = () => document.documentElement
 const live = () => html().dataset.tier !== 'still' && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 const clamp01 = (x) => Math.min(1, Math.max(0, x))
@@ -31,6 +39,54 @@ function onScrollFrame(fn) {
   window.addEventListener('scroll', kick, { passive: true })
   window.addEventListener('resize', kick, { passive: true })
   run()
+}
+
+export function initReveals() {
+  if (typeof window === 'undefined') return
+  const d = html()
+  window.__rv = true
+  if (!d.classList.contains('rv')) return
+  const allowed = () => {
+    const s = getState()
+    return s.tier !== 'still' && !s.quiet
+  }
+  if (typeof IntersectionObserver === 'undefined' || !document.querySelector('.hero') || !allowed()) {
+    d.classList.remove('rv')
+    return
+  }
+  const once = (io, el) => {
+    el.classList.add('in')
+    io.unobserve(el)
+  }
+  // the titles and the foot's meander, at 20% in view
+  const titles = new IntersectionObserver(
+    (es) => {
+      for (const e of es) if (e.isIntersecting) once(titles, e.target)
+    },
+    { threshold: 0.2, rootMargin: '0px 0px -6% 0px' },
+  )
+  document.querySelectorAll('main .sec-title, .meander--foot').forEach((el) => titles.observe(el))
+  // the blocks, one by one as they come up the screen; those that arrive together are 60 ms apart
+  const blocks = new IntersectionObserver(
+    (es) => {
+      let k = 0
+      const hits = es.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left)
+      for (const e of hits) {
+        e.target.style.setProperty('--d', `${60 * k++}ms`)
+        once(blocks, e.target)
+      }
+    },
+    { rootMargin: '0px 0px -12% 0px' },
+  )
+  document.querySelectorAll('main .turn').forEach((el) => blocks.observe(el))
+  // the still tier or quiet, mid-visit: everything is finished at once
+  const off = subscribe(() => {
+    if (allowed()) return
+    d.classList.remove('rv')
+    titles.disconnect()
+    blocks.disconnect()
+    off()
+  })
 }
 
 export function initNeckCut() {

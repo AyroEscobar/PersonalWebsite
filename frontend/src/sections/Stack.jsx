@@ -5,7 +5,7 @@ import { STACK } from '../content/stack.js'
 export default function Stack() {
   return (
     <Section id="stack" className="sec--stack">
-      <p className="stack-p">{STACK.sentence.text}</p>
+      <p className="stack-p turn">{STACK.sentence.text}</p>
     </Section>
   )
 }

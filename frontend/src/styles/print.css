@@ -46,7 +46,7 @@
   .closer,
   .contact-p,
   .foot-controls,
-  .ticks,
+  .carve::after,
   .band-clay,
   #contact .sec-title,
   [data-print='skip'],

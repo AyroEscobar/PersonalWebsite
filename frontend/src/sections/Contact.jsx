@@ -23,7 +23,7 @@ export default function Contact() {
       after={
         <div className="band">
           <div className="wrap band-inner">
-            <div className="plate contact-plate">
+            <div className="plate contact-plate turn">
               <p className="contact-p">{SIGNAL.paragraph.text}</p>
               <p className="contact-coffee">
                 <Button variant="fill" href={SIGNAL.coffee.href} rel="noopener" className="btn-cal" data-short={short}>

@@ -25,7 +25,7 @@ export const KIT = {
     off: ui('kit-state-off', 'off'),
     copied: ui('kit-state-copied', 'copied'),
     small: ui('kit-state-small', 'small'),
-    focusWithin: ui('kit-state-focus-within', 'focus within, the measured ticks'),
+    focusWithin: ui('kit-state-focus-within', 'focus within, the arrow out'),
     still: ui('kit-state-still', 'still tier'),
     paused: ui('kit-state-paused', 'paused'),
     posterOnly: ui('kit-state-poster', 'poster only'),

@@ -1,7 +1,8 @@
 /*
   motion.css: every transition on the site. One easing family. The canvas fades in over the poster in
-  260 ms and the poster steps aside after it; the neck's bar comes in over 200 ms; the measured ticks
-  rise in 220 ms; hovers are 160 ms. Only opacity, transform, colour and background animate: never
+  260 ms and the poster steps aside after it; the neck's bar comes in over 200 ms (on the home page in one
+  frame, at the cut); the sun moves only with the reader; hovers are 160 ms. The belly's reveals are
+  reveal.css. Only opacity, transform, colour and background animate: never
   filter, box-shadow or backdrop-filter (check-content fails the build on it). Under reduced motion
   nothing moves.
 */
@@ -27,9 +28,6 @@ body:has(.hero) .neck--fixed,
 body:has(.hero) .neck--fixed::after,
 body:has(.hero) .neck--fixed .tongues {
   transition: none;
-}
-.ticks {
-  transition: opacity var(--dur-ticks) var(--ease-out), transform var(--dur-ticks) var(--ease-out);
 }
 
 /* the sun moves only with the reader: over the hero's exit it slides 60 px right and 40 px lower, as the
@@ -70,9 +68,6 @@ body:has(.hero) .neck--fixed .tongues {
   *::after {
     transition: none !important;
     animation: none !important;
-  }
-  .ticks {
-    transform: none;
   }
 }
 

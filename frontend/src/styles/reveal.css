@@ -1,0 +1,113 @@
+/*
+  The belly, made the way the pot was made (src/lib/reveal.js). Only transform, opacity and colour move.
+  Every hidden state lives under html.rv, which the boot script sets only in a live tier, not quiet, not
+  under a fixed clock: without it (no JavaScript, reduced motion, motion off, quiet, print) every element is
+  simply there, finished. reveal.js takes rv away if the tier turns still or quiet mid-visit.
+
+    the carve   a section title is cut in: a cover in the ground's colour slides off it left to right with
+                a 1 px lighter lip, the chisel (520 ms); the interpunct is struck once the cover has
+                cleared it (120 ms); then the trailing hairline is turned from the title (600 ms, linear)
+    the turn    each block comes round the curve of the pot as it enters: in from the right edge, a
+                little narrow, 420 ms, 60 ms apart and 120 ms after its title begins
+    the foot    the meander above the black foot draws itself, left to right (900 ms, linear)
+*/
+
+/* ---------- the carve ---------- */
+.carve {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  flex: none;
+}
+html.rv .carve {
+  overflow: clip;
+  overflow-clip-margin: 6px;
+}
+html.rv .carve::after {
+  content: '';
+  position: absolute;
+  inset: -6px -6px -6px -1px;
+  background: var(--ground);
+  border-left: 1px solid var(--slip-2);
+  transform: translateX(0);
+  transition: transform var(--dur-carve) var(--ease-out);
+}
+html.rv .sec-title.in .carve::after {
+  transform: translateX(101%);
+}
+html.rv .sec-title .num .ip {
+  opacity: 0;
+  transition: opacity 120ms linear 260ms;
+}
+html.rv .sec-title.in .num .ip {
+  opacity: 1;
+}
+html.rv .sec-title::after {
+  transform-origin: 0 50%;
+  transform: translateY(-0.32em) scaleX(0);
+  transition: transform 600ms linear 480ms;
+}
+html.rv .sec-title.in::after {
+  transform: translateY(-0.32em) scaleX(1);
+}
+
+/* ---------- the turn ---------- */
+html.rv .turn {
+  opacity: 0;
+  transform: translateX(24px) scaleX(0.97);
+  transform-origin: 100% 50%;
+  transition:
+    opacity var(--dur-turn) var(--ease-out) calc(120ms + var(--d, 0ms)),
+    transform var(--dur-turn) var(--ease-out) calc(120ms + var(--d, 0ms));
+}
+html.rv .turn.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- the foot's meander draws itself ---------- */
+.meander--foot {
+  position: relative;
+  overflow: clip;
+}
+html.rv .meander--foot::after {
+  content: '';
+  position: absolute;
+  inset: -2px 0;
+  background: var(--foot-band);
+  transform: translateX(0);
+  transition: transform var(--dur-meander) linear;
+}
+html.rv .meander--foot.in::after {
+  transform: translateX(101%);
+}
+
+/* ---------- finished, whatever happens: reduced motion and paper ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html.rv .turn,
+  html.rv .sec-title .num .ip {
+    opacity: 1;
+    transform: none;
+  }
+  html.rv .carve::after,
+  html.rv .meander--foot::after {
+    display: none;
+  }
+  html.rv .sec-title::after {
+    transform: translateY(-0.32em);
+  }
+}
+@media print {
+  html.rv .turn,
+  html.rv .sec-title .num .ip {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  html.rv .carve::after,
+  html.rv .meander--foot::after {
+    display: none !important;
+  }
+  html.rv .sec-title::after {
+    transform: translateY(-0.32em) !important;
+  }
+}

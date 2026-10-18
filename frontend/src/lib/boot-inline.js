@@ -17,6 +17,8 @@
                        the poster instead of the live scene
     data-ui            '0' for ?ui=0 (the bare frieze, for captures)
     class clock-fixed  ?t= (a fixed clock: instant scrolls for captures)
+    class rv           the belly's reveals may hide what they reveal (a live tier, not quiet, not ?t=);
+                       taken away after 4 s if the entry never ran
     class notext       ?notext=1, for the contrast capture in QA
 
   And in <head>: the theme-color meta for the resolved theme (it comes first, so it wins over the static
@@ -92,5 +94,13 @@
   d.setAttribute('data-transparency', quiet ? 'reduced' : 'full')
   if (has(/[?&]ui=0(&|$)/)) d.setAttribute('data-ui', '0')
   if (has(/[?&]t=/)) d.className += ' clock-fixed'
+  // the belly's reveals (src/lib/reveal.js) may start hidden only in a live tier, not quiet, not under a
+  // fixed clock; if the entry never runs, nothing stays hidden
+  if (tier !== 'still' && !quiet && !has(/[?&]t=/)) {
+    d.className += ' rv'
+    setTimeout(function () {
+      if (!window.__rv) d.classList.remove('rv')
+    }, 4000)
+  }
   if (has(/[?&]notext=1(&|$)/)) d.className += ' notext'
 })()

@@ -75,8 +75,15 @@
   --dur-hover: 160ms;
   --dur-canvas: 260ms;
   --dur-bar: 200ms;
-  --dur-ticks: 220ms;
+  --dur-sheet: 220ms;
+  --dur-turn: 420ms;
+  --dur-carve: 520ms;
+  --dur-kiln: 600ms;
+  --dur-wheel: 700ms;
+  --dur-line: 700ms;
+  --dur-meander: 900ms;
   --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-in-out: cubic-bezier(0.6, 0, 0.4, 1);
 
   color-scheme: light;
 }

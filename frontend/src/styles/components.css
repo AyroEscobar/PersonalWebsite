@@ -1,7 +1,7 @@
 /*
   Components: side A of a neck amphora. The neck (header) with its tongue band, the clay of the frieze
-  bands, the meander, the room and its ground line, the plates, the buttons, the work plates and their
-  measured ticks, the experience lines, the contact pieces and the foot.
+  bands, the meander, the room and its ground line, the plates, the buttons, the work plates, the
+  experience lines, the contact pieces and the foot.
 
   Ornament budget: the meander twice (the hero frieze's edge and the foot's), the tongues once, the
   rays once (the lower frieze's top edge, where an Attic amphora carries them above its foot),
@@ -556,56 +556,15 @@ html.scrolled .neck--fixed .tongues,
 .card-link.is-focus {
   box-shadow: var(--focus);
 }
-/* the measured drawing: a dimension line with end ticks along the plate's top edge and its width */
-.ticks {
-  position: absolute;
-  left: -1px;
-  right: -1px;
-  top: -14px;
-  height: 9px;
-  border-top: 1px solid var(--ink-2);
-  opacity: 0;
-  transform: translateY(3px);
-  pointer-events: none;
+/* hover: the link's underline and its arrow, 2 px out; nothing else on the plate moves */
+.card-link .arr {
+  transition: transform var(--dur-hover) var(--ease-out);
 }
-.ticks::before,
-.ticks::after {
-  content: '';
-  position: absolute;
-  top: -5px;
-  width: 1px;
-  height: 9px;
-  background: var(--ink-2);
-}
-.ticks::before {
-  left: 0;
-}
-.ticks::after {
-  right: 0;
-}
-.ticks-n {
-  position: absolute;
-  left: 50%;
-  top: -7px;
-  transform: translateX(-50%);
-  background: var(--ground);
-  padding: 0 8px;
-  font: 400 11px/1 var(--label);
-  letter-spacing: 0.06em;
-  color: var(--ink-2);
-  white-space: nowrap;
-}
-.card:hover .ticks,
-.card:focus-within .ticks,
-.card.is-hover .ticks,
-.card.is-focus-within .ticks {
-  opacity: 1;
-  transform: none;
-}
-@media (hover: none) {
-  .ticks {
-    display: none;
-  }
+.card:hover .card-link .arr,
+.card:focus-within .card-link .arr,
+.card.is-hover .card-link .arr,
+.card.is-focus-within .card-link .arr {
+  transform: translate(2px, -2px);
 }
 
 /* ---------- experience lines: org, details, the date in its own column ---------- */

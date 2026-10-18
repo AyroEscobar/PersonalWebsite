@@ -10,7 +10,7 @@ export default function ExperienceList({ lines = EXPERIENCE }) {
   return (
     <ul className="lines">
       {lines.map((l) => (
-        <li key={l.id} id={l.id} data-id={l.id}>
+        <li key={l.id} id={l.id} data-id={l.id} className="turn">
           <p className="org">
             {l.org}
             <span className="sr-only"> · </span>

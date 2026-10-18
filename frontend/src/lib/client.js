@@ -1,7 +1,7 @@
 import { syncFromHtml, markStill } from './mode.js'
 import { setFocus } from './store.js'
 import { SECTION_IDS } from '../content/sections.js'
-import { initNeckCut, initSun } from './reveal.js'
+import { initNeckCut, initReveals, initSun } from './reveal.js'
 
 /*
   Client start-up, called once from main.jsx after hydration is scheduled. Copies <html data-*> (set by
@@ -21,6 +21,7 @@ export function initClient() {
 
   initActiveSection()
   initNeckCut()
+  initReveals()
   initSun()
 }
 

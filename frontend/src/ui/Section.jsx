@@ -11,18 +11,21 @@ import { headingId, sectionById } from '../content/sections.js'
   above at every width (Contact, whose frieze band is its own architecture).
 
   <SectionTitle id>: the Roman numeral in the accent and an interpunct (decorative), a hidden
-  "Section n." so a screen reader hears the order, then the word, then a trailing hairline.
+  "Section n." so a screen reader hears the order, then the word, then a trailing hairline. The .carve
+  span carries the chisel's cover (reveal.css): the title is cut in once, then the hairline is turned.
 */
 export function SectionTitle({ id, as: As = 'h2', className = '' }) {
   const s = sectionById(id)
   return (
     <As id={headingId(id)} className={`sec-title ${className}`.trim()}>
-      <span className="num" aria-hidden="true">
-        {s.numeral.text}
-        <span className="ip">·</span>
+      <span className="carve">
+        <span className="num" aria-hidden="true">
+          {s.numeral.text}
+          <span className="ip">·</span>
+        </span>
+        <span className="sr-only">{s.sr.text} </span>
+        <span className="sec-word">{s.label.text}</span>
       </span>
-      <span className="sr-only">{s.sr.text} </span>
-      <span className="sec-word">{s.label.text}</span>
     </As>
   )
 }
