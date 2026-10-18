@@ -10,11 +10,13 @@
     any other lazy chunk                 20 KB gz each
     CSS                                  24 KB gz
     HTML for /                           90 KB gz
-    preloaded fonts                      1 file, 60 KB
-    all font files                       2 (Mona Sans, Geist Mono at 20 KB or less)
+    preloaded fonts                      2 files (Cinzel, EB Garamond upright), 60 KB together
+    all font files                       4 (those two, the EB Garamond italic, Marcellus SC); no monospace
     the figure mesh                     400 KB
-    posters                              20 KB each AVIF, 32 KB each WebP, two of each
-    initial transfer                    500 KB (html, css, entry, Mona Sans, the eager poster, the preloads)
+    posters                              eight: the light and the dark vase, desktop and phone, AVIF 20 KB
+                                         or less each, WebP 32 KB or less each
+    initial transfer                    500 KB (html, css, entry, the two preloaded fonts, the light
+                                         desktop poster, the favicon)
     three in the entry, R3F, Firebase, Mapbox, framer-motion, react-router, a React development
     build, third-party requests, media files: zero
 
@@ -40,9 +42,8 @@ export const BUDGETS = {
   css: 24 * KB,
   html: 90 * KB,
   fonts: 60 * KB,
-  fontFiles: 1,
-  allFontFiles: 2,
-  monoFont: 20 * KB,
+  fontFiles: 2,
+  allFontFiles: 4,
   figure: 400 * KB,
   posterAvif: 20 * KB,
   posterWebp: 32 * KB,
@@ -105,7 +106,7 @@ export function measure() {
   add('lazy', 'scene chunk (src/scene + three)', lazy.scene, BUDGETS.scene, { files: sceneFiles })
   add('lazy', 'kit route (src/kit)', lazy.kit, BUDGETS.kit)
   add('lazy', 'the 404', lazy.notFound, BUDGETS.notFound)
-  if (!lazy.scene) fails.push('no scene chunk in the manifest (src/scene/boulder.js must be a dynamic import)')
+  if (!lazy.scene) fails.push('no scene chunk in the manifest (src/scene/frieze.js must be a dynamic import)')
 
   // CSS: every stylesheet in dist.
   const allCss = walk(path.join(DIST, 'assets'), { exts: ['.css'] })
@@ -135,16 +136,17 @@ export function measure() {
   add('fonts', `${preloads.length} preloaded woff2`, fontBytes, BUDGETS.fonts, { files: preloads })
   if (preloads.length > BUDGETS.fontFiles) fails.push(`fonts: ${preloads.length} preloads, budget ${BUDGETS.fontFiles}`)
   const allFonts = walk(path.join(DIST, 'assets'), { exts: ['.woff2', '.woff', '.ttf', '.otf'] })
-  if (allFonts.length > BUDGETS.allFontFiles) fails.push(`fonts: ${allFonts.length} font files in dist, only Mona Sans and Geist Mono are allowed`)
+  if (allFonts.length > BUDGETS.allFontFiles) fails.push(`fonts: ${allFonts.length} font files in dist; only Cinzel, EB Garamond (upright and italic) and Marcellus SC ship`)
   for (const f of allFonts) {
-    if (/mono/i.test(f)) add('fonts', `monospace file ${path.basename(f)}`, raw(f), BUDGETS.monoFont)
-    if (/mono/i.test(f) && preloads.some((p) => p.endsWith(path.basename(f)))) fails.push('fonts: the monospace file is preloaded (DESIGN.md 2.2: not preloaded)')
+    if (!/\/(cinzel-latin-wght-normal|eb-garamond-latin-wght-normal|eb-garamond-latin-400-italic|marcellus-sc-latin-400-normal)-[\w-]+\.woff2$/.test(f)) fails.push(`fonts: unexpected font file ${path.basename(f)}`)
+    if (/mono/i.test(f)) fails.push(`fonts: a monospace file ships (${path.basename(f)}); v5 has none`)
   }
+  for (const want of ['cinzel-latin-wght-normal', 'eb-garamond-latin-wght-normal']) if (!preloads.some((p) => p.includes(want))) fails.push(`fonts: ${want} is not preloaded`)
 
   // The figure mesh and the posters.
   for (const f of walk(path.join(DIST, 'assets'), { exts: ['.glb'] })) add('figure', path.basename(f), raw(f), BUDGETS.figure)
   const posterDir = path.join(DIST, 'poster')
-  for (const name of ['hero-1440', 'hero-780']) {
+  for (const name of ['frieze-light', 'frieze-light-m', 'frieze-dark', 'frieze-dark-m']) {
     for (const [ext, budget] of [['avif', BUDGETS.posterAvif], ['webp', BUDGETS.posterWebp]]) {
       const f = path.join(posterDir, `${name}.${ext}`)
       if (!existsSync(f)) { fails.push(`poster missing: poster/${name}.${ext} (run npm run poster)`); continue }
@@ -152,21 +154,22 @@ export function measure() {
     }
   }
 
-  // Initial transfer: html + entry js + css + preloaded fonts + the eager poster + the preloaded AVIFs + favicon.
+  // Initial transfer: html + entry js + css (inlined, so inside the html) + the two preloaded fonts + the
+  // light desktop poster (the boot script preloads the one poster this visitor sees; both pictures are
+  // lazy, so it is the only image on the first paint) + favicon. Any eager <img> would count too.
   const eagerImgs = [...indexHtml.matchAll(/<img\b[^>]*>/g)]
     .map((m) => m[0])
     .filter((tag) => !/loading="lazy"/.test(tag))
     .map((tag) => (tag.match(/src="\/([^"]+)"/) || [])[1])
     .filter((f) => f && existsSync(path.join(DIST, f)))
-  const preloadedImgs = [...indexHtml.matchAll(/<link rel="preload" as="image"[^>]*href="\/([^"]+)"/g)].map((m) => m[1]).filter((f) => existsSync(path.join(DIST, f)))
-  // the browser fetches the AVIF the media query picks, then the <picture> resolves to the same file; count the larger landscape AVIF once
-  const landscapeAvif = preloadedImgs.find((f) => /1440\.avif$/.test(f))
+  const firstPoster = path.join(DIST, 'poster/frieze-light.avif')
   const initial =
     htmlGz +
     entryGz +
     [...cssFiles].filter((f) => !indexHtml.includes(`data-href="/${f}"`)).reduce((s, f) => s + fileGz(path.join(DIST, f)), 0) +
     fontBytes +
-    (landscapeAvif ? raw(path.join(DIST, landscapeAvif)) : eagerImgs.reduce((s, f) => s + raw(path.join(DIST, f)), 0)) +
+    (existsSync(firstPoster) ? raw(firstPoster) : 0) +
+    eagerImgs.reduce((s, f) => s + raw(path.join(DIST, f)), 0) +
     (existsSync(path.join(DIST, 'favicon.svg')) ? fileGz(path.join(DIST, 'favicon.svg')) : 0)
   add('total', 'initial transfer', initial, BUDGETS.initial)
 
