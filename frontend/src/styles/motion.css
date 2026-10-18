@@ -16,7 +16,7 @@
 }
 .btn,
 .btn-cal::after {
-  transition: background-color var(--dur-hover) var(--ease-out), color var(--dur-hover) var(--ease-out), border-color var(--dur-hover) var(--ease-out), opacity var(--dur-hover) var(--ease-out), transform var(--dur-hover) var(--ease-out);
+  transition: background-color var(--dur-hover) var(--ease-out), background-size var(--dur-hover) var(--ease-out), color var(--dur-hover) var(--ease-out), border-color var(--dur-hover) var(--ease-out), opacity var(--dur-hover) var(--ease-out), transform var(--dur-hover) var(--ease-out);
 }
 .neck--fixed,
 .neck::after,

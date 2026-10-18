@@ -3,7 +3,8 @@ import { ArrowOut } from './icons.jsx'
 /*
   <Button>: square, 1 px border, 48 px tall (small 36), the label face (Marcellus SC 16, small 14).
 
-    variant   'fill' (the accent: the coffee chat, the 404's way home) | 'line' (1 px ink: email, copy)
+    variant   'fill' (the accent: the coffee chat, the 404's way home; it turns to ink on hover) |
+              'line' (1 px ink: email, copy; on hover it fills with ink from its left edge, 160 ms)
               ('primary' and 'glass', v4's names, map to fill and line)
     size      'md' | 'sm'
     icon      'out': a trailing 10 px outward arrow
