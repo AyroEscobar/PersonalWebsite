@@ -46,8 +46,6 @@ import {
   BANNED,
   COMPOSITE_RULES,
   CONTRAST_RULES,
-  brighten,
-  over,
   DASH_RE,
   PRIVATE_SHAPES,
   contrast,

@@ -15,14 +15,14 @@
   960 px), contain and bottom aligned, so the canvas lands on the poster pixel for pixel. The boot script
   preloads the one poster this visitor sees, so both pictures are lazy and only one is ever fetched.
 */
-export const POSTER = {
+const POSTER = {
   w: 1600,
   h: 1176,
   mw: 960,
   mh: 706,
   src: (theme, m = false, ext = 'avif') => `/poster/frieze-${theme}${m ? '-m' : ''}.${ext}`,
 }
-export const PHONE = '(max-width: 959.98px)'
+const PHONE = '(max-width: 959.98px)'
 
 export function PosterPicture({ theme, alt = '', priority = false }) {
   return (
