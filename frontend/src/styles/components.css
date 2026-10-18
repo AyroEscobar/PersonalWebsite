@@ -407,7 +407,8 @@ html.scrolled .neck--fixed .tongues,
 .theme-line {
   position: absolute;
   z-index: 4;
-  left: var(--gutter);
+  /* on the content's left edge (the .wrap column), however wide the band */
+  left: calc(max(0px, (100% - var(--max) - 2 * var(--gutter)) / 2) + var(--gutter));
   bottom: calc(var(--meander-h) + 14px);
   font: 400 12px/1 var(--label);
   letter-spacing: 0.08em;
