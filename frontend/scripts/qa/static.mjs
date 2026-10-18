@@ -4,7 +4,7 @@
 */
 import { readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
-import { BANNED, DASH_RE, PRIVATE_SHAPES, loadDenylist, loadNearRules, readTokens, termRegex, walk, hexToRgb } from '../lib/rules.mjs'
+import { BANNED, DASH_RE, PRIVATE_SHAPES, loadDenylist, loadNearRules, readTokens, termRegex, walk, hexToRgb, WRONG_LINKEDIN_RE } from '../lib/rules.mjs'
 
 export async function staticScan(ROOT) {
   const DIST = path.join(ROOT, 'dist')
@@ -40,6 +40,13 @@ export async function staticScan(ROOT) {
   // v2 has no map (DESIGN.md 7.2): the map labels check went with it.
   const index = existsSync(path.join(DIST, 'index.html')) ? readFileSync(path.join(DIST, 'index.html'), 'utf8') : ''
 
+  // The LinkedIn slug (Ayro, Sat Oct 17, 2026): his profile is /in/ayroescobar/, the other slug is wrong.
+  {
+    const wrong = walk(DIST, { exts: ['.html', '.js', '.css', '.json', '.txt', '.xml', '.svg'] }).filter((f) => WRONG_LINKEDIN_RE.test(readFileSync(f, 'utf8'))).map(rel)
+    const real = index.includes('https://www.linkedin.com/in/ayroescobar/')
+    push('linkedin-slug', !wrong.length && real ? 'pass' : 'fail', wrong.length ? `the wrong slug in ${wrong.join(', ')}` : real ? 'only /in/ayroescobar/ (in index.html, the hero, contact and the JSON-LD)' : 'index.html does not link /in/ayroescobar/')
+  }
+
   // CSS palette and cut effects.
   const tokens = readTokens(readFileSync(path.join(ROOT, 'src/styles/tokens.css'), 'utf8'))
   // print.css redefines the tokens for paper (ink on white); those values are tokens too
@@ -57,7 +64,9 @@ export async function staticScan(ROOT) {
 
   const cut = []
   if (/mix-blend-mode\s*:/.test(cssText)) cut.push('mix-blend-mode')
-  if (/repeating-linear-gradient/.test(cssText)) cut.push('repeating-linear-gradient (scanline risk)')
+  // the clay's wheel rings are the one repeating gradient (on .frieze and the phone hero's clay layer);
+  // anywhere else it is a scanline risk
+  for (const m of cssText.matchAll(/([^{}]+)\{[^{}]*repeating-linear-gradient/g)) if (!/frieze|\.hero:{1,2}before/.test(m[1])) cut.push(`repeating-linear-gradient on ${m[1].trim().slice(0, 60)} (scanline risk)`)
   if (/corner-shape/.test(cssText)) cut.push('corner-shape (chamfer)')
   if (/clip-path\s*:\s*polygon/.test(cssText)) cut.push('clip-path polygon (chamfer risk)')
   if (/cursor\s*:\s*url\(/.test(cssText)) cut.push('cursor replacement')

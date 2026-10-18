@@ -328,8 +328,8 @@ export function monoShare() {
     total++
     if (/mono|courier|consolas|menlo/i.test(getComputedStyle(el).fontFamily.split(',')[0])) {
       mono++
-      // v3 (DESIGN.md 2.2): Geist Mono only for the footer's build line and the scene controls
-      if (!el.closest('.foot-row--mono, .ctl')) outside++
+      // v5 ships no monospace face at all
+      outside++
     }
   }
   return { total, mono, outside, share: total ? Math.round((mono / total) * 1000) / 10 : 0 }

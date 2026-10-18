@@ -1,6 +1,6 @@
 /*
   Lighthouse (PLAN.md 7, 12 step 4). Mobile and desktop presets, full mode
-  and ?quiet=1 (solid plates), N runs each, median reported. Runs against the QA Chrome over
+  and ?quiet=1 (the poster instead of the live scene), N runs each, median reported. Runs against the QA Chrome over
   its debugging port, so no second browser is launched.
 */
 

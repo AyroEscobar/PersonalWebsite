@@ -10,15 +10,15 @@
     npm run qa -- --strict     treat "pending" (parts not built yet) as failures
     npm run qa -- --widths 390,1440 --no-shots
 
-  Every route ('/' and an unknown path for the 404) at 390, 768, 1440 and
-  1920: horizontal overflow, console errors, failed or third-party requests,
+  Every route ('/', '/kit' and an unknown path for the 404) at 390, 768, 1440
+  and 1920: horizontal overflow, console errors, failed or third-party requests,
   broken links and images, contrast spot checks, target sizes, structure.
-  Then axe (390 and 1440), reduced motion, the keyboard walk, hydration, the
-  404 status, the copy status, print, the r1 regressions that still apply,
-  the glass and scene checks (DESIGN.md 7, 9, 10: composite contrast at five
-  scroll positions, forced colours, quiet, framing, the city, the scroll
-  mapping, the still tier, frame cost), Lighthouse, and the bundle
-  report. Writes qa-report.md and qa-report.json to the reviews dir and
+  Then axe (390 and 1440, light and dark), reduced motion, the keyboard walk,
+  hydration, the 404 status, the copy status, print, the r1 regressions that
+  still apply, the page, theme and scene checks (scene-checks.mjs: composite
+  contrast in both themes, forced colours, quiet, the theme switch, the one
+  poster, framing, the slip, the one canvas, the still tier, frame cost),
+  Lighthouse, and the bundle report. Writes qa-report.md and qa-report.json to the reviews dir and
   screenshots to the shots dir (tools/local.json, or .build/qa).
 
   Exit code 1 when any check fails. Chrome always runs headless with its own
@@ -36,7 +36,7 @@ import { staticScan } from './static.mjs'
 import { runLighthouse, TARGETS } from './lighthouse.mjs'
 import * as P from './page-checks.mjs'
 import { writeReport } from './report.mjs'
-import { glassChecks } from './glass-checks.mjs'
+import { sceneChecks } from './scene-checks.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const REPO = path.resolve(ROOT, '..')
@@ -56,6 +56,7 @@ const SHOTS = opt('--shots', process.env.QA_SHOTS_DIR || cfg.shotsDir || path.jo
 const NO_SHOTS = flag('--no-shots')
 const ROUTES = [
   { label: 'home', path: '/' },
+  { label: 'kit', path: '/kit' },
   { label: '404', path: '/nothing-here' },
 ]
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -139,8 +140,15 @@ try {
     const miss = order.find((s) => { const i = flat.indexOf(s, at); if (i < 0) return true; at = i + s.length; return false })
     check('prerender', 'who he is before JS', !miss ? 'pass' : 'fail', miss ? `missing or out of order: "${miss}"` : 'name, age and school, Esvo, Viaere, the internships, three results, coffee chat, email, LinkedIn, in order in the served HTML')
   }
-  const poster = (homeHtml.match(/<picture class="poster">[\s\S]*?<\/picture>/) || [])[0] || ''
-  check('prerender', 'the poster before JS', /hero-1440\.avif/.test(poster) && /hero-780\.avif/.test(poster) && /fetchpriority="high"/i.test(poster) ? 'pass' : 'fail', 'both AVIF sources and a fetchpriority high <img> in the served HTML')
+  {
+    const pics = ['light', 'dark'].map((t) => (homeHtml.match(new RegExp(`<picture class="poster poster--${t}">[\\s\\S]*?<\\/picture>`)) || [])[0] || '')
+    const ok = pics.every((p, i) => {
+      const t = i ? 'dark' : 'light'
+      return p.includes(`frieze-${t}.avif`) && p.includes(`frieze-${t}-m.avif`) && /fetchpriority="high"/i.test(p) && /<img[^>]*alt="[^"]+"/.test(p) && /<img[^>]*width="\d+"[^>]*height="\d+"/.test(p)
+    })
+    check('prerender', 'the posters before JS', ok ? 'pass' : 'fail', 'the light and the dark poster, each with its phone AVIF, width, height, alt and fetchpriority high, in the served HTML')
+    check('prerender', 'the figure credit before JS', /Male base/.test(homeHtml) && /CC BY 3\.0/.test(homeHtml) ? 'pass' : 'fail', 'Male base, CC BY 3.0 in the served footer')
+  }
   const nf = await fetch(`${url}/nothing-here`)
   const nfHtml = await nf.text()
   check('http', '404 status', nf.status === 404 && nfHtml.includes(NOT_FOUND.line.text) ? 'pass' : 'fail', `/nothing-here -> ${nf.status}, ${nfHtml.includes(NOT_FOUND.line.text) ? 'themed' : 'not themed'}`)
@@ -205,14 +213,20 @@ try {
       for (const l of await page.eval(fn(P.linksList))) allLinks.set(l.abs, l)
       let axe = null
       if ([390, 1440].includes(w)) {
-        try {
-          const { axeSource } = await import('../../tools/axe.mjs')
-          await page.eval(axeSource + ';true')
-          axe = await page.eval(
-            `axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa','best-practice'] } }).then(r => r.violations.map(v => ({ id: v.id, impact: v.impact, help: v.help, n: v.nodes.length, nodes: v.nodes.slice(0, 4).map(n => n.target.join(' ')) })))`,
-          )
-        } catch (e) {
-          axe = [{ id: 'axe-error', help: e.message.slice(0, 200), n: 1 }]
+        axe = {}
+        const { axeSource } = await import('../../tools/axe.mjs')
+        for (const theme of ['light', 'dark']) {
+          try {
+            const ap = await cdp.newPage({ width: w, height: vh, dpr: mobile ? 2 : 1, mobile })
+            await ap.goto(`${url}${route.path}${route.path.includes('?') ? '&' : '?'}theme=${theme}`, { settle: 1800 })
+            await ap.eval(axeSource + ';true')
+            axe[theme] = await ap.eval(
+              `axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa','best-practice'] } }).then(r => r.violations.map(v => ({ id: v.id, impact: v.impact, help: v.help, n: v.nodes.length, nodes: v.nodes.slice(0, 4).map(n => n.target.join(' ')) })))`,
+            )
+            await ap.close()
+          } catch (e) {
+            axe[theme] = [{ id: 'axe-error', help: e.message.slice(0, 200), n: 1 }]
+          }
         }
       }
       if (!NO_SHOTS) R.shots.push(path.basename(await page.screenshot(path.join(SHOTS, `${tag}-full.png`), { fullPage: true })))
@@ -235,13 +249,13 @@ try {
       check('page', `${at} targets`, targets.smallCount ? 'fail' : targets.spacedCount ? 'warn' : 'pass', targets.smallCount ? targets.small.slice(0, 4).map((t) => `"${t.text}" ${t.w}x${t.h}`).join(' | ') : targets.spacedCount ? `under 24px but spaced (allowed by 2.5.8, PLAN.md 8 asks for 24): ${targets.spaced.slice(0, 4).map((t) => `"${t.text}" ${t.w}x${t.h}`).join(' | ')}` : '')
       check('page', `${at} structure`, facts.h1.length === 1 && facts.landmarks.main === 1 && facts.skipFirst && !facts.positiveTabindex && !facts.unnamedButtons ? 'pass' : 'fail', `h1 ${facts.h1.length}, main ${facts.landmarks.main}, skip first ${facts.skipFirst}, positive tabindex ${facts.positiveTabindex}, unnamed buttons ${facts.unnamedButtons}`)
       if (hydration.length) check('page', `${at} hydration`, 'fail', hydration.map((c) => c.text.slice(0, 120)).join(' | '))
-      if (axe) check('axe', at, axe.length ? 'fail' : 'pass', axe.map((v) => `${v.id} (${v.n})`).join(', '))
+      if (axe) for (const [theme, v] of Object.entries(axe)) check('axe', `${at} ${theme}`, v.length ? 'fail' : 'pass', v.map((x) => `${x.id} (${x.n}: ${x.nodes.join(' ; ')})`).join(', '))
       await page.close()
     }
   }
-  const fontFamilies = [...new Set(R.pages.flatMap((p) => p.facts.fonts.map((f) => f.replace(/ [\d ]+$/, ''))))]
-  // 'Mona Sans Fallback' is fonts.css's local() face with size-adjust, so the swap moves nothing (no file)
-  check('fonts', 'only Mona Sans and Geist Mono', fontFamilies.length && fontFamilies.every((f) => /^(Mona Sans|Geist Mono|Mona Sans Fallback( normal)?)$/.test(f)) ? 'pass' : 'fail', fontFamilies.join(', '))
+  const fontFamilies = [...new Set(R.pages.flatMap((p) => p.facts.fonts.map((f) => f.replace(/ [\d ]+$/, '').replace(/ normal$/, ''))))]
+  // the ... Fallback faces are fonts.css's local('Georgia') faces with size-adjust, so the swap barely moves anything (no file)
+  check('fonts', 'only Cinzel, EB Garamond and Marcellus SC', fontFamilies.length && fontFamilies.every((f) => /^(Cinzel|EB Garamond|Marcellus SC|Cinzel Fallback|Garamond Fallback|Marcellus Fallback)$/.test(f)) ? 'pass' : 'fail', fontFamilies.join(', '))
 
   // ---------- 7. links ----------
   log('links')
@@ -312,7 +326,7 @@ try {
     await sleep(3000)
     const res = await page.eval(`({
       raf: window.__qa.raf,
-      canvasOn: !!document.querySelector('.stage canvas.on'),
+      canvasOn: !!document.querySelector('.frieze-canvas.on'),
       tier: document.documentElement.dataset.tier,
       motion: document.documentElement.dataset.motion,
       paused: window.__stats ? window.__stats.paused : null,
@@ -348,14 +362,16 @@ try {
     check('keyboard', 'skip link first', seq[0] && /skip/i.test(seq[0].name) ? 'pass' : 'fail', seq[0]?.name)
     check('keyboard', 'visible focus', noRing.length ? 'fail' : 'pass', noRing.slice(0, 5).map((f) => `${f.tag} "${f.name}"`).join(', ') || `${seq.length} stops, all with a ring`)
     check('keyboard', 'focus not obscured', obscured.length ? 'fail' : 'pass', obscured.slice(0, 5).map((f) => `${f.tag} "${f.name}"`).join(', '))
-    // v4: the skip link, the wordmark, the four nav words, the quiet switch, then the hero's coffee
-    // chat, email, LinkedIn and GitHub, then the cards' links (Esvo first), the contact coffee chat,
-    // the email, copy, the three links, the footer links, the scene controls.
+    // v5: the skip link, the wordmark, the four nav words, the theme switch, the quiet switch, the neck's
+    // coffee chat, then the hero's coffee chat, email, LinkedIn and GitHub, then the cards' links (Esvo
+    // first), the contact coffee chat, the email, copy, the three links, the footer links, the scene controls.
     const EXPECT = [
       ['skip link', (f) => /skip/i.test(f.name)],
-      ['name', (f) => f.name === 'Ayro Escobar'],
-      ...SECTION_IDS.map((id) => [`nav ${id}`, (f) => f.tag === 'a' && f.href === `#${id}` && f.name !== 'Ayro Escobar']),
+      ['name', (f) => /^ayro escobar$/i.test(f.name)],
+      ...SECTION_IDS.map((id) => [`nav ${id}`, (f) => f.tag === 'a' && f.href === `#${id}` && !/^ayro escobar$/i.test(f.name)]),
+      ['theme', (f) => /^dark theme$/i.test(f.name)],
       ['quiet', (f) => /^quiet/i.test(f.name)],
+      ['neck coffee', (f) => /^https:\/\/cal\.com\//.test(f.href || '')],
       ['coffee', (f) => /^https:\/\/cal\.com\//.test(f.href || '')],
       ['hero email', (f) => /^mailto:/.test(f.href || '')],
       ['LinkedIn', (f) => /linkedin\.com\//.test(f.href || '')],
@@ -371,7 +387,7 @@ try {
     let j = 0
     for (const f of seq) if (j < EXPECT.length && EXPECT[j][1](f)) j++
     const missing = EXPECT.filter(([, m]) => !seq.some(m)).map(([n]) => n)
-    check('keyboard', 'tab order spec', j === EXPECT.length ? 'pass' : 'fail', j === EXPECT.length ? 'skip, name, four nav words, quiet, coffee, email, LinkedIn, GitHub, the two cards, contact coffee, contact email, copy, links, scene controls' : missing.length ? `never reached: ${missing.join(', ')}` : `out of order at "${EXPECT[j][0]}"`)
+    check('keyboard', 'tab order spec', j === EXPECT.length ? 'pass' : 'fail', j === EXPECT.length ? 'skip, name, four nav words, theme, quiet, coffee (neck), coffee, email, LinkedIn, GitHub, the two cards, contact coffee, contact email, copy, links, scene controls' : missing.length ? `never reached: ${missing.join(', ')}` : `out of order at "${EXPECT[j][0]}"`)
 
     // Enter on a nav word lands the heading below the pill.
     const rail = await page.eval(`!!document.querySelector('nav a[href="#check-out"]')`)
@@ -390,7 +406,7 @@ try {
       await page.eval(`document.querySelector('nav a[href="#experience"]').focus({ preventScroll: true })`)
       await page.key('Enter')
       await sleep(1600)
-      const pos = await page.eval(`(() => { const h = document.getElementById('experience-h').getBoundingClientRect(); const nav = document.querySelector('.top .nav'); const b = nav.getBoundingClientRect().bottom; const cur = document.querySelector('.nav [aria-current="true"]'); return { top: Math.round(h.top), bar: Math.round(b), vh: innerHeight, current: cur ? cur.getAttribute('href') : null } })()`)
+      const pos = await page.eval(`(() => { const h = document.getElementById('experience-h').getBoundingClientRect(); const b = document.querySelector('.neck .neck-row').getBoundingClientRect().bottom; const cur = document.querySelector('.neck .nav [aria-current="true"]'); return { top: Math.round(h.top), bar: Math.round(b), vh: innerHeight, current: cur ? cur.getAttribute('href') : null } })()`)
       check('keyboard', 'nav word lands below the nav', pos.top >= pos.bar && pos.top < pos.vh ? 'pass' : 'fail', `heading top ${pos.top}, nav bottom ${pos.bar}`)
       check('nav', 'aria-current tracks the section', pos.current === '#experience' ? 'pass' : 'fail', `aria-current on "${pos.current}" after jumping to experience`)
     }
@@ -433,7 +449,7 @@ try {
 
   // ---------- 10b. r1 regressions that still apply in v2 (T2, T6, T9, T12, T14) ----------
   // v1's map, rail, stops sheet, ping and clock are gone (DESIGN.md 7.2), and so are their checks
-  // (T5, T11, T13, T15). What they protected that still matters is checked here or in glass-checks.
+  // (T5, T11, T13, T15). What they protected that still matters is checked here or in scene-checks.
   log('r1 regressions')
   {
     // T2 and T6: a way to write to him on the first screen; the name high on a phone.
@@ -444,17 +460,17 @@ try {
       const c = await page.eval(`(() => {
         const m = document.querySelector('#top a[href^="mailto:"]')
         const h1 = document.querySelector('h1')
-        const sheet = document.querySelector('.panel--hero')
+        const sheet = document.querySelector('.hero-plate')
         return { mail: m ? Math.round(m.getBoundingClientRect().bottom) : null, vh: innerHeight, h1: Math.round(h1.getBoundingClientRect().top), h1b: Math.round(h1.getBoundingClientRect().bottom), sheet: Math.round(sheet.getBoundingClientRect().top), sw: document.documentElement.scrollWidth, iw: innerWidth }
       })()`)
       check('r1', `T2 email on the first screen @${w}x${h}`, c.mail != null && c.mail <= c.vh ? 'pass' : 'fail', `the hero email pill ends at ${c.mail} of ${c.vh}`)
-      // v3 (DESIGN.md 6.3): the man takes the top of a phone and the name sits in the sheet under him,
-      // so the old "name above 300 px" rule becomes: the sheet starts in the lower 60% and the name is whole on the first screen
-      if (mobile) check('r1', `T6 name on the first screen on a phone @${w}x${h}`, c.sheet >= h * 0.4 && c.h1b <= h && c.sw <= w && c.iw === w ? 'pass' : 'fail', `sheet top ${c.sheet} (at least ${Math.round(h * 0.4)}), h1 ${c.h1} to ${c.h1b} of ${h}, scrollWidth ${c.sw}`)
+      // v5: the frieze (the man and the disk) takes the top of a phone and the plate sits under it, so the
+      // plate starts in the lower 60% and the name is whole on the first screen
+      if (mobile) check('r1', `T6 name on the first screen on a phone @${w}x${h}`, c.sheet >= h * 0.4 && c.h1b <= h && c.sw <= w && c.iw === w ? 'pass' : 'fail', `plate top ${c.sheet} (at least ${Math.round(h * 0.4)}), h1 ${c.h1} to ${c.h1b} of ${h}, scrollWidth ${c.sw}`)
       await page.close()
     }
 
-    // T14: WCAG 1.4.12 text spacing at 320 and 390: no sideways scroll, the name and the quiet switch stay in.
+    // T14: WCAG 1.4.12 text spacing at 320 and 390: no sideways scroll, the name and the menu button stay in.
     for (const w of [320, 390]) {
       const page = await cdp.newPage({ width: w, height: 800, dpr: 2, mobile: true })
       await page.goto(`${url}/`, { settle: 800 })
@@ -465,11 +481,11 @@ try {
         setTimeout(() => {
           const h1 = document.querySelector('h1')
           const b = h1.getBoundingClientRect()
-          const q = document.querySelector('.top .nav').getBoundingClientRect()
+          const q = document.querySelector('.neck .menu-btn').getBoundingClientRect()
           done({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, iw: innerWidth, h1Clip: h1.scrollWidth > h1.clientWidth + 1 || b.right > innerWidth + 1, quietRight: Math.round(q.right) })
         }, 400)
       })`)
-      check('r1', `T14 text spacing @${w}`, r.sw === r.cw && r.iw === w && !r.h1Clip && r.quietRight <= w ? 'pass' : 'fail', `scrollWidth ${r.sw}, clientWidth ${r.cw}, layout ${r.iw}, h1 clipped ${r.h1Clip}, quiet switch right edge ${r.quietRight}`)
+      check('r1', `T14 text spacing @${w}`, r.sw === r.cw && r.iw === w && !r.h1Clip && r.quietRight <= w ? 'pass' : 'fail', `scrollWidth ${r.sw}, clientWidth ${r.cw}, layout ${r.iw}, h1 clipped ${r.h1Clip}, menu button right edge ${r.quietRight}`)
       await page.close()
     }
 
@@ -480,7 +496,7 @@ try {
       await page.eval(fn(P.scrollThrough))
       const m = await page.eval(fn(P.monoShare))
       const b = await page.eval(fn(P.borderedBoxes))
-      check('v3', 'monospace only in the build line and scene controls (DESIGN.md 2.2)', m.outside === 0 ? 'pass' : 'fail', `${m.mono} of ${m.total} visible text nodes are monospace, ${m.outside} outside .foot-row--mono and .ctl (must be 0)`)
+      check('v5', 'no monospace anywhere', m.mono === 0 ? 'pass' : 'fail', `${m.mono} of ${m.total} visible text nodes are monospace (must be 0: no monospace face ships)`)
       check('r1', 'T9 bordered boxes at 1440', b.count < 40 ? 'pass' : 'fail', `${b.count} fully bordered elements in main (under 40): ${b.sample.join(', ')}`)
       await page.close()
     }
@@ -502,9 +518,9 @@ try {
     }
   }
 
-  // ---------- 10c. the glass checks (DESIGN.md 9; they replaced the r2 map checks) ----------
-  log('glass checks')
-  await glassChecks({ cdp, url, check, sleep, scratch: REVIEWS })
+  // ---------- 10c. the page, theme and scene checks (they replaced v4's glass checks) ----------
+  log('page, theme and scene checks')
+  await sceneChecks({ cdp, url, check, sleep, scratch: REVIEWS })
 
   // ---------- 11. Lighthouse ----------
   if (!FAST) {
