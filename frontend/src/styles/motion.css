@@ -22,6 +22,12 @@
 .tongues {
   transition: background-color var(--dur-bar) var(--ease-out), opacity var(--dur-bar) var(--ease-out);
 }
+/* on the home page the cut is one frame: a half cream bar never fades across the man */
+body:has(.hero) .neck--fixed,
+body:has(.hero) .neck--fixed::after,
+body:has(.hero) .neck--fixed .tongues {
+  transition: none;
+}
 .ticks {
   transition: opacity var(--dur-ticks) var(--ease-out), transform var(--dur-ticks) var(--ease-out);
 }

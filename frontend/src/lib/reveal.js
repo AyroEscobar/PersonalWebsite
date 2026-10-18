@@ -1,6 +1,11 @@
 /*
   The page's own motion, in the entry (no three):
 
+    initNeckCut()   the neck stays the pot's clay, with its tongues, until whichever comes first under it:
+                    the hero's plate (at 1440, so the big name never passes under the nav words on a clear
+                    neck) or its meander (on a phone, where the plate is under the frieze). At that frame
+                    html.scrolled: the ground bar, its rule, no tongues. Pages without a shoulder (the
+                    kit, the 404) keep the old rule, a bar after 80 px.
     initSun()   the late sun on the clay moves with the reader: the patch slides 60 px right and 40 px
                 lower over the hero's exit, and comes down onto the contact band as it arrives. Where the
                 browser has scroll-driven animations, motion.css does it on the compositor and this does
@@ -26,6 +31,25 @@ function onScrollFrame(fn) {
   window.addEventListener('scroll', kick, { passive: true })
   window.addEventListener('resize', kick, { passive: true })
   run()
+}
+
+export function initNeckCut() {
+  if (typeof window === 'undefined') return
+  const d = html()
+  const meander = document.querySelector('.hero > .meander')
+  const plate = document.querySelector('.hero-plate')
+  if (!meander) {
+    onScrollFrame(() => d.classList.toggle('scrolled', window.scrollY > 80))
+    return
+  }
+  // the cut line: the neck's row and its tongue band (a constant, so the cut never flickers as the
+  // tongues collapse)
+  const px = (name) => parseFloat(getComputedStyle(d).getPropertyValue(name)) || 0
+  onScrollFrame(() => {
+    const line = px('--neck-h') + px('--tongue-h')
+    const top = Math.min(meander.getBoundingClientRect().top, plate ? plate.getBoundingClientRect().top : Infinity)
+    d.classList.toggle('scrolled', top <= line)
+  })
 }
 
 export function initSun() {

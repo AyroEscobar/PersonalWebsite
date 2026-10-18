@@ -220,9 +220,17 @@
 /* ---------- phones and small tablets: the frieze on top, the plate under it ---------- */
 @media (max-width: 959.98px) {
   .nav,
-  .neck-tools,
-  .tongues {
+  .neck-tools {
     display: none;
+  }
+  /* the neck is clay on a phone too, with a smaller tongue band as its lower edge (the frieze passes under
+     it as the page scrolls, never under the wordmark) */
+  .tongues {
+    -webkit-mask-size: 18px 12px;
+    mask-size: 18px 12px;
+  }
+  body:has(.hero) .neck--fixed {
+    --hh: var(--frieze-h);
   }
   .neck-row {
     grid-template-columns: 1fr auto;
@@ -230,7 +238,8 @@
   .menu-btn {
     display: block;
   }
-  .neck.is-open {
+  .neck.is-open,
+  body:has(.hero) .neck--fixed.is-open {
     background: var(--ground);
   }
   .neck.is-open::after {

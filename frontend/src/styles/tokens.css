@@ -58,6 +58,7 @@
 
   /* layout */
   --neck-h: 68px;
+  --tongue-h: 20px; /* the tongue band under the neck while it sits on the clay */
   --mu: 5px; /* the meander unit: stroke = gap = one unit */
   --meander-h: calc(var(--mu) * 5 + 12px);
   --gutter: clamp(20px, 4vw, 64px);
@@ -103,6 +104,7 @@
 @media (max-width: 959.98px) {
   :root {
     --neck-h: 58px;
+    --tongue-h: 12px;
     --mu: 4px;
   }
 }
