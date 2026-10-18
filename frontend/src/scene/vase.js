@@ -23,10 +23,10 @@
 import * as THREE from 'three'
 import { NOISE_GLSL } from './noise.js'
 
-// The inks, sRGB, the same values as the palette in src/styles/tokens.css. The light body has a faint
-// semi-gloss (0.15): more and he reads rendered, not painted.
+// The inks, sRGB, the same values as the palette in src/styles/tokens.css. No sheen on the light body:
+// any gloss leaves grey satin highlights on the thigh, calf and forearm, and he reads rendered, not painted.
 export const INKS = {
-  light: { body: 0x17110d, line: 0xc47d45, shade: 0, gloss: 0.15, disk: 0xf4ead2, fleck: 0x3a2a20, contour: 0x2a1d15 },
+  light: { body: 0x17110d, line: 0xc47d45, shade: 0, gloss: 0, disk: 0xf4ead2, fleck: 0x3a2a20, contour: 0x2a1d15 },
   dark: { body: 0xc8773f, line: 0x141110, shade: 1, gloss: 0, disk: 0xcd844b, fleck: 0x8a4a26, contour: 0x141110 },
 }
 const col = (h) => new THREE.Color(h)
