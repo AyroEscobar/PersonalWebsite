@@ -8,6 +8,8 @@ License: Creative Commons Attribution 3.0 Unported (CC BY 3.0)
 Changes made for this site (tools/build-figure.mjs): the mesh was welded, scaled to 1.80 m,
 simplified with meshoptimizer, auto-rigged with 21 joints and skinned, quantized and
 meshopt-compressed into one GLB. The pose and the push cycle are solved at runtime on that
-rig (src/scene/figure.js). The material is this site's own (dark clearcoat with a neon edge).
+rig (src/scene/figure.js). The material is this site's own: since the classical revamp (Oct 2026) it is
+an unlit vase ink (src/scene/vase.js), black figure on the clay in the light theme and red figure on the
+black gloss in the dark one. The mesh, the rig and the solver are unchanged.
 
 Credit, as shown in the site footer: 3D figure: Male base by Артур Мигранов, CC BY 3.0.
