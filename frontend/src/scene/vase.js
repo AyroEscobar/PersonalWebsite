@@ -30,6 +30,10 @@ export const INKS = {
   dark: { body: 0xc8773f, line: 0x141110, shade: 1, gloss: 0, disk: 0xcd844b, fleck: 0x8a4a26, contour: 0x141110 },
 }
 const col = (h) => new THREE.Color(h)
+// the form line (the iso-line of the key light) is the painter's incision: at 0.42 it ran a loop round the
+// hip like a pair of shorts and seams down the thighs; at 0.72 only the strong turns draw (the shoulder,
+// the back, the knees), and the cut between overlapping limbs does the rest
+export const FORM = 0.72
 // where the worn flecks fall on the disk (object space, so they roll with it): picked by eye so the
 // poster frame reads as a worn stone, never as two eyes and a mouth
 export const FLECK_SEED = [4.2, 1.9, 7.7]
@@ -103,10 +107,10 @@ function uniforms({ ink, line, contour = -2, form = 0.42, crease = -7, lines = 1
   }
 }
 
-export function figureMaterial({ curv = false, inflate = 0, theme = 'light' } = {}) {
+export function figureMaterial({ curv = false, inflate = 0, theme = 'light', form = FORM } = {}) {
   const k = INKS[theme]
   const m = new THREE.MeshLambertMaterial({ color: 0xffffff })
-  const u = uniforms({ ink: k.body, line: k.line, gloss: k.gloss, shade: k.shade, inflate })
+  const u = uniforms({ ink: k.body, line: k.line, gloss: k.gloss, shade: k.shade, inflate, form })
   if (curv) m.defines = { USE_CURV: '' }
   common(m, u, 'vase-fig' + (curv ? 'c' : 'n'))
   m.userData.role = 'figure'
