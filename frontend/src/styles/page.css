@@ -61,7 +61,7 @@
 @media (min-width: 1100px) {
   .sec-inner {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-columns: 280px minmax(0, 1fr);
     column-gap: 56px;
     align-items: start;
   }
@@ -72,12 +72,18 @@
     margin-bottom: 0;
     padding-top: 2px;
   }
-  .sec-inner > .sec-title .num {
+  /* the numeral stands over the word, like an inscription; contact (no grid) follows suit */
+  .sec-inner > .sec-title .num,
+  .sec--contact .sec-title .num {
     flex-basis: 100%;
     margin-bottom: 12px;
   }
-  .sec-inner > .sec-title .num .ip {
+  .sec-inner > .sec-title .num .ip,
+  .sec--contact .sec-title .num .ip {
     display: none;
+  }
+  .sec--contact .sec-title {
+    flex-wrap: wrap;
   }
   .sec-inner > .sec-title::after {
     margin-left: 20px;
