@@ -114,6 +114,13 @@ html.rv.scene-live [data-band='contact']:not(.painted) .poster {
   opacity: 0;
 }
 
+/* ---------- the kiln: the page crossfades while the scene fires the vase (src/lib/mode.js) ---------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 400ms;
+  animation-timing-function: linear;
+}
+
 /* ---------- finished, whatever happens: reduced motion and paper ---------- */
 @media (prefers-reduced-motion: reduce) {
   html.rv .turn,

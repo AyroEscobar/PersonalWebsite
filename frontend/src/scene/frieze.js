@@ -31,7 +31,7 @@
 */
 import * as THREE from 'three'
 import { loadFigure, makeFigure } from './figure.js'
-import { figureMaterial, boulderMaterial, hullOutline, setInks, INKS, SKETCH } from './vase.js'
+import { figureMaterial, boulderMaterial, hullOutline, setInks, fireInks, setFire, INKS, SKETCH } from './vase.js'
 import { addCurvature } from './curvature.js'
 import { addParts, headUniforms } from './head.js'
 import { rockShape } from './rock.js'
@@ -77,6 +77,7 @@ const WRAP = 240
 // scratch in, the disk is filled with added white and its flecks worn in, then he moves
 const PAINT = { sketch: [0, 0.3], slip: [0.3, 0.9], scratch: [0.9, 1.3], white: [1.3, 1.6], fleck: [1.6, 1.75], move: [1.75, 2.25] }
 const PAINT_AT = 0.6
+const KILN_S = 0.6 // the kiln, --dur-kiln
 // the loop at Contact, once a visit, when the band has been 90% in view for a second after the painting:
 // his push stalls (0.8 s), the rock gets away at 5/7 g sin 14 degrees (1.70 m/s2, a rolling ball) and rolls
 // back past him and out of the picture; he straightens and watches it go (0.9 s from the get-away), turns
@@ -137,6 +138,8 @@ async function build({ theme, figureUrl = FIGURE_URL }) {
   const hu = headUniforms(objScale)
   fig.userData.u.uHair.value.copy(hu.uHair); fig.userData.u.uEye.value.copy(hu.uEye); fig.userData.u.uBeard.value.copy(hu.uBeard)
   const disk = boulderMaterial({ theme })
+  // the kiln's front climbs the disk from its foot (object space, -R to R)
+  disk.userData.u.uFireH.value.set(R, 1 / (2 * R))
   const rs = rockShape('polished', R)
   const f = makeFigure({ man, material: fig, boulderMaterial: disk, boulderGeometry: rs.geometry, R, x0: X0, sole: SOLE, surface: rs.surface, ...GAIT, ...POSE })
   f.glints.forEach((g) => { g.visible = false })
@@ -782,6 +785,27 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   }
   function setDpr(v) { r.setPixelRatio(v); measureHost(); stats.dpr = v }
 
+  // the theme switch as a kiln (600 ms, the site's in-out curve): a heat front rises through the frieze and
+  // up the pot and the inks cross to the other vase's table behind it; the hulls and the grit change at the
+  // midpoint. Uniform writes only: the programs never change
+  let kiln = null
+  function finishTheme(th) {
+    kiln = null
+    setInks(mats, th); dust.setInk(INKS[th].body); lines.setInk(INKS[th].body)
+    if (pot) { pot.fireAt(th, 1); pot.setTheme(th) }
+    potDirty = true
+    if (!host || still() || !stats.frames) render(0, true)
+  }
+  function kilnStep() {
+    if (!kiln) return
+    const k = clamp((t - kiln.t0) / KILN_S, 0, 1), e = easeInOut(k)
+    setFire(mats, e)
+    pot?.fireAt(kiln.to, e)
+    if (!kiln.half && k >= 0.5) { kiln.half = true; diskHull.material.color.set(INKS[kiln.to].contour); dust.setInk(INKS[kiln.to].body); lines.setInk(INKS[kiln.to].body) }
+    potDirty = true
+    if (k >= 1) finishTheme(kiln.to)
+  }
+
   function frame(now) {
     let dt = Math.min(0.05, (now - last) / 1000)
     last = now
@@ -791,6 +815,9 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (nb !== host || leaving) requestHost(nb)
     t += dt; tau += dt * rate
     if (t > WRAP) { t = tau = T_POSTER; shiftBase = 0; camShift = 0; catchStart = -1; nextCatch = t + catchEvery; dust.clear() }
+    // nothing on screen to fire: the kiln finishes at once
+    if (kiln && !host) finishTheme(kiln.to)
+    kilnStep()
     const t0 = performance.now()
     const drew = render(dt)
     const ms = performance.now() - t0
@@ -809,9 +836,12 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     onReady?.()
   }
   // the loop runs while any band is near the screen (it picks the host itself each frame); none: it stops
+  // never before every program is compiled and the hooks are in (an early observer callback used to start
+  // the loop mid-compile: a stalled first frame)
   const near = new Set()
+  let mounted = false
   function sync() {
-    const run = docVisible && !userPaused && fixedT === null && !lost && (!!host || near.size > 0)
+    const run = mounted && docVisible && !userPaused && fixedT === null && !lost && (!!host || near.size > 0)
     stats.paused = !run
     last = performance.now()
     lastY = scrollY
@@ -928,6 +958,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     poster: (o) => poster(o),
   })
 
+  mounted = true
   if (fixedT !== null) { render(0, true); live(); actWhenThere() } else sync()
 
   Object.assign(me, {
@@ -937,9 +968,14 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     setTheme: (th) => {
       if (th === curTheme) return
       curTheme = th
-      setInks(mats, th); dust.setInk(INKS[th].body); lines.setInk(INKS[th].body); pot?.setTheme(th)
-      potDirty = true
-      if (!host || still() || !stats.frames) render(0, true)
+      // the kiln: animated while the scene runs (never during the painting); otherwise the instant swap
+      if (host && !still() && stats.frames && !lost && !(host.kind === 'contact' && !painted) && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        kiln = { to: th, t0: t, half: false }
+        fireInks(mats, th)
+        potDirty = true
+        return
+      }
+      finishTheme(th)
     },
     paused: () => userPaused,
     remeasure: () => { measureHost(); if (still()) render(0, true) },

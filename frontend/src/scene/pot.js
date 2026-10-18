@@ -12,6 +12,7 @@
     pot.frame(cssW, cssH)          fit the camera to the host box
     pot.setSun(k)                  the late sun: k 0 is 35 degrees at Work, 1 the low sun (12) at Stack
     pot.setTheme(theme)            black-figure by day, red-figure by night (uniform writes)
+    pot.fireAt(theme, k)           the kiln: a heat front climbs from the foot, the technique turns behind it
 
   The zones are by height on the profile, so a theme switch or the sun is a uniform write, never a
   recompile. Every ornament is procedural: the tongues, the meander (the site's own 6 x 5 key) and the
@@ -57,7 +58,7 @@ const FRAG = /* glsl */ `
   uniform sampler2D uRT; uniform float uRTOn;
   uniform vec4 uSector; // centre angle, width, y0, y1
   uniform vec3 uSun, uSunCol, uSky, uGround, uClay, uGloss, uLit, uSheenCol;
-  uniform float uDark, uSheen, uPaint;
+  uniform float uDark, uSheen, uPaint, uFire, uDark2;
   varying vec3 vPos; varying vec3 vN; varying vec3 vW; varying float vHandle;
   ${NOISE_GLSL}
   // the site's meander: one 6 x 5 cell tile, a bit per filled cell (rows top to bottom)
@@ -122,7 +123,15 @@ const FRAG = /* glsl */ `
     orn += tz;
     orn = clamp(orn, 0.0, 1.0) * (1.0 - vHandle);
     ornInk = clamp(ornInk, 0.0, 1.0);
+    // the kiln: a heat front climbs the pot from the foot and the technique turns behind it
     float dk = uDark;
+    float glow = 0.0;
+    if (uFire > 0.0) {
+      float fh = y / ${POT_H.toFixed(3)} + 0.05 * (fbm3l(vPos * 5.0) - 0.5);
+      float fm = 1.0 - smoothstep(uFire * 1.2 - 0.1 - 0.04, uFire * 1.2 - 0.1 + 0.04, fh);
+      dk = mix(uDark, uDark2, fm);
+      glow = fm * (1.0 - fm) * 4.0;
+    }
     // black-figure: ornaments in gloss on reserved clay; red-figure: reserved ornaments on gloss
     float ground = dk;
     float ink = 1.0 - dk;
@@ -175,6 +184,7 @@ const FRAG = /* glsl */ `
     // the lip and the handle tops are worn back toward the clay
     float wear = smoothstep(2.905, 2.93, y) * step(0.42, r) * (1.0 - vHandle) + vHandle * smoothstep(0.75, 0.95, N.y) * 0.5;
     col = mix(col, uClay * (uSunCol * diff + amb), wear * 0.25 * gloss);
+    col = mix(col, uLit * 1.3, glow * 0.5);
     gl_FragColor = linearToOutputTexel(vec4(col, 1.0));
   }
 `
@@ -237,7 +247,7 @@ export function makePot({ tier = 'full', theme = 'light' } = {}) {
     uSun: { value: new THREE.Vector3(0.55, 0.57, 0.6) }, uSunCol: { value: lin(0xffe7c2) },
     uSky: { value: lin(0x6b5a4a) }, uGround: { value: lin(0x4a3324) },
     uClay: { value: lin(0xc47d45) }, uGloss: { value: lin(0x141110) }, uLit: { value: lin(0xe09249) }, uSheenCol: { value: lin(0xffe2b8) },
-    uDark: { value: 0 }, uSheen: { value: 1 },
+    uDark: { value: 0 }, uSheen: { value: 1 }, uFire: { value: 0 }, uDark2: { value: 0 },
   }
   const mat = new THREE.ShaderMaterial({ uniforms: u, vertexShader: VERT, fragmentShader: FRAG, defines: tier === 'lite' ? { LITE: '' } : {} })
   const mesh = new THREE.Mesh(geo, mat)
@@ -276,6 +286,21 @@ export function makePot({ tier = 'full', theme = 'light' } = {}) {
     setSun(k)
   }
   setTheme(theme)
+  // the kiln: from the current theme to t over k 0..1 (the light lerps; the technique turns behind the front)
+  let fireFrom = null
+  const tmpA = new THREE.Color(), tmpB = new THREE.Color()
+  function fireAt(t, kk) {
+    if (fireFrom === null) fireFrom = th
+    const A = LIGHT[fireFrom], B = LIGHT[t]
+    u.uDark.value = fireFrom === 'dark' ? 1 : 0
+    u.uDark2.value = t === 'dark' ? 1 : 0
+    u.uFire.value = kk
+    const m = THREE.MathUtils.smoothstep(kk, 0.2, 0.9)
+    u.uSky.value.copy(tmpA.set(lin(A.sky))).lerp(tmpB.set(lin(B.sky)), m)
+    u.uGround.value.copy(tmpA.set(lin(A.ground))).lerp(tmpB.set(lin(B.ground)), m)
+    u.uSheen.value = THREE.MathUtils.lerp(A.sheen, B.sheen, m)
+    if (kk >= 1) { fireFrom = null; u.uFire.value = 0; setTheme(t) }
+  }
   // fit: the pot (and its shadow) fills the box's height, a little above centre, seen from 8 degrees up
   function frame(cssW, cssH) {
     cam.aspect = cssW / cssH
@@ -291,5 +316,5 @@ export function makePot({ tier = 'full', theme = 'light' } = {}) {
     cam.updateProjectionMatrix()
   }
   function dispose() { geo.dispose(); mat.dispose(); shadow.geometry.dispose(); shadow.material.dispose(); rt.dispose() }
-  return { scene, cam, group, mesh, shadow, rt, u, win: WIN, setSun, setTheme, frame, dispose, sector: SECTOR }
+  return { scene, cam, group, mesh, shadow, rt, u, win: WIN, setSun, setTheme, fireAt, frame, dispose, sector: SECTOR }
 }

@@ -44,6 +44,14 @@ export default function Neck({ active, open: forcedOpen, scrolled = false, fixed
   }, [open])
 
   const close = kit ? undefined : () => setOpen(false)
+  // the theme from the sheet: the sheet closes (220 ms, focus back on the menu button), then the vase is
+  // fired, so the switch happens on the painting, not behind the sheet; at once when nothing moves
+  const closeThenFire = (flip) => {
+    setOpen(false)
+    btn.current?.focus()
+    if (document.documentElement.dataset.tier === 'still') flip()
+    else setTimeout(flip, 240)
+  }
   const tab = kit ? -1 : undefined
   return (
     <header className={['neck', fixed && 'neck--fixed', isOpen && 'is-open', scrolled && 'is-scrolled', className].filter(Boolean).join(' ')}>
@@ -91,7 +99,7 @@ export default function Neck({ active, open: forcedOpen, scrolled = false, fixed
           {HERO.coffee.label}
         </Button>
         <div className="sheet-tools">
-          <ThemeSwitch pressed={kit ? false : undefined} />
+          <ThemeSwitch pressed={kit ? false : undefined} before={kit ? undefined : closeThenFire} />
           <QuietSwitch pressed={kit ? false : undefined} />
         </div>
       </div>

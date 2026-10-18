@@ -8,17 +8,20 @@ import { useHydrated } from '../lib/hydrated.js'
   true when the dark theme (red-figure) is on, and its name is "dark theme". The underline follows
   html[data-theme] in CSS, so it is right before hydration too. A switch writes data-theme, ae.theme
   and the theme-color meta, swaps the posters (CSS) and the scene's inks (a uniform write, no
-  recompile), and is announced. `pressed` forces a look for the kit (inert).
+  recompile; while the scene runs it is a kiln, a heat front through the painting), and is announced.
+  `pressed` forces a look for the kit (inert). `before(flip)` lets the phone's menu sheet close first and
+  then flip, so the kiln is seen happening to the painting, not behind the sheet.
 */
-export default function ThemeSwitch({ pressed, className = '' }) {
+export default function ThemeSwitch({ pressed, className = '', before }) {
   const theme = useTheme()
   const hydrated = useHydrated()
   const kit = pressed !== undefined
   const dark = kit ? !!pressed : theme === 'dark'
-  const onClick = () => {
+  const flip = () => {
     const next = toggleTheme()
     announce(next === 'dark' ? CHROME.themeAnnounceDark.text : CHROME.themeAnnounceLight.text)
   }
+  const onClick = () => (before ? before(flip) : flip())
   return (
     <button
       type="button"

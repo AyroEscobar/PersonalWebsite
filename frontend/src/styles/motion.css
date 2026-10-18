@@ -65,6 +65,34 @@ body:has(.hero) .neck--fixed .tongues {
   }
 }
 
+/* the menu sheet slides down from the neck (220 ms) and its rows arrive 30 ms apart, opacity only */
+@media (max-width: 959.98px) {
+  .sheet:not([hidden]) {
+    transition: transform var(--dur-sheet) var(--ease-out), opacity var(--dur-sheet) linear;
+  }
+  .sheet-nav li {
+    transition: opacity var(--dur-sheet) linear;
+  }
+  .sheet-nav li:nth-child(2) {
+    transition-delay: 30ms;
+  }
+  .sheet-nav li:nth-child(3) {
+    transition-delay: 60ms;
+  }
+  .sheet-nav li:nth-child(4) {
+    transition-delay: 90ms;
+  }
+  @starting-style {
+    .sheet:not([hidden]) {
+      transform: translateY(-12px);
+      opacity: 0;
+    }
+    .sheet:not([hidden]) .sheet-nav li {
+      opacity: 0;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

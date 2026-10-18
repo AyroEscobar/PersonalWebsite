@@ -19,6 +19,7 @@
                                            painter's incision shows the clay of the pot. Over empty clay
                                            it changes nothing, so there is no halo.
     setInks(mats, theme)                   switch black-figure and red-figure without a recompile
+    fireInks(mats, theme), setFire(mats, k)   the kiln: the other theme's inks behind a heat front (0..1)
     paint uniforms (uPaintOn, uPaint, uSketch, uScratch, uPaintY)   the painting at Contact, a front that
                                            rises through him and the disk (frieze.js drives it)
 
@@ -92,6 +93,7 @@ function common(m, u, key, vertexExtra = '') {
       .replace('#include <common>', `#include <common>
         uniform vec3 uInk, uLine, uKeyDir, uFleck, uFleckSeed; uniform float uHeadY; uniform float uContour, uForm, uCrease, uLines, uGloss, uWidth, uShade, uSpeck;
         uniform float uPaintOn, uPaint, uSketch, uScratch; uniform vec3 uSketchCol; uniform vec2 uPaintY;
+        uniform float uFire, uShade2; uniform vec3 uInk2, uLine2, uFleck2, uFireGlow; uniform vec2 uFireH;
         varying float vCurv; varying vec3 vMP; varying vec3 vWP;
         #ifdef USE_PART
         varying vec2 vPart; uniform vec4 uHair, uEye, uBeard; uniform float uEyeOn;
@@ -125,9 +127,19 @@ function common(m, u, key, vertexExtra = '') {
         #else
         float line = clamp(max(l1, max(l2, l3) * (1.0 - head)), 0.0, 1.0) * uLines;
         #endif
-        vec3 ink = uInk;
+        // the kiln (a theme switch): a heat front rises from the ground line through him and the disk, and
+        // behind it every ink crosses to the other vase's table, with a thin glow at the front. A uniform
+        // write per frame, no recompile; at rest uFire is 0 and nothing of this runs
+        float fire = 0.0, glow = 0.0;
+        if (uFire > 0.0) {
+          float fh = (vMP.y + uFireH.x) * uFireH.y + 0.04 * (fbm3l(vMP * 7.0) - 0.5);
+          fire = 1.0 - smoothstep(uFire * 1.2 - 0.1 - 0.05, uFire * 1.2 - 0.1 + 0.05, fh);
+          glow = fire * (1.0 - fire) * 4.0;
+        }
+        vec3 ink = mix(uInk, uInk2, fire);
+        vec3 lineInk = mix(uLine, uLine2, fire), fleckInk = mix(uFleck, uFleck2, fire);
         // red-figure: the reserved clay keeps a faint wash of diluted glaze on the shadow side
-        ink *= mix(1.0, 0.84 + 0.16 * smoothstep(-0.2, 0.6, ndl), uShade);
+        ink *= mix(1.0, 0.84 + 0.16 * smoothstep(-0.2, 0.6, ndl), mix(uShade, uShade2, fire));
         // the black gloss fires to a semi-gloss: a soft sheen where the slip faces the key
         vec3 H = normalize(normalize(uKeyDir) + V);
         ink += vec3(0.20, 0.17, 0.14) * pow(max(dot(N, H), 0.0), 24.0) * uGloss;
@@ -137,10 +149,11 @@ function common(m, u, key, vertexExtra = '') {
           vec3 fp = vMP + uFleckSeed;
           float sp = smoothstep(0.9, 0.91, vnoise3(fp * 6.0)) + smoothstep(0.935, 0.945, vnoise3(fp * 19.0 + 3.0));
           float wear = smoothstep(0.55, 0.8, vnoise3(fp * 3.1 + 11.0)) * 0.05;
-          ink = mix(ink, uFleck, clamp(sp, 0.0, 1.0) * uSpeck);
-          ink = mix(ink, uFleck, wear * uSpeck);
+          ink = mix(ink, fleckInk, clamp(sp, 0.0, 1.0) * uSpeck);
+          ink = mix(ink, fleckInk, wear * uSpeck);
         }
-        vec4 outc = vec4(mix(ink, uLine, line), 1.0);
+        ink = mix(ink, uFireGlow, glow * 0.6);
+        vec4 outc = vec4(mix(ink, lineInk, line), 1.0);
         // the painting at Contact: bare clay with the painter's sketch, then the slip floods up from his feet
         // with a ragged brush edge, then the incisions scratch in (the disk fills from its foot the same way).
         // Unpainted pixels are transparent, premultiplied: the page's lit clay shows through them
@@ -148,7 +161,7 @@ function common(m, u, key, vertexExtra = '') {
           float h = uPaintY.y > 0.0 ? (vWP.y - uPaintY.x) / uPaintY.y : (vMP.y + 1.0) * 0.5;
           float pm = 1.0 - smoothstep(uPaint - 0.04, uPaint + 0.04, h + 0.06 * (fbm3l(vMP * 9.0) - 0.5));
           float sc = step(vnoise3(vMP * 13.0 + 2.0), uScratch);
-          vec3 painted = mix(ink, uLine, line * sc);
+          vec3 painted = mix(ink, lineInk, line * sc);
           float sk = aaLine(ndv, 0.06, uWidth * 1.4) * uSketch * (1.0 - pm);
           float a = max(pm, sk);
           vec3 c = mix(uSketchCol, painted, pm / max(a, 1e-4));
@@ -168,6 +181,7 @@ function uniforms({ ink, line, contour = -2, form = 0.42, crease = -7, lines = 1
     uInflate: { value: inflate }, uHeadY: { value: 1e9 }, uFleckSeed: { value: new THREE.Vector3(...FLECK_SEED) },
     uHair: { value: new THREE.Vector4(9, 0, 0, 0) }, uEye: { value: new THREE.Vector4(0, 0, 1, 1) }, uBeard: { value: new THREE.Vector4() }, uEyeOn: { value: 1 },
     uPaintOn: { value: 0 }, uPaint: { value: 2 }, uSketch: { value: 0 }, uScratch: { value: 1 }, uSketchCol: { value: col(0x7f5636) }, uPaintY: { value: new THREE.Vector2(0, 0) },
+    uFire: { value: 0 }, uShade2: { value: shade }, uInk2: { value: col(ink) }, uLine2: { value: col(line) }, uFleck2: { value: col(fleck) }, uFireGlow: { value: col(0xe09249) }, uFireH: { value: new THREE.Vector2(1, 0.5) },
   }
 }
 
@@ -264,5 +278,17 @@ export function setInks({ fig, disk, diskHull }, theme) {
   f.uInk.value.set(k.body); f.uLine.value.set(k.line); f.uShade.value = k.shade; f.uGloss.value = k.gloss
   const d = disk.userData.u
   d.uInk.value.set(k.disk); d.uLine.value.set(k.contour); d.uFleck.value.set(k.fleck)
+  f.uFire.value = d.uFire.value = 0
   diskHull.material.color.set(k.contour)
+}
+// the kiln: the target theme's inks go in the second set; the caller moves uFire from 0 to 1 (setFire) and
+// calls setInks at the end
+export function fireInks({ fig, disk }, theme) {
+  const k = INKS[theme] || INKS.light
+  const f = fig.userData.u, d = disk.userData.u
+  f.uInk2.value.set(k.body); f.uLine2.value.set(k.line); f.uShade2.value = k.shade
+  d.uInk2.value.set(k.disk); d.uLine2.value.set(k.contour); d.uFleck2.value.set(k.fleck); d.uShade2.value = 0
+}
+export function setFire({ fig, disk }, v) {
+  fig.userData.u.uFire.value = disk.userData.u.uFire.value = v
 }
