@@ -532,3 +532,96 @@
     min-width: 44px;
   }
 }
+
+/* ---------- the font swap moves nothing. Marcellus SC (the label face) is not preloaded and its metric
+   fallback sets other widths, so the label pieces on the first screen take their final widths, measured
+   in Marcellus SC, from the first frame: the nav words, the neck's switches and its coffee chat, and the
+   hero's two buttons (on a phone their flex basis) ---------- */
+@media (min-width: 960px) {
+  .neck .nav li {
+    flex: none;
+    white-space: nowrap;
+  }
+  .neck .nav li:nth-child(1) {
+    inline-size: 41.61px;
+  }
+  .neck .nav li:nth-child(2) {
+    inline-size: 108.89px;
+  }
+  .neck .nav li:nth-child(3) {
+    inline-size: 71.69px;
+  }
+  .neck .nav li:nth-child(4) {
+    inline-size: 93.86px;
+  }
+  .neck-tools .tog--theme {
+    inline-size: 96.11px;
+    white-space: nowrap;
+  }
+  .neck-tools .quiet {
+    inline-size: 45.6px;
+    white-space: nowrap;
+  }
+  .neck-tools .btn--sm {
+    inline-size: 171.38px;
+    padding-inline: 0;
+  }
+  #top .acts .btn--fill {
+    inline-size: 207.58px;
+    padding-inline: 0;
+  }
+  #top .acts .btn--line {
+    inline-size: 121.47px;
+    padding-inline: 0;
+  }
+}
+/* the tablet's interpuncts are 0.45em a side */
+@media (min-width: 960px) and (max-width: 1180px) {
+  .neck .nav li:nth-child(2) {
+    inline-size: 99.89px;
+  }
+  .neck .nav li:nth-child(3) {
+    inline-size: 62.69px;
+  }
+  .neck .nav li:nth-child(4) {
+    inline-size: 84.86px;
+  }
+}
+@media (max-width: 959.98px) {
+  /* right aligned, so a change of width would move them: the menu button ("menu" and "close" both fit) and
+     the theme line */
+  .neck .menu-btn {
+    inline-size: 49.5px;
+    white-space: nowrap;
+  }
+  .hero .theme-line {
+    inline-size: 143.1px;
+    white-space: nowrap;
+    text-align: right;
+  }
+  #top .acts .btn {
+    min-inline-size: 0;
+  }
+  #top .acts .btn--fill {
+    flex-basis: 207.58px;
+  }
+  #top .acts .btn--line {
+    flex-basis: 121.47px;
+  }
+}
+@media (max-width: 400px) {
+  #top .acts .btn--fill {
+    flex-basis: 191.58px;
+  }
+  #top .acts .btn--line {
+    flex-basis: 105.47px;
+  }
+}
+@media (max-width: 340px) {
+  #top .acts .btn--fill {
+    flex-basis: 195.58px;
+  }
+  #top .acts .btn--line {
+    flex-basis: 109.47px;
+  }
+}

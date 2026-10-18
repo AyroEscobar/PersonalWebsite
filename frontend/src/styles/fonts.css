@@ -63,10 +63,12 @@
   line-gap-override: 0%;
 }
 
+/* Georgia's small caps set 5.75% narrower than Marcellus SC's at the same size: matched here, so the labels
+   on the first screen keep their width when the face arrives (it is not preloaded) */
 @font-face {
   font-family: 'Marcellus Fallback';
   src: local('Georgia');
-  size-adjust: 102.4%;
+  size-adjust: 108.3%;
   ascent-override: 95.2%;
   descent-override: 26.9%;
   line-gap-override: 0%;
