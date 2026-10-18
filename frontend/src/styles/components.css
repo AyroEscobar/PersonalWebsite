@@ -748,9 +748,10 @@ html.scrolled .neck--fixed .tongues,
   .meander::before {
     display: none !important;
   }
+  /* !important: the phone layout drops the plates' border (page.css), forced colours puts it back */
   .plate,
   .card {
-    border: 2px solid CanvasText;
+    border: 2px solid CanvasText !important;
   }
   .btn {
     border: 1px solid ButtonText;
