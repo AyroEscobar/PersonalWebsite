@@ -6,7 +6,7 @@ import { headingId, sectionById } from '../content/sections.js'
   (the hero is #top, labelled by its h1). The prerender, the scroll anchors and QA rely on it.
 
   <Section id> lays the belly out: a .wrap with the title and the body. From 1100 px up it is a two
-  column grid, the title in a 300 px column that sticks under the neck (the numeral above it), the
+  column grid, the title in a 280 px column that sticks under the neck (the numeral inline, I · WORK), the
   content in the other; under 1100 the title sits above the content. `grid={false}` keeps the title
   above at every width (Contact, whose frieze band is its own architecture).
 

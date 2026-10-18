@@ -1,7 +1,7 @@
 /*
   The page: the pot from top to foot. The hero is the shoulder frieze (the plate at the left, the room
   to its right, the meander under them); the sections sit on the slip of the belly, in a two column
-  grid from 1100 px (the numeral and title in a sticky 300 px column); contact has the plate over the
+  grid from 1100 px (the numeral and title in a sticky 280 px column); contact has the plate over the
   second frieze band; the foot closes it. Under 960 px the frieze is the top of the page and the plate
   runs full width under it.
 */
@@ -65,28 +65,21 @@
     column-gap: 56px;
     align-items: start;
   }
+  /* the brief's inline numeral at every width (I · WORK), as on the phone and in the menu: a numeral
+     alone over its word read as a stray red mark */
   .sec-inner > .sec-title {
     position: sticky;
     top: calc(var(--neck-h) + 40px);
-    flex-wrap: wrap;
     margin-bottom: 0;
     padding-top: 2px;
   }
-  /* the numeral stands over the word, like an inscription; contact (no grid) follows suit */
-  .sec-inner > .sec-title .num,
-  .sec--contact .sec-title .num {
-    flex-basis: 100%;
-    margin-bottom: 12px;
-  }
-  .sec-inner > .sec-title .num .ip,
-  .sec--contact .sec-title .num .ip {
-    display: none;
-  }
-  .sec--contact .sec-title {
-    flex-wrap: wrap;
+  /* "II · EXPERIENCE" at 28 px is 252 px of the 280: the hairline gives way first, never the numeral */
+  .sec-inner > .sec-title .num {
+    flex: none;
   }
   .sec-inner > .sec-title::after {
-    margin-left: 20px;
+    margin-left: 14px;
+    min-width: 12px;
   }
 }
 
