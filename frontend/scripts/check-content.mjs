@@ -147,9 +147,9 @@ export async function checkContent({ quiet = false } = {}) {
     }
   }
 
-  // "Onto what's next." exactly once in the content.
-  const closers = visible.filter((v) => v.text.includes("Onto what's next."))
-  if (closers.length !== 1) err(`"Onto what's next." must appear exactly once in content; found ${closers.length}`)
+  // “Onto what’s next.” exactly once in the content (with the curly apostrophe: EB Garamond's straight one is a tick)
+  const closers = visible.filter((v) => v.text.includes('Onto what’s next.'))
+  if (closers.length !== 1) err(`"Onto what’s next." must appear exactly once in content; found ${closers.length}`)
 
   // Banned words in content strings.
   for (const v of visible) {
@@ -220,7 +220,7 @@ export async function checkContent({ quiet = false } = {}) {
     // 8: the age comes from one constant (Ayro asked for it on the hero, Thu Oct 15, 2026), so a
     // birthday is a one-line change; a spelled-out age anywhere else in src goes stale unseen
     if (r.startsWith('src/') && r !== 'src/content/constants.js') {
-      const m = text.match(/\btwenty\b|\b\d{2} years\b|\b\d{2}[ -]year[ -]old\b|\bI'?m \d{2}\b|\bI am \d{2}\b/i)
+      const m = text.match(/\btwenty\b|\b\d{2} years\b|\b\d{2}[ -]year[ -]old\b|\bI['’]?m \d{2}\b|\bI am \d{2}\b/i)
       if (m) err(`${r}:${where(text, m.index)}: an age ("${m[0]}"); read it from AGE in src/content/constants.js`)
     }
 

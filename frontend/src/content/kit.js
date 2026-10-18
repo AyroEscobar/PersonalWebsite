@@ -76,7 +76,7 @@ export const KIT = {
     tongues: ui('kit-orn-tongues', 'the tongue band, under the neck'),
     rays: ui('kit-orn-rays', 'the ray band, the top edge of the lower frieze'),
     numerals: ui('kit-orn-numerals', 'section numerals'),
-    ground: ui('kit-orn-ground', "the ground line, the painter's double rule"),
+    ground: ui('kit-orn-ground', 'the ground line, the painter’s double rule'),
   },
   stage: {
     note: ui('kit-stage-note', 'the poster paints first; the canvas fades in over it on its first frame'),

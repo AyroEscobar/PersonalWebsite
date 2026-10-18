@@ -3,7 +3,7 @@ import { COFFEE, EMAIL, GITHUB, INSTAGRAM, LINKEDIN } from './constants.js'
 
 /*
   Contact. The paragraph, then the coffee chat first, then the email row and three channels.
-  "Onto what's next." appears exactly once on the whole site (check-content enforces it).
+  “Onto what’s next.” appears exactly once on the whole site (check-content enforces it).
 */
 
 export const SIGNAL = {
@@ -25,5 +25,5 @@ export const SIGNAL = {
     { id: 'channel-linkedin', label: 'LinkedIn', href: LINKEDIN, facts: ['ln-linkedin'] },
     { id: 'channel-instagram', label: 'Instagram', href: INSTAGRAM, facts: ['ln-instagram'] },
   ],
-  closer: item('signal-closer', "Onto what's next.", ['voice-post-closers']),
+  closer: item('signal-closer', 'Onto what’s next.', ['voice-post-closers']),
 }

@@ -42,7 +42,7 @@ export const EXPERIENCE = [
     org: 'Major League Hacking',
     details: 'Coach',
     dates: 'June 2025 to present',
-    note: 'Spoke at Hackcon 2026, "Planning for Chaos".',
+    note: 'Spoke at Hackcon 2026, “Planning for Chaos”.',
     facts: ['exp-mlh-coach', 'exp-mlh-hackcon'],
   },
   {

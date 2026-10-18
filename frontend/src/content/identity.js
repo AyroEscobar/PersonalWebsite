@@ -13,14 +13,14 @@ import { AGE, COFFEE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
 export const HERO = {
   sceneAlt: ui('scene-alt', 'A black-figure silhouette pushing a white boulder along the frieze of a Greek vase.'),
   name: item('hero-name', 'Ayro Escobar', ['identity-name']),
-  intro: item('hero-intro', `I'm ${AGE} and I study computer science at UT\u00a0Dallas.`, ['identity-age', 'identity-student']),
+  intro: item('hero-intro', `I’m ${AGE} and I study computer science at UT\u00a0Dallas.`, ['identity-age', 'identity-student']),
   roles: [
     item('hero-role-esvo', 'Founder of Esvo Technologies', ['ven-esvo']),
     item('hero-role-viaere', 'Co-founder and Founding Engineer at Viaere', ['ven-viaere', 'ven-viaere-bio']),
     item('hero-role-internships', 'Internships at JPMorgan\u00a0Chase and RBC\u00a0Capital\u00a0Markets', ['exp-jpm-2026', 'exp-rbc']),
   ],
   built: {
-    label: ui('hero-built-label', "A few things I've built"),
+    label: ui('hero-built-label', 'A few things I’ve built'),
     items: [
       item('hero-built-800k', 'Software that saved a company more than $800K in a single month', ['built-800k'], { strong: '$800K' }),
       item('hero-built-160h', 'A store system that saves the team 160+\u00a0hours of work every week', ['built-store-160h'], { strong: '160+\u00a0hours' }),

@@ -110,7 +110,7 @@ export async function staticScan(ROOT) {
 
   // Copy invariants on the prerendered page.
   const pageText = index.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ' ').replace(/<[^>]+>/g, ' ')
-  const closers = (pageText.match(/Onto what(&#x27;|')s next\./g) || []).length
+  const closers = (pageText.match(/Onto what(&#x27;|'|’)s next\./g) || []).length
   push('closer-once', closers === 1 ? 'pass' : 'fail', `"Onto what's next." appears ${closers} time(s)`)
   push('competed', /\b(won(?!['’]t)|placed|winner|finalist)\b/i.test(pageText) ? 'fail' : 'pass', 'no award or placement words')
   return out
