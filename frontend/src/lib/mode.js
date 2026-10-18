@@ -10,7 +10,7 @@ import { detectTier, readTier, writeTier } from './tier.js'
 
     readHtmlMode()     { theme, quiet, motion, tier } from <html data-*>
     setTheme(theme)    'light' (black-figure) or 'dark' (red-figure): html[data-theme], ae.theme, the
-                       unqualified theme-color meta (the boot script writes it first in <head>); the
+                       first theme-color meta (the boot script writes it first in <head>); the
                        scene follows the store (src/lib/frieze-host.js)
     setQuiet(on)       the quiet switch: the poster instead of the live scene (html[data-transparency]),
                        persisted per viewer
@@ -22,7 +22,7 @@ import { detectTier, readTier, writeTier } from './tier.js'
 export function readHtmlMode() {
   if (typeof document === 'undefined') return { theme: 'light', quiet: false, motion: 'on', tier: 'full' }
   const d = document.documentElement.dataset
-  const theme = d.theme === 'dark' || d.theme === 'light' ? d.theme : window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  const theme = d.theme === 'dark' ? 'dark' : 'light'
   return {
     theme,
     quiet: d.transparency === 'reduced',

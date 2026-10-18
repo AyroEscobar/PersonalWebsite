@@ -15,8 +15,9 @@
 
   theme
     served       ?theme=light and ?theme=dark render, the boot script sets data-theme before the first
-                 stylesheet, the theme-color meta matches
-    system       prefers-color-scheme: dark and no stored choice serves dark
+                 stylesheet, the theme-color meta matches; the served HTML holds one theme-color, the clay
+    default      no stored choice serves the light vase (the black-figure picture), whatever the system's
+                 scheme: prefers-color-scheme dark and light both serve light
     toggle       the switch flips the theme without a reload, the scene's program count does not
                  change (a uniform write, no recompile), the posters and the meta follow, it is announced
     reload       a stored theme survives a reload with no flash (data-theme is there before CSS)
@@ -246,8 +247,8 @@ export async function sceneChecks({ cdp, url, check, sleep, scratch }) {
     const boot = html.indexOf('<script>')
     const firstCss = Math.min(...[html.indexOf('<style'), html.indexOf('rel="stylesheet"')].filter((i) => i >= 0))
     check('theme', 'data-theme set before the first stylesheet', boot >= 0 && boot < firstCss && /data-theme/.test(html.slice(boot, firstCss)) ? 'pass' : 'fail', `boot script at ${boot}, first stylesheet at ${firstCss}`)
-    const metas = [...html.matchAll(/<meta name="theme-color" content="(#[0-9A-Fa-f]{6})" media="\(prefers-color-scheme: (light|dark)\)"/g)].map((m) => `${m[2]} ${m[1]}`)
-    check('theme', 'two theme-color metas', metas.join(', ') === 'light #C47D45, dark #141110' ? 'pass' : 'fail', metas.join(', ') || 'none')
+    const metas = [...html.matchAll(/<meta name="theme-color"[^>]*>/g)].map((m) => m[0])
+    check('theme', 'one theme-color meta, the clay', metas.length === 1 && /content="#C47D45"/.test(metas[0]) && !/media=/.test(metas[0]) ? 'pass' : 'fail', metas.join(' ') || 'none')
   }
   for (const theme of ['light', 'dark']) {
     const page = await fresh({ width: 1440, height: 900 }, `/?theme=${theme}`, 1500)
@@ -265,7 +266,7 @@ export async function sceneChecks({ cdp, url, check, sleep, scratch }) {
     await page.media([{ name: 'prefers-color-scheme', value: 'light' }])
     await page.goto(url + '/', { settle: 1200 })
     const light = await page.eval('document.documentElement.dataset.theme')
-    check('theme', 'the system scheme with no stored choice', dark === 'dark' && light === 'light' ? 'pass' : 'fail', `prefers dark serves ${dark}, prefers light serves ${light}`)
+    check('theme', 'light by default, whatever the system', dark === 'light' && light === 'light' ? 'pass' : 'fail', `no stored choice: prefers dark serves ${dark}, prefers light serves ${light} (both must be light)`)
     await page.close()
   }
   {

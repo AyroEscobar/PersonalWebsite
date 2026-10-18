@@ -5,8 +5,9 @@
 
   Writes on <html>, read by CSS and by src/lib/client.js:
     data-theme         'light' (black-figure) or 'dark' (red-figure): ?theme=, then the stored choice
-                       (ae.theme), then the system's prefers-color-scheme. Set before the first
-                       stylesheet, so a reload never flashes the other vase.
+                       (ae.theme), then 'light': the black-figure vase is the picture, so a first visit
+                       sees it whatever the system's scheme (dark is one click on the switch). Set
+                       before the first stylesheet, so a reload never flashes the other vase.
     data-js            JavaScript is running
     data-motion        'off' when the viewer turned the scene off (ae.motion), else 'on'
     data-tier          'still' under prefers-reduced-motion, motion off, no WebGL2 or ?tier=still;
@@ -18,8 +19,8 @@
     class clock-fixed  ?t= (a fixed clock: instant scrolls for captures)
     class notext       ?notext=1, for the contrast capture in QA
 
-  And in <head>: the unqualified theme-color meta for the resolved theme (it comes first, so it wins over
-  the two media-qualified ones), and one <link rel="preload"> for the one poster this visitor will see
+  And in <head>: the theme-color meta for the resolved theme (it comes first, so it wins over the static
+  light one), and one <link rel="preload"> for the one poster this visitor will see
   (the theme's, the phone cut under 960 px), so the first paint never fetches the other vase.
 */
 ;(function () {
@@ -46,7 +47,7 @@
     }
   }
   var theme = (q.match(/[?&]theme=(light|dark)(&|$)/) || [])[1] || ls('ae.theme')
-  if (theme !== 'light' && theme !== 'dark') theme = mq('(prefers-color-scheme: dark)') ? 'dark' : 'light'
+  if (theme !== 'light' && theme !== 'dark') theme = 'light'
   d.setAttribute('data-theme', theme)
   try {
     var m = document.createElement('meta')

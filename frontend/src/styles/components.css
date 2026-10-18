@@ -282,14 +282,6 @@ html.scrolled .neck--fixed .tongues,
 :root[data-theme='dark'] .poster--dark {
   display: block;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .poster--light {
-    display: none;
-  }
-  :root:not([data-theme='light']) .poster--dark {
-    display: block;
-  }
-}
 /* the live canvas sits under the room; once it has faded in, the poster steps aside (it stays in the
    accessibility tree, so its alt still describes the scene) */
 .is-live .poster {

@@ -100,29 +100,6 @@
   --ring: 0.3;
   color-scheme: dark;
 }
-/* no JavaScript and no stored choice: the system's preference */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --ground: var(--gloss);
-    --panel: var(--gloss-2);
-    --plate: var(--gloss-2);
-    --frieze: var(--gloss);
-    --frieze-lit: var(--gloss-3);
-    --frieze-ink: var(--clay);
-    --ink: var(--cream);
-    --ink-2: var(--aged);
-    --accent: var(--clay-lit);
-    --accent-ink: var(--gloss);
-    --plate-rule: rgb(239 228 204 / 0.32);
-    --foot: var(--foot-dark);
-    --foot-band-ink: var(--clay);
-    --foot-band: var(--gloss);
-    --rule: rgb(239 228 204 / 0.16);
-    --ring: 0.3;
-    color-scheme: dark;
-  }
-}
-
 @media (max-width: 959.98px) {
   :root {
     --neck-h: 58px;

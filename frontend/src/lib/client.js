@@ -1,14 +1,12 @@
-import { syncFromHtml, markStill, themeColorMeta } from './mode.js'
-import { setFocus, setThemeState } from './store.js'
+import { syncFromHtml, markStill } from './mode.js'
+import { setFocus } from './store.js'
 import { SECTION_IDS } from '../content/sections.js'
-import { STORAGE } from '../content/constants.js'
-import { HEAD } from '../content/meta.js'
 
 /*
   Client start-up, called once from main.jsx after hydration is scheduled. Copies <html data-*> (set by
-  the inline boot script) into the store, follows the OS motion setting into the still tier and the OS
-  colour scheme while the viewer has not picked a theme, watches the section in view (the nav's
-  aria-current) and sets html.scrolled after 80 px (the neck becomes a ground bar with a rule and the
+  the inline boot script) into the store, follows the OS motion setting into the still tier (the theme
+  does not follow the OS: light is the default and the switch the only way to dark), watches the
+  section in view (the nav's aria-current) and sets html.scrolled after 80 px (the neck becomes a ground bar with a rule and the
   tongues go). No three here: the scene is src/scene/, mounted by src/lib/frieze-host.js.
 */
 export function initClient() {
@@ -19,27 +17,8 @@ export function initClient() {
     if (e.matches) markStill()
   })
 
-  followSystemTheme()
   initActiveSection()
   initScrolledFlag()
-}
-
-/* no stored choice and no ?theme=: the vase follows the system's light or dark */
-function followSystemTheme() {
-  const dark = window.matchMedia?.('(prefers-color-scheme: dark)')
-  dark?.addEventListener?.('change', (e) => {
-    let stored = null
-    try {
-      stored = localStorage.getItem(STORAGE.theme)
-    } catch {
-      stored = null
-    }
-    if (stored || /[?&]theme=/.test(location.search)) return
-    const theme = e.matches ? 'dark' : 'light'
-    document.documentElement.dataset.theme = theme
-    themeColorMeta().content = HEAD.themeColor[theme]
-    setThemeState(theme)
-  })
 }
 
 /* the nav's active section */
