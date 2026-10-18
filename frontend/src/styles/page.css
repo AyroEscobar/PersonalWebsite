@@ -87,9 +87,13 @@
 .sec--contact .sec-title {
   margin-bottom: 36px;
 }
+/* the band's foot point stands 219 px above its lower edge (a smaller man, further up the line), so the
+   line leaves the band at its lower left corner: the rock that gets away in the loop (frieze.js) is found
+   again whole on the line, never half behind the band's edge. At 1440 x 900 the whole band still sits
+   between the neck and the foot when the page is at its end */
 .band {
   position: relative;
-  min-height: 660px;
+  min-height: 740px;
 }
 .band-inner {
   position: relative;
@@ -113,13 +117,13 @@
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
-  padding-bottom: 26px;
+  padding-bottom: 219px;
 }
 .band-stage .stage {
   width: min(56%, 820px);
 }
 .band-stage .room {
-  width: min(100%, calc((660px - 150px - 50px) * var(--room-aspect)));
+  width: min(100%, calc((740px - 150px - 24px - 219px) * var(--room-aspect)));
   margin-left: auto;
 }
 

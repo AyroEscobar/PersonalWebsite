@@ -14,10 +14,12 @@
                    header, plate and button boxes on screen, so a check can assert none touches him
     __poster(o)    the transparent poster frame as a PNG data URL (frieze.js poster(), for scripts/poster.mjs)
     __potShot(o)   the pot's still at a turn, { rot, sun, w, h }, as a PNG data URL (scripts/poster.mjs --pot)
+    __act(name, u) a moment of an event as a still: 'catch', 'paint', 'loop' or a loop phase, u s into it
+    __loop()       the loop's state: { phase, start, done, t }
 */
 import * as THREE from 'three'
 
-const KEYS = ['__frameAt', '__bench', '__bounds', '__measure', '__poster', '__ready', '__stats', '__gait', '__legs', '__potShot']
+const KEYS = ['__frameAt', '__bench', '__bounds', '__measure', '__poster', '__ready', '__stats', '__gait', '__legs', '__potShot', '__act', '__loop']
 
 export function installHooks(ctx) {
   const { r, cam, scene, f, R, canvas, render, step, measure, poster } = ctx
@@ -33,6 +35,8 @@ export function installHooks(ctx) {
   }
   window.__measure = () => measure()
   window.__potShot = (o) => ctx.potShot?.(o)
+  window.__act = (name, u) => ctx.act?.(name, u)
+  window.__loop = () => ctx.loop?.()
   window.__legs = (n = 24, t0 = 2.34) => {
     const rows = []
     for (let i = 0; i < n; i++) {

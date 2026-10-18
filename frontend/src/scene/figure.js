@@ -7,6 +7,8 @@
     const fig = await loadFigure(url)            // fetch + decode the GLB (meshopt)
     const f = makeFigure({ man: fig, material, boulderMaterial, boulderGeometry, R })
     f.update(tau, pose)      // the push; tau is the gait clock (frozen during the catch)
+    f.walk(s, { amp })       // the loop's walk back down (amp 0: standing); f.setMirror(on) turns him
+    f.capture(buf), f.blend(a, b, k)   // a pose's bones, and a per-bone mix of two (the loop's turns)
 
   The body, as a solver:
     - root speed v, step period T, stance duty d. A stance foot is pinned at its footfall; the
@@ -89,7 +91,9 @@ const sphereSurface = (dir, R, p, n) => { p.copy(dir).multiplyScalar(R); n.copy(
 export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R = 2.1, speed = 0.33, period = 1.9, duty = 0.7, leanDeg = 50, pelvisK = 0.7, handLift = 0, frontK = 0.16, x0 = 0, sole = 0, surface = sphereSurface, swingPow = 0.7, thighDrive = 0.6, clearance = 0.05, pitchDrop = 0.3, headUp = 20 } = {}) {
   const group = new THREE.Group()
   // model space faces +z with its left at +x; the slope frame faces +x with the right at +z
-  const rig = new THREE.Group(); rig.rotation.y = Math.PI / 2; group.add(rig)
+  // body: a group between him and the slope, so the loop can mirror him to walk down (the rock stays out)
+  const body = new THREE.Group(); group.add(body)
+  const rig = new THREE.Group(); rig.rotation.y = Math.PI / 2; body.add(rig)
   rig.add(man.root)
   const mesh = man.mesh
   mesh.material = material
@@ -124,8 +128,9 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
   const front = frontK // the ball lands this far behind the hips; push-off is a stance length further back
   const rootX = (t) => x0 + v0 * t
   const footZ = 0.125
-  // the push gait
+  // the push gait, and the walk (the loop's walk back down: upright, 1.3 m/s, the feet landing ahead)
   const PUSH = { v: v0, T, d, front, x0 }
+  const WALK = { v: 1.45, T: 1.0, d: 0.62, front: -0.38, x0: 0 }
   function foot(t, phase, out, gp = PUSH) {
     const { v, T, d, front, x0 } = gp
     const k = Math.floor(t / T - phase)
@@ -224,6 +229,24 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
     fk('hand' + s)
     setBone('hand' + s, qh)
   }
+  // a hanging hand: the fingers down the forearm's line, the palm to the thigh (the hand's support frame
+  // turned so its heel-to-fingertip axis is the forearm and its palm faces in)
+  const freeHand = (s, fd, outQ) => frameRot(handAxis[s], handNormal[s], fd, new THREE.Vector3(0, 0, -zSide[s]), outQ)
+  // world down in his own frame: the slope frame turned by the slope, and mirrored when he faces downhill
+  let slopeA = THREE.MathUtils.degToRad(14), mirrored = false
+  const grav = new THREE.Vector3()
+  const setGrav = () => grav.set((mirrored ? 1 : -1) * Math.sin(slopeA), -Math.cos(slopeA), 0)
+  function setSlope(deg) { slopeA = THREE.MathUtils.degToRad(deg); setGrav() }
+  function setMirror(on) { mirrored = on; setGrav() }
+  setGrav()
+  // the free wrist: hanging under the shoulder (plumb), a little forward, swung by `swing` radians
+  function freeWrist(s, swing, out) {
+    const S = Pw['upperArm' + s]
+    const fwd = new THREE.Vector3(-grav.y, grav.x, 0) // across the plumb line, toward his front
+    const l = (La + Lf) * 0.975
+    return out.copy(S).addScaledVector(grav, l * Math.cos(swing)).addScaledVector(fwd, l * Math.sin(swing) + 0.04).add(new THREE.Vector3(0, 0, zSide[s] * 0.07))
+  }
+  const poleFree = { L: new THREE.Vector3(-1, 0.1, -0.3).normalize(), R: new THREE.Vector3(-1, 0.1, 0.3).normalize() }
 
   // ---- legs and the rigid feet
   function solveLegs() {
@@ -288,8 +311,10 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
     bones.hips.position.copy(Pw.hips).applyQuaternion(QcInv)
   }
 
-  // ---- the push. pose: shift (m he has been put back), leanAdd, crouch, reachAdd, lookUp (degrees)
-  function update(t, { shift = 0, leanAdd = 0, crouch = 0, reachAdd = 0, lookUp = 0 } = {}) {
+  // ---- the push. pose: shift (m he has been put back), leanAdd, crouch, reachAdd, lookUp (degrees), and
+  // for the loop: rock { x, z } (the rock goes its own way instead of sitting in his hands) and release
+  // (0..1, his hands come off it and hang)
+  function update(t, { shift = 0, leanAdd = 0, crouch = 0, reachAdd = 0, lookUp = 0, rock = null, release = 0 } = {}) {
     const x = rootX(t) - shift
     foot(t, 0, fl); foot(t, 0.5, fr)
     fl.x -= shift; fr.x -= shift
@@ -310,7 +335,7 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
     // ---- the trunk; the head bows toward the rock with the effort, steady against the step (counter-
     // pitch); raised enough that the face, the beard and the eye read in profile (lookUp raises it further)
     trunk(x, pelvisY, sway, lean, roll, -12 - headUp * 0.4, -4 - headUp - lookUp - 1.5 * Math.sin(2 * Math.PI * ph * 2) * 0.6)
-    clavicles(1)
+    clavicles(1 - 0.7 * release)
 
     // ---- the rock, placed from the hands: push through the centre
     const sh = tmp.a.copy(Pw.upperArmL).add(Pw.upperArmR).multiplyScalar(0.5)
@@ -322,9 +347,9 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
     const handY = sh.y + 0.07 + handLift
     const reachH = Math.sqrt(Math.max(0.01, reach * reach - (handY - sh.y) ** 2))
     const hw = Math.sqrt(Math.max(0, RR * RR - (R - handY) ** 2 - 0.04))
-    const bx = sh.x + reachH + hw
+    const bx = rock ? rock.x : sh.x + reachH + hw
     const phi = Math.asin(THREE.MathUtils.clamp((R - handY) / RR, -1, 1))
-    boulder.position.set(bx, R, 0)
+    boulder.position.set(bx, R, rock ? rock.z || 0 : 0)
     boulder.rotation.set(0, 0, -bx / R)
 
     // ---- arms and hands
@@ -357,7 +382,16 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
       if (handU) handU[i].copy(c).addScaledVector(nrm, -HAND.press).applyMatrix4(group.matrixWorld)
       // the hand's support plane (bind pose, model space, mirrored for the right) lands on the rock
       const qh = frameRot(handAxis[s], handNormal[s], fingers, palm, new THREE.Quaternion())
-      arm(s, wrist, poleArm[s], qh)
+      if (release > 0) {
+        // the hands come off the rock and hang: the wrist target, the elbow pole and the hand's turn blend
+        const k = sstep(0, 1, release)
+        const fw = freeWrist(s, 0.15 * (1 - k), new THREE.Vector3())
+        wrist.lerp(fw, k)
+        const pole = poleArm[s].clone().lerp(poleFree[s], k).normalize()
+        const fd = wrist.clone().sub(Pw['upperArm' + s]).normalize()
+        qh.slerp(freeHand(s, fd, new THREE.Quaternion()), k)
+        arm(s, wrist, pole, qh)
+      } else arm(s, wrist, poleArm[s], qh)
     }
 
     solveLegs()
@@ -365,8 +399,50 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
     return out
   }
 
+  // ---- the walk (and, at amp 0, standing): upright, the arms swinging, he walks +x in the body's own
+  // frame (the loop mirrors the body so +x is downhill). s is the distance walked from x = 0
+  function walk(s, { amp = 1, lookDown = 0 } = {}) {
+    const tc = s / WALK.v
+    const ph = tc / WALK.T
+    if (amp > 0.001) {
+      foot(tc, 0, fl, WALK); foot(tc, 0.5, fr, WALK)
+    } else {
+      // standing: the feet planted under him, one a short step ahead
+      Object.assign(fl, { x: s - 0.1, y: 0, u: 0.2, stance: true }); Object.assign(fr, { x: s + 0.16, y: 0, u: 0.2, stance: true })
+    }
+    fl.drive = fr.drive = 0.25
+    const bob = 0.025 * Math.cos(2 * Math.PI * ph * 2) * amp
+    const pelvisY = hipH * 0.95 + bob + sole
+    // upright to the world, not to the slope: 4 degrees forward of plumb walking, 2 standing
+    const lean = THREE.MathUtils.degToRad(2 + 2 * amp) + (mirrored ? -slopeA : slopeA)
+    const roll = 0.04 * Math.sin(2 * Math.PI * ph) * amp, sway = 0.012 * Math.sin(2 * Math.PI * ph) * amp
+    trunk(s, pelvisY, sway, lean, roll, -2 + lookDown * 0.4, 4 + lookDown)
+    clavicles(0)
+    // the arms swing against the legs
+    const sw = 0.32 * amp * Math.sin(2 * Math.PI * ph)
+    for (const side of ['L', 'R']) {
+      const a = side === 'L' ? sw : -sw
+      const wrist = freeWrist(side, a, new THREE.Vector3())
+      const fd = wrist.clone().sub(Pw['upperArm' + side]).normalize()
+      arm(side, wrist, poleFree[side], freeHand(side, fd, new THREE.Quaternion()))
+    }
+    out.push = 0
+    solveLegs()
+    out.x = s; out.head = Pw.head
+    return out
+  }
+
+  // ---- pose blending: capture the bones (local rotations and the root's position), then mix two captures
+  const boneList = mesh.skeleton.bones
+  const capture = (buf = { q: boneList.map(() => new THREE.Quaternion()), p: new THREE.Vector3() }) => {
+    boneList.forEach((b, i) => buf.q[i].copy(b.quaternion)); buf.p.copy(bones.hips.position); return buf
+  }
+  const blend = (a, b, k) => { boneList.forEach((bn, i) => bn.quaternion.slerpQuaternions(a.q[i], b.q[i], k)); bones.hips.position.lerpVectors(a.p, b.p, k) }
+  // the rock on its own (the loop): x along the slope, rolling true
+  const placeRock = (x, z = 0) => { boulder.position.set(x, R, z); boulder.rotation.set(0, 0, -x / R) }
+
   out.balls = [new THREE.Vector3(), new THREE.Vector3()]; out.stance = [false, false]
   // the phase of the cycle (0..1); both feet are planted for phase 0..0.2 and 0.5..0.7 at duty 0.7
   const phase = (t) => ((t / T) % 1 + 1) % 1
-  return { group, boulder, glints, mesh, bones, Pw, update, rootX, phase, R, T, duty: d, PUSH, lengths: { Lt, Ls, La, Lf, hipH } }
+  return { group, body, boulder, glints, mesh, bones, Pw, update, walk, capture, blend, placeRock, setSlope, setMirror, rootX, phase, R, T, duty: d, PUSH, WALK, lengths: { Lt, Ls, La, Lf, hipH } }
 }

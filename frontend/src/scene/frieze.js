@@ -77,6 +77,13 @@ const WRAP = 240
 // scratch in, the disk is filled with added white and its flecks worn in, then he moves
 const PAINT = { sketch: [0, 0.3], slip: [0.3, 0.9], scratch: [0.9, 1.3], white: [1.3, 1.6], fleck: [1.6, 1.75], move: [1.75, 2.25] }
 const PAINT_AT = 0.6
+// the loop at Contact, once a visit, when the band has been 90% in view for a second after the painting:
+// his push stalls (0.8 s), the rock gets away at 5/7 g sin 14 degrees (1.70 m/s2, a rolling ball) and rolls
+// back past him and out of the picture; he straightens and watches it go (0.9 s from the get-away), turns
+// (0.4) and walks down after it at a measured step (figure.js WALK), the camera letting him walk 1.1 m before
+// it goes with him and, once the rock has left the picture, leading 0.9 m; he eases to a stop over the last
+// 0.4 m, plants his hands on it (0.7) and pushes again (1.2)
+const LOOP = { stall: 0.8, watchAt: 0.9, turn: 0.4, stop: 0.4, trail: 1.1, follow: 1.0, plant: 0.7, push: 1.2, a: 1.7, lead: 0.9, at: 0.9, wait: 1.0 }
 const ph01 = (u, [a, b]) => clamp((u - a) / (b - a), 0, 1)
 // where he holds on the pot when you stop reading: the push-off lunge (the poster's phase, either leg)
 const HOLD_PHASES = [((T_POSTER / GAIT.period) % 1 + 1) % 1, (((T_POSTER / GAIT.period) + 0.5) % 1 + 1) % 1]
@@ -104,6 +111,10 @@ function query() {
     // tools only: a fixed effort (0..1, + is scrolling down) for stills; the pot held at a turn (degrees)
     effort: q.has('effort') ? Number(q.get('effort')) : null,
     potDeg: q.has('pot') ? Number(q.get('pot')) : null,
+    // tools only: a moment of an event as a still, with ?t=: ?act=catch|paint|loop&u=<s into it>, or a loop
+    // phase by name (stall, getaway, watch, turn, walk, plant, push) and how far into it
+    act: q.get('act'),
+    actU: q.has('u') ? Number(q.get('u')) : null,
   }
 }
 
@@ -200,7 +211,7 @@ function makeGroundLines(ink) {
 
 export async function mount({ canvas, bands, theme = 'light', tier = 'full', onReady, onError, onLost } = {}) {
   if (S) unmount()
-  const { fixedT, catchEvery, catchFirst, effort: fixedEffort, potDeg } = query()
+  const { fixedT, catchEvery, catchFirst, effort: fixedEffort, potDeg, act, actU } = query()
   const r = makeRenderer(canvas)
   const a0 = bands[0]?.art.getBoundingClientRect()
   let cap = capFor(tier, a0?.width || 0, a0?.height || 0)
@@ -244,7 +255,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   let docVisible = !document.hidden, userPaused = false, first = true, holdUntil = 0, curTheme = theme
   const O = new THREE.Vector3(), win = {}
   // the painting: only where the reveals run (a live tier, not quiet); the still page shows it finished
-  let paintStart = -1, painted = !document.documentElement.classList.contains('rv')
+  let paintStart = -1, painted = !document.documentElement.classList.contains('rv'), paintDoneAt = -1
   const fu = mats.fig.userData.u, du = mats.disk.userData.u
   const _c = new THREE.Vector3(), _skc = new THREE.Color(), _ctc = new THREE.Color()
   const shown = (el) => { const rc = el.getBoundingClientRect(); return (Math.min(rc.bottom, innerHeight) - Math.max(rc.top, 0)) / Math.max(1, rc.height) }
@@ -500,6 +511,10 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (host.kind === 'pot') return leaving && !snap ? false : renderPot(dt, force)
     if (!fit) return false
     holdTau = null
+    // the loop: it keeps its time if the band leaves (he is already pushing again when you come back)
+    if (L.start >= 0 && host.kind !== 'contact') finishLoop()
+    if (L.start < 0 && loopReady(dt)) startLoop()
+    if (L.start >= 0) return renderLoop(dt)
     // the painting starts when the contact band is 60% in view (at 35% he was still below the fold)
     const painting = host.kind === 'contact' && !painted
     if (painting && paintStart < 0 && fixedT === null && shown(host.el) >= PAINT_AT) { paintStart = t; tau = T_POSTER }
@@ -507,7 +522,8 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     // the catch: in the hero, only as a foot lands (both feet planted, the stance at its widest, so he can
     // dig in), and never while a scroll is moving him (it waits for the spring to settle)
     const ph = f.phase(tau)
-    if (catchStart < 0 && fixedT === null && host.kind === 'hero' && t >= nextCatch && e < 0.05 && ph % 0.5 < 0.05) catchStart = t
+    // the contact band keeps its one event for the loop: no catch there until the loop has run
+    if (catchStart < 0 && fixedT === null && (host.kind === 'hero' || (host.kind === 'contact' && L.done)) && t >= nextCatch && e < 0.05 && ph % 0.5 < 0.05) catchStart = t
     rate = catchAt(t)
     // your scroll is his push: scrolling down he leans in and steps faster, scrolling up he braces (a
     // step back of 3 cm, recovered as you stop); never on top of the catch
@@ -525,6 +541,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     camShift = Math.max(camShift, pose.shift - CATCH.dist * 0.7)
     scene.updateMatrixWorld()
     const o = f.update(tau, pose)
+    lastRootX = o.x
     kickAt(o, dt)
     if (dt > 0) catchDustAt(t, o)
     dust.update(t, dt)
@@ -549,6 +566,182 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     r.render(scene, cam)
     return true
   }
+  // ---- the loop (B's state machine): his pose for the frame, and the camera's foot point (slope x)
+  const L = { start: -1, done: false, seen: 0, xm: 0, xr0: 0, tauHold: 0, shift0: 0, gone: -1, Rx: 0, xEnd: 0, D: 0, Xb: 0, shiftNew: 0, tTurn: 0, tWalk: 0, tPlant: 0, tPush: 0, camX: 0, dust: 0, phase: '' }
+  const bufA = f.capture(), bufB = f.capture()
+  const PL = { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0, lookUp: 0, rock: null, release: 0 }
+  const rockL = { x: 0, z: 0 }
+  let lastRootX = 0
+  function mirror(on, xb = 0) { f.body.scale.x = on ? -1 : 1; f.body.position.x = on ? xb : 0; f.setMirror(on) }
+  function loopReady(dt) {
+    if (L.done || fixedT !== null || host?.kind !== 'contact' || !painted || catchStart >= 0 || paintDoneAt < 0) { L.seen = 0; return false }
+    // the band in view and the reader settled (a scroll in progress never hides the beat)
+    L.seen = shown(host.el) >= LOOP.at && Math.abs(vel) < 40 ? L.seen + dt : 0
+    return L.seen >= LOOP.wait
+  }
+  function startLoop() {
+    Object.assign(L, { start: t, gone: -1, dust: 0, shift0: shiftBase, camX: lastRootX, phase: 'stall' })
+    stats.loop = 'stall'
+  }
+  function loopFrame(dt) {
+    const u = t - L.start
+    const cs = Math.cos(slope.rotation.z)
+    const edge = win.left / cs // the canvas's left edge from the camera's foot point, metres along the slope
+    const V = f.WALK.v
+    if (u < LOOP.stall) {
+      // the stall: his last push slows to a third and he leans into it
+      const e = easeInOut(u / LOOP.stall)
+      rate = lerp(1, 0.3, e)
+      Object.assign(PL, { shift: L.shift0, leanAdd: 4 * e, crouch: 0.02 * e, reachAdd: 0, lookUp: 0, rock: null, release: 0 })
+      const o = f.update(tau, PL)
+      L.xr0 = o.bx; L.xm = o.x; L.tauHold = tau; L.camX = o.x
+      L.tTurn = L.start + LOOP.stall + LOOP.watchAt; L.tWalk = L.tTurn + LOOP.turn; L.tPlant = Infinity; L.tPush = Infinity
+      if (dt > 0 && L.dust < 2 && u > 0.3 + 0.3 * L.dust) { const b = o.balls[o.pushFoot]; dust.kick(b.x - 0.04, 0.03, 1, { t }); L.dust++ }
+      L.phase = 'stall'
+      return L.camX
+    }
+    rate = 0
+    const ug = u - LOOP.stall
+    // the rock on its own: rolling back down past him, behind him, until it has left the picture; then it
+    // is at rest further down, where he will find it (the painter's licence: it stopped out of sight)
+    if (L.gone < 0) {
+      rockL.x = L.xr0 - 0.5 * LOOP.a * ug * ug
+      rockL.z = -1.4 * sstep(0, 0.35, ug)
+      if (dt > 0 && ug > 0.15 + 0.3 * (L.dust - 2) && L.dust < 14) { dust.kick(rockL.x + 0.05, 0.03, 3, { vx: [-0.5, 0.25], vy: [0.2, 0.45], t }); L.dust++ }
+      if (rockL.x + R * 1.08 < L.camX + edge) {
+        L.gone = t
+        // where it rests, and so where he will stand to push it again, and how far he has to walk
+        const o = f.update(L.tauHold, { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0, lookUp: 0 })
+        const off = o.bx - o.x
+        L.Rx = L.camX + edge - R * 1.2
+        L.xEnd = L.Rx - off
+        L.D = L.xm - L.xEnd
+        L.Xb = L.xm
+        L.shiftNew = f.rootX(L.tauHold) - L.xEnd
+        // the walk: up to speed in 0.4 s, on at V, and it eases to a stop over the last LOOP.stop m
+        L.tPlant = L.tWalk + 0.2 + (L.D - LOOP.stop) / V + (2 * LOOP.stop) / V
+        L.tPush = L.tPlant + LOOP.plant
+      }
+    }
+    if (L.gone >= 0) { rockL.x = L.Rx; rockL.z = -1.4 }
+    // the get-away and the watch: he straightens, his hands come off it and he looks down after it
+    const getaway = () => {
+      const k = easeOut(clamp(ug / 0.7, 0, 1))
+      Object.assign(PL, { shift: L.shift0, leanAdd: lerp(4, -30, k), crouch: -0.07 * k, reachAdd: 0, lookUp: lerp(0, -16, easeOut(clamp(ug / 0.6, 0, 1))), rock: rockL, release: sstep(0.05, 0.6, ug) })
+      return f.update(L.tauHold, PL)
+    }
+    if (t < L.tTurn) {
+      mirror(false)
+      getaway()
+      L.phase = ug < 0.7 ? 'getaway' : 'watch'
+      return L.camX
+    }
+    if (t < L.tWalk) {
+      // the turn: into a standing pose, then (a cut, as a painter turns a figure) facing downhill
+      const k = (t - L.tTurn) / LOOP.turn
+      if (k < 0.5) {
+        mirror(false)
+        getaway(); f.capture(bufA)
+        f.walk(L.xm, { amp: 0, lookDown: 10 }); f.capture(bufB)
+        f.blend(bufA, bufB, easeInOut(k / 0.5))
+      } else {
+        mirror(true, L.xm)
+        f.walk(0, { amp: 0, lookDown: 10 }); f.capture(bufA)
+        f.walk(0.001, { amp: 1, lookDown: 8 }); f.capture(bufB)
+        f.blend(bufA, bufB, easeInOut((k - 0.5) / 0.5))
+      }
+      f.placeRock(rockL.x, rockL.z)
+      L.phase = 'turn'
+      return L.camX
+    }
+    if (t < L.tPlant) {
+      // the walk back down after it, a measured step; he follows the rock while it is still rolling out of
+      // the picture, then on to where it lies (the longest still-looking stretch on the page, on purpose)
+      const tw = t - L.tWalk
+      let sd = tw < 0.4 ? (V * tw * tw) / 0.8 : V * (tw - 0.2)
+      if (L.gone >= 0) {
+        const t1 = 0.2 + (L.D - LOOP.stop) / V // where the stop begins
+        if (tw > t1) { const td = Math.min(tw - t1, (2 * LOOP.stop) / V); sd = L.D - LOOP.stop + V * td - (V * V * td * td) / (4 * LOOP.stop) }
+        sd = Math.min(sd, L.D)
+      }
+      mirror(true, L.xm)
+      f.walk(Math.max(0.001, sd), { amp: 1, lookDown: 8 })
+      f.placeRock(rockL.x, rockL.z)
+      // the camera lets him walk a little way down toward where it went (never as far as the plate), goes
+      // with him from there, and once the rock has left the picture eases into looking a little ahead down
+      // the slope; it settles as he arrives
+      const trail = L.xm - Math.max(0, sd - LOOP.trail)
+      let target = trail
+      if (L.gone >= 0) {
+        const lead = LOOP.lead * (1 - sstep(L.D - 1.4, L.D - 0.2, sd))
+        target = lerp(trail, L.xm - sd - lead, sstep(L.gone, L.gone + LOOP.follow, t))
+      }
+      L.camX += (target - L.camX) * (1 - Math.exp(-dt * 5))
+      L.phase = 'walk'
+      return L.camX
+    }
+    const push = (k) => { Object.assign(PL, { shift: L.shiftNew, leanAdd: 0, crouch: 0, reachAdd: 0, lookUp: 0, rock: k < 1 ? { x: L.Rx, z: 0 } : null, release: 0 }); return f.update(tau, PL) }
+    if (t < L.tPush) {
+      // the plant: he turns uphill and sets his palms on the real surface of the rock
+      const k = (t - L.tPlant) / LOOP.plant
+      if (k < 0.25) {
+        mirror(true, L.xm)
+        f.walk(L.D, { amp: 1, lookDown: 8 }); f.capture(bufA)
+        f.walk(L.D, { amp: 0, lookDown: 4 }); f.capture(bufB)
+        f.blend(bufA, bufB, easeInOut(k / 0.25))
+      } else {
+        mirror(false)
+        f.walk(L.xEnd, { amp: 0, lookDown: 4 }); f.capture(bufA)
+        push(0); f.capture(bufB)
+        f.blend(bufA, bufB, easeOut((k - 0.25) / 0.75))
+      }
+      f.placeRock(L.Rx, 0)
+      L.camX += (L.xEnd - L.camX) * (1 - Math.exp(-dt * 4))
+      L.phase = 'plant'
+      return L.camX
+    }
+    // the first push: he leans before he steps, then the rock turns again
+    const k = (t - L.tPush) / LOOP.push
+    mirror(false)
+    rate = clamp(k, 0, 1) ** 2
+    const o = push(1)
+    L.camX += (o.x - L.camX) * (1 - Math.exp(-dt * 4))
+    L.phase = 'push'
+    if (k >= 1) {
+      shiftBase = L.shiftNew; camShift = L.shiftNew
+      L.done = true; L.start = -1; L.phase = 'done'
+      nextCatch = t + catchEvery
+    }
+    return L.camX
+  }
+  // the band left mid-loop (a scroll back up): he is already pushing again where the loop would leave him
+  function finishLoop() {
+    if (L.start < 0) return
+    mirror(false)
+    if (L.gone >= 0) { tau = L.tauHold; shiftBase = L.shiftNew; camShift = L.shiftNew }
+    L.done = true; L.start = -1; L.phase = 'done'
+    nextCatch = t + catchEvery
+  }
+  function renderLoop(dt) {
+    const target = advTarget()
+    if (dt > 0) { const w = SPRING_W, a = -w * w * (adv - target) - 2 * w * advVel; advVel += a * dt; adv += advVel * dt } else { adv = target; advVel = 0 }
+    windowFor(fit, win)
+    scene.updateMatrixWorld()
+    const cx = loopFrame(dt)
+    scene.updateMatrixWorld()
+    dust.update(t, dt)
+    const ox = cx - adv
+    O.set(ox, 0, 0).applyMatrix4(slope.matrixWorld)
+    const cs = Math.cos(slope.rotation.z)
+    dust.stones(ox + win.left / cs - 0.3, ox + win.right / cs + 0.3)
+    aim(cam, O)
+    cam.left = win.left; cam.right = win.right; cam.top = win.top; cam.bottom = win.bottom
+    cam.updateProjectionMatrix()
+    r.render(scene, cam)
+    stats.loop = L.phase
+    return true
+  }
+
   function paintAt(u) {
     fu.uPaintOn.value = du.uPaintOn.value = 1
     fu.uSketch.value = du.uSketch.value = sstep(0, 1, ph01(u, PAINT.sketch))
@@ -566,7 +759,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     diskHull.visible = true
     if (u >= PAINT.move[0]) {
       painted = true
-      stats.painted = +t.toFixed(2)
+      paintDoneAt = t
       host?.el.classList.add('painted')
       unpaint()
     }
@@ -602,7 +795,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     const drew = render(dt)
     const ms = performance.now() - t0
     if (drew) { stats.renders++; stats.ms += (ms - stats.ms) * 0.1; adapt(stats.ms + (dt * 1000 > 40 ? 30 : 0)) }
-    stats.frames++; stats.t = t; stats.slipping = catchStart >= 0; stats.eff = +clamp(Math.abs(vel) / V_FULL, 0, 1).toFixed(3); stats.rate = +rate.toFixed(3); stats.rot = +rot.toFixed(1)
+    stats.frames++; stats.t = t; stats.slipping = catchStart >= 0; stats.looped = L.done; stats.loop = L.phase; stats.eff = +clamp(Math.abs(vel) / V_FULL, 0, 1).toFixed(3); stats.rate = +rate.toFixed(3); stats.rot = +rot.toFixed(1)
     if (first) live()
   }
   function live() {
@@ -639,7 +832,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   bands.forEach((b) => { ro.observe(b.room); ro.observe(b.art) })
   const onVis = () => { docVisible = !document.hidden; sync() }
   // with a fixed clock (?t=) or paused, a scroll renders one still at the scrolled climb (and turn)
-  const onScroll = () => { if (still() && !first) { requestHost(choose()); render(0, true) } }
+  const onScroll = () => { if (still() && !first) { requestHost(choose()); render(0, true); actWhenThere() } }
   addEventListener('resize', onResize)
   addEventListener('scroll', onScroll, { passive: true })
   document.addEventListener('visibilitychange', onVis)
@@ -670,6 +863,34 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   NECK = px('--neck-h', 68)
   setHost(choose() || bands[0])
 
+  // tools: a moment of an event as a still (with ?t=): the catch or the painting u seconds in, the loop u
+  // seconds in, or u seconds into one of its phases. The loop is stepped at 60 fps from its start, so every
+  // phase is the one the visitor sees
+  const PHASES = ['stall', 'getaway', 'watch', 'turn', 'walk', 'plant', 'push']
+  function actAt(name, u = 0) {
+    if (name === 'catch') { catchStart = t - u; render(0, true); return { act: name, u } }
+    if (name === 'paint') { painted = false; paintStart = t - u; render(0, true); return { act: name, u } }
+    if (name !== 'loop' && !PHASES.includes(name)) return null
+    painted = true; paintDoneAt = t - 2; unpaint()
+    if (L.start < 0) { L.done = false; startLoop() }
+    let n = 0, inPhase = 0
+    while (n++ < 4000) {
+      t += 1 / 60; tau += rate / 60; renderLoop(1 / 60)
+      if (L.start < 0) break
+      if (name === 'loop' ? t - L.start >= u : L.phase === name && (inPhase += 1 / 60) >= u) break
+      if (name !== 'loop' && inPhase > 0 && L.phase !== name) break
+    }
+    return { act: name, phase: L.phase, u: +(t - L.start).toFixed(2) }
+  }
+  let actPending = act
+  function actWhenThere() {
+    if (!actPending || fixedT === null) return
+    if (host?.kind !== (actPending === 'catch' ? 'hero' : 'contact')) return
+    const a = actPending
+    actPending = null
+    actAt(a, actU ?? 0)
+  }
+
   // tools: the pot's still, rendered from the scene at a turn (scripts/poster.mjs --pot): w x h device px,
   // the man in the lunge at T_POSTER, the sun as the turn's spring would set it
   function potShot({ rot: deg = 0, sun: k = 0, w = 560, h = 860 } = {}) {
@@ -698,6 +919,8 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
 
   installHooks({
     potShot,
+    act: (name, u) => actAt(name, u),
+    loop: () => ({ phase: L.phase, start: L.start, done: L.done, t }),
     r, cam, scene, slope, f, R, canvas, fit: () => fit, host: () => host, W,
     render: (tt) => { t = tau = tt; render(0, true) },
     step: (dt) => { t += dt; tau += dt * rate; render(dt, true) },
@@ -705,7 +928,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     poster: (o) => poster(o),
   })
 
-  if (fixedT !== null) { render(0, true); live() } else sync()
+  if (fixedT !== null) { render(0, true); live(); actWhenThere() } else sync()
 
   Object.assign(me, {
     io, ro, onResize, onVis, onScroll, W,
