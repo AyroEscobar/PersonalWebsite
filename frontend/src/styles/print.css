@@ -232,6 +232,10 @@
   .sec-title::after {
     display: none;
   }
+  /* the resume reorders the sections, so the numerals stay on screen (on paper they would read II, I, III) */
+  .sec-title .num {
+    display: none;
+  }
 
   /* experience: the dates back on the details line */
   .lines {
