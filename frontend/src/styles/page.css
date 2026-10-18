@@ -325,10 +325,11 @@
     width: calc(var(--room-h) * var(--room-aspect));
     margin: 0 0 0 max(0px, calc((100% - var(--room-h) * var(--room-aspect)) / 2));
   }
+  /* just above the meander, under the painter's second rule where it crosses the right half */
   .theme-line {
     left: auto;
     right: var(--gutter);
-    top: calc(var(--frieze-h) - var(--meander-h) - 26px);
+    top: calc(var(--frieze-h) - var(--meander-h) - 20px);
     bottom: auto;
   }
   .hero-plate {
