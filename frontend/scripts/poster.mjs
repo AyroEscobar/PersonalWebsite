@@ -1,52 +1,50 @@
 #!/usr/bin/env node
 /*
-  poster (DESIGN.md 3.11). Renders the real scene headlessly and writes the first-paint frames:
+  poster. Renders the posters from the real scene headlessly (window.__poster, the scene's own
+  poster(): the composition box alone, transparent, at the poster frame, as the live canvas draws it)
+  and measures the composite the visitor sees:
 
-    public/poster/hero-1440.{avif,webp}   1440x900 at DPR 1, the hero camera, t 2.3, p 0
-    public/poster/hero-780.{avif,webp}    390x844 at DPR 2 with mobile emulation (780x1688)
-    public/poster/meta.json               sizes, mean luminance, the brightest backdrop pixel under
-                                          each text surface (check-content's composite rules), the
-                                          measured contrast of every text line on the composite at
-                                          four widths and five scroll positions (lib/composite.mjs), t, build sha
-    .build/poster/*.png                   the source captures
+    public/poster/frieze-{light,dark}.{avif,webp}     1600 px wide (800 CSS px at DPR 2), the desktop room
+    public/poster/frieze-{light,dark}-m.{avif,webp}   960 px wide (480 CSS px at DPR 2), the phone room
+                                                      AVIF 20 KB or less, WebP 32 KB or less (the quality
+                                                      steps down until each fits)
+    public/poster/meta.json   sizes; the light composite's mean luminance (the first screen at 1440x900,
+                              floor 0.09); the share of drawn pixels in each poster (the dark one must
+                              not be empty); the darkest and lightest clay under the text on the clay,
+                              per theme (rules.mjs COMPOSITE_RULES, check-content's extremes); and every
+                              visible text line measured on the composite at four widths, five scroll
+                              positions and both themes (lib/composite.mjs)
+    .build/poster/*.png       the sources, and hero-1440.png (the composed light hero) for scripts/og.mjs
 
-  The composite measurement (rules.mjs COMPOSITE_RULES): for each key, the page is laid out with
-  its UI at the frame's progress and scrolled to it, the boxes of that surface are read, the bare
-  scene is captured at the same progress, and the brightest pixel under those boxes is kept:
-    panel   .panel at p 0        card   .card at p 0.2         pill    .btn.glass at p 0 (v4's nav is plain words;
-                                                                       they are measured line by line below)
-    theme   .theme-line at p 0   title  .sec-title--bare at p 0.2   footer  .footer at p 1
-
-  Gate (prototype b's graft): the mean luminance of the 1440 frame must be 0.09 or higher, and
-  this page targets 0.25; under 0.09 the script exits 1 and names the lights to raise.
-
-  Run after `npm run build` with the dist served here: node scripts/poster.mjs [--tier full]
-  The outputs are committed, so the deploy build never needs Chrome or sharp.
+  Run after `npm run build` with the dist served here: node scripts/poster.mjs [--tier full] [--fast]
+  (--fast skips the composite measurement and keeps the last one). The outputs are committed, so the
+  deploy build never needs Chrome or sharp.
 */
 import { mkdirSync, readFileSync, statSync, writeFileSync, existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { serveDist } from './serve-dist.mjs'
 import { launchChrome } from './lib/chrome.mjs'
 import { connect } from './lib/cdp.mjs'
 import { measureComposite } from './lib/composite.mjs'
+import { COMPOSITE_RULES } from './lib/rules.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(ROOT, 'public/poster')
 const SRC = path.join(ROOT, '.build/poster')
 const argv = process.argv.slice(2)
 const opt = (n, d) => (argv.includes(`--${n}`) ? argv[argv.indexOf(`--${n}`) + 1] : d)
+const FAST = argv.includes('--fast')
 const TIER = opt('tier', 'full')
-const T = 2.3
+const { T_POSTER } = await import(pathToFileURL(path.join(ROOT, 'src/scene/comp.js')))
 const FLOOR = 0.09
-const TARGET = 0.25
 const BUDGET = { avif: 20 * 1024, webp: 32 * 1024 }
-const FRAMES = [
-  { p: 0, keys: { panel: '.panel', pill: '.btn.glass', theme: '.theme-line' }, scrollTo: null },
-  { p: 0.2, keys: { card: '.card', title: '.sec-title--bare' }, scrollTo: 'check-out' },
-  { p: 1, keys: { footer: '.footer' }, scrollTo: 'bottom' },
+const SIZES = [
+  { suffix: '', cssWidth: 800 },
+  { suffix: '-m', cssWidth: 480 },
 ]
+const THEMES = ['light', 'dark']
 
 let sharp
 try {
@@ -62,24 +60,46 @@ if (!existsSync(path.join(ROOT, 'dist/index.html'))) {
 mkdirSync(OUT, { recursive: true })
 mkdirSync(SRC, { recursive: true })
 
-const VIEWS = [
-  { name: 'hero-1440', w: 1440, h: 900, dpr: 1, mobile: false },
-  { name: 'hero-780', w: 390, h: 844, dpr: 2, mobile: true },
-]
-
 const lum = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b
+const waitReady = (page) => page.eval('new Promise((r, j) => { let n = 0; const f = () => window.__ready ? setTimeout(r, 400) : (++n > 400 ? j(new Error("scene never became ready")) : setTimeout(f, 50)); f() })')
+const HIDE = `(() => { const s = document.createElement('style'); s.textContent = '*, *::before, *::after { color: transparent !important; -webkit-text-fill-color: transparent !important; text-decoration-color: transparent !important }'; document.head.appendChild(s); return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 150)))) })()`
 
-/** Mean luminance (0..1) of a PNG and the brightest pixel inside each list of boxes (CSS px, scaled by dpr). */
-async function analyse(png, dpr, boxes) {
+/** Encode a PNG to AVIF and WebP, stepping the quality down until each fits its budget. */
+async function encode(png, base) {
+  const out = {}
+  for (const [ext, budget, qs, enc] of [
+    ['avif', BUDGET.avif, [60, 55, 50, 45, 40, 36, 32, 28], (q) => sharp(png).avif({ quality: q, effort: 7 })],
+    ['webp', BUDGET.webp, [86, 80, 74, 68, 62, 56, 50, 44, 38], (q) => sharp(png).webp({ quality: q, alphaQuality: Math.min(90, q + 6), effort: 6 })],
+  ]) {
+    let buf = null
+    let q = 0
+    for (q of qs) {
+      buf = await enc(q).toBuffer()
+      if (buf.length <= budget) break
+    }
+    writeFileSync(`${base}.${ext}`, buf)
+    out[ext] = { bytes: buf.length, quality: q, ok: buf.length <= budget }
+  }
+  return out
+}
+
+/** The share of pixels the poster draws (alpha over 8). */
+async function drawn(png) {
+  const { data, info } = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+  let n = 0
+  for (let i = 3; i < data.length; i += info.channels) if (data[i] > 8) n++
+  return Number((n / (info.width * info.height)).toFixed(4))
+}
+
+/** Mean luminance (0..1) of a capture, and the darkest and lightest pixel inside each list of boxes (CSS px). */
+async function analyse(png, dpr, boxes = {}) {
   const { data, info } = await sharp(png).raw().toBuffer({ resolveWithObject: true })
   const { width, height, channels } = info
   let sum = 0
-  const n = width * height
-  for (let i = 0; i < n; i++) sum += lum(data[i * channels], data[i * channels + 1], data[i * channels + 2])
-  const brightest = {}
+  for (let i = 0; i < width * height; i++) sum += lum(data[i * channels], data[i * channels + 1], data[i * channels + 2])
+  const extremes = {}
   for (const [key, list] of Object.entries(boxes)) {
-    let best = null
-    let bestL = -1
+    let dark = null, light = null, dl = Infinity, ll = -1
     for (const b of list) {
       const x0 = Math.max(0, Math.floor(b.x0 * dpr)), y0 = Math.max(0, Math.floor(b.y0 * dpr))
       const x1 = Math.min(width, Math.ceil(b.x1 * dpr)), y1 = Math.min(height, Math.ceil(b.y1 * dpr))
@@ -87,103 +107,138 @@ async function analyse(png, dpr, boxes) {
         for (let x = x0; x < x1; x++) {
           const i = (y * width + x) * channels
           const l = lum(data[i], data[i + 1], data[i + 2])
-          if (l > bestL) { bestL = l; best = [data[i], data[i + 1], data[i + 2]] }
+          if (l < dl) { dl = l; dark = [data[i], data[i + 1], data[i + 2]] }
+          if (l > ll) { ll = l; light = [data[i], data[i + 1], data[i + 2]] }
         }
       }
     }
-    if (best) brightest[key] = best
+    if (dark) extremes[key] = { dark, light }
   }
-  return { mean: sum / n / 255, brightest }
+  return { mean: sum / (width * height) / 255, extremes }
 }
 
-const waitReady = (page) => page.eval('new Promise((r, j) => { let n = 0; const f = () => window.__ready ? setTimeout(r, 400) : (++n > 400 ? j(new Error("scene never became ready")) : setTimeout(f, 50)); f() })')
-
-const { server, url } = await serveDist({ port: 0 })
-const chrome = await launchChrome({ tag: 'poster' })
-const meta = { t: T, p: 0, tier: TIER, build: null, views: {}, brightest: {} }
+const metaPath = path.join(OUT, 'meta.json')
+const old = existsSync(metaPath) ? JSON.parse(readFileSync(metaPath, 'utf8')) : {}
+const meta = { t: T_POSTER, tier: TIER, build: null, posters: {}, alpha: {}, extremes: {}, composite: FAST ? old.composite : null }
 try {
   meta.build = execSync('git rev-parse --short=7 HEAD', { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
 } catch {
   meta.build = 'dev'
 }
+
+const { server, url } = await serveDist({ port: 0 })
+const chrome = await launchChrome({ tag: 'poster' })
 let code = 0
 try {
   const cdp = await connect(chrome.wsUrl)
-  for (const v of VIEWS) {
-    const page = await cdp.newPage({ width: v.w, height: v.h, dpr: v.dpr, mobile: v.mobile })
-    const view = { width: v.w * v.dpr, height: v.h * v.dpr, dpr: v.dpr, brightest: {} }
-    for (const fr of FRAMES) {
-      // the page with its UI, at this progress, scrolled to the frame: the boxes of each surface
-      await page.goto(`${url}/?tier=${TIER}&t=${T}&p=${fr.p}&static`, { settle: 900 })
-      if (fr.scrollTo === 'bottom') await page.eval('scrollTo(0, document.documentElement.scrollHeight)')
-      else if (fr.scrollTo) await page.eval(`scrollTo(0, document.getElementById(${JSON.stringify(fr.scrollTo)}).offsetTop)`)
-      await new Promise((r) => setTimeout(r, 400))
-      const boxes = await page.eval(`(() => {
-        const keys = ${JSON.stringify(fr.keys)}
-        const rect = (el) => { const r = el.getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom } }
-        const vis = (b) => b.x1 > 0 && b.y1 > 0 && b.x0 < innerWidth && b.y0 < innerHeight && b.x1 > b.x0 && b.y1 > b.y0
-        // text surfaces (the title, the theme line) measure under their glyphs' own line boxes, not the block
-        const textRects = (el) => { const r = document.createRange(); r.selectNodeContents(el); return [...r.getClientRects()].map((b) => ({ x0: b.left, y0: b.top, x1: b.right, y1: b.bottom })) }
-        const out = {}
-        for (const [k, sel] of Object.entries(keys)) out[k] = [...document.querySelectorAll(sel)].flatMap((el) => (k === 'title' || k === 'theme' ? textRects(el) : [rect(el)])).filter(vis)
-        return out
-      })()`)
-      // the bare scene at the same progress
-      await page.goto(`${url}/?ui=0&tier=${TIER}&t=${T}&p=${fr.p}`, { settle: 1200 })
-      await waitReady(page)
-      const errs = page.console.filter((c) => /error|exception/.test(c.type))
-      if (errs.length) console.warn(`poster: console on ${v.name} p ${fr.p}:`, errs.map((e) => e.text).join(' | '))
-      const png = path.join(SRC, fr.p === 0 ? `${v.name}.png` : `${v.name}-p${fr.p}.png`)
-      await page.screenshot(png)
-      const { mean, brightest } = await analyse(png, v.dpr, boxes)
-      for (const [k, px] of Object.entries(brightest)) view.brightest[k] = px
-      for (const k of Object.keys(fr.keys)) if (!brightest[k]) console.warn(`poster: ${v.name} p ${fr.p}: no visible ${k} box to measure`)
-      if (fr.p === 0) {
-        view.mean = Number(mean.toFixed(4))
-        const avif = path.join(OUT, `${v.name}.avif`)
-        const webp = path.join(OUT, `${v.name}.webp`)
-        await sharp(png).avif({ quality: 56, effort: 6 }).toFile(avif)
-        await sharp(png).webp({ quality: 78, effort: 6 }).toFile(webp)
-        view.sizes = { avif: statSync(avif).size, webp: statSync(webp).size, png: statSync(png).size }
-        console.log(`poster: ${v.name}  avif ${(view.sizes.avif / 1024).toFixed(1)} KB  webp ${(view.sizes.webp / 1024).toFixed(1)} KB  mean luminance ${mean.toFixed(3)}`)
-        if (view.sizes.avif > BUDGET.avif) { console.error(`poster: ${v.name}.avif is over ${BUDGET.avif / 1024} KB`); code = 1 }
-        if (view.sizes.webp > BUDGET.webp) { console.error(`poster: ${v.name}.webp is over ${BUDGET.webp / 1024} KB`); code = 1 }
+
+  // 1. the posters, from the scene's own poster()
+  {
+    const page = await cdp.newPage({ width: 1440, height: 900, dpr: 1 })
+    await page.goto(`${url}/?tier=${TIER}&theme=light`, { settle: 600 })
+    await waitReady(page)
+    for (const theme of THEMES) {
+      for (const s of SIZES) {
+        const name = `frieze-${theme}${s.suffix}`
+        const res = await page.eval(`window.__poster({ theme: ${JSON.stringify(theme)}, cssWidth: ${s.cssWidth}, dpr: 2, t: ${T_POSTER} }).then((o) => JSON.stringify({ w: o.width, h: o.height, url: o.url }))`)
+        const { w, h, url: dataUrl } = JSON.parse(res)
+        const png = path.join(SRC, `${name}.png`)
+        writeFileSync(png, Buffer.from(dataUrl.split(',')[1], 'base64'))
+        const enc = await encode(png, path.join(OUT, name))
+        const share = await drawn(png)
+        meta.posters[name] = { width: w, height: h, ...enc, drawn: share }
+        if (!s.suffix) meta.alpha[theme] = share
+        console.log(`poster: ${name} ${w}x${h}  avif ${(enc.avif.bytes / 1024).toFixed(1)} KB (q ${enc.avif.quality})  webp ${(enc.webp.bytes / 1024).toFixed(1)} KB (q ${enc.webp.quality})  drawn ${(share * 100).toFixed(1)}%`)
+        if (!enc.avif.ok) { console.error(`poster: ${name}.avif is over ${BUDGET.avif / 1024} KB at the lowest quality`); code = 1 }
+        if (!enc.webp.ok) { console.error(`poster: ${name}.webp is over ${BUDGET.webp / 1024} KB at the lowest quality`); code = 1 }
       }
     }
-    console.log(`poster: ${v.name} brightest under each surface: ${Object.entries(view.brightest).map(([k, px]) => `${k} rgb(${px.join(',')})`).join('  ')}`)
-    meta.views[v.name] = view
     await page.close()
   }
-  // text contrast on the real composite: every visible line, four widths, five scroll positions
-  meta.composite = await measureComposite({ cdp, url, sharp, tmpDir: SRC, tier: TIER })
-  if (meta.composite.failures.length) {
-    console.error(`poster: ${meta.composite.failures.length} line(s) under their contrast minimum on the composite:`)
-    for (const f of meta.composite.failures) console.error(`  ${f.view} p ${f.p}: ${f.sel} "${f.text}" ${f.ratio} (needs ${f.min})`)
-    code = 1
+
+  // 2. the composed hero (the OG crop and the luminance floor) and the clay under the text, per theme
+  for (const theme of THEMES) {
+    meta.extremes[theme] = {}
+    for (const v of [{ name: '1440', w: 1440, h: 900, dpr: 1, mobile: false }, { name: '390', w: 390, h: 844, dpr: 2, mobile: true }]) {
+      const page = await cdp.newPage({ width: v.w, height: v.h, dpr: v.dpr, mobile: v.mobile })
+      for (const p of [0, 1]) {
+        await page.goto(`${url}/?tier=${TIER}&t=${T_POSTER}&theme=${theme}`, { settle: 600 })
+        await waitReady(page)
+        await page.eval('document.fonts.ready.then(() => true)')
+        if (p === 1) await page.eval('scrollTo(0, document.documentElement.scrollHeight)')
+        await new Promise((r) => setTimeout(r, 500))
+        if (p === 0 && v.name === '1440') {
+          const shot = path.join(SRC, theme === 'light' ? 'hero-1440.png' : `hero-1440-${theme}.png`)
+          await page.screenshot(shot)
+          const { mean } = await analyse(shot, 1)
+          if (theme === 'light') meta.luminance = Number(mean.toFixed(4))
+          meta[`mean_${theme}`] = Number(mean.toFixed(4))
+        }
+        const rules = COMPOSITE_RULES.filter((r) => r.p === p)
+        const boxes = await page.eval(`(() => {
+          const rules = ${JSON.stringify(rules.map((r) => ({ key: r.key, sel: r.sel })))}
+          const out = {}
+          const shown = (el) => { const cs = getComputedStyle(el); return cs.display !== 'none' && cs.visibility !== 'hidden' }
+          for (const r of rules) {
+            out[r.key] = [...document.querySelectorAll(r.sel)].filter(shown).flatMap((el) => { const g = document.createRange(); g.selectNodeContents(el); return [...g.getClientRects()] })
+              .filter((b) => b.width > 1 && b.height > 1 && b.bottom > 0 && b.top < innerHeight)
+              .map((b) => ({ x0: b.left, y0: b.top, x1: b.right, y1: b.bottom }))
+          }
+          return out
+        })()`)
+        await page.eval(HIDE)
+        const png = path.join(SRC, `clay-${theme}-${v.name}-p${p}.png`)
+        await page.screenshot(png)
+        const { extremes } = await analyse(png, v.dpr, boxes)
+        for (const r of rules) {
+          const e = extremes[r.key]
+          if (!e) { console.warn(`poster: ${theme} ${v.name} p ${p}: no visible ${r.key} text to measure`); continue }
+          const cur = meta.extremes[theme][r.key]
+          meta.extremes[theme][r.key] = cur
+            ? { dark: lum(...e.dark) < lum(...cur.dark) ? e.dark : cur.dark, light: lum(...e.light) > lum(...cur.light) ? e.light : cur.light }
+            : e
+        }
+      }
+      await page.close()
+    }
+    console.log(`poster: ${theme} clay under the text: ${Object.entries(meta.extremes[theme]).map(([k, e]) => `${k} rgb(${e.dark}) to rgb(${e.light})`).join('  ')}`)
   }
-  cdp.close()
-  // the composite worst case across both views
-  for (const v of Object.values(meta.views)) {
-    for (const [k, px] of Object.entries(v.brightest)) {
-      const cur = meta.brightest[k]
-      if (!cur || lum(...px) > lum(...cur)) meta.brightest[k] = px
+
+  // 3. every text line on the composite: four widths, five scroll positions, both themes
+  if (!FAST) {
+    meta.composite = {}
+    for (const theme of THEMES) {
+      meta.composite[theme] = await measureComposite({ cdp, url, sharp, tmpDir: SRC, tier: TIER, theme, t: T_POSTER })
+      const c = meta.composite[theme]
+      if (c.failures.length) {
+        console.error(`poster: ${c.failures.length} ${theme} line(s) under their contrast minimum on the composite:`)
+        for (const f of c.failures) console.error(`  ${f.view} p ${f.p}: ${f.sel} "${f.text}" ${f.ratio} (needs ${f.min})`)
+        code = 1
+      }
     }
   }
-  const mean = meta.views['hero-1440'].mean
-  meta.luminance = mean
-  if (mean < FLOOR) {
-    console.error(`poster: mean luminance ${mean.toFixed(3)} is under the ${FLOOR} floor. Raise LIGHT.hemi (src/scene/lights.js), then LIGHT.exposure.`)
+  cdp.close()
+
+  if (!(meta.luminance >= FLOOR)) {
+    console.error(`poster: the light composite's mean luminance ${meta.luminance} is under the ${FLOOR} floor (a dark or failed render).`)
     code = 1
-  } else if (mean < TARGET) {
-    console.warn(`poster: mean luminance ${mean.toFixed(3)} is under the ${TARGET} target (the floor is ${FLOOR}).`)
   }
-  writeFileSync(path.join(OUT, 'meta.json'), JSON.stringify(meta, null, 2) + '\n')
+  if (!(meta.alpha.dark > 0.01)) {
+    console.error(`poster: the dark poster is empty (drawn ${meta.alpha.dark}).`)
+    code = 1
+  }
+  writeFileSync(metaPath, JSON.stringify(meta, null, 2) + '\n')
   writeFileSync(path.join(SRC, 'meta.json'), JSON.stringify(meta, null, 2) + '\n')
-  console.log(`poster: wrote public/poster/meta.json (build ${meta.build}, luminance ${mean.toFixed(3)})`)
+  console.log(`poster: wrote public/poster/meta.json (build ${meta.build}, light luminance ${meta.luminance})`)
   // the built dist serves the new posters too, until the next build copies public/ again
   const distPoster = path.join(ROOT, 'dist/poster')
   mkdirSync(distPoster, { recursive: true })
-  for (const f of ['hero-1440.avif', 'hero-1440.webp', 'hero-780.avif', 'hero-780.webp', 'meta.json']) writeFileSync(path.join(distPoster, f), readFileSync(path.join(OUT, f)))
+  for (const theme of THEMES) for (const s of SIZES) for (const ext of ['avif', 'webp']) {
+    const f = `frieze-${theme}${s.suffix}.${ext}`
+    writeFileSync(path.join(distPoster, f), readFileSync(path.join(OUT, f)))
+  }
+  writeFileSync(path.join(distPoster, 'meta.json'), readFileSync(metaPath))
+  for (const [name, p] of Object.entries(meta.posters)) if (statSync(path.join(OUT, `${name}.avif`)).size !== p.avif.bytes) console.warn(`poster: ${name}.avif size changed under us`)
 } catch (e) {
   console.error(e.stack || String(e))
   code = 1
