@@ -32,6 +32,10 @@ import { installHooks, removeHooks } from './hooks.js'
 
 const FIGURE_URL = new URL('../assets/figure/man.glb', import.meta.url).href
 const DPR_CAP = { full: 2, lite: 1.5 }
+// a phone's band (390 x 388 CSS px is 0.15 MP) is cheap to draw: lite renders it at DPR 2, so on a 3x
+// screen the silhouette and its incisions are as sharp as the CSS ground line and the text beside them
+const SMALL_CANVAS = 5e5
+const capFor = (tier, w, h) => Math.min(devicePixelRatio || 1, tier === 'lite' && w * h < SMALL_CANVAS ? 2 : DPR_CAP[tier] || 2)
 const SLIP = { dist: 0.55, slide: 0.45, plant: 0.3, hold: 0.12, resume: 0.6 }
 const HOLD_MS = 260 // the clock holds the poster frame this long while the canvas fades in over it
 const ADV_HERO = 0.45 // metres he climbs while the hero scrolls away
@@ -122,7 +126,8 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   if (S) unmount()
   const { fixedT, slipEvery } = query()
   const r = makeRenderer(canvas)
-  const cap = Math.min(devicePixelRatio || 1, DPR_CAP[tier] || 2)
+  const a0 = bands[0]?.art.getBoundingClientRect()
+  let cap = capFor(tier, a0?.width || 0, a0?.height || 0)
   r.setPixelRatio(cap)
   const me = (S = { r, canvas, dead: false })
   let lost = false, losses = 0
@@ -155,6 +160,13 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (!host) return
     const c = host.art.getBoundingClientRect(), rr = host.room.getBoundingClientRect()
     cssW = Math.max(1, Math.round(c.width)); cssH = Math.max(1, Math.round(c.height))
+    // the cap follows the band's size (a phone turned to landscape is no longer a small canvas; the
+    // adaptive step raises it again when it is)
+    const c2 = capFor(tier, cssW, cssH)
+    if (c2 !== cap) {
+      cap = c2
+      if (r.getPixelRatio() > cap) { r.setPixelRatio(cap); lineWidths(W, cap); stats.dpr = cap }
+    }
     r.setSize(cssW, cssH, false)
     fit = fitIn(cssW, cssH, rr.left - c.left, rr.top - c.top, rr.width, rr.height)
     for (const h of hulls) h.material.userData.u.uRes.value.set(cssW, cssH)
