@@ -7,8 +7,8 @@ import SceneControls from '../ui/SceneControls.jsx'
   The foot: the black foot of the pot, with the meander as its top edge (gloss on the clay band; in dark,
   clay on the gloss). Three rows in the foot inks: the plain row (name · place, "no cookies, no
   analytics.", "site source", "the kit"); the credits row (the CC BY credit for the figure, mandatory in
-  every tier and on every page, and the three faces under the SIL OFL); the controls row (the build line
-  and the scene controls).
+  every tier and on every page, and the three faces under the SIL OFL); the controls row (the scene
+  controls; the build line only on the kit page, the home page carries it as <meta name="build">).
 */
 export default function Footer({ className = '', kit = false, controls }) {
   return (
@@ -47,9 +47,11 @@ export default function Footer({ className = '', kit = false, controls }) {
         </p>
       </div>
       <div className="wrap foot-row foot-controls">
-        <p className="build">
-          <BuildStamp />
-        </p>
+        {kit && (
+          <p className="build">
+            <BuildStamp />
+          </p>
+        )}
         {controls ?? <SceneControls />}
       </div>
     </footer>

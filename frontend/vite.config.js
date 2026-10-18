@@ -54,6 +54,7 @@ function headTags() {
     `<title>${esc(HEAD.title.text)}</title>`,
     meta('name', 'description', HEAD.description.text),
     meta('name', 'color-scheme', 'light dark'),
+    meta('name', 'build', `${BUILD_SHA} ${BUILD_DATE}`),
     `<meta name="theme-color" content="${HEAD.themeColor.light}" />`,
     `<link rel="canonical" href="${esc(HEAD.canonical)}" />`,
     `<link rel="icon" href="/favicon.svg" type="image/svg+xml" />`,
