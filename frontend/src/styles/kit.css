@@ -240,7 +240,9 @@
   flex: 1 1 360px;
 }
 .kit-poster {
-  height: 260px;
+  --band-h: 260px;
+  --ps-h: calc(var(--band-h) - 16px - var(--meander-h) - 8px);
+  height: var(--band-h);
 }
 .kit-poster .poster-stage {
   inset: 16px 16px calc(var(--meander-h) + 8px);
@@ -251,7 +253,7 @@
   gap: 16px;
 }
 .kit-theme .kit-poster {
-  height: 200px;
+  --band-h: 200px;
 }
 .kit-foot-box {
   background: var(--foot);

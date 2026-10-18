@@ -131,8 +131,12 @@
 }
 
 /* ---------- the 404 ---------- */
+/* --ps-h is the poster stage's height, so the room is as wide as that height allows and never wider than
+   the band (on a phone the 404's disk would run off the right edge otherwise) */
 .nf-band {
-  height: clamp(320px, 52svh, 560px);
+  --band-h: clamp(320px, 52svh, 560px);
+  --ps-h: calc(var(--band-h) - var(--neck-h) - 24px - var(--meander-h) - 16px);
+  height: var(--band-h);
 }
 .poster-stage {
   position: absolute;
@@ -143,14 +147,14 @@
   align-items: flex-end;
 }
 .poster-stage .stage {
+  width: 100%;
   height: 100%;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
 }
 .poster-stage .room {
-  height: 100%;
-  width: auto;
-  max-width: 100%;
+  width: min(100%, calc(var(--ps-h) * var(--room-aspect)));
 }
 /* the poster bands (the 404 and the kit samples): the meander is the band's bottom edge, as on the home page */
 .frieze--poster > .meander {
