@@ -14,12 +14,12 @@
   The ground line is CSS (crisp, and there before the scene), so the camera follows him along the slope:
   the line never moves on screen, and scroll only changes how far up it he has got.
 
-  Two clocks: t is the wall clock, tau the gait clock, which freezes during the slip and ramps back, so
+  Two clocks: t is the wall clock, tau the gait clock, which freezes during the catch and ramps back, so
   the cycle never pops. Flat colour, no lights, no fog, no post, no shadows: a theme switch is a uniform
   write (vase.js setInks), never a recompile.
 
-  Query flags (tools only): ?t=<s> freezes the clock (a scroll renders one still), ?slip=<s> the slip
-  period. Hooks (hooks.js): window.__ready, __stats, __bench(n), __frameAt(t), __measure(), __bounds(),
+  Query flags (tools only): ?t=<s> freezes the clock (a scroll renders one still), ?slip=<s> the catch
+  period (and its first), ?effort=<0..1> a fixed effort. Hooks (hooks.js): window.__ready, __stats, __bench(n), __frameAt(t), __measure(), __bounds(),
   __poster(opts).
 */
 import * as THREE from 'three'
@@ -38,7 +38,10 @@ const DPR_CAP = { full: 2, lite: 1.5 }
 // screen the silhouette and its incisions are as sharp as the CSS ground line and the text beside them
 const SMALL_CANVAS = 5e5
 const capFor = (tier, w, h) => Math.min(devicePixelRatio || 1, tier === 'lite' && w * h < SMALL_CANVAS ? 2 : DPR_CAP[tier] || 2)
-const SLIP = { dist: 0.55, slide: 0.45, plant: 0.3, hold: 0.12, resume: 0.6 }
+// the catch: the rock gets away from him, he digs in, holds it, and goes on (seconds and metres); first
+// 6.5 s after the scene goes live, then every 18 s
+const CATCH = { give: 0.3, dig: 0.3, hold: 0.4, resume: 0.8, after: 0.4, dist: 0.55, first: 6.5, every: 18 }
+const CATCH_LEN = CATCH.give + CATCH.dig + CATCH.hold + CATCH.resume + CATCH.after
 const HOLD_MS = 260 // the clock holds the poster frame this long while the canvas fades in over it
 const ADV_HERO = 0.9 // metres he climbs while the hero scrolls away (to the cut, the meander under the neck)
 const ADV_CONTACT = [-0.9, 0] // and over the contact band as it comes into view: he arrives, never crests
@@ -59,12 +62,25 @@ const EYE_PX = 200
 const WRAP = 240
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp
 const sstep = (a, b, x) => { const u = clamp((x - a) / (b - a), 0, 1); return u * u * (3 - 2 * u) }
+// the site's curves, solved: --ease-out and --ease-in-out (tokens.css)
+function bezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by
+  return (x) => {
+    if (x <= 0) return 0
+    if (x >= 1) return 1
+    let s = x
+    for (let i = 0; i < 6; i++) { const f = ((ax * s + bx) * s + cx) * s - x, d = (3 * ax * s + 2 * bx) * s + cx; if (Math.abs(d) < 1e-6) break; s -= f / d }
+    return ((ay * s + by) * s + cy) * s
+  }
+}
+const easeOut = bezier(0.215, 0.61, 0.355, 1), easeInOut = bezier(0.6, 0, 0.4, 1)
 
 function query() {
   const q = new URLSearchParams(location.search)
   return {
     fixedT: q.has('t') ? Number(q.get('t')) : null,
-    slipEvery: Number(q.get('slip')) || 14,
+    catchEvery: Number(q.get('slip')) || CATCH.every,
+    catchFirst: Number(q.get('slip')) || CATCH.first,
     // tools only: a fixed effort (0..1, + is scrolling down) for stills
     effort: q.has('effort') ? Number(q.get('effort')) : null,
   }
@@ -143,7 +159,7 @@ let S = null
 
 export async function mount({ canvas, bands, theme = 'light', tier = 'full', onReady, onError, onLost } = {}) {
   if (S) unmount()
-  const { fixedT, slipEvery, effort: fixedEffort } = query()
+  const { fixedT, catchEvery, catchFirst, effort: fixedEffort } = query()
   const r = makeRenderer(canvas)
   const a0 = bands[0]?.art.getBoundingClientRect()
   let cap = capFor(tier, a0?.width || 0, a0?.height || 0)
@@ -169,8 +185,8 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   let host = null, fit = null, cssW = 1, cssH = 1
   const vis = new Map()
   let t = fixedT ?? T_POSTER, tau = t, rate = 1, last = performance.now()
-  let slipStart = -1, lastSlip = t, shiftBase = 0, camShift = 0
-  const pose = { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0 }
+  let catchStart = -1, nextCatch = Infinity, shiftBase = 0, camShift = 0
+  const pose = { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0, lookUp: 0 }
   let adv = 0, advVel = 0, prevPush = 0
   // effort: the scroll velocity through the spring (px/s, signed: + is down the page)
   let vel = fixedEffort !== null ? fixedEffort * V_FULL : 0, velV = 0, lastY = scrollY
@@ -216,17 +232,46 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     return lerp(ADV_CONTACT[0], ADV_CONTACT[1], sstep(0, 1, p))
   }
 
-  function slipAt(now) {
-    rate = 1
-    pose.shift = shiftBase; pose.leanAdd = 0; pose.crouch = 0
-    if (slipStart < 0) return
-    const u = now - slipStart
-    const { dist, slide, plant, hold, resume } = SLIP
-    if (u < slide) { const k = (u / slide) ** 3; pose.shift = shiftBase + dist * k; pose.leanAdd = -8 * sstep(0, 1, k); pose.crouch = 0.05 * k; rate = 0 }
-    else if (u < slide + plant) { const k = sstep(0, 1, (u - slide) / plant); pose.shift = shiftBase + dist; pose.leanAdd = lerp(-8, 5, k); pose.crouch = lerp(0.05, 0.07, k); rate = 0 }
-    else if (u < slide + plant + hold) { pose.shift = shiftBase + dist; pose.leanAdd = 5; pose.crouch = 0.07; rate = 0 }
-    else if (u < slide + plant + hold + resume) { const k = sstep(0, 1, (u - slide - plant - hold) / resume); pose.shift = shiftBase + dist; pose.leanAdd = 5 * (1 - k); pose.crouch = 0.07 * (1 - k); rate = k }
-    else { shiftBase += dist; slipStart = -1; lastSlip = now; pose.shift = shiftBase }
+  // the catch, in scene time: writes the pose and returns the gait rate it allows
+  function catchAt(now) {
+    pose.shift = shiftBase; pose.leanAdd = 0; pose.crouch = 0; pose.lookUp = 0
+    if (catchStart < 0) return 1
+    const u = now - catchStart
+    const { give, dig, hold, resume, dist } = CATCH
+    if (u < give) {
+      // the give: the rock gets 0.55 m on him, his feet skid back with it, his head comes up to it
+      const k = (u / give) ** 3, e = sstep(0, 1, k)
+      pose.shift = shiftBase + dist * k; pose.leanAdd = -8 * e; pose.crouch = 0.025 * k; pose.lookUp = 10 * e
+      return 0
+    }
+    if (u < give + dig) {
+      // the dig-in: the rear foot plants, the front knee drives, the lean goes past where it was
+      const k = easeOut((u - give) / dig)
+      pose.shift = shiftBase + dist; pose.leanAdd = lerp(-8, 6, k); pose.crouch = lerp(0.025, 0.035, k); pose.lookUp = lerp(10, 4, k)
+      return 0
+    }
+    if (u < give + dig + hold) { pose.shift = shiftBase + dist; pose.leanAdd = 6; pose.crouch = 0.035; pose.lookUp = 4; return 0 }
+    if (u < give + dig + hold + resume) {
+      // the resume: he leans before he steps
+      const k = (u - give - dig - hold) / resume, e = easeInOut(k)
+      pose.shift = shiftBase + dist; pose.leanAdd = 6 * (1 - e); pose.crouch = 0.035 * (1 - e); pose.lookUp = 4 * (1 - e)
+      return k * k
+    }
+    pose.shift = shiftBase + dist
+    if (u >= CATCH_LEN) { shiftBase += dist; catchStart = -1; nextCatch = now + catchEvery - CATCH_LEN; pose.shift = shiftBase }
+    return 1
+  }
+  // grit at the catch: from both feet as they skid, then one speck from where the rock meets the line
+  let catchDust = 0
+  function catchDustAt(now, o) {
+    if (catchStart < 0) { catchDust = 0; return }
+    const u = now - catchStart
+    const sprayAt = [0.02, 0.12, 0.22]
+    while (catchDust < sprayAt.length && u >= sprayAt[catchDust]) {
+      for (let i = 0; i < 2; i++) dust.kick(o.balls[i].x, 0.03, 2, { vx: [0.25, 0.9], vy: [0.25, 0.5], t: now })
+      catchDust++
+    }
+    if (catchDust === sprayAt.length && u >= CATCH.give + CATCH.dig + 0.15) { dust.kick(o.bx - 0.05, 0.08, 1, { vx: [-0.15, -0.05], vy: [0.05, 0.12], t: now, s: [2.6, 2.8] }); catchDust++ }
   }
 
   // the reader's effort: the scroll velocity through a critically damped spring (w 7, settled in 0.6 s)
@@ -243,23 +288,26 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   function render(dt) {
     if (!fit || lost) return
     effortAt(dt)
-    if (slipStart < 0 && fixedT === null && t - lastSlip > slipEvery && Math.abs(f.phase(tau) - 0.6) < 0.03) slipStart = t
-    slipAt(t)
+    const e = clamp(Math.abs(vel) / V_FULL, 0, 1)
+    // the catch: in the hero, only as a foot lands (both feet planted, the stance at its widest, so he can
+    // dig in), and never while a scroll is moving him (it waits for the spring to settle)
+    const ph = f.phase(tau)
+    if (catchStart < 0 && fixedT === null && host?.kind === 'hero' && t >= nextCatch && e < 0.05 && ph % 0.5 < 0.05) catchStart = t
+    rate = catchAt(t)
     // your scroll is his push: scrolling down he leans in and steps faster, scrolling up he braces (a
-    // step back of 3 cm, recovered as you stop); never on top of the slip
+    // step back of 3 cm, recovered as you stop); never on top of the catch
     pose.reachAdd = 0
-    if (slipStart < 0) {
-      const e = clamp(Math.abs(vel) / V_FULL, 0, 1)
+    if (catchStart < 0) {
       if (vel >= 0) { rate *= 1 + 0.5 * e; pose.leanAdd += 3 * e; pose.reachAdd = 0.02 * e }
       else { rate *= 1 - 0.6 * e; pose.leanAdd += 2 * e; pose.shift += 0.03 * e }
     }
     // the scroll position of the frieze: a critically damped spring on how far up the line he is
     const target = advTarget()
     if (dt > 0) { const w = SPRING_W, a = -w * w * (adv - target) - 2 * w * advVel; advVel += a * dt; adv += advVel * dt } else { adv = target; advVel = 0 }
-    camShift += (pose.shift - camShift) * (1 - Math.exp(-dt * (slipStart >= 0 ? 0.35 : 0.9)))
-    // the camera never lags him by more than the slip the room was measured for (measure(): SLIP.dist * 0.7),
-    // so the deepest slip stays inside the room and clear of the plate however close the slips come
-    camShift = Math.max(camShift, pose.shift - SLIP.dist * 0.7)
+    camShift += (pose.shift - camShift) * (1 - Math.exp(-dt * (catchStart >= 0 ? 0.35 : 0.9)))
+    // the camera never lags him by more than the catch the room was measured for (measure(): CATCH.dist *
+    // 0.7), so the deepest give stays inside the room and clear of the plate however close the catches come
+    camShift = Math.max(camShift, pose.shift - CATCH.dist * 0.7)
     scene.updateMatrixWorld()
     const o = f.update(tau, pose)
     // grit kicked back from the rear toe at each push-off (never in a still or a held frame)
@@ -268,8 +316,9 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
       dust.kick(b.x - 0.04, 0.03, 4 + Math.round(2 * ((tau * 7.3) % 1)), { t })
     }
     prevPush = o.push
+    if (dt > 0) catchDustAt(t, o)
     dust.update(t, dt)
-    // O, the foot point the CSS ground line passes through: his root minus the climb, minus the slip lag
+    // O, the foot point the CSS ground line passes through: his root minus the climb, minus the catch lag
     const ox = o.x + pose.shift - camShift - adv
     O.set(ox, 0, 0).applyMatrix4(slope.matrixWorld)
     windowFor(fit, win)
@@ -297,16 +346,19 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (first) holdUntil = now + HOLD_MS
     if (now < holdUntil) dt = 0 // hold the poster frame while the canvas fades in over it
     t += dt; tau += dt * rate
-    if (t > WRAP) { t = tau = T_POSTER; shiftBase = 0; camShift = 0; slipStart = -1; lastSlip = t; dust.clear() }
+    if (t > WRAP) { t = tau = T_POSTER; shiftBase = 0; camShift = 0; catchStart = -1; nextCatch = t + catchEvery; dust.clear() }
     const t0 = performance.now()
     render(dt)
     const ms = performance.now() - t0 + (dt * 1000 > 40 ? 30 : 0)
-    stats.frames++; stats.ms += (ms - stats.ms) * 0.1; stats.t = t; stats.slipping = slipStart >= 0; stats.eff = +clamp(Math.abs(vel) / V_FULL, 0, 1).toFixed(3); stats.rate = +rate.toFixed(3)
+    stats.frames++; stats.ms += (ms - stats.ms) * 0.1; stats.t = t; stats.slipping = catchStart >= 0; stats.eff = +clamp(Math.abs(vel) / V_FULL, 0, 1).toFixed(3); stats.rate = +rate.toFixed(3)
     adapt(stats.ms)
     if (first) live()
   }
   function live() {
     first = false
+    // a catch starts only as a foot lands (every 1.025 s): from 0.7 s early, the first lands about 6.1 s
+    // after the poster turns live (the clock holds 260 ms on the poster first)
+    nextCatch = t + catchFirst - 0.7
     host?.el.classList.add('is-live')
     canvas.classList.add('on')
     window.__ready = true
@@ -371,7 +423,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   return me
 }
 
-// the box: his skinned vertices and the disk over two push cycles (and, separately, the slip poses with
+// the box: his skinned vertices and the disk over two push cycles (and, separately, the catch poses with
 // the camera lag), relative to O; and the frame of greatest stretch (the push-off peak)
 function measure(W) {
   const { scene, slope, f } = W
@@ -401,11 +453,13 @@ function measure(W) {
     const o = f.update(tt, { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0 })
     if (o.push > pushMax) { pushMax = o.push; tPush = tt }
   }
-  // the slip: the rock gets SLIP.dist on him, the camera (camShift) has barely moved yet
-  for (const p of [{ leanAdd: -8, crouch: 0.05 }, { leanAdd: 5, crouch: 0.07 }]) for (let i = 0; i < 16; i++) {
+  // the catch: the rock gets CATCH.dist on him, the camera (camShift) has barely moved yet; and the effort
+  // poses (leaning in 3 degrees, reaching 2 cm)
+  for (const p of [{ leanAdd: -8, crouch: 0.025, lookUp: 10 }, { leanAdd: 6, crouch: 0.035, lookUp: 4 }, { leanAdd: 3, crouch: 0, reachAdd: 0.02 }]) for (let i = 0; i < 16; i++) {
     const tt = T_POSTER + (i / 16) * GAIT.period
     scene.updateMatrixWorld()
-    add(slip, f.update(tt, { shift: SLIP.dist, reachAdd: 0, ...p }), SLIP.dist * 0.7)
+    const sh = p.reachAdd ? 0 : CATCH.dist
+    add(slip, f.update(tt, { shift: sh, reachAdd: 0, ...p }), sh * 0.7)
   }
   return { rest, slip, man, tPush, pushMax, R, BOX }
 }
