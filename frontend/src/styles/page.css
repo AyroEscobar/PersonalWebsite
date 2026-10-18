@@ -503,3 +503,24 @@
     padding: 0 16px;
   }
 }
+
+/* ---------- touch: every small control is a 44 px target (padding, never a bigger type size); after the
+   phone rules, which set the menu button's display ---------- */
+@media (pointer: coarse) {
+  .links a,
+  .elsewhere a,
+  .foot-row:not(.foot-credits) a,
+  .tog,
+  .ctl,
+  .menu-btn,
+  .btn.copy {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-block: 0;
+  }
+  .menu-btn {
+    justify-content: center;
+    min-width: 44px;
+  }
+}
