@@ -24,10 +24,11 @@
 */
 import * as THREE from 'three'
 import { loadFigure, makeFigure } from './figure.js'
-import { figureMaterial, boulderMaterial, hullOutline, setInks } from './vase.js'
+import { figureMaterial, boulderMaterial, hullOutline, setInks, INKS } from './vase.js'
 import { addCurvature } from './curvature.js'
 import { addParts, headUniforms } from './head.js'
 import { rockShape } from './rock.js'
+import { makeDust } from './dust.js'
 import { SLOPE_DEG, R, X0, T_POSTER, BOX } from './comp.js'
 import { installHooks, removeHooks } from './hooks.js'
 
@@ -94,9 +95,13 @@ async function build({ theme, figureUrl = FIGURE_URL }) {
   f.boulder.renderOrder = 1
   f.mesh.renderOrder = 2
   const gapHull = hullOutline(f.mesh, { px: 1.5, cut: true, inflate: INFLATE / objScale, part: fig.userData.u }); gapHull.renderOrder = 3; f.mesh.parent.add(gapHull)
+  // the grit he kicks onto the line and the stones that lie on it (dust.js): one Points draw
+  const dust = makeDust()
+  slope.add(dust.points)
   const mats = { fig, disk, gapHull, diskHull }
   setInks(mats, theme)
-  return { scene, slope, f, mats, hulls: [diskHull, gapHull], rs }
+  dust.setInk(INKS[theme].body)
+  return { scene, slope, f, mats, hulls: [diskHull, gapHull], rs, dust }
 }
 
 // the incised lines are fwidth-wide in device pixels: scale them so they stay the same in CSS px at any dpr
@@ -150,7 +155,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   let W
   try { W = await build({ theme }) } catch (e) { onError?.(e); return null }
   if (me.dead) return null
-  const { scene, slope, f, mats, hulls } = W
+  const { scene, slope, f, mats, hulls, dust } = W
   lineWidths(W, r.getPixelRatio())
   const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200)
   cam.position.set(0, 0, 60)
@@ -162,7 +167,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   let t = fixedT ?? T_POSTER, tau = t, rate = 1, last = performance.now()
   let slipStart = -1, lastSlip = t, shiftBase = 0, camShift = 0
   const pose = { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0 }
-  let adv = 0, advVel = 0
+  let adv = 0, advVel = 0, prevPush = 0
   let docVisible = !document.hidden, userPaused = false, first = true, holdUntil = 0, curTheme = theme
   const O = new THREE.Vector3(), win = {}
 
@@ -181,6 +186,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     fit = fitIn(cssW, cssH, rr.left - c.left, rr.top - c.top, rr.width, rr.height)
     for (const h of hulls) h.material.userData.u.uRes.value.set(cssW, cssH)
     mats.fig.userData.u.uEyeOn.value = 1.8 * fit.s >= EYE_PX ? 1 : 0
+    dust.setScale(fit.s, r.getPixelRatio())
   }
   function setHost(b) {
     if (b === host) return
@@ -226,9 +232,20 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     camShift = Math.max(camShift, pose.shift - SLIP.dist * 0.7)
     scene.updateMatrixWorld()
     const o = f.update(tau, pose)
+    // grit kicked back from the rear toe at each push-off (never in a still or a held frame)
+    if (dt > 0 && fixedT === null && rate > 0.05 && o.push > 0.6 && prevPush <= 0.6) {
+      const b = o.balls[o.pushFoot]
+      dust.kick(b.x - 0.04, 0.03, 4 + Math.round(2 * ((tau * 7.3) % 1)), { t })
+    }
+    prevPush = o.push
+    dust.update(t, dt)
     // O, the foot point the CSS ground line passes through: his root minus the climb, minus the slip lag
-    O.set(o.x + pose.shift - camShift - adv, 0, 0).applyMatrix4(slope.matrixWorld)
+    const ox = o.x + pose.shift - camShift - adv
+    O.set(ox, 0, 0).applyMatrix4(slope.matrixWorld)
     windowFor(fit, win)
+    // the stones across the whole canvas (the window is in world metres from O)
+    const cs = Math.cos(slope.rotation.z)
+    dust.stones(ox + win.left / cs - 0.3, ox + win.right / cs + 0.3)
     aim(cam, O)
     cam.left = win.left; cam.right = win.right; cam.top = win.top; cam.bottom = win.bottom
     cam.updateProjectionMatrix()
@@ -250,7 +267,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (first) holdUntil = now + HOLD_MS
     if (now < holdUntil) dt = 0 // hold the poster frame while the canvas fades in over it
     t += dt; tau += dt * rate
-    if (t > WRAP) { t = tau = T_POSTER; shiftBase = 0; camShift = 0; slipStart = -1; lastSlip = t }
+    if (t > WRAP) { t = tau = T_POSTER; shiftBase = 0; camShift = 0; slipStart = -1; lastSlip = t; dust.clear() }
     const t0 = performance.now()
     render(dt)
     const ms = performance.now() - t0 + (dt * 1000 > 40 ? 30 : 0)
@@ -295,7 +312,9 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   // compile off the critical path before the first frame, so the first frame never stalls
   scene.updateMatrixWorld()
   f.update(T_POSTER, pose)
+  dust.kick(0, 0.05, 1, { t: 0 }); dust.update(0, 0) // the grit's program compiles with the rest
   try { await r.compileAsync(scene, cam) } catch { /* the first frame compiles instead */ }
+  dust.clear()
   if (me.dead) return null
   // start in the hero if nothing has reported yet (the observer fires on the next frame)
   if (!host) setHost(bands[0])
@@ -314,7 +333,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     io, ro, onResize, onVis, onScroll, W,
     pause: () => { userPaused = true; sync() },
     play: () => { userPaused = false; sync() },
-    setTheme: (th) => { if (th === curTheme) return; curTheme = th; setInks(mats, th); if (!host || still() || !stats.frames) render(0) },
+    setTheme: (th) => { if (th === curTheme) return; curTheme = th; setInks(mats, th); dust.setInk(INKS[th].body); if (!host || still() || !stats.frames) render(0) },
     paused: () => userPaused,
     remeasure: () => { measureHost(); if (still()) render(0) },
   })
@@ -382,6 +401,10 @@ export async function poster({ theme = 'light', cssWidth = 800, dpr = 2, figureU
   const win = windowFor(fit0, {})
   aim(cam, O)
   Object.assign(cam, win); cam.updateProjectionMatrix()
+  // the stones on the line are part of the picture (the first live frame draws them where they lie)
+  W.dust.setScale(fit0.s, dpr)
+  const cs = Math.cos(W.slope.rotation.z)
+  W.dust.stones(o.x + win.left / cs - 0.3, o.x + win.right / cs + 0.3)
   await r.compileAsync(W.scene, cam).catch(() => {})
   r.render(W.scene, cam)
   const url = canvas.toDataURL('image/png')
