@@ -10,7 +10,10 @@
 .frieze-canvas {
   transition: opacity var(--dur-canvas) linear;
 }
-/* the poster waits for the canvas to finish fading in, then steps aside */
+/* the poster waits for the canvas to finish fading in, then steps aside (and so do the pot's stills and
+   its last frame) */
+.pot-still,
+.pot-snap,
 .poster {
   transition: opacity 0s linear calc(var(--dur-canvas) + 20ms);
 }

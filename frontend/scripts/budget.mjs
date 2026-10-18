@@ -13,6 +13,7 @@
     preloaded fonts                      2 files (Cinzel, EB Garamond upright), 60 KB together
     all font files                       4 (those two, the EB Garamond italic, Marcellus SC); no monospace
     the figure mesh                     400 KB
+    pot stills                           four: light and dark, turned away and facing, AVIF 20 KB or less each
     posters                              eight: the light and the dark vase, desktop and phone, AVIF 20 KB
                                          or less each, WebP 32 KB or less each
     initial transfer                    500 KB (html, css, entry, the two preloaded fonts, the light
@@ -47,6 +48,7 @@ export const BUDGETS = {
   figure: 400 * KB,
   posterAvif: 20 * KB,
   posterWebp: 32 * KB,
+  potStill: 20 * KB,
   initial: 500 * KB,
 }
 
@@ -152,6 +154,12 @@ export function measure() {
       if (!existsSync(f)) { fails.push(`poster missing: poster/${name}.${ext} (run npm run poster)`); continue }
       add('poster', `${name}.${ext}`, raw(f), budget)
     }
+  }
+  // the pot's four stills (lazy: only the laid-out pot's, once the reader nears the belly)
+  for (const name of ['pot-light-in', 'pot-light-face', 'pot-dark-in', 'pot-dark-face']) {
+    const f = path.join(DIST, 'pot', `${name}.avif`)
+    if (!existsSync(f)) { fails.push(`pot still missing: pot/${name}.avif (run npm run poster -- --pot)`); continue }
+    add('poster', `${name}.avif`, raw(f), BUDGETS.potStill)
   }
 
   // Initial transfer: html + entry js + css (inlined, so inside the html) + the two preloaded fonts + the

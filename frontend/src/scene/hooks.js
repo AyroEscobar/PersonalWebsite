@@ -13,10 +13,11 @@
     __bounds()     CSS px boxes in the viewport: figure (his skinned mesh), disk, room, canvas, and the
                    header, plate and button boxes on screen, so a check can assert none touches him
     __poster(o)    the transparent poster frame as a PNG data URL (frieze.js poster(), for scripts/poster.mjs)
+    __potShot(o)   the pot's still at a turn, { rot, sun, w, h }, as a PNG data URL (scripts/poster.mjs --pot)
 */
 import * as THREE from 'three'
 
-const KEYS = ['__frameAt', '__bench', '__bounds', '__measure', '__poster', '__ready', '__stats', '__gait', '__legs']
+const KEYS = ['__frameAt', '__bench', '__bounds', '__measure', '__poster', '__ready', '__stats', '__gait', '__legs', '__potShot']
 
 export function installHooks(ctx) {
   const { r, cam, scene, f, R, canvas, render, step, measure, poster } = ctx
@@ -31,6 +32,7 @@ export function installHooks(ctx) {
     return { avgMs: (performance.now() - s0) / n, size: [size.x, size.y], dpr: r.getPixelRatio(), draws: r.info.render.calls, tris: r.info.render.triangles, programs: r.info.programs.length }
   }
   window.__measure = () => measure()
+  window.__potShot = (o) => ctx.potShot?.(o)
   window.__legs = (n = 24, t0 = 2.34) => {
     const rows = []
     for (let i = 0; i < n; i++) {

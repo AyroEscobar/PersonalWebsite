@@ -16,9 +16,14 @@
                               positions and both themes (lib/composite.mjs)
     .build/poster/*.png       the sources, and hero-1440.png (the composed light hero) for scripts/og.mjs
 
+    public/pot/pot-{light,dark}-{in,face}.avif   with --pot (and nothing else): the pot's four stills,
+                                                 560x860, from the scene (window.__potShot): turned away
+                                                 (-70 degrees, where the canvas lands in a live tier) and
+                                                 facing (0, the still tier), 20 KB or less each
+
   Run after `npm run build` with the dist served here: node scripts/poster.mjs [--tier full] [--fast]
-  (--fast skips the composite measurement and keeps the last one). The outputs are committed, so the
-  deploy build never needs Chrome or sharp.
+  [--pot] (--fast skips the composite measurement and keeps the last one). SERVE_PORT and CDP_PORT fix
+  the ports. The outputs are committed, so the deploy build never needs Chrome or sharp.
 */
 import { mkdirSync, readFileSync, statSync, writeFileSync, existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
@@ -36,6 +41,7 @@ const SRC = path.join(ROOT, '.build/poster')
 const argv = process.argv.slice(2)
 const opt = (n, d) => (argv.includes(`--${n}`) ? argv[argv.indexOf(`--${n}`) + 1] : d)
 const FAST = argv.includes('--fast')
+const POT = argv.includes('--pot')
 const TIER = opt('tier', 'full')
 const { T_POSTER } = await import(pathToFileURL(path.join(ROOT, 'src/scene/comp.js')))
 const FLOOR = 0.09
@@ -131,6 +137,36 @@ const chrome = await launchChrome({ tag: 'poster' })
 let code = 0
 try {
   const cdp = await connect(chrome.wsUrl)
+
+  // the pot's stills, and nothing else
+  if (POT) {
+    const out = path.join(ROOT, 'public/pot'), dist = path.join(ROOT, 'dist/pot')
+    mkdirSync(out, { recursive: true }); mkdirSync(dist, { recursive: true })
+    for (const theme of THEMES) {
+      const page = await cdp.newPage({ width: 1440, height: 900, dpr: 1 })
+      await page.goto(`${url}/?tier=${TIER}&t=${T_POSTER}&theme=${theme}`, { settle: 600 })
+      await waitReady(page)
+      for (const [kind, rot, sun] of [['in', -70, 0], ['face', 0, 0.3]]) {
+        const res = await page.eval(`JSON.stringify(window.__potShot({ rot: ${rot}, sun: ${sun}, w: 560, h: 860 }))`)
+        const { url: dataUrl } = JSON.parse(res)
+        const png = path.join(SRC, `pot-${theme}-${kind}.png`)
+        writeFileSync(png, Buffer.from(dataUrl.split(',')[1], 'base64'))
+        let buf = null, q = 0
+        for (q of [62, 56, 50, 45, 40, 36, 32, 28]) {
+          buf = await sharp(png).avif({ quality: q, effort: 7 }).toBuffer()
+          if (buf.length <= BUDGET.avif) break
+        }
+        const f = `pot-${theme}-${kind}.avif`
+        writeFileSync(path.join(out, f), buf)
+        writeFileSync(path.join(dist, f), buf)
+        console.log(`poster: ${f} 560x860  avif ${(buf.length / 1024).toFixed(1)} KB (q ${q})`)
+        if (buf.length > BUDGET.avif) { console.error(`poster: ${f} is over ${BUDGET.avif / 1024} KB at the lowest quality`); code = 1 }
+      }
+      await page.close()
+    }
+    cdp.close()
+    throw Object.assign(new Error('done'), { done: true })
+  }
 
   // 1. the posters, from the scene's own poster()
   {
@@ -240,8 +276,10 @@ try {
   writeFileSync(path.join(distPoster, 'meta.json'), readFileSync(metaPath))
   for (const [name, p] of Object.entries(meta.posters)) if (statSync(path.join(OUT, `${name}.avif`)).size !== p.avif.bytes) console.warn(`poster: ${name}.avif size changed under us`)
 } catch (e) {
-  console.error(e.stack || String(e))
-  code = 1
+  if (!e.done) {
+    console.error(e.stack || String(e))
+    code = 1
+  }
 } finally {
   await chrome.kill()
   server.close()

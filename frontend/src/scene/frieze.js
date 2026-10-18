@@ -234,7 +234,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   let heroCut = 1 // px of scroll from the top of the page to the cut (the hero's meander under the neck)
   let NECK = 68
   // the pot: its turn and its sun, springs on the scroll position; his stride there; on-demand rendering
-  let rot = potDeg ?? POT_TURN.from, rotV = 0, sun = 0, sunV = 0, holdTau = null, potDirty = true, rtTau = NaN, rtKey = ''
+  let rot = potDeg ?? POT_TURN.from, rotV = 0, sun = 0, sunV = 0, holdTau = null, potDirty = true, rtTau = NaN, rtKey = '', potSeen = false
   let docVisible = !document.hidden, userPaused = false, first = true, holdUntil = 0, curTheme = theme
   const O = new THREE.Vector3(), win = {}
   const px = (name, d) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)) || d
@@ -281,9 +281,43 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     host = b
     stats.host = b ? b.kind : null
     if (!b) return
+    canvas.classList.remove('on')
     b.art.appendChild(canvas)
     measureHost()
-    if (!first) { render(0, true); b.el.classList.add('is-live') }
+    // the first time he lands on the pot he is in the lunge, as its still shows him (the hero is under the
+    // neck by then, so the step is never seen)
+    if (b.kind === 'pot' && !potSeen) { potSeen = true; tau = T_POSTER + Math.round((tau - T_POSTER) / GAIT.period) * GAIT.period }
+    // once the pot has been live its turned-away still never shows again (the snapshot stands in)
+    if (b.kind === 'pot' && !first) b.el.classList.add('was-live')
+    if (!first) {
+      render(0, true)
+      // the canvas fades in over the band's still (260 ms), then the still and any old snapshot step aside
+      requestAnimationFrame(() => { if (host === b) { canvas.classList.add('on'); b.el.classList.add('is-live'); snaps.get(b)?.classList.remove('on') } })
+    }
+  }
+  // leaving the pot: its last frame stays on it as a picture (an <img>, so there is only ever one canvas)
+  // while the canvas goes on to the next band. The pot freezes, the frame is encoded off the main thread,
+  // and the canvas moves once the picture is decoded and in place, so the pot is never empty.
+  const snaps = new Map()
+  let leaving = null
+  function requestHost(b) {
+    if (b === host) { if (leaving) leaving.cancel = true; return }
+    if (leaving) return
+    if (host?.kind !== 'pot' || first || lost || !canvas.toBlob) return setHost(b)
+    const from = host
+    leaving = { cancel: false }
+    const done = () => { const l = leaving; leaving = null; if (!l.cancel) setHost(choose()); else if (host === from) snaps.get(from)?.classList.remove('on') }
+    render(0, true, true)
+    canvas.toBlob((blob) => {
+      if (!blob || me.dead) return done()
+      let img = snaps.get(from)
+      if (!img) { img = new Image(); img.className = 'pot-snap'; img.alt = ''; img.setAttribute('aria-hidden', 'true'); img.decoding = 'async'; from.art.appendChild(img); snaps.set(from, img) }
+      // a data: URL (the CSP allows data: images, not blob:), read off the main thread
+      const fr = new FileReader()
+      fr.onload = () => { img.src = fr.result; img.decode().catch(() => {}).then(() => { img.classList.add('on'); done() }) }
+      fr.onerror = done
+      fr.readAsDataURL(blob)
+    }, 'image/png')
   }
   // the host: the hero keeps the canvas until its meander has passed under the neck (the cut); then
   // whichever laid-out band shows the most of itself (the pot, the contact band)
@@ -389,7 +423,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     }
     // ease into the hold, and land on it exactly (so the pot stops rendering)
     if (holdTau - tau < 0.003) { tau = holdTau; return target }
-    return Math.max(target, clamp((holdTau - tau) * 2.4, 0.05, 0.9))
+    return Math.max(target, clamp((holdTau - tau) * 3, 0.12, 1))
   }
   // grit kicked back from the rear toe at each push-off (never in a still or a held frame)
   function kickAt(o, dt) {
@@ -409,7 +443,8 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (dt > 0) { ;[sun, sunV] = step(sun, sunV, st) } else { sun = st; sunV = 0 }
     rate = fixedT === null ? strideRate() : 0
     const dustMoving = dust.update(t, dt) > 0
-    const moving = Math.abs(rotV) > 0.02 || Math.abs(rot - rt) > 0.02 || Math.abs(sunV) > 0.0005 || rate > 0.002 || dustMoving
+    // (a twentieth of a degree of turn is under a pixel at the pot's size)
+    const moving = Math.abs(rotV) > 0.05 || Math.abs(rot - rt) > 0.05 || Math.abs(sunV) > 0.001 || rate > 0.002 || dustMoving
     if (!moving && !potDirty && !force) return false
     const key = `${curTheme}|${r.getPixelRatio()}`
     const rtDirty = force || potDirty || tau !== rtTau || dustMoving || key !== rtKey
@@ -445,10 +480,11 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     return true
   }
 
-  function render(dt, force = false) {
+  function render(dt, force = false, snap = false) {
     if (!host || lost) return false
     effortAt(dt)
-    if (host.kind === 'pot') return renderPot(dt, force)
+    // the pot holds still while its last frame is taken (and draws that frame once, for the snapshot)
+    if (host.kind === 'pot') return leaving && !snap ? false : renderPot(dt, force)
     if (!fit) return false
     holdTau = null
     const e = clamp(Math.abs(vel) / V_FULL, 0, 1)
@@ -505,7 +541,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (first) holdUntil = now + HOLD_MS
     if (now < holdUntil) dt = 0 // hold the poster frame while the canvas fades in over it
     const nb = choose()
-    if (nb !== host) setHost(nb)
+    if (nb !== host || leaving) requestHost(nb)
     t += dt; tau += dt * rate
     if (t > WRAP) { t = tau = T_POSTER; shiftBase = 0; camShift = 0; catchStart = -1; nextCatch = t + catchEvery; dust.clear() }
     const t0 = performance.now()
@@ -536,8 +572,8 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   }
   const io = new IntersectionObserver((es) => {
     for (const e of es) { const b = bands.find((x) => x.el === e.target); if (e.isIntersecting) near.add(b); else near.delete(b) }
-    if (!near.size && host) setHost(null)
-    if (still()) { const nb = choose(); if (nb !== host) setHost(nb) }
+    if (!near.size && host) requestHost(null)
+    if (still()) requestHost(choose())
     sync()
   }, { rootMargin: '10% 0px 10% 0px' })
   bands.forEach((b) => io.observe(b.el))
@@ -549,7 +585,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   bands.forEach((b) => { ro.observe(b.room); ro.observe(b.art) })
   const onVis = () => { docVisible = !document.hidden; sync() }
   // with a fixed clock (?t=) or paused, a scroll renders one still at the scrolled climb (and turn)
-  const onScroll = () => { if (still() && !first) { const nb = choose(); if (nb !== host) setHost(nb); render(0, true) } }
+  const onScroll = () => { if (still() && !first) { requestHost(choose()); render(0, true) } }
   addEventListener('resize', onResize)
   addEventListener('scroll', onScroll, { passive: true })
   document.addEventListener('visibilitychange', onVis)
@@ -563,6 +599,16 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     if (pot) {
       lines.g.visible = true; await r.compileAsync(scene, rtCam); lines.g.visible = false
       pot.frame(300, 450); await r.compileAsync(pot.scene, pot.cam)
+      // warm the pot before it is ever on screen: allocate the band's target and upload the pot, and draw it
+      // once into the canvas (still invisible), so the hand-off from the hero is one ordinary frame (it cost
+      // 40 to 80 ms the first time)
+      const warm = new THREE.WebGLRenderTarget(32, 48)
+      rtCam.left = pot.win.l; rtCam.right = pot.win.r; rtCam.bottom = pot.win.b; rtCam.top = pot.win.t; rtCam.position.set(0, 0, 60); rtCam.updateProjectionMatrix()
+      r.setRenderTarget(pot.rt); r.render(scene, rtCam)
+      r.setRenderTarget(warm); r.render(pot.scene, pot.cam)
+      r.setRenderTarget(null); warm.dispose()
+      r.render(pot.scene, pot.cam)
+      r.clear()
     }
   } catch { /* the first frame compiles instead */ }
   dust.clear()
@@ -570,7 +616,34 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   NECK = px('--neck-h', 68)
   setHost(choose() || bands[0])
 
+  // tools: the pot's still, rendered from the scene at a turn (scripts/poster.mjs --pot): w x h device px,
+  // the man in the lunge at T_POSTER, the sun as the turn's spring would set it
+  function potShot({ rot: deg = 0, sun: k = 0, w = 560, h = 860 } = {}) {
+    if (!pot) return null
+    const dpr = r.getPixelRatio()
+    r.setPixelRatio(1); r.setSize(w, h, false)
+    pot.frame(w, h); passWidths('pot')
+    pose.shift = shiftBase; pose.leanAdd = 0; pose.crouch = 0; pose.reachAdd = 0; pose.lookUp = 0
+    scene.updateMatrixWorld()
+    const o = f.update(T_POSTER, pose)
+    O.set(o.x + pose.shift - camShift, 0, 0).applyMatrix4(slope.matrixWorld)
+    aim(rtCam, O)
+    rtCam.left = pot.win.l; rtCam.right = pot.win.r; rtCam.bottom = pot.win.b; rtCam.top = pot.win.t; rtCam.updateProjectionMatrix()
+    const cs = Math.cos(slope.rotation.z)
+    dust.clear()
+    dust.stones(o.x + pose.shift - camShift + pot.win.l / cs - 0.3, o.x + pose.shift - camShift + pot.win.r / cs + 0.3)
+    lines.g.position.x = o.x; lines.g.visible = true
+    r.setRenderTarget(pot.rt); r.setClearColor(0x000000, 0); r.clear(); r.render(scene, rtCam); r.setRenderTarget(null)
+    lines.g.visible = false
+    pot.group.rotation.y = THREE.MathUtils.degToRad(deg); pot.setSun(k)
+    r.clear(); r.render(pot.scene, pot.cam)
+    const url = canvas.toDataURL('image/png')
+    r.setPixelRatio(dpr); measureHost(); rtTau = NaN; render(0, true)
+    return { url, w, h }
+  }
+
   installHooks({
+    potShot,
     r, cam, scene, slope, f, R, canvas, fit: () => fit, host: () => host, W,
     render: (tt) => { t = tau = tt; render(0, true) },
     step: (dt) => { t += dt; tau += dt * rate; render(dt, true) },

@@ -30,6 +30,46 @@
   aspect-ratio: auto;
   pointer-events: none;
 }
+.pot-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: none;
+}
+/* which still: the theme's, turned away in a live tier (the canvas turns it into view), facing in the
+   still tier and under quiet */
+:root:not([data-theme='dark']) .pot-still--light.pot-still--in,
+:root[data-theme='dark'] .pot-still--dark.pot-still--in {
+  display: block;
+}
+:root[data-tier='still'] .pot-still--in,
+:root[data-transparency='reduced'] .pot-still--in {
+  display: none !important;
+}
+:root[data-tier='still']:not([data-theme='dark']) .pot-still--light.pot-still--face,
+:root[data-tier='still'][data-theme='dark'] .pot-still--dark.pot-still--face,
+:root[data-transparency='reduced']:not([data-theme='dark']) .pot-still--light.pot-still--face,
+:root[data-transparency='reduced'][data-theme='dark'] .pot-still--dark.pot-still--face {
+  display: block;
+}
+.pot.is-live .pot-still,
+.pot.was-live .pot-still--in {
+  opacity: 0;
+}
+/* the pot's last frame, kept on it when the canvas moves on (frieze.js) */
+.pot-snap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.pot-snap.on {
+  opacity: 1;
+  transition: none;
+}
 .pot-rail,
 .pot-band {
   display: none;
