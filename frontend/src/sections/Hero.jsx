@@ -25,7 +25,7 @@ function Built({ text, strong }) {
 
   Under 960 px the frieze is the top of the page and the plate runs full width under it, no border; the
   results move after the buttons by CSS order (the DOM order stays, QA reads it), so the first screen
-  keeps the man, the whole boulder, who he is and both buttons. The theme line sits once, 12 px, on the
+  keeps the man, the boulder (on a phone it may run off the right edge), who he is and both buttons. The theme line sits once, 14 px, on the
   clay: lower left at 1440, lower right inside the frieze on a phone.
 */
 export default function Hero() {

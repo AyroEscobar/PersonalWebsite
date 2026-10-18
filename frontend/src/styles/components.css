@@ -425,8 +425,9 @@ html.scrolled .neck--fixed .tongues,
   /* on the content's left edge (the .wrap column), however wide the band */
   left: calc(max(0px, (100% - var(--max) - 2 * var(--gutter)) / 2) + var(--gutter));
   bottom: calc(var(--meander-h) + 14px);
-  font: 400 12px/1 var(--label);
-  letter-spacing: 0.08em;
+  /* 14 px, tracked 0.1em: at 12 it read as fine print, an accident in the corner */
+  font: 400 14px/1 var(--label);
+  letter-spacing: 0.1em;
   color: var(--frieze-ink);
 }
 

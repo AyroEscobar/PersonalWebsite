@@ -6,7 +6,7 @@ import { AGE, COFFEE, EMAIL, GITHUB, LINKEDIN } from './constants.js'
   his school, the way his own emails open), three short lines for what he is (his company, Viaere,
   the internships), then "A few things I've built": three results in his own words, the figure in
   each one set strong. Then two ways to reach him and two links. Builders render it; they do not
-  rewrite it. The theme line is the only theme line on the site: 12 px, lowercase, once, on the clay
+  rewrite it. The theme line is the only theme line on the site: 14 px, lowercase, once, on the clay
   in the hero's lower-left corner (lower right inside the frieze on a phone).
 */
 
