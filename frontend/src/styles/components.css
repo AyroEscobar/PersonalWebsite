@@ -399,6 +399,11 @@ html.scrolled .neck--fixed .tongues,
 .elsewhere .ip {
   color: var(--ink-2);
 }
+/* 24 px tall targets, as the plan asks: inline padding, so the line box does not move */
+.links a,
+.elsewhere a {
+  padding-block: 2px;
+}
 .theme-line {
   position: absolute;
   z-index: 4;
