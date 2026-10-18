@@ -120,6 +120,14 @@
   height: 64px;
   border: 1px solid var(--rule);
 }
+/* the hex values in the book face with lining, tabular figures: in Marcellus SC a zero reads as the
+   letter O (#0D0B0A as #ODOBOA) */
+.kit-swatches .tnum {
+  font-family: var(--text);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
 .kit-type {
   display: grid;
   gap: 18px;
