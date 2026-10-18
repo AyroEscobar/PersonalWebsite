@@ -1,19 +1,20 @@
 /*
-  composite.mjs: text contrast measured on the real composite over the live scene (BRIEF.md budgets,
-  DESIGN.md 4.2 and 10.10). Used by scripts/poster.mjs, which has Chrome and the built dist up.
+  composite.mjs: text contrast measured on the real composite over the live frieze. Used by
+  scripts/poster.mjs and the QA scene checks, which have Chrome and the built dist up.
 
-  For every view and every progress p, the home page is opened with the scene's clock fixed
-  (?t=2.3, so a scroll renders one still at the scrolled progress) and scrolled to p. Every visible
+  For every view, every progress p and each theme, the home page is opened with the scene's clock
+  fixed (?t=2.34, so a scroll renders one still at the scrolled climb) and scrolled to p. Every visible
   text line is listed (its client rects, its computed colour, its size and weight); then the page is
-  captured with all text made transparent (text shadows kept: a shadow sits under its glyph), so each line's backdrop is exactly
-  what sits behind it: the scene through the glass's blur, saturate and brightness, the fill, the
-  scrim, the sheen and the grain. The worst backdrop pixel under each line (after a 3x3 mean, so a
-  lone star or grain speck cannot decide it) is compared with the text colour:
+  captured with all text made transparent, so each line's backdrop is exactly what sits behind it: the
+  clay and its wheel rings, the plates, the slip, the man and the disk wherever they pass. The worst
+  backdrop pixel under each line (after a 3x3 mean, so a lone fleck cannot decide it) is compared with
+  the text colour:
 
     4.5:1 for body text, 3:1 for large text (24 px and up, or 18.66 px and up at weight 700+)
 
   Disabled controls are skipped (WCAG exempts them); text inside .sr-only is not drawn, so it is skipped;
-  a line box under the fixed nav pill or wordmark is covered by them (hidden, not low contrast), so it is skipped.
+  a line box under the fixed neck once it is a ground bar is covered by it (hidden, not low contrast),
+  so it is skipped.
   Returns { views: { [name]: { [p]: { lines, lowest, worst } } }, lowest, failures }.
 */
 
@@ -35,7 +36,7 @@ export const ratio = (a, b) => {
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
 }
 
-// in the page: scroll to progress p with the scene's own anchors (src/scene/scroll.js), list the text
+// in the page: scroll to progress p (the section anchors at 0, 0.2, 0.45, 0.7, 0.85 and the end at 1), list the text
 const PAGE_LIST = (p) => `(async () => {
   const d = document.documentElement
   const A = [['top', 0], ['check-out', 0.2], ['experience', 0.45], ['stack', 0.7], ['contact', 0.85]]
@@ -50,15 +51,16 @@ const PAGE_LIST = (p) => `(async () => {
   const opacityOf = (el) => { let o = 1; for (let e = el; e && e.nodeType === 1; e = e.parentElement) o *= Number(getComputedStyle(e).opacity); return o }
   const lines = []
   // the fixed header controls sit on top of whatever scrolls under them: text they cover is hidden, not low contrast
-  const covers = [...document.querySelectorAll('.top .nav, .top .wordmark')].map((e) => e.getBoundingClientRect()).filter((b) => b.width && getComputedStyle(document.querySelector('.top')).visibility === 'visible')
-  const covered = (x0, y0, x1, y1, el) => !el.closest('.top') && covers.some((b) => x0 < b.right && x1 > b.left && y0 < b.bottom && y1 > b.top)
+  const neck = document.querySelector('.neck--fixed')
+  const covers = neck && getComputedStyle(neck).visibility === 'visible' ? [neck.querySelector('.neck-row').getBoundingClientRect()] : []
+  const covered = (x0, y0, x1, y1, el) => !el.closest('.neck') && covers.some((b) => x0 < b.right && x1 > b.left && y0 < b.bottom && y1 > b.top)
   const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
   let n
   while ((n = w.nextNode())) {
     const text = n.textContent.replace(/\\s+/g, ' ').trim()
     if (!text) continue
     const el = n.parentElement
-    if (!el || el.closest('.sr-only, script, style, noscript, template, [hidden]')) continue
+    if (!el || el.closest('.sr-only, .sr, script, style, noscript, template, [hidden]')) continue
     if (el.closest(':disabled, [aria-disabled="true"]')) continue
     const cs = getComputedStyle(el)
     if (cs.visibility !== 'visible' || cs.display === 'none') continue
@@ -112,17 +114,17 @@ async function measureLines(sharp, png, dpr, lines) {
  * Run the whole measurement.
  * cdp: a connected client (scripts/lib/cdp.mjs); url: the served dist; sharp; tmpDir for the captures.
  */
-export async function measureComposite({ cdp, url, sharp, tmpDir, views = COMPOSITE_VIEWS, ps = COMPOSITE_PS, tier = 'full', log = console.log }) {
-  const result = { views: {}, lowest: null, failures: [], method: 'text hidden, 3x3 mean, worst pixel under each line box' }
+export async function measureComposite({ cdp, url, sharp, tmpDir, views = COMPOSITE_VIEWS, ps = COMPOSITE_PS, tier = 'full', theme = 'light', t = 2.34, log = console.log }) {
+  const result = { theme, views: {}, lowest: null, failures: [], method: 'text hidden, 3x3 mean, worst pixel under each line box' }
   for (const v of views) {
     const page = await cdp.newPage({ width: v.w, height: v.h, dpr: v.dpr, mobile: v.mobile })
     result.views[v.name] = {}
     for (const p of ps) {
-      await page.goto(`${url}/?tier=${tier}&t=2.3`, { settle: 600 })
+      await page.goto(`${url}/?tier=${tier}&t=${t}&theme=${theme}`, { settle: 600 })
       await page.eval('new Promise((r) => { let n = 0; const f = () => (window.__ready || ++n > 200) ? setTimeout(r, 300) : setTimeout(f, 50); f() })')
       const { y, lines } = await page.eval(PAGE_LIST(p))
       await page.eval(HIDE)
-      const png = `${tmpDir}/composite-${v.name}-p${p}.png`
+      const png = `${tmpDir}/composite-${theme}-${v.name}-p${p}.png`
       await page.screenshot(png)
       const measured = await measureLines(sharp, png, v.dpr, lines)
       const fails = measured.filter((m) => m.ratio < m.min)
@@ -130,7 +132,7 @@ export async function measureComposite({ cdp, url, sharp, tmpDir, views = COMPOS
       result.views[v.name][p] = { scrollY: y, lines: measured.length, lowest: low && low.ratio, worst: low }
       for (const f of fails) result.failures.push({ view: v.name, p, ...f })
       if (low && (!result.lowest || low.ratio / low.min < result.lowest.ratio / result.lowest.min)) result.lowest = { view: v.name, p, ...low }
-      log(`composite: ${v.name} p ${p}: ${measured.length} lines, lowest ${low ? `${low.ratio} (${low.sel} "${low.text}", needs ${low.min})` : 'n/a'}${fails.length ? `, ${fails.length} FAIL` : ''}`)
+      log(`composite: ${theme} ${v.name} p ${p}: ${measured.length} lines, lowest ${low ? `${low.ratio} (${low.sel} "${low.text}", needs ${low.min})` : 'n/a'}${fails.length ? `, ${fails.length} FAIL` : ''}`)
     }
     await page.close()
   }

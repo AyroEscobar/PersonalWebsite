@@ -11,21 +11,27 @@
     7  a privacy denylist term or proximity rule, an EIN or phone shape
     8  an age spelled out anywhere in src ("twenty", "20 years", "I'm 20"): the age is read from the
        one AGE constant in src/content/constants.js (identity-age); "Onto what's next." not exactly once
-    9  a token pair under its contrast floor, or text on glass under its floor measured on the
-       composite: the glass fill, brightness and scrim over the brightest backdrop pixel the
-       poster script measured under a panel (public/poster/meta.json); and every visible text line
-       measured on the real composite over the live scene at 1440, 390, 768 and 1920 and at p 0,
-       0.3, 0.56, 0.8 and 1 (meta.json composite, scripts/lib/composite.mjs): 4.5:1, 3:1 large
+    9  a palette pair under its contrast floor in either theme (rules.mjs CONTRAST_RULES); text on
+       the clay (the neck, the theme line) under its floor against the darkest and the lightest
+       pixel the poster script measured under it on the real render, per theme (meta.json
+       extremes); and every visible text line measured on the real composite at 1440, 390, 768 and
+       1920, at p 0, 0.3, 0.56, 0.8 and 1, in both themes (meta.json composite,
+       scripts/lib/composite.mjs): 4.5:1, 3:1 large. The light poster composite's mean luminance
+       is 0.09 or more; the dark poster has a non-empty alpha.
    10  an off-palette color literal (#hex or rgb() in CSS and JSX; three's 0x literals are the
        scene's own), or a cut effect (scanlines, glitch, chamfers, cursor replacement) in src
    11  an import of @react-three, framer-motion, firebase or react-router anywhere; an import of
        three or three/addons anywhere but src/scene/
-   12  backdrop-filter anywhere in src but src/styles/glass.css; SVG noise or displacement anywhere
-       (v4's glass has no grain and no lens)
-   13  a monospace face anywhere but through --mono in the footer build line, the scene controls
-       and the kit captions; <code>, <kbd>, <samp>, <pre> never
+   12  backdrop-filter anywhere (v5 has no glass); SVG noise or displacement anywhere
+   13  a monospace face anywhere: --mono is the label stack (tokens.css), used only by the scene
+       controls and the kit captions; <code>, <kbd>, <samp>, <pre> never
    14  a keyframe or transition that animates backdrop-filter, box-shadow or filter
-   15  magenta, sky or dawn used as a text colour (they are the scene's)
+   15  --white, --clay or --clay-lit used as a text colour (the disk, the clay and its highlight)
+   16  the wrong LinkedIn slug anywhere in src, public or index.html; the real profile missing from
+       src/content/constants.js
+   17  the composition out of step: src/scene/comp.js (BOX: aspect, foot point) against
+       --room-aspect, --foot-x and --foot-y in tokens.css, and the poster sizes in
+       src/hero/Frieze.jsx against the frames the scene renders
 
   facts.json and the denylist live outside the public repo. When either is missing (on Vercel)
   those checks are skipped with a warning.
@@ -55,6 +61,8 @@ import {
   where,
   FACTS_PATH,
   DENYLIST_PATH,
+  WRONG_LINKEDIN_RE,
+  LINKEDIN_OK,
 } from './lib/rules.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -167,7 +175,7 @@ export async function checkContent({ quiet = false } = {}) {
     { re: /\bscan-?lines?\b/i, name: 'scanlines' },
     { re: /\bglitch/i, name: 'glitch' },
     { re: /chromatic[- ]aberration/i, name: 'chromatic aberration' },
-    { re: /feTurbulence|feDisplacementMap/, name: 'SVG noise or displacement (the glass has no grain and no lens)' },
+    { re: /feTurbulence|feDisplacementMap/, name: 'SVG noise or displacement' },
     { re: /corner-shape\s*:/, name: 'chamfered corners' },
     { re: /cursor\s*:\s*url\(/, name: 'cursor replacement' },
     { re: /mix-blend-mode\s*:/, name: 'mix-blend-mode (never on a full-viewport layer)' },
@@ -185,6 +193,12 @@ export async function checkContent({ quiet = false } = {}) {
     if (dash) {
       const i = text.search(DASH_RE)
       err(`${r}:${where(text, i)}: en or em dash (${dash.length} in file)`)
+    }
+
+    // 16: the wrong LinkedIn slug, anywhere in src, public or index.html
+    {
+      const m = text.match(WRONG_LINKEDIN_RE)
+      if (m) err(`${r}:${where(text, m.index)}: the wrong LinkedIn slug; his profile is ${LINKEDIN_OK}`)
     }
 
     if (r.startsWith('src/') && !r.startsWith('src/content/')) {
@@ -238,19 +252,20 @@ export async function checkContent({ quiet = false } = {}) {
         .replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' '))
         .replace(/(^|\s)\/\/.*$/gm, (c) => c.replace(/[^\n]/g, ' '))
 
-      // 12: the material lives in one file (DESIGN.md 4). Feature detection (CSS.supports) is allowed.
-      if (r !== 'src/styles/glass.css') {
+      // 12: v5 has no glass, so no backdrop-filter anywhere
+      {
         const m = code.match(/(^|[\s;{'"`])(-webkit-)?backdrop-filter\s*:|backdropFilter|setProperty\(\s*['"](-webkit-)?backdrop-filter/)
-        if (m) err(`${r}:${where(text, m.index)}: backdrop-filter outside src/styles/glass.css (render <Glass> instead)`)
+        if (m) err(`${r}:${where(text, m.index)}: backdrop-filter (v5 has no glass)`)
       }
 
-      // 13: monospace only through --mono (tokens.css defines it; components.css and kit.css use it on
-      // .foot-row--mono, .ctl, .kit-sub and .kit-cap). Never <code>, <kbd>, <samp>, <pre>.
+      // 13: no monospace face ships. --mono is the label stack (tokens.css), used by the kit captions;
+      // never a monospace family, never <code>, <kbd>, <samp>, <pre>.
       {
         const allowMono = /^src\/styles\/(tokens|components|kit)\.css$/.test(r)
-        const m = code.match(/\bmonospace\b|\bfont-mono\b|Geist Mono|var\(--mono\)|<(code|kbd|samp|pre)[\s>]/)
-        if (m && !(allowMono && /^(var\(--mono\)|monospace|Geist Mono)$/.test(m[0])) && !(r === 'src/styles/fonts.css' && m[0] === 'Geist Mono')) err(`${r}:${where(text, m.index)}: monospace (${m[0].trim()}) outside the build line, the scene controls and the kit captions`)
+        const m = code.match(/\bmonospace\b|\bfont-mono\b|Geist Mono|ui-monospace|var\(--mono\)|<(code|kbd|samp|pre)[\s>]/)
+        if (m && !(allowMono && m[0] === 'var(--mono)')) err(`${r}:${where(text, m.index)}: monospace (${m[0].trim()}); no monospace face ships`)
       }
+
 
       // 11: three only in the scene chunk; the rest never
       const imp = code.match(BANNED_IMPORTS)
@@ -268,107 +283,114 @@ export async function checkContent({ quiet = false } = {}) {
           const p = m[2].match(/\b(backdrop-filter|box-shadow|filter)\b/)
           if (p) err(`${r}:${where(text, m.index)}: a transition animates ${p[1]}`)
         }
-        // 15: the scene's hues are never text.
+        // 15: the disk, the clay and its highlight are never text (text uses the role tokens)
         if (/^src\/styles\/(components|page|kit|base)\.css$/.test(r)) {
-          for (const m of text.matchAll(/(^|[\s;{])color\s*:\s*var\(--(magenta|sky|dawn)\)/g)) {
-            err(`${r}:${where(text, m.index)}: --${m[2]} as a text colour; it is the scene's (DESIGN.md 2.1)`)
+          for (const m of text.matchAll(/(^|[\s;{])color\s*:\s*var\(--(white|clay|clay-lit)\)/g)) {
+            err(`${r}:${where(text, m.index)}: --${m[2]} as a text colour; use a role token (tokens.css)`)
           }
         }
       }
     }
   }
 
-  // ---------- 9: token contrast ----------
+  // ---------- 16: the real profile is the one constant ----------
+  {
+    const constants = readFileSync(path.join(ROOT, 'src/content/constants.js'), 'utf8')
+    if (!constants.includes(`LINKEDIN = '${LINKEDIN_OK}'`)) err(`src/content/constants.js: LINKEDIN must be '${LINKEDIN_OK}'`)
+  }
+
+  // ---------- 17: the composition, in step across the scene, the CSS and the posters ----------
+  {
+    const comp = await import(pathToFileURL(path.join(ROOT, 'src/scene/comp.js')))
+    const cssVar = (name) => (tokensCss.match(new RegExp(`--${name}:\\s*([\\d.]+)%?;`)) || [])[1]
+    const want = { 'room-aspect': comp.ASPECT, 'foot-x': comp.FOOT_X * 100, 'foot-y': comp.FOOT_Y * 100 }
+    for (const [k, v] of Object.entries(want)) {
+      const have = Number(cssVar(k))
+      if (!(Math.abs(have - v) <= (k === 'room-aspect' ? 0.0005 : 0.01))) err(`tokens.css --${k} is ${cssVar(k)}, src/scene/comp.js gives ${v.toFixed(4)}`)
+    }
+    const frieze = readFileSync(path.join(ROOT, 'src/hero/Frieze.jsx'), 'utf8')
+    const num = (k) => Number((frieze.match(new RegExp(`\\b${k}:\\s*(\\d+)`)) || [])[1])
+    const bw = comp.BOX.r - comp.BOX.l, bh = comp.BOX.t - comp.BOX.b
+    // scripts/poster.mjs renders 800 and 480 CSS px wide at DPR 2 (frieze.js poster())
+    const frame = (css) => [css * 2, Math.round((css * bh) / bw) * 2]
+    const [w, h] = frame(800), [mw, mh] = frame(480)
+    if (num('w') !== w || num('h') !== h || num('mw') !== mw || num('mh') !== mh) err(`src/hero/Frieze.jsx POSTER is ${num('w')}x${num('h')} and ${num('mw')}x${num('mh')}; the scene renders ${w}x${h} and ${mw}x${mh}`)
+  }
+
+  // ---------- 9: palette contrast, both themes ----------
   const pairs = []
   for (const rule of CONTRAST_RULES) {
     if (!tokens[rule.fg] || !tokens[rule.bg]) {
-      err(`contrast: token --${!tokens[rule.fg] ? rule.fg : rule.bg} missing from tokens.css`)
+      err(`contrast: token --${!tokens[rule.fg] ? rule.fg : rule.bg} missing from the palette in tokens.css`)
       continue
     }
     const ratio = contrast(hexToRgb(tokens[rule.fg]), hexToRgb(tokens[rule.bg]))
     pairs.push({ ...rule, ratio })
-    if (ratio < rule.min) err(`contrast: --${rule.fg} on --${rule.bg} is ${ratio.toFixed(2)}, needs ${rule.min} (${rule.kind})`)
+    if (ratio < rule.min) err(`contrast (${rule.theme}): --${rule.fg} on --${rule.bg} is ${ratio.toFixed(2)}, needs ${rule.min} (${rule.kind})`)
   }
 
-  // ---------- 9: text on glass, on the composite over the brightest measured backdrop ----------
+  // ---------- 9: text on the clay, against the darkest and lightest pixel measured under it ----------
   const metaPath = path.join(ROOT, 'public/poster/meta.json')
-  let brightest = null
+  let meta = null
   if (existsSync(metaPath)) {
     try {
-      const meta = JSON.parse(readFileSync(metaPath, 'utf8'))
-      brightest = meta.brightest
+      meta = JSON.parse(readFileSync(metaPath, 'utf8'))
     } catch (e) {
       err(`contrast: public/poster/meta.json is unreadable (${e.message})`)
     }
   }
-  if (!brightest) {
-    err('contrast: public/poster/meta.json has no `brightest` backdrop measurement; run `npm run poster` after a build so the composite is measured, not assumed')
+  if (!meta?.extremes) {
+    err('contrast: public/poster/meta.json has no `extremes` measurement; run `npm run poster` after a build so the clay under the text is measured, not assumed')
   } else {
-    const voidRgb = hexToRgb(tokens.void)
-    for (const rule of COMPOSITE_RULES) {
-      // the brightest pixel the poster script measured under this surface's boxes, on its frame
-      const key = rule.key
-      const px = brightest[key]
-      if (!px) {
-        err(`contrast: meta.json has no brightest.${key} measurement`)
-        continue
-      }
-      let behind = brighten(px, rule.brightness)
-      behind = over([255, 255, 255], behind, rule.fill)
-      behind = over(voidRgb, behind, rule.scrim)
-      let worst = null
-      for (const t of rule.text) {
+    for (const theme of ['light', 'dark']) {
+      for (const rule of COMPOSITE_RULES) {
+        const px = meta.extremes[theme]?.[rule.key]
+        if (!px) {
+          err(`contrast: meta.json has no extremes.${theme}.${rule.key} measurement`)
+          continue
+        }
+        const t = rule.text[theme]
         if (!tokens[t]) {
           err(`contrast: token --${t} missing from tokens.css`)
           continue
         }
-        const ratio = contrast(hexToRgb(tokens[t]), behind)
-        if (!worst || ratio < worst.ratio) worst = { ratio, t }
+        const ratio = Math.min(contrast(hexToRgb(tokens[t]), px.dark), contrast(hexToRgb(tokens[t]), px.light))
+        pairs.push({ fg: t, bg: `${rule.where}, ${theme}`, min: rule.min, ratio, kind: 'composite' })
+        if (ratio < rule.min) err(`contrast (${theme}): --${t} on ${rule.where} is ${ratio.toFixed(2)} against the measured clay (rgb ${px.dark.join(', ')} to rgb ${px.light.join(', ')}), needs ${rule.min}`)
       }
-      if (!worst) continue
-      pairs.push({ fg: worst.t, bg: rule.glass, min: rule.min, ratio: worst.ratio, kind: 'composite' })
-      if (worst.ratio < rule.min) err(`contrast: --${worst.t} on ${rule.glass} over the brightest backdrop rgb(${px.join(', ')}) is ${worst.ratio.toFixed(2)}, needs ${rule.min}`)
     }
   }
 
-  // ---------- 9: every text line measured on the real composite (scripts/lib/composite.mjs via poster.mjs) ----------
-  {
-    let comp = null
-    try {
-      comp = existsSync(metaPath) ? JSON.parse(readFileSync(metaPath, 'utf8')).composite : null
-    } catch {
-      comp = null
-    }
-    // the poster is the first paint: a dark or failed render (luminance under prototype b's 0.09 floor) never ships
-    try {
-      const lumMeta = existsSync(metaPath) ? JSON.parse(readFileSync(metaPath, 'utf8')).luminance : null
-      if (!(lumMeta >= 0.09)) err(`poster: public/poster/meta.json luminance ${lumMeta} is under the 0.09 floor (a dark or failed render); re-run \`npm run poster\``)
-    } catch {
-      /* unreadable meta is reported above */
-    }
-    if (!comp) err('contrast: public/poster/meta.json has no measured composite; run `npm run poster` after a build so every text line is measured over the live scene')
-    else {
+  // ---------- 9: every text line measured on the real composite, both themes (scripts/lib/composite.mjs via poster.mjs) ----------
+  if (meta) {
+    // the poster is the first paint: a dark or failed light render never ships; the dark poster is drawn
+    if (!(meta.luminance >= 0.09)) err(`poster: public/poster/meta.json luminance ${meta.luminance} (the light composite) is under the 0.09 floor; re-run \`npm run poster\``)
+    if (!(meta.alpha?.dark > 0.01)) err(`poster: the dark poster's alpha is empty (${meta.alpha?.dark}); re-run \`npm run poster\``)
+    for (const theme of ['light', 'dark']) {
+      const comp = meta.composite?.[theme]
+      if (!comp) {
+        err(`contrast: public/poster/meta.json has no measured ${theme} composite; run \`npm run poster\` after a build`)
+        continue
+      }
       for (const v of COMPOSITE_VIEWS) {
         for (const p of COMPOSITE_PS) {
           const m = comp.views?.[v.name]?.[p]
-          if (!m) err(`contrast: the composite was not measured at ${v.name} p ${p}`)
-          else if (!m.lines) err(`contrast: the composite at ${v.name} p ${p} measured no text`)
+          if (!m) err(`contrast: the ${theme} composite was not measured at ${v.name} p ${p}`)
+          else if (!m.lines) err(`contrast: the ${theme} composite at ${v.name} p ${p} measured no text`)
         }
       }
-      for (const f of comp.failures || []) err(`contrast: ${f.view} p ${f.p}: ${f.sel} "${f.text}" is ${f.ratio} on the composite, needs ${f.min}`)
-      if (comp.lowest) pairs.push({ fg: comp.lowest.sel, bg: `the live composite (${comp.lowest.view} p ${comp.lowest.p})`, min: comp.lowest.min, ratio: comp.lowest.ratio, kind: 'measured' })
+      for (const f of comp.failures || []) err(`contrast (${theme}): ${f.view} p ${f.p}: ${f.sel} "${f.text}" is ${f.ratio} on the composite, needs ${f.min}`)
+      if (comp.lowest) pairs.push({ fg: comp.lowest.sel, bg: `the live composite (${theme}, ${comp.lowest.view} p ${comp.lowest.p})`, min: comp.lowest.min, ratio: comp.lowest.ratio, kind: 'measured' })
     }
   }
 
-  // ---------- 9: links outside glass sit on the raw scene, so their colour is a raw-scene token ----------
+  // ---------- 9: links take their surface's ink (base.css), so they are measured with it ----------
   {
-    const rule = COMPOSITE_RULES.find((r) => r.links)
     const baseCss = readFileSync(path.join(ROOT, 'src/styles/base.css'), 'utf8')
     const block = baseCss.match(/(^|\n)a\s*\{([^}]*)\}/)
-    const color = block?.[2].match(/(^|[\s;])color\s*:\s*var\(--([\w-]+)\)/)?.[2]
-    if (!rule) err('contrast: rules.mjs has no raw-scene rule for links (COMPOSITE_RULES, links: true)')
-    else if (!color) err('contrast: src/styles/base.css has no `a { color: var(--token) }` rule for links')
-    else if (!rule.text.includes(color)) err(`contrast: links outside glass are --${color} (base.css); on the raw scene they must be one of ${rule.text.map((t) => `--${t}`).join(', ')}`)
+    const color = block?.[2].match(/(^|[\s;])color\s*:\s*([^;]+);/)?.[2].trim()
+    if (!color) err('contrast: src/styles/base.css has no `a { color: ... }` rule for links')
+    else if (color !== 'inherit' && !/^var\(--(ink|accent|foot-ink)\)$/.test(color)) err(`contrast: links are ${color} (base.css); they must inherit their surface's ink or use --ink, --accent or --foot-ink`)
   }
 
   if (!quiet) {

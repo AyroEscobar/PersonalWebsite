@@ -164,36 +164,65 @@ export const over = (a, b, alpha) => a.map((v, i) => v * alpha + b[i] * (1 - alp
 export const brighten = (c, k) => c.map((v) => Math.min(255, v * k))
 
 /*
-  Token pairs (DESIGN.md 2.1): body text on the void and on the plate needs 4.5:1 (ink and
-  ink-2 measure 15 to 19); cyan is eyebrows, the email link and the button fill, never body;
-  void on cyan is the primary button's ink.
+  The wrong LinkedIn slug (Ayro, Sat Oct 17, 2026: /in/ayroescobar/ is his profile; the other one, on his
+  resume and his email signature, is wrong and is never published). check-content and the QA static scan
+  fail on it anywhere in src, public, index.html or dist.
 */
+export const WRONG_LINKEDIN_RE = /ayro-escobar/i
+export const LINKEDIN_OK = 'https://www.linkedin.com/in/ayroescobar/'
+
+/*
+  Palette pairs (src/styles/tokens.css, the first :root block names every colour of both themes). The
+  floors: 7 for ink on its ground, 4.5 for body text, 3 for large text and the focus ring.
+
+    light (black-figure): gloss ink on the slip; umber the second ink; the added red the accent; the
+                          neck words and the theme line in gloss on the clay
+    dark (red-figure):    cream on the gloss; aged the second ink; clay-lit the accent; the theme line
+                          and the tongues in clay on the gloss
+    the foot (both):      cream and aged on the black foot
+*/
+const pair = (theme, fg, bg, min, kind) => ({ theme, fg, bg, min, kind })
 export const CONTRAST_RULES = [
-  ...['ink', 'ink-2'].map((t) => ({ fg: t, bg: 'void', min: 7, kind: 'body text on the void' })),
-  ...['ink', 'ink-2', 'cyan'].map((t) => ({ fg: t, bg: 'plate', min: 4.5, kind: 'text on the solid plate (fallbacks)' })),
-  ...['ink', 'ink-2', 'cyan'].map((t) => ({ fg: t, bg: 'plate-2', min: 4.5, kind: 'text on the plate gradient' })),
-  { fg: 'cyan', bg: 'void', min: 4.5, kind: 'the eyebrows and the email link on the void' },
-  { fg: 'void', bg: 'cyan', min: 4.5, kind: 'void ink on the cyan button' },
-  { fg: 'ink', bg: 'void', min: 3, kind: 'the focus ring' },
+  pair('light', 'gloss', 'slip', 7, 'ink on the ground'),
+  pair('light', 'gloss', 'slip-2', 7, 'ink on the work plates'),
+  pair('light', 'umber', 'slip', 4.5, 'the second ink on the ground'),
+  pair('light', 'umber', 'slip-2', 4.5, 'the second ink on the work plates'),
+  pair('light', 'red', 'slip', 4.5, 'the accent (numerals, domain links) on the ground'),
+  pair('light', 'red', 'slip-2', 4.5, 'the accent on the work plates'),
+  pair('light', 'slip', 'red', 4.5, 'the fill button'),
+  pair('light', 'gloss', 'clay', 4.5, 'the neck words and the theme line on the clay'),
+  pair('light', 'gloss', 'clay-lit', 4.5, 'the same on the burnished highlight'),
+  pair('light', 'gloss', 'slip', 3, 'the focus ring'),
+  pair('dark', 'cream', 'gloss', 7, 'ink on the ground'),
+  pair('dark', 'cream', 'gloss-2', 7, 'ink on the plates'),
+  pair('dark', 'cream', 'gloss-3', 4.5, 'the neck words on the frieze ring'),
+  pair('dark', 'aged', 'gloss', 4.5, 'the second ink on the ground'),
+  pair('dark', 'aged', 'gloss-2', 4.5, 'the second ink on the plates'),
+  pair('dark', 'clay-lit', 'gloss', 4.5, 'the accent on the ground'),
+  pair('dark', 'clay-lit', 'gloss-2', 4.5, 'the accent on the plates'),
+  pair('dark', 'gloss', 'clay-lit', 4.5, 'the fill button'),
+  pair('dark', 'clay', 'gloss', 4.5, 'the theme line on the dark frieze'),
+  pair('dark', 'cream', 'gloss', 3, 'the focus ring'),
+  pair('foot', 'cream', 'gloss', 4.5, 'the foot ink, light'),
+  pair('foot', 'aged', 'gloss', 4.5, 'the foot second ink, light'),
+  pair('foot', 'cream', 'foot-dark', 4.5, 'the foot ink, dark'),
+  pair('foot', 'aged', 'foot-dark', 4.5, 'the foot second ink, dark'),
 ]
 
 /*
-  Composite contrast (DESIGN.md 4.2): text on glass is measured against what is actually
-  behind it. The worst case on this page is the BRIGHTEST backdrop pixel under a panel: the
-  poster script measures it from the real hero frame under each panel box and records it in
-  public/poster/meta.json (brightest.rgb); check-content composites the glass fill, the
-  backdrop brightness and the scrim over that pixel, and every text token on that surface
-  must reach its floor. QA re-measures on the live page at five scroll positions.
+  Composite contrast: the only text that sits on the clay is the neck (at the top of the page) and the
+  theme line. scripts/poster.mjs measures, on the real render in both themes with the text made
+  transparent, the darkest and the lightest pixel under each of these boxes and records them in
+  public/poster/meta.json (extremes[theme][key]); check-content takes the text token for that theme
+  against both and the worse must reach the floor. QA and the poster script also measure every visible
+  text line on the composite (scripts/lib/composite.mjs).
 
-    fill       the white fill alpha at its weakest point
-    brightness the backdrop-filter brightness
-    scrim      the void alpha under the copy (0 where the copy sits on the padding ring)
+    neck   the neck words over the clay at p 0
+    theme  the theme line at p 0
+    band   the neck words at p 1 (scrolled: the ground bar)
 */
 export const COMPOSITE_RULES = [
-  { key: 'panel', glass: 'thick panel under its scrim (the hero at p 0)', fill: 0.05, brightness: 1.04, scrim: 0.74, text: ['ink', 'ink-2', 'cyan'], min: 4.5 },
-  { key: 'card', glass: 'card under its scrim (check out at p 0.2)', fill: 0.05, brightness: 1.04, scrim: 0.78, text: ['ink', 'ink-2', 'cyan'], min: 4.5 },
-  { key: 'pill', glass: 'glass pill on its void base (the glass email button at p 0)', fill: 0.05, brightness: 1.04, scrim: 0.72, text: ['ink', 'ink-2'], min: 4.5 },
-  { key: 'theme', glass: 'the theme line on its void pool (p 0)', fill: 0, brightness: 1, scrim: 0.7, text: ['ink'], min: 4.5 },
-  { key: 'title', glass: 'the bare section title on the raw scene (p 0.2), large text', fill: 0, brightness: 1, scrim: 0, text: ['ink'], min: 3 },
-  { key: 'footer', glass: 'the footer on its void gradient (p 1)', fill: 0, brightness: 1, scrim: 0.86, text: ['ink', 'ink-2'], min: 4.5, links: true },
+  { key: 'neck', where: 'the neck words over the clay (p 0)', sel: '.neck--fixed .nav a, .neck--fixed .wordmark, .neck--fixed .tog, .neck--fixed .menu-btn, .neck--fixed .neck-tools .btn-label', p: 0, text: { light: 'gloss', dark: 'cream' }, min: 4.5 },
+  { key: 'theme', where: 'the theme line on the clay (p 0)', sel: '.theme-line', p: 0, text: { light: 'gloss', dark: 'clay' }, min: 4.5 },
+  { key: 'band', where: 'the neck words on its bar (p 1)', sel: '.neck--fixed .nav a, .neck--fixed .wordmark, .neck--fixed .tog, .neck--fixed .menu-btn, .neck--fixed .neck-tools .btn-label', p: 1, text: { light: 'gloss', dark: 'cream' }, min: 4.5 },
 ]
