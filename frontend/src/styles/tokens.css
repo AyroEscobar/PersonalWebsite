@@ -129,6 +129,12 @@
     --mu: 4px;
   }
 }
+/* short phones (360x780 and under): a lower frieze, so the email button still ends on the first screen */
+@media (max-width: 959.98px) and (max-height: 800px) {
+  :root {
+    --frieze-h: clamp(300px, 42svh, 520px);
+  }
+}
 @media (min-width: 960px) and (max-width: 1180px) {
   :root {
     --plate-w: 500px;
