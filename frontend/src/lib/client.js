@@ -1,13 +1,15 @@
 import { syncFromHtml, markStill } from './mode.js'
 import { setFocus } from './store.js'
 import { SECTION_IDS } from '../content/sections.js'
+import { initSun } from './reveal.js'
 
 /*
   Client start-up, called once from main.jsx after hydration is scheduled. Copies <html data-*> (set by
   the inline boot script) into the store, follows the OS motion setting into the still tier (the theme
   does not follow the OS: light is the default and the switch the only way to dark), watches the
   section in view (the nav's aria-current) and sets html.scrolled after 80 px (the neck becomes a ground bar with a rule and the
-  tongues go). No three here: the scene is src/scene/, mounted by src/lib/frieze-host.js.
+  tongues go), and moves the late sun on the clay with the reader (src/lib/reveal.js). No three here: the
+  scene is src/scene/, mounted by src/lib/frieze-host.js.
 */
 export function initClient() {
   syncFromHtml()
@@ -19,6 +21,7 @@ export function initClient() {
 
   initActiveSection()
   initScrolledFlag()
+  initSun()
 }
 
 /* the nav's active section */

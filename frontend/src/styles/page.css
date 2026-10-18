@@ -285,11 +285,12 @@
     top: 0;
     height: var(--frieze-h);
     background:
-      repeating-linear-gradient(180deg, color-mix(in srgb, var(--white) calc(2.6% * var(--ring)), transparent) 0 1px, transparent 1px 7px),
-      repeating-linear-gradient(180deg, color-mix(in srgb, var(--umber) calc(4% * var(--ring)), transparent) 0 2px, transparent 2px 19px),
-      radial-gradient(120% 90% at 58% 62%, var(--frieze-lit) 0%, color-mix(in srgb, var(--frieze-lit) 40%, var(--frieze)) 45%, var(--frieze) 85%),
+      linear-gradient(180deg, transparent 52%, color-mix(in srgb, var(--umber) calc(9% * var(--ring)), transparent) 100%),
+      linear-gradient(90deg, color-mix(in srgb, var(--umber) calc(10% * var(--ring)), transparent) 0%, transparent 42%),
       var(--frieze);
   }
+  /* the sun stays on the phone's frieze, never on the plate under it */
+  .hero > .frieze-sun,
   .hero > .frieze-art {
     bottom: auto;
     height: var(--frieze-h);

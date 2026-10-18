@@ -210,15 +210,54 @@ html.scrolled .neck--fixed .tongues,
 }
 
 /* ---------- the clay: the frieze bands ---------- */
+/* the clay turns away from the light toward the band's left and lower edge, so the shoulder reads as a
+   cylinder; the light itself is the .frieze-sun layer, which moves with the reader (motion.css) */
 .frieze {
   position: relative;
   overflow: clip;
   background:
-    repeating-linear-gradient(180deg, color-mix(in srgb, var(--white) calc(2.6% * var(--ring)), transparent) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(180deg, color-mix(in srgb, var(--umber) calc(4% * var(--ring)), transparent) 0 2px, transparent 2px 19px),
-    repeating-linear-gradient(180deg, color-mix(in srgb, var(--white) calc(2% * var(--ring)), transparent) 0 3px, transparent 3px 41px),
-    radial-gradient(110% 85% at 64% 46%, var(--frieze-lit) 0%, color-mix(in srgb, var(--frieze-lit) 40%, var(--frieze)) 42%, var(--frieze) 78%),
+    linear-gradient(180deg, transparent 52%, color-mix(in srgb, var(--umber) calc(9% * var(--ring)), transparent) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--umber) calc(10% * var(--ring)), transparent) 0%, transparent 42%),
     var(--frieze);
+}
+/* the late sun on the clay: a broad warm patch from the upper right, --clay-lit over the clay, and the
+   wheel's broad throwing rings, which only grazing light brings out: they show inside the patch and
+   nowhere else. At rest it is fixed, late afternoon, high right. Dark: night, the patch is a tenth of
+   --gloss-3 and the rings go. */
+.frieze-sun {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+.frieze-sun::before,
+.frieze-sun::after {
+  content: '';
+  position: absolute;
+  inset: -30% -16% -24% -16%;
+}
+.frieze-sun::before {
+  background: radial-gradient(48% 50% at 70% 34%, color-mix(in srgb, var(--frieze-lit) 72%, transparent) 0%, color-mix(in srgb, var(--frieze-lit) 40%, transparent) 46%, transparent 100%);
+}
+.frieze-sun::after {
+  background: repeating-linear-gradient(180deg, transparent 0 40px, color-mix(in srgb, var(--white) calc(3.5% * var(--ring)), transparent) 40px 64px, color-mix(in srgb, var(--umber) calc(2.5% * var(--ring)), transparent) 64px 70px, transparent 70px 116px);
+  -webkit-mask: radial-gradient(36% 40% at 70% 44%, var(--gloss) 0%, transparent 100%);
+  mask: radial-gradient(36% 40% at 70% 44%, var(--gloss) 0%, transparent 100%);
+}
+:root[data-theme='dark'] .frieze-sun::before {
+  background: radial-gradient(48% 50% at 70% 34%, color-mix(in srgb, var(--gloss-3) 100%, transparent) 0%, transparent 100%);
+}
+:root[data-theme='dark'] .frieze-sun::after {
+  display: none;
+}
+/* the contact band: the clay again, the sun lower and warmer as the day goes */
+.frieze--contact .frieze-sun::before {
+  background: radial-gradient(46% 56% at 62% 60%, color-mix(in srgb, var(--frieze-lit) 78%, transparent) 0%, color-mix(in srgb, var(--frieze-lit) 42%, transparent) 50%, transparent 100%);
+}
+.frieze--contact .frieze-sun::after {
+  -webkit-mask: radial-gradient(40% 52% at 62% 56%, var(--gloss) 0%, transparent 100%);
+  mask: radial-gradient(40% 52% at 62% 56%, var(--gloss) 0%, transparent 100%);
 }
 .frieze-art {
   position: absolute;

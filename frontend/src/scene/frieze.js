@@ -40,9 +40,11 @@ const SMALL_CANVAS = 5e5
 const capFor = (tier, w, h) => Math.min(devicePixelRatio || 1, tier === 'lite' && w * h < SMALL_CANVAS ? 2 : DPR_CAP[tier] || 2)
 const SLIP = { dist: 0.55, slide: 0.45, plant: 0.3, hold: 0.12, resume: 0.6 }
 const HOLD_MS = 260 // the clock holds the poster frame this long while the canvas fades in over it
-const ADV_HERO = 0.45 // metres he climbs while the hero scrolls away
+const ADV_HERO = 0.9 // metres he climbs while the hero scrolls away (to the cut, the meander under the neck)
 const ADV_CONTACT = [-0.9, 0] // and over the contact band as it comes into view: he arrives, never crests
 const SPRING_W = 7
+// effort: the reader's scroll velocity (CSS px/s) that counts as full effort
+const V_FULL = 1200
 const INFLATE = 0.02 // metres: a little more body, closer to the vase painter's heavy silhouette
 // metres: the soles stand this far off the slope, so the inflated toes sit on the painter's ground line
 // instead of sinking into it (no dark puddle where the outline meets the 4 px line)
@@ -63,6 +65,8 @@ function query() {
   return {
     fixedT: q.has('t') ? Number(q.get('t')) : null,
     slipEvery: Number(q.get('slip')) || 14,
+    // tools only: a fixed effort (0..1, + is scrolling down) for stills
+    effort: q.has('effort') ? Number(q.get('effort')) : null,
   }
 }
 
@@ -139,7 +143,7 @@ let S = null
 
 export async function mount({ canvas, bands, theme = 'light', tier = 'full', onReady, onError, onLost } = {}) {
   if (S) unmount()
-  const { fixedT, slipEvery } = query()
+  const { fixedT, slipEvery, effort: fixedEffort } = query()
   const r = makeRenderer(canvas)
   const a0 = bands[0]?.art.getBoundingClientRect()
   let cap = capFor(tier, a0?.width || 0, a0?.height || 0)
@@ -168,6 +172,9 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   let slipStart = -1, lastSlip = t, shiftBase = 0, camShift = 0
   const pose = { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0 }
   let adv = 0, advVel = 0, prevPush = 0
+  // effort: the scroll velocity through the spring (px/s, signed: + is down the page)
+  let vel = fixedEffort !== null ? fixedEffort * V_FULL : 0, velV = 0, lastY = scrollY
+  let heroCut = 1 // px of scroll from the top of the page to the cut (the hero's meander under the neck)
   let docVisible = !document.hidden, userPaused = false, first = true, holdUntil = 0, curTheme = theme
   const O = new THREE.Vector3(), win = {}
 
@@ -183,6 +190,9 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
       if (r.getPixelRatio() > cap) { r.setPixelRatio(cap); lineWidths(W, cap); stats.dpr = cap }
     }
     r.setSize(cssW, cssH, false)
+    const m = document.querySelector('.hero > .meander')
+    const neck = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--neck-h')) || 68
+    if (m) heroCut = Math.max(1, m.getBoundingClientRect().bottom + scrollY - neck)
     fit = fitIn(cssW, cssH, rr.left - c.left, rr.top - c.top, rr.width, rr.height)
     for (const h of hulls) h.material.userData.u.uRes.value.set(cssW, cssH)
     mats.fig.userData.u.uEyeOn.value = 1.8 * fit.s >= EYE_PX ? 1 : 0
@@ -201,7 +211,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
   function advTarget() {
     if (!host) return 0
     const rc = host.el.getBoundingClientRect()
-    if (host.kind === 'hero') return ADV_HERO * clamp(-rc.top / Math.max(1, rc.height), 0, 1)
+    if (host.kind === 'hero') return ADV_HERO * clamp(scrollY / heroCut, 0, 1)
     const p = clamp((innerHeight - rc.top) / Math.max(1, rc.height), 0, 1)
     return lerp(ADV_CONTACT[0], ADV_CONTACT[1], sstep(0, 1, p))
   }
@@ -219,10 +229,30 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     else { shiftBase += dist; slipStart = -1; lastSlip = now; pose.shift = shiftBase }
   }
 
+  // the reader's effort: the scroll velocity through a critically damped spring (w 7, settled in 0.6 s)
+  function effortAt(dt) {
+    const y = scrollY
+    if (fixedEffort !== null) { lastY = y; return }
+    let v = dt > 0 ? (y - lastY) / dt : 0
+    lastY = y
+    v = clamp(v, -4000, 4000)
+    if (dt > 0) { const w = SPRING_W, a = -w * w * (vel - v) - 2 * w * velV; velV += a * dt; vel += velV * dt }
+    if (Math.abs(vel) < 0.5 && Math.abs(velV) < 0.5) { vel = 0; velV = 0 }
+  }
+
   function render(dt) {
     if (!fit || lost) return
+    effortAt(dt)
     if (slipStart < 0 && fixedT === null && t - lastSlip > slipEvery && Math.abs(f.phase(tau) - 0.6) < 0.03) slipStart = t
     slipAt(t)
+    // your scroll is his push: scrolling down he leans in and steps faster, scrolling up he braces (a
+    // step back of 3 cm, recovered as you stop); never on top of the slip
+    pose.reachAdd = 0
+    if (slipStart < 0) {
+      const e = clamp(Math.abs(vel) / V_FULL, 0, 1)
+      if (vel >= 0) { rate *= 1 + 0.5 * e; pose.leanAdd += 3 * e; pose.reachAdd = 0.02 * e }
+      else { rate *= 1 - 0.6 * e; pose.leanAdd += 2 * e; pose.shift += 0.03 * e }
+    }
     // the scroll position of the frieze: a critically damped spring on how far up the line he is
     const target = advTarget()
     if (dt > 0) { const w = SPRING_W, a = -w * w * (adv - target) - 2 * w * advVel; advVel += a * dt; adv += advVel * dt } else { adv = target; advVel = 0 }
@@ -271,7 +301,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     const t0 = performance.now()
     render(dt)
     const ms = performance.now() - t0 + (dt * 1000 > 40 ? 30 : 0)
-    stats.frames++; stats.ms += (ms - stats.ms) * 0.1; stats.t = t; stats.slipping = slipStart >= 0
+    stats.frames++; stats.ms += (ms - stats.ms) * 0.1; stats.t = t; stats.slipping = slipStart >= 0; stats.eff = +clamp(Math.abs(vel) / V_FULL, 0, 1).toFixed(3); stats.rate = +rate.toFixed(3)
     adapt(stats.ms)
     if (first) live()
   }
@@ -286,6 +316,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
     const run = !!host && docVisible && !userPaused && fixedT === null && !lost
     stats.paused = !run
     last = performance.now()
+    lastY = scrollY
     r.setAnimationLoop(run ? frame : null)
   }
   function pick() {

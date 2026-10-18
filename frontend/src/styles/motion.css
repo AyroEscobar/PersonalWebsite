@@ -26,6 +26,38 @@
   transition: opacity var(--dur-ticks) var(--ease-out), transform var(--dur-ticks) var(--ease-out);
 }
 
+/* the sun moves only with the reader: over the hero's exit it slides 60 px right and 40 px lower, as the
+   day moves while he climbs; at Contact it comes down onto the band as it arrives. A scroll-driven
+   animation where the browser has one (compositor only), else src/lib/reveal.js initSun() writes the same
+   transform from the band's position on a frame. Never on its own, never in the still tier. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-tier='still']) .frieze--hero > .frieze-sun {
+      animation: sun-hero linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100svh;
+    }
+    html:not([data-tier='still']) .frieze--contact > .frieze-sun {
+      animation: sun-contact linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 60%;
+    }
+  }
+}
+@keyframes sun-hero {
+  to {
+    transform: translate3d(60px, 40px, 0);
+  }
+}
+@keyframes sun-contact {
+  from {
+    transform: translate3d(-40px, -60px, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

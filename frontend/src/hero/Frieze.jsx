@@ -1,9 +1,10 @@
 /*
   The frieze: a band of the pot's clay with the man and the boulder on the painter's ground line, a
   running meander under it. Two on the home page: band="hero" (the shoulder frieze, with the plate that
-  says who he is) and band="contact" (the same figure further up the line). The clay is CSS (the radial
-  burnish and the faint wheel rings in components.css), so is the ground line, so both are there before
-  any script and never move.
+  says who he is) and band="contact" (the same figure further up the line). The clay is CSS (its turning
+  edge, and the late sun with the wheel's rings inside it, in components.css), so is the ground line, so
+  both are there before any script. The sun is its own layer (.frieze-sun), so it can move with the
+  reader on the compositor while the clay and the line stay put.
 
     <Frieze band="hero" as="section" ...>  .frieze-art (the one canvas lands here, src/lib/frieze-host.js)
       ...children                          the plate, a <Room />, the theme line
@@ -50,6 +51,7 @@ export function Room({ alt = '', priority = false, className = '' }) {
 export default function Frieze({ band, as: As = 'div', className = '', meander = true, children, ...rest }) {
   return (
     <As className={`frieze frieze--${band} ${className}`.trim()} data-band={band} {...rest}>
+      <div className="frieze-sun" aria-hidden="true" data-deco="" />
       <div className="frieze-art" aria-hidden="true" />
       {children}
       {meander && <div className="meander" aria-hidden="true" data-deco="" />}
