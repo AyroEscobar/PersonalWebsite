@@ -186,17 +186,17 @@ export default function Kit() {
             <div className="kit-stack" inert>
               <Cell label={KIT.nav.desktop.text} className="kit-neck-cell">
                 <div className="kit-neck frieze">
-                  <Neck fixed={false} active="check-out" className="kit-neck-sample" hrefBase="/" />
+                  <Neck fixed={false} active="check-out" className="kit-neck-sample" wordmarkHref="/" hrefBase="/" />
                 </div>
               </Cell>
               <Cell label={KIT.nav.scrolled.text} className="kit-neck-cell">
                 <div className="kit-neck">
-                  <Neck fixed={false} active="experience" scrolled className="kit-neck-sample" hrefBase="/" />
+                  <Neck fixed={false} active="experience" scrolled className="kit-neck-sample" wordmarkHref="/" hrefBase="/" />
                 </div>
               </Cell>
               <Cell label={`${KIT.nav.phone.text}, ${S.open.text}`} className="kit-neck-cell kit-neck-cell--phone">
                 <div className="kit-neck kit-neck--phone">
-                  <Neck fixed={false} active="stack" open className="kit-neck-sample neck--phone" hrefBase="/" />
+                  <Neck fixed={false} active="stack" open className="kit-neck-sample neck--phone" wordmarkHref="/" hrefBase="/" />
                 </div>
               </Cell>
               <div className="kit-row">
