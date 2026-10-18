@@ -253,6 +253,10 @@
 .kit-theme .kit-poster {
   height: 200px;
 }
+.kit-foot-box {
+  background: var(--foot);
+  padding: 12px 18px;
+}
 .kit-skip {
   position: static;
   display: inline-block;

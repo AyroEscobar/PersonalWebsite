@@ -128,7 +128,6 @@
   content: '·' / '';
   display: inline-block;
   padding: 0 0.7em;
-  opacity: 0.7;
 }
 .nav a,
 .tog,
@@ -160,32 +159,23 @@
 }
 .tog .ip {
   padding: 0 0.3em;
-  opacity: 0.6;
 }
 /* the theme switch underlines the current vase from the attribute the boot script set, so it is right
-   before hydration; the kit forces it with .is-light / .is-dark */
+   before hydration; the kit forces it with .is-light / .is-dark. Full ink always: on the clay a faded
+   word would fall under 4.5:1, so the underline alone says which. */
 .tog--theme .tog-l {
   text-decoration: underline;
-}
-.tog--theme .tog-d {
-  opacity: 0.78;
 }
 :root[data-theme='dark'] .tog--theme:not(.is-light) .tog-l,
 .tog--theme.is-dark .tog-l {
   text-decoration: none;
-  opacity: 0.78;
 }
 :root[data-theme='dark'] .tog--theme:not(.is-light) .tog-d,
 .tog--theme.is-dark .tog-d {
   text-decoration: underline;
-  opacity: 1;
-}
-.quiet {
-  opacity: 0.82;
 }
 :root[data-transparency='reduced'] .quiet:not(.kit-static),
 .quiet[aria-checked='true'] {
-  opacity: 1;
   text-decoration: underline;
 }
 .menu-btn {

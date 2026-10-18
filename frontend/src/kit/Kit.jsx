@@ -260,19 +260,29 @@ export default function Kit() {
           <Group id="controls" title={KIT.groups.controls.text}>
             <div className="kit-row kit-row--foot" inert>
               <Cell label={S.rest.text}>
-                <SceneControls tier="full" paused={false} motion="on" />
+                <div className="kit-foot-box">
+                  <SceneControls tier="full" paused={false} motion="on" />
+                </div>
               </Cell>
               <Cell label={S.hover.text}>
-                <SceneControls tier="full" paused={false} motion="on" state="hover" />
+                <div className="kit-foot-box">
+                  <SceneControls tier="full" paused={false} motion="on" state="hover" />
+                </div>
               </Cell>
               <Cell label={S.paused.text}>
-                <SceneControls tier="full" paused motion="on" />
+                <div className="kit-foot-box">
+                  <SceneControls tier="full" paused motion="on" />
+                </div>
               </Cell>
               <Cell label={S.off.text}>
-                <SceneControls tier="still" paused={false} motion="off" />
+                <div className="kit-foot-box">
+                  <SceneControls tier="still" paused={false} motion="off" />
+                </div>
               </Cell>
               <Cell label={S.still.text}>
-                <SceneControls tier="still" paused={false} motion="on" />
+                <div className="kit-foot-box">
+                  <SceneControls tier="still" paused={false} motion="on" />
+                </div>
               </Cell>
             </div>
           </Group>
