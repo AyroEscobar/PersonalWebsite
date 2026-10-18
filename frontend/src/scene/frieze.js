@@ -38,6 +38,9 @@ const ADV_HERO = 0.45 // metres he climbs while the hero scrolls away
 const ADV_CONTACT = [-0.9, 0] // and over the contact band as it comes into view: he arrives, never crests
 const SPRING_W = 7
 const INFLATE = 0.02 // metres: a little more body, closer to the vase painter's heavy silhouette
+// metres: the soles stand this far off the slope, so the inflated toes sit on the painter's ground line
+// instead of sinking into it (no dark puddle where the outline meets the 4 px line)
+const SOLE = 0.018
 export const GAIT = { speed: 0.3, period: 2.05 }
 const WRAP = 240
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp
@@ -66,7 +69,7 @@ async function build({ theme, figureUrl = FIGURE_URL }) {
   fig.userData.u.uHeadY.value = geo.boundingBox.min.y + (1.56 / 1.8) * (geo.boundingBox.max.y - geo.boundingBox.min.y)
   const disk = boulderMaterial({ theme })
   const rs = rockShape('polished', R)
-  const f = makeFigure({ man, material: fig, boulderMaterial: disk, boulderGeometry: rs.geometry, R, x0: X0, surface: rs.surface, ...GAIT })
+  const f = makeFigure({ man, material: fig, boulderMaterial: disk, boulderGeometry: rs.geometry, R, x0: X0, sole: SOLE, surface: rs.surface, ...GAIT })
   f.glints.forEach((g) => { g.visible = false })
   slope.add(f.group)
   // draw order: the disk's painted contour, the disk, him, then the incised cut through whatever he overlaps

@@ -82,7 +82,7 @@ export const HAND = {
 }
 const sphereSurface = (dir, R, p, n) => { p.copy(dir).multiplyScalar(R); n.copy(dir); return R }
 
-export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R = 2.1, speed = 0.33, period = 1.9, duty = 0.7, leanDeg = 50, pelvisK = 0.7, handLift = 0, frontK = 0.16, x0 = 0, surface = sphereSurface } = {}) {
+export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R = 2.1, speed = 0.33, period = 1.9, duty = 0.7, leanDeg = 50, pelvisK = 0.7, handLift = 0, frontK = 0.16, x0 = 0, sole = 0, surface = sphereSurface } = {}) {
   const group = new THREE.Group()
   // model space faces +z with its left at +x; the slope frame faces +x with the right at +z
   const rig = new THREE.Group(); rig.rotation.y = Math.PI / 2; group.add(rig)
@@ -159,7 +159,7 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
     fl.x -= shift; fr.x -= shift
     const ph = t / T
     const bob = 0.02 * Math.cos(2 * Math.PI * ph * 2)
-    const pelvisY = hipH * pelvisK + bob - crouch
+    const pelvisY = hipH * pelvisK + bob - crouch + sole
     // weight: a 3 degree torso pitch with the step, a little hip roll and sway toward the stance side
     const lean = THREE.MathUtils.degToRad(leanDeg + leanAdd + 1.5 * Math.sin(2 * Math.PI * ph * 2))
     const roll = 0.05 * Math.sin(2 * Math.PI * ph), sway = 0.015 * Math.sin(2 * Math.PI * ph)
@@ -262,7 +262,7 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
       let pitch // heel lift about the ball, radians
       if (f.stance) pitch = 0.62 * sstep(0.55, 1.0, f.u)
       else pitch = 0.62 * (1 - sstep(0.0, 0.55, f.u)) - 0.12 * Math.sin(Math.PI * sstep(0.3, 1.0, f.u))
-      const ball = new THREE.Vector3(f.x, ballY + f.y, z)
+      const ball = new THREE.Vector3(f.x, ballY + f.y + sole, z)
       fk('thigh' + s)
       const hip = Pw['thigh' + s]
       // the ball is pinned; if the leg cannot reach the ankle, the heel rises about the ball until
