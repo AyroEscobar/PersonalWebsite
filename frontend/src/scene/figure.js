@@ -6,16 +6,20 @@
 
     const fig = await loadFigure(url)            // fetch + decode the GLB (meshopt)
     const f = makeFigure({ man: fig, material, boulderMaterial, boulderGeometry, R })
-    f.update(tau, { shift, leanAdd, crouch })    // tau is the cycle clock (frozen during a slip)
+    f.update(tau, pose)      // the push; tau is the gait clock (frozen during the catch)
 
   The body, as a solver:
     - root speed v, step period T, stance duty d. A stance foot is pinned at its footfall; the
       foot is rigid (ankle, ball, toe in one frame) and in the last part of stance the heel rises
-      about the planted ball, so the rear leg straightens into the push-off. Swing lifts the foot
-      on an arc and sets it down flat. Feet never slide: footfall k lands at root(t_k) + const.
-    - the pelvis sits at 0.75 of the standing hip height and bobs 2 cm at twice the step rate;
-      the torso leans so the line from the rear heel to the head is about 40 degrees off the
-      slope; the head bows toward the rock.
+      about the planted ball, so the rear leg straightens into the push-off. Feet never slide:
+      footfall k lands at root(t_k) + const.
+    - the swing is solved in joint space: the thigh swings from its toe-off angle to its landing
+      angle (front loaded, with a forward drive, so the knee drives through), the shin trails it and
+      the toe clears the slope by bisection. The knee rides an arc of the thigh's length about the
+      hip, so it never drops to the slope: no frame of the cycle reads as a kneel.
+    - the pelvis sits at 0.84 of the standing hip height (the vase's long lunge) and bobs 2 cm at
+      twice the step rate; the torso leans about 56 degrees off the slope's normal; the head is raised
+      headUp degrees so the painter's profile (the beard, the eye) reads.
     - the shoulders come out of the chest by forward kinematics (the clavicles protract), the
       hands are planted flat on the rock's surface along the line from the shoulder to the rock's
       centre (push through the centre), elbows bent and loaded; analytic two-bone IK for arms
@@ -82,7 +86,7 @@ export const HAND = {
 }
 const sphereSurface = (dir, R, p, n) => { p.copy(dir).multiplyScalar(R); n.copy(dir); return R }
 
-export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R = 2.1, speed = 0.33, period = 1.9, duty = 0.7, leanDeg = 50, pelvisK = 0.7, handLift = 0, frontK = 0.16, x0 = 0, sole = 0, surface = sphereSurface } = {}) {
+export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R = 2.1, speed = 0.33, period = 1.9, duty = 0.7, leanDeg = 50, pelvisK = 0.7, handLift = 0, frontK = 0.16, x0 = 0, sole = 0, surface = sphereSurface, swingPow = 0.7, thighDrive = 0.6, clearance = 0.05, pitchDrop = 0.3, headUp = 20 } = {}) {
   const group = new THREE.Group()
   // model space faces +z with its left at +x; the slope frame faces +x with the right at +z
   const rig = new THREE.Group(); rig.rotation.y = Math.PI / 2; group.add(rig)
@@ -118,16 +122,20 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
 
   const v0 = speed, T = period, d = duty
   const front = frontK // the ball lands this far behind the hips; push-off is a stance length further back
-  const lift = 0.1
   const rootX = (t) => x0 + v0 * t
   const footZ = 0.125
-  function foot(t, phase, out) {
+  // the push gait
+  const PUSH = { v: v0, T, d, front, x0 }
+  function foot(t, phase, out, gp = PUSH) {
+    const { v, T, d, front, x0 } = gp
     const k = Math.floor(t / T - phase)
     const u = (t - (k + phase) * T) / T
-    const landX = (kk) => rootX((kk + phase) * T) - front
+    const landX = (kk) => x0 + v * (kk + phase) * T - front
     if (u < d) { out.x = landX(k); out.y = 0; out.u = u / d; out.stance = true; return out }
-    const w = (u - d) / (1 - d), e = w * w * (3 - 2 * w)
-    out.x = THREE.MathUtils.lerp(landX(k), landX(k + 1), e); out.y = lift * Math.sin(Math.PI * Math.pow(w, 0.8)); out.u = w; out.stance = false
+    out.from = landX(k); out.to = landX(k + 1)
+    // the swing itself is solved in joint space in update(); x is only a nominal position
+    const w = (u - d) / (1 - d)
+    out.x = THREE.MathUtils.lerp(out.from, out.to, w); out.y = 0; out.u = w; out.stance = false
     return out
   }
 
@@ -153,10 +161,141 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
   const poleKnee = new THREE.Vector3(1, 0.1, 0)
   const zSide = { L: -1, R: 1 }
 
-  function update(t, { shift = 0, leanAdd = 0, crouch = 0, reachAdd = 0 } = {}) {
+  // a planted foot: the ball pinned at (bx, ground) with the heel raised by pitch; if the leg cannot reach
+  // the ankle, the heel rises about the ball until it can (99.75% of full length, a knee of about 172
+  // degrees), so the rear leg straightens and the foot never slides. Solved by bisection, so the heel angle
+  // is continuous. Writes ball, ankle, knee and the foot's rotation; returns the pitch
+  const reachMax = () => (Lt + Ls) * 0.9975
+  function plant(hip, bx, pitch, z, ball, ankle, knee, footQ) {
+    ball.set(bx, ballY + sole, z)
+    const ankleAt = (pa) => { footQ.setFromAxisAngle(Zv, -pa); return ankle.copy(ballOff).negate().applyQuaternion(footQ).add(ball) }
+    if (ankleAt(pitch).distanceTo(hip) > reachMax()) {
+      let lo = pitch, hi = 1.35
+      for (let k = 0; k < 22; k++) { const mid = (lo + hi) / 2; if (ankleAt(mid).distanceTo(hip) > reachMax()) lo = mid; else hi = mid }
+      pitch = hi; ankleAt(pitch)
+    }
+    ik(hip, ankle, Lt, Ls, poleKnee, knee)
+    return pitch
+  }
+
+  // ---- the trunk: hips at (x, pelvisY, sway), the spine leaning `lean` (radians) off the slope's normal,
+  // the neck and the head turned neckOff and headOff degrees from it (negative is up)
+  function trunk(x, pelvisY, sway, lean, roll, neckOff, headOff) {
+    const dir = (deg) => new THREE.Vector3(Math.sin(lean + THREE.MathUtils.degToRad(deg)), Math.cos(lean + THREE.MathUtils.degToRad(deg)), 0)
+    const sideRef = new THREE.Vector3(0, Math.sin(roll), 1).normalize()
+    Pw.hips.set(x, pelvisY, sway)
+    aimBone('hips', dir(-14), sideRef, Zv)
+    fk('spine'); aimBone('spine', dir(-3), sideRef, Zv)
+    fk('chest'); aimBone('chest', dir(4), new THREE.Vector3(0, -Math.sin(roll) * 0.6, 1).normalize(), Zv)
+    fk('neck'); aimBone('neck', dir(neckOff), Zv, Zv)
+    fk('head'); aimBone('head', dir(headOff), Zv, Zv)
+    out.chestY = Pw.chest.y
+  }
+  // ---- the clavicles: protract (1) rolls the shoulders forward into the push, 0 lets them hang
+  function clavicles(protract) {
+    for (const s of ['L', 'R']) {
+      const k = 'clav' + s
+      fk(k)
+      const lat = new THREE.Vector3(0, 0, zSide[s]).applyQuaternion(Rw.chest)
+      const fwd = new THREE.Vector3(1, 0, 0).applyQuaternion(Rw.chest)
+      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(Rw.chest)
+      const target = lat.clone().multiplyScalar(0.92).addScaledVector(fwd, 0.32 * protract).addScaledVector(up, 0.06 * protract - 0.04 * (1 - protract))
+      aimBone(k, target, fwd, X)
+      fk('upperArm' + s)
+    }
+  }
+  // ---- one arm to a wrist target, the hand turned by qh
+  function arm(s, wrist, pole, qh) {
+    const S = Pw['upperArm' + s]
+    const el = ik(S, wrist, La, Lf, pole, new THREE.Vector3())
+    const ud = el.clone().sub(S).normalize(), fd = wrist.clone().sub(el).normalize()
+    // the biceps side: where the forearm goes; fall back to the pole when the arm is straight
+    let ref = fd.clone().addScaledVector(ud, -fd.dot(ud))
+    if (ref.lengthSq() < 1e-4) ref.copy(pole).negate()
+    aimBone('upperArm' + s, ud, ref.normalize(), X)
+    fk('foreArm' + s)
+    const elbowRot = new THREE.Quaternion().setFromUnitVectors(ud, fd)
+    const refT = ref.clone().applyQuaternion(elbowRot)
+    // hand first, then share its twist into the forearm so the wrist does not collapse
+    const refFull = X.clone().applyQuaternion(qh)
+    refFull.addScaledVector(fd, -refFull.dot(fd)).normalize()
+    const refF = refT.clone().lerp(refFull, 0.6).normalize()
+    aimBone('foreArm' + s, fd, refF, X)
+    fk('hand' + s)
+    setBone('hand' + s, qh)
+  }
+
+  // ---- legs and the rigid feet
+  function solveLegs() {
+    const legs = [['L', fl], ['R', fr]]
+    legs.forEach(([s, f], i) => {
+      const z = zSide[s] * footZ
+      fk('thigh' + s)
+      const hip = Pw['thigh' + s]
+      const footQ = new THREE.Quaternion(), ankle = new THREE.Vector3(), knee = new THREE.Vector3(), ball = new THREE.Vector3()
+      let pitch // heel lift about the ball, radians
+      if (f.stance) {
+        pitch = plant(hip, f.x, 0.62 * sstep(0.55, 1.0, f.u), z, ball, ankle, knee, footQ)
+      } else {
+        // the swing in joint space: the thigh swings from its toe-off angle to its landing angle, front
+        // loaded and with a forward overshoot (the knee drives through, up and forward), and the shin
+        // trails it; both end angles are the planted solutions, so the swing meets them exactly. The knee
+        // rides an arc of the thigh's length about the hip, so it can never drop to the slope (in the IK
+        // swing it fell to 0.31 m with the shin flat on the ground, and he read as kneeling)
+        const p0 = plant(hip, f.from, 0.62, z, ball, ankle, knee, footQ)
+        const a0 = Math.atan2(knee.y - hip.y, knee.x - hip.x), b0 = Math.atan2(ankle.y - knee.y, ankle.x - knee.x), kz0 = knee.z, az0 = ankle.z
+        plant(hip, f.to, 0, z, ball, ankle, knee, footQ)
+        const a1 = Math.atan2(knee.y - hip.y, knee.x - hip.x), b1 = Math.atan2(ankle.y - knee.y, ankle.x - knee.x), kz1 = knee.z, az1 = ankle.z
+        const w = f.u, wt = Math.pow(w, swingPow), et = wt * wt * (3 - 2 * wt), es = w * w * (3 - 2 * w)
+        const a = a0 + (a1 - a0) * et + f.drive * Math.sin(Math.PI * Math.pow(w, 0.8))
+        let b = b0 + (b1 - b0) * es
+        // the heel comes down over the first pitchDrop of the swing (at 0.45 the rear shin flattened to 20 degrees)
+        pitch = p0 * (1 - sstep(0.0, pitchDrop, w)) - 0.12 * Math.sin(Math.PI * sstep(0.3, 1.0, w))
+        knee.set(hip.x + Lt * Math.cos(a), hip.y + Lt * Math.sin(a), kz0 + (kz1 - kz0) * es)
+        const place = (bb) => {
+          ankle.set(knee.x + Ls * Math.cos(bb), knee.y + Ls * Math.sin(bb), az0 + (az1 - az0) * es)
+          footQ.setFromAxisAngle(Zv, -pitch)
+          ball.copy(ballOff).applyQuaternion(footQ).add(ankle)
+          return ball.y
+        }
+        // the toe clears the slope: if the trailing shin would put the ball under it, the heel comes up
+        const clear = ballY + sole + clearance * Math.sin(Math.PI * w)
+        if (place(b) < clear) {
+          const dir = Math.cos(b) < 0 ? -1 : 1 // rotate away from straight down, toward the side the foot is on
+          let lo = 0, hi = 1.2
+          for (let k = 0; k < 20; k++) { const mid = (lo + hi) / 2; if (place(b + dir * mid) < clear) lo = mid; else hi = mid }
+          b += dir * hi; place(b)
+        }
+      }
+      out.pitch[i] = pitch
+      const td = knee.clone().sub(hip).normalize(), sd = ankle.clone().sub(knee).normalize()
+      let ref = sd.clone().addScaledVector(td, -sd.dot(td)).negate()
+      if (ref.lengthSq() < 1e-4) ref.copy(X)
+      aimBone('thigh' + s, td, ref.normalize(), X)
+      fk('shin' + s)
+      aimBone('shin' + s, sd, ref.clone().applyQuaternion(new THREE.Quaternion().setFromUnitVectors(td, sd)), X)
+      fk('foot' + s)
+      setBone('foot' + s, footQ)
+      fk('toe' + s)
+      setBone('toe' + s, _q.identity())
+      out.feet[i].set(ball.x + 0.03, 0, z)
+      out.heels[i].set(ankle.x - 0.03, 0, z)
+      out.balls[i].copy(ball)
+      out.stance[i] = f.stance
+      out[s === 'L' ? 'kneeL' : 'kneeR'] = { knee, hip, ankle, stance: f.stance, u: f.u }
+    })
+    // the root bone sits under the rig group; its parent is the GLTF scene root (identity)
+    bones.hips.position.copy(Pw.hips).applyQuaternion(QcInv)
+  }
+
+  // ---- the push. pose: shift (m he has been put back), leanAdd, crouch, reachAdd, lookUp (degrees)
+  function update(t, { shift = 0, leanAdd = 0, crouch = 0, reachAdd = 0, lookUp = 0 } = {}) {
     const x = rootX(t) - shift
     foot(t, 0, fl); foot(t, 0.5, fr)
     fl.x -= shift; fr.x -= shift
+    if (!fl.stance) { fl.from -= shift; fl.to -= shift }
+    if (!fr.stance) { fr.from -= shift; fr.to -= shift }
+    fl.drive = fr.drive = thighDrive
     const ph = t / T
     const bob = 0.02 * Math.cos(2 * Math.PI * ph * 2)
     const pelvisY = hipH * pelvisK + bob - crouch + sole
@@ -165,31 +304,13 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
     const roll = 0.05 * Math.sin(2 * Math.PI * ph), sway = 0.015 * Math.sin(2 * Math.PI * ph)
     // push-off pulse: a Gaussian at the end of each stance
     const pu = (u) => Math.exp(-(((u - 0.92) / 0.08) ** 2))
-    out.push = Math.max(fl.stance ? pu(fl.u) : 0, fr.stance ? pu(fr.u) : 0)
+    const pl = fl.stance ? pu(fl.u) : 0, pr = fr.stance ? pu(fr.u) : 0
+    out.push = Math.max(pl, pr); out.pushFoot = pl >= pr ? 0 : 1
 
-    // ---- the trunk
-    const dir = (deg) => new THREE.Vector3(Math.sin(lean + THREE.MathUtils.degToRad(deg)), Math.cos(lean + THREE.MathUtils.degToRad(deg)), 0)
-    const sideRef = new THREE.Vector3(0, Math.sin(roll), 1).normalize()
-    Pw.hips.set(x, pelvisY, sway)
-    aimBone('hips', dir(-14), sideRef, Zv)
-    fk('spine'); aimBone('spine', dir(-3), sideRef, Zv)
-    fk('chest'); aimBone('chest', dir(4), new THREE.Vector3(0, -Math.sin(roll) * 0.6, 1).normalize(), Zv)
-    fk('neck'); aimBone('neck', dir(-12), Zv, Zv)
-    // the head bows toward the rock with the effort, steady against the step (counter-pitch)
-    fk('head'); aimBone('head', dir(-4 - 1.5 * Math.sin(2 * Math.PI * ph * 2) * 0.6), Zv, Zv)
-    out.chestY = Pw.chest.y
-
-    // ---- the clavicles protract: the shoulders roll forward into the push
-    for (const s of ['L', 'R']) {
-      const k = 'clav' + s
-      fk(k)
-      const lat = new THREE.Vector3(0, 0, zSide[s]).applyQuaternion(Rw.chest)
-      const fwd = new THREE.Vector3(1, 0, 0).applyQuaternion(Rw.chest)
-      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(Rw.chest)
-      const target = lat.clone().multiplyScalar(0.92).addScaledVector(fwd, 0.32).addScaledVector(up, 0.06)
-      aimBone(k, target, fwd, X)
-      fk('upperArm' + s)
-    }
+    // ---- the trunk; the head bows toward the rock with the effort, steady against the step (counter-
+    // pitch); raised enough that the face, the beard and the eye read in profile (lookUp raises it further)
+    trunk(x, pelvisY, sway, lean, roll, -12 - headUp * 0.4, -4 - headUp - lookUp - 1.5 * Math.sin(2 * Math.PI * ph * 2) * 0.6)
+    clavicles(1)
 
     // ---- the rock, placed from the hands: push through the centre
     const sh = tmp.a.copy(Pw.upperArmL).add(Pw.upperArmR).multiplyScalar(0.5)
@@ -202,7 +323,7 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
     const reachH = Math.sqrt(Math.max(0.01, reach * reach - (handY - sh.y) ** 2))
     const hw = Math.sqrt(Math.max(0, RR * RR - (R - handY) ** 2 - 0.04))
     const bx = sh.x + reachH + hw
-    const phi = Math.asin((R - handY) / RR)
+    const phi = Math.asin(THREE.MathUtils.clamp((R - handY) / RR, -1, 1))
     boulder.position.set(bx, R, 0)
     boulder.rotation.set(0, 0, -bx / R)
 
@@ -210,7 +331,6 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
     // the rock's local frame this instant (it has rolled -bx / R about z)
     const toRock = _qr.setFromAxisAngle(Zv, bx / R), fromRock = _qr2.copy(toRock).invert()
     for (const s of ['L', 'R']) {
-      const S = Pw['upperArm' + s]
       const i = s === 'L' ? 0 : 1
       const z = zSide[s] * 0.2
       // contact point on the rock at chest height, a little wider than the shoulders: aimed on the
@@ -235,72 +355,18 @@ export function makeFigure({ man, material, boulderMaterial, boulderGeometry, R 
       _m1.makeBasis(fingers, _v.crossVectors(nrm, fingers), nrm); gl.quaternion.setFromRotationMatrix(_m1)
       gl.scale.set(1.25, 0.9, 1)
       if (handU) handU[i].copy(c).addScaledVector(nrm, -HAND.press).applyMatrix4(group.matrixWorld)
-      const el = ik(S, wrist, La, Lf, poleArm[s], new THREE.Vector3())
-      const ud = el.clone().sub(S).normalize(), fd = wrist.clone().sub(el).normalize()
-      // the biceps side: where the forearm goes; fall back to the pole when the arm is straight
-      let ref = fd.clone().addScaledVector(ud, -fd.dot(ud))
-      if (ref.lengthSq() < 1e-4) ref.copy(poleArm[s]).negate()
-      aimBone('upperArm' + s, ud, ref.normalize(), X)
-      fk('foreArm' + s)
-      const elbowRot = new THREE.Quaternion().setFromUnitVectors(ud, fd)
-      const refT = ref.clone().applyQuaternion(elbowRot)
-      // hand first, then share its twist into the forearm so the wrist does not collapse
       // the hand's support plane (bind pose, model space, mirrored for the right) lands on the rock
       const qh = frameRot(handAxis[s], handNormal[s], fingers, palm, new THREE.Quaternion())
-      const refFull = X.clone().applyQuaternion(qh)
-      refFull.addScaledVector(fd, -refFull.dot(fd)).normalize()
-      const refF = refT.clone().lerp(refFull, 0.6).normalize()
-      aimBone('foreArm' + s, fd, refF, X)
-      fk('hand' + s)
-      setBone('hand' + s, qh)
+      arm(s, wrist, poleArm[s], qh)
     }
 
-    // ---- legs and the rigid feet
-    const legs = [['L', fl], ['R', fr]]
-    legs.forEach(([s, f], i) => {
-      const z = zSide[s] * footZ
-      let pitch // heel lift about the ball, radians
-      if (f.stance) pitch = 0.62 * sstep(0.55, 1.0, f.u)
-      else pitch = 0.62 * (1 - sstep(0.0, 0.55, f.u)) - 0.12 * Math.sin(Math.PI * sstep(0.3, 1.0, f.u))
-      const ball = new THREE.Vector3(f.x, ballY + f.y + sole, z)
-      fk('thigh' + s)
-      const hip = Pw['thigh' + s]
-      // the ball is pinned; if the leg cannot reach the ankle, the heel rises about the ball until
-      // it can (99.75% of full length, a knee of about 172 degrees), so the rear leg straightens and
-      // the foot never slides. Solved by bisection, so the heel angle is continuous (no 0.025 rad steps)
-      const footQ = new THREE.Quaternion(), ankle = new THREE.Vector3()
-      const reachMax = (Lt + Ls) * 0.9975
-      const ankleAt = (pa) => { footQ.setFromAxisAngle(Zv, -pa); return ankle.copy(ballOff).negate().applyQuaternion(footQ).add(ball) }
-      if (ankleAt(pitch).distanceTo(hip) > reachMax) {
-        let lo = pitch, hi = 1.35
-        for (let k = 0; k < 22; k++) { const mid = (lo + hi) / 2; if (ankleAt(mid).distanceTo(hip) > reachMax) lo = mid; else hi = mid }
-        pitch = hi; ankleAt(pitch)
-      }
-      out.pitch[i] = pitch
-      const knee = ik(hip, ankle, Lt, Ls, poleKnee, new THREE.Vector3())
-      const td = knee.clone().sub(hip).normalize(), sd = ankle.clone().sub(knee).normalize()
-      let ref = sd.clone().addScaledVector(td, -sd.dot(td)).negate()
-      if (ref.lengthSq() < 1e-4) ref.copy(X)
-      aimBone('thigh' + s, td, ref.normalize(), X)
-      fk('shin' + s)
-      aimBone('shin' + s, sd, ref.clone().applyQuaternion(new THREE.Quaternion().setFromUnitVectors(td, sd)), X)
-      fk('foot' + s)
-      setBone('foot' + s, footQ)
-      fk('toe' + s)
-      setBone('toe' + s, _q.identity())
-      out.feet[i].set(ball.x + 0.03, 0, z)
-      out.heels[i].set(ankle.x - 0.03, 0, z)
-      out.balls[i].copy(ball)
-      out.stance[i] = f.stance
-      out[s === 'L' ? 'kneeL' : 'kneeR'] = { knee, hip, ankle, stance: f.stance, u: f.u }
-    })
-    // the root bone sits under the rig group; its parent is the GLTF scene root (identity)
-    bones.hips.position.copy(Pw.hips).applyQuaternion(QcInv)
+    solveLegs()
     out.x = x; out.bx = bx; out.phi = phi; out.head = Pw.head
     return out
   }
+
   out.balls = [new THREE.Vector3(), new THREE.Vector3()]; out.stance = [false, false]
   // the phase of the cycle (0..1); both feet are planted for phase 0..0.2 and 0.5..0.7 at duty 0.7
   const phase = (t) => ((t / T) % 1 + 1) % 1
-  return { group, boulder, glints, mesh, bones, Pw, update, rootX, phase, R, T, duty: d, lengths: { Lt, Ls, La, Lf, hipH } }
+  return { group, boulder, glints, mesh, bones, Pw, update, rootX, phase, R, T, duty: d, PUSH, lengths: { Lt, Ls, La, Lf, hipH } }
 }

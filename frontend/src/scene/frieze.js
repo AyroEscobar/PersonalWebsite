@@ -47,8 +47,9 @@ const INFLATE = 0.02 // metres: a little more body, closer to the vase painter's
 const SOLE = 0.018
 export const GAIT = { speed: 0.3, period: 2.05 }
 // the vase's long diagonal lunge: the hips high and the back leg long (at pelvisK 0.7 and 50 degrees both
-// shins lay nearly flat for half the cycle and he read as kneeling)
-const POSE = { pelvisK: 0.78, leanDeg: 56 }
+// shins lay nearly flat for half the cycle and he read as kneeling; at 0.78 the swinging knee still fell to
+// 0.31 m; at 0.84 with the joint-space swing it stays above 0.36 m and drives forward)
+const POSE = { pelvisK: 0.84, leanDeg: 56, headUp: 0 }
 const WRAP = 240
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp
 const sstep = (a, b, x) => { const u = clamp((x - a) / (b - a), 0, 1); return u * u * (3 - 2 * u) }
