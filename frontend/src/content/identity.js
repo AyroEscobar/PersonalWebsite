@@ -36,4 +36,9 @@ export const HERO = {
   theme: item('hero-theme', 'uphill, on purpose.', ['voice-typing-lines', 'voice-no-shortcut']),
 }
 
+// the social card (scripts/og.mjs renders it into public/og.png): his name and this one line
+export const OG = {
+  line: item('og-line', 'Founder of Esvo Technologies \u00b7 UT\u00a0Dallas', ['ven-esvo', 'identity-student']),
+}
+
 export const SKIP = ui('skip-link', 'skip to content')
