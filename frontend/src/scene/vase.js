@@ -29,7 +29,8 @@ import { NOISE_GLSL } from './noise.js'
 // any gloss leaves grey satin highlights on the thigh, calf and forearm, and he reads rendered, not painted.
 export const INKS = {
   light: { body: 0x17110d, line: 0xc47d45, shade: 0, gloss: 0, disk: 0xf4ead2, fleck: 0x3a2a20, contour: 0x2a1d15 },
-  dark: { body: 0xc8773f, line: 0x141110, shade: 1, gloss: 0, disk: 0xcd844b, fleck: 0x8a4a26, contour: 0x141110 },
+  // dark: the disk is added white, aged (--aged), with clay flecks, so he no longer merges into it at the hands
+  dark: { body: 0xc8773f, line: 0x141110, shade: 1, gloss: 0, disk: 0xc8b491, fleck: 0xc47d45, contour: 0x141110 },
 }
 const col = (h) => new THREE.Color(h)
 // the form line (the iso-line of the key light) is the painter's incision: at 0.42 it ran a loop round the
@@ -172,12 +173,14 @@ export function boulderMaterial({ theme = 'light' } = {}) {
 
 // an inverted hull: same geometry (and skeleton), back faces only, pushed out along the skinned normal by
 // px pixels in clip space (a constant width at any scale), plus the same world inflate as the body
-export function hullOutline(mesh, { px = 2.2, color = 0x141110, cut = false, inflate = 0, part = null } = {}) {
+export function hullOutline(mesh, { px = 2.2, color = 0x141110, cut = false, inflate = 0, part = null, load = 0 } = {}) {
   const mat = new THREE.MeshBasicMaterial({ color: col(cut ? 0x000000 : color), side: THREE.BackSide })
   if (cut) { mat.blending = THREE.NoBlending; mat.opacity = 0; mat.depthWrite = false }
   mat.toneMapped = false
   mat.fog = false
-  const u = { uPx: { value: px }, uRes: { value: new THREE.Vector2(1440, 900) }, uInflate: { value: inflate } }
+  // load: the painted contour is loaded toward the ground, as a brush is (thin at the top, heavier underneath),
+  // so a disk with no shading still sits on the line instead of floating as a moon
+  const u = { uPx: { value: px }, uRes: { value: new THREE.Vector2(1440, 900) }, uInflate: { value: inflate }, uLoad: { value: load } }
   // the figure's own hair and head uniforms (the same objects), so the cut follows the cap exactly
   if (part) { mat.defines = { USE_PART: '' }; u.uHair = part.uHair; u.uHeadY = part.uHeadY }
   mat.userData.u = u
@@ -185,7 +188,7 @@ export function hullOutline(mesh, { px = 2.2, color = 0x141110, cut = false, inf
     Object.assign(sh.uniforms, u)
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', `#include <common>
-        uniform float uPx; uniform float uInflate; uniform vec2 uRes;
+        uniform float uPx; uniform float uInflate; uniform vec2 uRes; uniform float uLoad;
         #ifdef USE_PART
         ${PART_VERT}
         #endif`)
@@ -217,6 +220,7 @@ export function hullOutline(mesh, { px = 2.2, color = 0x141110, cut = false, inf
           // the hands and feet: a finer cut where he meets the rock and the ground
           k *= 1.0 - 0.45 * aPart.x * step(0.25, aPart.y);
           #endif
+          k *= 1.0 - uLoad + uLoad * 2.0 * max(0.0, -nv.y);
           gl_Position.xy += d * uPx * k * 2.0 / uRes * gl_Position.w;
         }`)
   }

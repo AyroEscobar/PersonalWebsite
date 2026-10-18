@@ -89,7 +89,8 @@ async function build({ theme, figureUrl = FIGURE_URL }) {
   f.glints.forEach((g) => { g.visible = false })
   slope.add(f.group)
   // draw order: the disk's painted contour, the disk, him, then the incised cut through whatever he overlaps
-  const diskHull = hullOutline(f.boulder, { px: 1.6 }); diskHull.renderOrder = 0; f.boulder.add(diskHull)
+  // the disk's painted contour, loaded toward the ground: about 1 px at the top to 1.6 px underneath
+  const diskHull = hullOutline(f.boulder, { px: 1.3, load: 0.25 }); diskHull.renderOrder = 0; f.boulder.add(diskHull)
   f.boulder.renderOrder = 1
   f.mesh.renderOrder = 2
   const gapHull = hullOutline(f.mesh, { px: 1.5, cut: true, inflate: INFLATE / objScale, part: fig.userData.u }); gapHull.renderOrder = 3; f.mesh.parent.add(gapHull)
