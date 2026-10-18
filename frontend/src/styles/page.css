@@ -152,7 +152,8 @@
   width: auto;
   max-width: 100%;
 }
-.nf-band > .meander {
+/* the poster bands (the 404 and the kit samples): the meander is the band's bottom edge, as on the home page */
+.frieze--poster > .meander {
   position: absolute;
   left: 0;
   right: 0;
