@@ -334,6 +334,32 @@ export async function sceneChecks({ cdp, url, check, sleep, scratch }) {
     await page.close()
   }
 
+  // the still tier is the finished page: nothing waiting at opacity 0 or turned, the pot facing (both themes,
+  // 1440 and a phone); reduced motion lands on the same tier
+  for (const [label, opts] of SIZES) {
+    for (const theme of ['light', 'dark']) {
+      const page = await fresh(opts, `/?tier=still&theme=${theme}`, 1200)
+      const r = await page.eval(`(async () => {
+        for (let y = 0; y < document.documentElement.scrollHeight; y += 500) { window.scrollTo({ top: y, behavior: 'instant' }); await new Promise((d) => setTimeout(d, 60)) }
+        await new Promise((d) => setTimeout(d, 400))
+        const hidden = [], turned = []
+        for (const e of document.querySelectorAll('main *, footer *')) {
+          const cs = getComputedStyle(e)
+          if (cs.display === 'none' || e.closest('[aria-hidden="true"]') && !e.matches('.pot-still')) continue
+          const b = e.getBoundingClientRect()
+          if (!b.width || !b.height) continue
+          if (cs.opacity === '0' && !e.matches('.poster, .poster img, .pot-snap')) hidden.push(e.className || e.tagName)
+          if (e.matches('.turn, .sec-title, .carve') && cs.transform !== 'none') turned.push(e.className)
+        }
+        const cover = [...document.querySelectorAll('.carve')].filter((e) => getComputedStyle(e, '::after').content !== 'none' && getComputedStyle(e, '::after').display !== 'none').length
+        const face = [...document.querySelectorAll('.pot-still--face.pot-still--${theme}')].filter((i) => i.getClientRects().length && i.complete && i.naturalWidth > 0).length
+        return { hidden: hidden.slice(0, 6), turned: turned.slice(0, 6), cover, face, rv: document.documentElement.classList.contains('rv'), canvas: document.querySelectorAll('canvas').length }
+      })()`)
+      check('scene', `still tier is the finished page @${label} ${theme}`, !r.hidden.length && !r.turned.length && !r.cover && r.face === 1 && !r.rv && !r.canvas ? 'pass' : 'fail', `hidden ${r.hidden.join(', ') || 'none'}; turned ${r.turned.join(', ') || 'none'}; carve covers ${r.cover}; the facing pot still shown ${r.face}; html.rv ${r.rv}; canvas ${r.canvas}`)
+      await page.close()
+    }
+  }
+
   // the still tier never asks for the scene
   {
     const page = await cdp.newPage({ width: 1440, height: 900 })
@@ -481,8 +507,11 @@ export async function sceneChecks({ cdp, url, check, sleep, scratch }) {
         await waitReady(page).catch(() => {})
         await page.eval(`(() => { const s = document.createElement('style'); s.textContent = ${JSON.stringify(css)}; document.head.appendChild(s); const r = document.querySelector('.belly').getBoundingClientRect(); window.scrollTo({ top: r.top + scrollY - 40, behavior: 'instant' }) })()`)
         await sleep(1500)
-        const box = await page.eval(`(() => { const r = document.querySelector('.pot-rail .pot').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height } })()`)
-        const png = path.join(scratch || path.join(ROOT, '.build/qa'), `pot-${theme}-${shots.length}.png`)
+        // (the capture's clip is in document coordinates)
+        const box = await page.eval(`(() => { const r = document.querySelector('.pot-rail .pot').getBoundingClientRect(); return { x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height, host: window.__stats && window.__stats.host } })()`)
+        const dir = path.join(scratch || path.join(ROOT, '.build/qa'), 'pot')
+        mkdirSync(dir, { recursive: true })
+        const png = path.join(dir, `pot-${theme}-${shots.length}.png`)
         await page.screenshot(png, { clip: box })
         shots.push(png)
         await page.close()
@@ -502,8 +531,9 @@ export async function sceneChecks({ cdp, url, check, sleep, scratch }) {
     await page.eval(`document.querySelector('.pot-band').scrollIntoView({ block: 'center', behavior: 'instant' })`)
     await sleep(1500)
     await page.eval('__bench(20)')
-    const bp = await page.eval('({ ...__bench(60), host: __stats.host })')
-    check('scene', 'pot pass cost on lite', bp.host === 'pot' && bp.avgMs <= 2.0 ? 'pass' : 'fail', `pot host ${bp.host}, ${Math.round(bp.avgMs * 100) / 100} ms a frame (at most 2.0) at ${bp.size.join('x')}, ${bp.draws} draws`)
+    // the median of five benches (one alone moves with whatever else the machine is doing)
+    const bp = await page.eval('(() => { const xs = []; let b; for (let i = 0; i < 5; i++) { b = __bench(60); xs.push(b.avgMs) } xs.sort((a, c) => a - c); return { ...b, avgMs: xs[2], host: __stats.host } })()')
+    check('scene', 'pot pass cost on lite', bp.host === 'pot' && bp.avgMs <= 2.0 ? 'pass' : 'fail', `pot host ${bp.host}, ${Math.round(bp.avgMs * 100) / 100} ms a frame (median of five, at most 2.0) at ${bp.size.join('x')}, ${bp.draws} draws`)
     await page.close()
   }
 
