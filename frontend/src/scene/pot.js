@@ -163,7 +163,9 @@ const FRAG = /* glsl */ `
     albedo *= 1.0 + (grain - 0.5) * 0.09 * (1.0 - gloss);
     vec3 up = vec3(0.0, 1.0, 0.0);
     vec3 tp = normalize(up - N * dot(N, up) + 1e-4);
-    N = normalize(N + tp * (0.05 * sin(y * 6.28318530718 * 34.0) * (1.0 - 0.8 * gloss) * (1.0 - vHandle)) + tp * (grain - 0.5) * 0.06);
+    // the wheel's ridges, broad and low, so they read as throwing marks under the low sun and never as a
+    // fine stripe (at 34 to the unit they shimmered in fine bands as the pot turned)
+    N = normalize(N + tp * (0.03 * sin(y * 6.28318530718 * 18.0) * (1.0 - 0.8 * gloss) * (1.0 - vHandle)) + tp * (grain - 0.5) * 0.06);
     vec3 V = normalize(cameraPosition - vW);
     vec3 L = normalize(uSun);
     float ndl = dot(N, L);

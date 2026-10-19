@@ -17,7 +17,7 @@
     .build/poster/*.png       the sources, and hero-1440.png (the composed light hero) for scripts/og.mjs
 
     public/pot/pot-{light,dark}-{in,face}.avif   with --pot (and nothing else): the pot's four stills,
-                                                 560x860, from the scene (window.__potShot): turned away
+                                                 560x857 (the box's aspect), from the scene (window.__potShot): turned away
                                                  (-70 degrees, where the canvas lands in a live tier) and
                                                  facing (0, the still tier), 20 KB or less each
 
@@ -147,7 +147,7 @@ try {
       await page.goto(`${url}/?tier=${TIER}&t=${T_POSTER}&theme=${theme}`, { settle: 600 })
       await waitReady(page)
       for (const [kind, rot, sun] of [['in', -70, 0], ['face', 0, 0.3]]) {
-        const res = await page.eval(`JSON.stringify(window.__potShot({ rot: ${rot}, sun: ${sun}, w: 560, h: 860 }))`)
+        const res = await page.eval(`JSON.stringify(window.__potShot({ rot: ${rot}, sun: ${sun}, w: 560, h: 857 }))`)
         const { url: dataUrl } = JSON.parse(res)
         const png = path.join(SRC, `pot-${theme}-${kind}.png`)
         writeFileSync(png, Buffer.from(dataUrl.split(',')[1], 'base64'))
@@ -159,7 +159,7 @@ try {
         const f = `pot-${theme}-${kind}.avif`
         writeFileSync(path.join(out, f), buf)
         writeFileSync(path.join(dist, f), buf)
-        console.log(`poster: ${f} 560x860  avif ${(buf.length / 1024).toFixed(1)} KB (q ${q})`)
+        console.log(`poster: ${f} 560x857  avif ${(buf.length / 1024).toFixed(1)} KB (q ${q})`)
         if (buf.length > BUDGET.avif) { console.error(`poster: ${f} is over ${BUDGET.avif / 1024} KB at the lowest quality`); code = 1 }
       }
       await page.close()

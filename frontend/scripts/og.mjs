@@ -51,11 +51,12 @@ html, body { width: ${W}px; height: ${H}px; overflow: hidden; }
 body {
   position: relative;
   color: #141110;
+  /* the clay as the site lays it (components.css .frieze and .frieze-sun): the late sun from the upper right
+     with the wheel's broad rings inside it, the clay turning away toward the left and the foot */
   background:
-    repeating-linear-gradient(180deg, color-mix(in srgb, #F4EAD2 2.6%, transparent) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(180deg, color-mix(in srgb, #3A2E26 4%, transparent) 0 2px, transparent 2px 19px),
-    repeating-linear-gradient(180deg, color-mix(in srgb, #F4EAD2 2%, transparent) 0 3px, transparent 3px 41px),
-    radial-gradient(110% 85% at 64% 46%, #E09249 0%, color-mix(in srgb, #E09249 40%, #C47D45) 42%, #C47D45 78%),
+    radial-gradient(48% 50% at 70% 34%, color-mix(in srgb, #E09249 72%, transparent) 0%, color-mix(in srgb, #E09249 40%, transparent) 46%, transparent 100%) 50% -189px / 132% 970px no-repeat,
+    linear-gradient(180deg, transparent 52%, color-mix(in srgb, #3A2E26 9%, transparent) 100%),
+    linear-gradient(90deg, color-mix(in srgb, #3A2E26 10%, transparent) 0%, transparent 42%),
     #C47D45;
 }
 .name { position: absolute; left: 62px; top: 58px; font: 500 ${NAME}px/0.98 'Cinzel', serif; letter-spacing: 0.02em; text-transform: uppercase; }

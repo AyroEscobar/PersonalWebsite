@@ -16,7 +16,7 @@ export default function PotStage({ className = '' }) {
       <div className="frieze-art pot-art" />
       <div className="room pot-room">
         {['light', 'dark'].map((th) =>
-          ['in', 'face'].map((k) => <img key={th + k} className={`pot-still pot-still--${th} pot-still--${k}`} src={STILL(th, k)} width="560" height="860" alt="" loading="lazy" decoding="async" />),
+          ['in', 'face'].map((k) => <img key={th + k} className={`pot-still pot-still--${th} pot-still--${k}`} src={STILL(th, k)} width="560" height="857" alt="" loading="lazy" decoding="async" />),
         )}
       </div>
     </div>

@@ -1,97 +1,97 @@
 {
   "t": 2.34,
   "tier": "full",
-  "build": "68ab656",
+  "build": "fe8d7c9",
   "posters": {
     "frieze-light": {
       "width": 1600,
       "height": 1040,
       "avif": {
-        "bytes": 19389,
-        "quality": 40,
+        "bytes": 20289,
+        "quality": 45,
         "ok": true
       },
       "webp": {
-        "bytes": 32048,
+        "bytes": 31168,
         "quality": 86,
         "ok": true
       },
-      "drawn": 0.3306
+      "drawn": 0.3292
     },
     "frieze-light-m": {
       "width": 960,
       "height": 624,
       "avif": {
-        "bytes": 12388,
+        "bytes": 11738,
         "quality": 60,
         "ok": true
       },
       "webp": {
-        "bytes": 18942,
+        "bytes": 18260,
         "quality": 86,
         "ok": true
       },
-      "drawn": 0.3334
+      "drawn": 0.3314
     },
     "frieze-dark": {
       "width": 1600,
       "height": 1040,
       "avif": {
-        "bytes": 19870,
+        "bytes": 19290,
         "quality": 40,
         "ok": true
       },
       "webp": {
-        "bytes": 31718,
+        "bytes": 31188,
         "quality": 80,
         "ok": true
       },
-      "drawn": 0.3306
+      "drawn": 0.3292
     },
     "frieze-dark-m": {
       "width": 960,
       "height": 624,
       "avif": {
-        "bytes": 12804,
+        "bytes": 12444,
         "quality": 60,
         "ok": true
       },
       "webp": {
-        "bytes": 20712,
+        "bytes": 20298,
         "quality": 86,
         "ok": true
       },
-      "drawn": 0.3334
+      "drawn": 0.3314
     }
   },
   "alpha": {
-    "light": 0.3306,
-    "dark": 0.3306
+    "light": 0.3292,
+    "dark": 0.3292
   },
   "extremes": {
     "light": {
       "neck": {
         "dark": [
-          191,
-          122,
-          67
+          183,
+          117,
+          66
         ],
         "light": [
-          207,
-          137,
-          77
+          213,
+          138,
+          72
         ]
       },
       "theme": {
         "dark": [
-          190,
-          121,
-          67
+          173,
+          111,
+          63
         ],
         "light": [
-          215,
-          141,
-          76
+          192,
+          125,
+          68
         ]
       },
       "band": {
@@ -115,9 +115,9 @@
           16
         ],
         "light": [
-          28,
-          24,
-          20
+          33,
+          26,
+          22
         ]
       },
       "theme": {
@@ -127,9 +127,9 @@
           16
         ],
         "light": [
-          33,
-          27,
-          24
+          25,
+          20,
+          19
         ]
       },
       "band": {
@@ -139,9 +139,9 @@
           16
         ],
         "light": [
-          20,
-          17,
-          16
+          33,
+          26,
+          22
         ]
       }
     }
@@ -154,7 +154,7 @@
           "0": {
             "scrollY": 0,
             "lines": 18,
-            "lowest": 5.53,
+            "lowest": 5.11,
             "worst": {
               "text": "Ayro",
               "sel": "span.wm-a",
@@ -162,17 +162,17 @@
               "weight": 500,
               "large": false,
               "min": 4.5,
-              "ratio": 5.53,
+              "ratio": 5.11,
               "bg": [
-                192,
-                123,
-                68
+                184,
+                118,
+                66
               ],
               "textLum": 0.006
             }
           },
           "1": {
-            "scrollY": 3532,
+            "scrollY": 4110,
             "lines": 25,
             "lowest": 9.3,
             "worst": {
@@ -192,8 +192,28 @@
             }
           },
           "0.3": {
-            "scrollY": 1395,
-            "lines": 27,
+            "scrollY": 348,
+            "lines": 31,
+            "lowest": 7.92,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.92,
+              "bg": [
+                106,
+                50,
+                39
+              ],
+              "textLum": 0.781
+            }
+          },
+          "0.56": {
+            "scrollY": 1263,
+            "lines": 24,
             "lowest": 7.92,
             "worst": {
               "text": "II",
@@ -211,29 +231,9 @@
               "textLum": 0.055
             }
           },
-          "0.56": {
-            "scrollY": 2310,
-            "lines": 31,
-            "lowest": 7.92,
-            "worst": {
-              "text": "III",
-              "sel": "span.num",
-              "size": 22,
-              "weight": 400,
-              "large": false,
-              "min": 4.5,
-              "ratio": 7.92,
-              "bg": [
-                241,
-                227,
-                207
-              ],
-              "textLum": 0.055
-            }
-          },
           "0.8": {
-            "scrollY": 3019,
-            "lines": 21,
+            "scrollY": 3056,
+            "lines": 8,
             "lowest": 7.92,
             "worst": {
               "text": "IV",
@@ -256,7 +256,7 @@
           "0": {
             "scrollY": 0,
             "lines": 24,
-            "lowest": 5.6,
+            "lowest": 5.09,
             "worst": {
               "text": "Ayro",
               "sel": "span.wm-a",
@@ -264,17 +264,17 @@
               "weight": 500,
               "large": false,
               "min": 4.5,
-              "ratio": 5.6,
+              "ratio": 5.09,
               "bg": [
-                194,
-                124,
-                68
+                183,
+                118,
+                66
               ],
               "textLum": 0.006
             }
           },
           "1": {
-            "scrollY": 2858,
+            "scrollY": 3490,
             "lines": 28,
             "lowest": 7.92,
             "worst": {
@@ -294,8 +294,28 @@
             }
           },
           "0.3": {
-            "scrollY": 1301,
-            "lines": 38,
+            "scrollY": 304,
+            "lines": 32,
+            "lowest": 5.09,
+            "worst": {
+              "text": "Ayro",
+              "sel": "span.wm-a",
+              "size": 15,
+              "weight": 500,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.09,
+              "bg": [
+                183,
+                118,
+                66
+              ],
+              "textLum": 0.006
+            }
+          },
+          "0.56": {
+            "scrollY": 1085,
+            "lines": 32,
             "lowest": 7.92,
             "worst": {
               "text": "II",
@@ -313,29 +333,9 @@
               "textLum": 0.055
             }
           },
-          "0.56": {
-            "scrollY": 2082,
-            "lines": 34,
-            "lowest": 7.92,
-            "worst": {
-              "text": "III",
-              "sel": "span.num",
-              "size": 22,
-              "weight": 400,
-              "large": false,
-              "min": 4.5,
-              "ratio": 7.92,
-              "bg": [
-                241,
-                227,
-                207
-              ],
-              "textLum": 0.055
-            }
-          },
           "0.8": {
-            "scrollY": 2666,
-            "lines": 19,
+            "scrollY": 2755,
+            "lines": 11,
             "lowest": 7.92,
             "worst": {
               "text": "IV",
@@ -358,7 +358,7 @@
           "0": {
             "scrollY": 0,
             "lines": 32,
-            "lowest": 5.52,
+            "lowest": 4.63,
             "worst": {
               "text": "uphill, on purpose.",
               "sel": "p.theme-line",
@@ -366,18 +366,18 @@
               "weight": 400,
               "large": false,
               "min": 4.5,
-              "ratio": 5.52,
+              "ratio": 4.63,
               "bg": [
-                192,
-                123,
-                68
+                173,
+                112,
+                64
               ],
               "textLum": 0.006
             }
           },
           "1": {
-            "scrollY": 2441,
-            "lines": 37,
+            "scrollY": 2765,
+            "lines": 35,
             "lowest": 7.92,
             "worst": {
               "text": "Grab a coffee chat",
@@ -396,8 +396,28 @@
             }
           },
           "0.3": {
-            "scrollY": 1092,
-            "lines": 64,
+            "scrollY": 221,
+            "lines": 33,
+            "lowest": 4.63,
+            "worst": {
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 14,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 4.63,
+              "bg": [
+                173,
+                112,
+                64
+              ],
+              "textLum": 0.006
+            }
+          },
+          "0.56": {
+            "scrollY": 872,
+            "lines": 46,
             "lowest": 8.63,
             "worst": {
               "text": "esvotech.com",
@@ -415,28 +435,8 @@
               "textLum": 0.055
             }
           },
-          "0.56": {
-            "scrollY": 1657,
-            "lines": 45,
-            "lowest": 9.22,
-            "worst": {
-              "text": "Inaugural AidenEdge cohort, 1 of 10 interns, six",
-              "sel": "p.note",
-              "size": 17,
-              "weight": 400,
-              "large": false,
-              "min": 4.5,
-              "ratio": 9.22,
-              "bg": [
-                228,
-                214,
-                196
-              ],
-              "textLum": 0.03
-            }
-          },
           "0.8": {
-            "scrollY": 2172,
+            "scrollY": 2092,
             "lines": 27,
             "lowest": 7.92,
             "worst": {
@@ -460,7 +460,7 @@
           "0": {
             "scrollY": 0,
             "lines": 32,
-            "lowest": 5.66,
+            "lowest": 4.78,
             "worst": {
               "text": "uphill, on purpose.",
               "sel": "p.theme-line",
@@ -468,18 +468,18 @@
               "weight": 400,
               "large": false,
               "min": 4.5,
-              "ratio": 5.66,
+              "ratio": 4.78,
               "bg": [
-                194,
-                125,
-                70
+                176,
+                114,
+                64
               ],
               "textLum": 0.006
             }
           },
           "1": {
-            "scrollY": 2441,
-            "lines": 41,
+            "scrollY": 2765,
+            "lines": 38,
             "lowest": 7.92,
             "worst": {
               "text": "Grab a coffee chat",
@@ -498,48 +498,48 @@
             }
           },
           "0.3": {
-            "scrollY": 1272,
-            "lines": 69,
-            "lowest": 8.63,
+            "scrollY": 221,
+            "lines": 34,
+            "lowest": 4.78,
             "worst": {
-              "text": "esvotech.com",
-              "sel": "a.card-link",
-              "size": 18,
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 14,
               "weight": 400,
               "large": false,
               "min": 4.5,
-              "ratio": 8.63,
+              "ratio": 4.78,
               "bg": [
-                247,
-                237,
-                221
+                176,
+                114,
+                64
               ],
-              "textLum": 0.055
+              "textLum": 0.006
             }
           },
           "0.56": {
-            "scrollY": 1837,
-            "lines": 48,
-            "lowest": 7.92,
+            "scrollY": 872,
+            "lines": 47,
+            "lowest": 4.78,
             "worst": {
-              "text": "Grab a coffee chat",
-              "sel": "span.btn-label",
-              "size": 16,
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 14,
               "weight": 400,
               "large": false,
               "min": 4.5,
-              "ratio": 7.92,
+              "ratio": 4.78,
               "bg": [
-                106,
-                50,
-                39
+                176,
+                114,
+                64
               ],
-              "textLum": 0.781
+              "textLum": 0.006
             }
           },
           "0.8": {
-            "scrollY": 2352,
-            "lines": 39,
+            "scrollY": 2212,
+            "lines": 37,
             "lowest": 7.92,
             "worst": {
               "text": "Grab a coffee chat",
@@ -568,11 +568,11 @@
         "weight": 400,
         "large": false,
         "min": 4.5,
-        "ratio": 5.52,
+        "ratio": 4.63,
         "bg": [
-          192,
-          123,
-          68
+          173,
+          112,
+          64
         ],
         "textLum": 0.006
       },
@@ -586,7 +586,7 @@
           "0": {
             "scrollY": 0,
             "lines": 18,
-            "lowest": 5.21,
+            "lowest": 5.55,
             "worst": {
               "text": "uphill, on purpose.",
               "sel": "p.theme-line",
@@ -594,17 +594,17 @@
               "weight": 400,
               "large": false,
               "min": 4.5,
-              "ratio": 5.21,
+              "ratio": 5.55,
               "bg": [
-                32,
-                26,
-                22
+                24,
+                20,
+                18
               ],
               "textLum": 0.268
             }
           },
           "1": {
-            "scrollY": 3532,
+            "scrollY": 4110,
             "lines": 25,
             "lowest": 9.3,
             "worst": {
@@ -624,8 +624,28 @@
             }
           },
           "0.3": {
-            "scrollY": 1395,
-            "lines": 27,
+            "scrollY": 348,
+            "lines": 31,
+            "lowest": 7.5,
+            "worst": {
+              "text": "Grab a coffee chat",
+              "sel": "span.btn-label",
+              "size": 16,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 7.5,
+              "bg": [
+                224,
+                146,
+                73
+              ],
+              "textLum": 0.006
+            }
+          },
+          "0.56": {
+            "scrollY": 1263,
+            "lines": 24,
             "lowest": 6.95,
             "worst": {
               "text": "esvotech.com",
@@ -643,29 +663,9 @@
               "textLum": 0.369
             }
           },
-          "0.56": {
-            "scrollY": 2310,
-            "lines": 31,
-            "lowest": 7.5,
-            "worst": {
-              "text": "III",
-              "sel": "span.num",
-              "size": 22,
-              "weight": 400,
-              "large": false,
-              "min": 4.5,
-              "ratio": 7.5,
-              "bg": [
-                20,
-                17,
-                16
-              ],
-              "textLum": 0.369
-            }
-          },
           "0.8": {
-            "scrollY": 3019,
-            "lines": 21,
+            "scrollY": 3056,
+            "lines": 8,
             "lowest": 7.5,
             "worst": {
               "text": "IV",
@@ -688,7 +688,7 @@
           "0": {
             "scrollY": 0,
             "lines": 24,
-            "lowest": 5.32,
+            "lowest": 5.56,
             "worst": {
               "text": "uphill, on purpose.",
               "sel": "p.theme-line",
@@ -696,17 +696,17 @@
               "weight": 400,
               "large": false,
               "min": 4.5,
-              "ratio": 5.32,
+              "ratio": 5.56,
               "bg": [
-                30,
-                24,
-                21
+                23,
+                20,
+                18
               ],
               "textLum": 0.268
             }
           },
           "1": {
-            "scrollY": 2858,
+            "scrollY": 3490,
             "lines": 28,
             "lowest": 7.5,
             "worst": {
@@ -726,8 +726,28 @@
             }
           },
           "0.3": {
-            "scrollY": 1301,
-            "lines": 38,
+            "scrollY": 304,
+            "lines": 32,
+            "lowest": 5.55,
+            "worst": {
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 14,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.55,
+              "bg": [
+                24,
+                20,
+                18
+              ],
+              "textLum": 0.268
+            }
+          },
+          "0.56": {
+            "scrollY": 1085,
+            "lines": 32,
             "lowest": 6.95,
             "worst": {
               "text": "esvotech.com",
@@ -745,29 +765,9 @@
               "textLum": 0.369
             }
           },
-          "0.56": {
-            "scrollY": 2082,
-            "lines": 34,
-            "lowest": 7.5,
-            "worst": {
-              "text": "III",
-              "sel": "span.num",
-              "size": 22,
-              "weight": 400,
-              "large": false,
-              "min": 4.5,
-              "ratio": 7.5,
-              "bg": [
-                20,
-                17,
-                16
-              ],
-              "textLum": 0.369
-            }
-          },
           "0.8": {
-            "scrollY": 2666,
-            "lines": 19,
+            "scrollY": 2755,
+            "lines": 11,
             "lowest": 7.5,
             "worst": {
               "text": "IV",
@@ -790,7 +790,7 @@
           "0": {
             "scrollY": 0,
             "lines": 32,
-            "lowest": 5.62,
+            "lowest": 5.61,
             "worst": {
               "text": "uphill, on purpose.",
               "sel": "p.theme-line",
@@ -798,18 +798,18 @@
               "weight": 400,
               "large": false,
               "min": 4.5,
-              "ratio": 5.62,
+              "ratio": 5.61,
               "bg": [
                 22,
                 19,
-                17
+                18
               ],
               "textLum": 0.268
             }
           },
           "1": {
-            "scrollY": 2441,
-            "lines": 37,
+            "scrollY": 2765,
+            "lines": 35,
             "lowest": 7.5,
             "worst": {
               "text": "Grab a coffee chat",
@@ -828,8 +828,28 @@
             }
           },
           "0.3": {
-            "scrollY": 1092,
-            "lines": 64,
+            "scrollY": 221,
+            "lines": 33,
+            "lowest": 5.61,
+            "worst": {
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 14,
+              "weight": 400,
+              "large": false,
+              "min": 4.5,
+              "ratio": 5.61,
+              "bg": [
+                22,
+                19,
+                18
+              ],
+              "textLum": 0.268
+            }
+          },
+          "0.56": {
+            "scrollY": 872,
+            "lines": 46,
             "lowest": 6.95,
             "worst": {
               "text": "esvotech.com",
@@ -847,28 +867,8 @@
               "textLum": 0.369
             }
           },
-          "0.56": {
-            "scrollY": 1657,
-            "lines": 45,
-            "lowest": 8.35,
-            "worst": {
-              "text": "Inaugural AidenEdge cohort, 1 of 10 interns, six",
-              "sel": "p.note",
-              "size": 17,
-              "weight": 400,
-              "large": false,
-              "min": 4.5,
-              "ratio": 8.35,
-              "bg": [
-                32,
-                28,
-                26
-              ],
-              "textLum": 0.47
-            }
-          },
           "0.8": {
-            "scrollY": 2172,
+            "scrollY": 2092,
             "lines": 27,
             "lowest": 7.5,
             "worst": {
@@ -892,7 +892,7 @@
           "0": {
             "scrollY": 0,
             "lines": 32,
-            "lowest": 5.58,
+            "lowest": 5.62,
             "worst": {
               "text": "uphill, on purpose.",
               "sel": "p.theme-line",
@@ -900,18 +900,18 @@
               "weight": 400,
               "large": false,
               "min": 4.5,
-              "ratio": 5.58,
+              "ratio": 5.62,
               "bg": [
-                23,
+                22,
                 19,
-                18
+                17
               ],
               "textLum": 0.268
             }
           },
           "1": {
-            "scrollY": 2441,
-            "lines": 41,
+            "scrollY": 2765,
+            "lines": 38,
             "lowest": 7.5,
             "worst": {
               "text": "Grab a coffee chat",
@@ -930,48 +930,48 @@
             }
           },
           "0.3": {
-            "scrollY": 1272,
-            "lines": 69,
-            "lowest": 6.95,
+            "scrollY": 221,
+            "lines": 34,
+            "lowest": 5.62,
             "worst": {
-              "text": "esvotech.com",
-              "sel": "a.card-link",
-              "size": 18,
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 14,
               "weight": 400,
               "large": false,
               "min": 4.5,
-              "ratio": 6.95,
+              "ratio": 5.62,
               "bg": [
-                30,
-                25,
-                22
+                22,
+                19,
+                17
               ],
-              "textLum": 0.369
+              "textLum": 0.268
             }
           },
           "0.56": {
-            "scrollY": 1837,
-            "lines": 48,
-            "lowest": 7.5,
+            "scrollY": 872,
+            "lines": 47,
+            "lowest": 5.62,
             "worst": {
-              "text": "Grab a coffee chat",
-              "sel": "span.btn-label",
-              "size": 16,
+              "text": "uphill, on purpose.",
+              "sel": "p.theme-line",
+              "size": 14,
               "weight": 400,
               "large": false,
               "min": 4.5,
-              "ratio": 7.5,
+              "ratio": 5.62,
               "bg": [
-                224,
-                146,
-                73
+                22,
+                19,
+                17
               ],
-              "textLum": 0.006
+              "textLum": 0.268
             }
           },
           "0.8": {
-            "scrollY": 2352,
-            "lines": 39,
+            "scrollY": 2212,
+            "lines": 37,
             "lowest": 7.5,
             "worst": {
               "text": "Grab a coffee chat",
@@ -1000,11 +1000,11 @@
         "weight": 400,
         "large": false,
         "min": 4.5,
-        "ratio": 5.21,
+        "ratio": 5.55,
         "bg": [
-          32,
-          26,
-          22
+          24,
+          20,
+          18
         ],
         "textLum": 0.268
       },
@@ -1012,7 +1012,7 @@
       "method": "text hidden, 3x3 mean, worst pixel under each line box"
     }
   },
-  "luminance": 0.6423,
-  "mean_light": 0.6423,
-  "mean_dark": 0.169
+  "luminance": 0.6306,
+  "mean_light": 0.6306,
+  "mean_dark": 0.1797
 }
