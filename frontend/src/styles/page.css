@@ -234,7 +234,7 @@
     mask-size: 18px 12px;
   }
   body:has(.hero) .neck--fixed {
-    --hh: var(--frieze-h);
+    --hb: calc(var(--frieze-h) + 80px);
   }
   .neck-row {
     grid-template-columns: 1fr auto;
@@ -302,11 +302,14 @@
       linear-gradient(90deg, color-mix(in srgb, var(--umber) calc(10% * var(--ring)), transparent) 0%, transparent 42%),
       var(--frieze);
   }
-  /* the sun stays on the phone's frieze, never on the plate under it */
-  .hero > .frieze-sun,
+  /* the sun stays on the phone's frieze, never on the plate under it (its layer starts 80 px above) */
   .hero > .frieze-art {
     bottom: auto;
     height: var(--frieze-h);
+  }
+  .hero > .frieze-sun {
+    bottom: auto;
+    height: calc(var(--frieze-h) + 80px);
   }
   .hero > .meander {
     top: calc(var(--frieze-h) - var(--meander-h));

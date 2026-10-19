@@ -201,15 +201,17 @@
    sun, sized to the hero), until the cut: the plate and the man pass under it, never under the words of
    the nav. At the cut (src/lib/reveal.js initNeckCut) the ground bar, its rule and no tongues, in one frame */
 body:has(.hero) .neck--fixed {
-  --hh: max(760px, 100svh);
+  /* the hero's sun layer: the band plus 80 px a side (its height here), its light 132% x 154% of that */
+  --hb: calc(max(760px, 100svh) + 160px);
+  --sun-bg: 50% calc(-80px - var(--hb) * 0.3) / calc(132% + 211.2px) calc(var(--hb) * 1.54) no-repeat;
   background:
-    radial-gradient(48% 50% at 70% 34%, color-mix(in srgb, var(--frieze-lit) 72%, transparent) 0%, color-mix(in srgb, var(--frieze-lit) 40%, transparent) 46%, transparent 100%) 50% calc(var(--hh) * -0.3) / 132% calc(var(--hh) * 1.54) no-repeat,
+    radial-gradient(48% 50% at 70% 34%, color-mix(in srgb, var(--frieze-lit) 72%, transparent) 0%, color-mix(in srgb, var(--frieze-lit) 40%, transparent) 46%, transparent 100%) var(--sun-bg),
     linear-gradient(90deg, color-mix(in srgb, var(--umber) calc(10% * var(--ring)), transparent) 0%, transparent 42%),
     var(--frieze);
 }
 :root[data-theme='dark'] body:has(.hero) .neck--fixed {
   background:
-    radial-gradient(48% 50% at 70% 34%, var(--gloss-3) 0%, transparent 100%) 50% calc(var(--hh) * -0.3) / 132% calc(var(--hh) * 1.54) no-repeat,
+    radial-gradient(48% 50% at 70% 34%, var(--gloss-3) 0%, transparent 100%) var(--sun-bg),
     var(--frieze);
 }
 html.scrolled .neck--fixed,
@@ -248,7 +250,9 @@ html.scrolled .neck--fixed .tongues,
    --gloss-3 and the rings go. */
 .frieze-sun {
   position: absolute;
-  inset: 0;
+  /* 80 px past the band on every side, so the layer still covers the clay wherever the reader has moved
+     it (the band clips it) */
+  inset: -80px;
   z-index: 0;
   overflow: clip;
   pointer-events: none;
