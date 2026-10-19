@@ -33,8 +33,18 @@
                  and 120 or more at 393x659 and 375x667 (Safari's first screen on an iPhone 15 Pro, an
                  SE); no header, plate or button box touches him or the disk; the disk is never cut by
                  the room's top or by the plate (on a phone it may run off the right edge)
-    slip         ?slip=1: the slip and catch show within 2 s and repeat; at the deepest slip he stays
-                 8 px or more right of the hero plate at 1440x900
+    catch        ?slip=1 (the catch period and its first): the catch shows within 2 s and repeats; at the
+                 deepest give he stays 8 px or more right of the hero plate at 1440x900; by default the first
+                 is at 6.5 s and then every 18 s (the source)
+    gait         __gait(): the swing knee 0.30 m or more over the slope, the flattest rear shin 21 degrees or
+                 more, the feet 0.28 m or more apart at landing (no frame of the cycle reads as a kneel)
+    contact      __contact(): a planted ball never slides during its stance; the palms are never more than
+                 2 mm off the rock's real surface
+    acts         ?t= with ?act=: the catch, the painting and every phase of the loop as a still; his box never
+                 meets a plate, a button or the neck in any of them
+    painting     the programs are the same before and after the painting at Contact
+    pot          the canvas lands on the pot's turned-away still (mean difference under 2 levels); the pot pass
+                 (both of its passes, forced) costs 2.0 ms or less on lite at 390x844 DPR 2
     one canvas   exactly one <canvas>: in the hero band at the top, in the contact band when it is on
                  screen, where he stands near the right edge and never crests; on a phone he stands
                  further right in the contact band than in the hero (not the hero picture again)
@@ -407,10 +417,94 @@ export async function sceneChecks({ cdp, url, check, sleep, scratch }) {
       }
       f()
     })`)
-    check('scene', 'the slip and catch', r.first >= 0 && r.first <= 2000 && r.slips >= 2 && r.gap >= 8 ? 'pass' : 'fail', `first slip at ${r.first} ms (at most 2000), ${r.slips} slips in 7 s (?slip=1), deepest slip ${r.gap} px right of the plate (at least 8)`)
+    check('scene', 'the catch', r.first >= 0 && r.first <= 2000 && r.slips >= 2 && r.gap >= 8 ? 'pass' : 'fail', `first catch at ${r.first} ms (at most 2000), ${r.slips} catches in 7 s (?slip=1), deepest give ${r.gap} px right of the plate (at least 8)`)
     await page.close()
     const src = readFileSync(path.join(ROOT, 'src/scene/frieze.js'), 'utf8')
-    check('scene', 'the slip every 14 s by default', /get\('slip'\)\)\s*\|\|\s*14/.test(src) ? 'pass' : 'fail', 'src/scene/frieze.js query(): slipEvery defaults to 14')
+    const ok = /const CATCH = \{[^}]*first: 6\.5, every: 18 \}/.test(src) && /catchEvery: Number\(q\.get\('slip'\)\) \|\| CATCH\.every/.test(src)
+    check('scene', 'the catch at 6.5 s, then every 18 s', ok ? 'pass' : 'fail', 'src/scene/frieze.js: CATCH first 6.5, every 18; ?slip= overrides the period')
+  }
+
+  // the gait and the contacts: no kneel, no sliding foot, no hand off the rock
+  {
+    const page = await fresh({ width: 1440, height: 900, dpr: 1 }, `/?tier=full&t=${T_POSTER}`, 1200)
+    await waitReady(page)
+    const g = await page.eval('window.__gait(100)')
+    check('scene', 'gait floors', g.swingKneeMin >= 0.3 && g.shinMin >= 21 && g.sepMin >= 0.28 ? 'pass' : 'fail', `swing knee ${g.swingKneeMin} m (at least 0.30), flattest rear shin ${g.shinMin} degrees (at least 21), feet ${g.sepMin} m apart at landing (at least 0.28)`)
+    const c = await page.eval('window.__contact(120)')
+    check('scene', 'feet planted, palms on the rock', c.drift <= 1e-4 && c.gap <= 0.002 ? 'pass' : 'fail', `a planted ball slides ${c.drift} m in its stance (must be 0), the palms are at most ${c.gap} m off the rock (pressed in up to ${-c.press} m; at most 0.002 off)`)
+    await page.close()
+  }
+
+  // every moment of the catch, the painting and the loop as a still: his box never meets a plate, a button or
+  // the neck (at 1440 and on a phone)
+  for (const [label, opts] of SIZES) {
+    const bad = [], seen = []
+    for (const [act, u] of [['catch', 0.3], ['catch', 0.75], ['paint', 0.5], ['paint', 1.4], ['stall', 0.4], ['getaway', 0.4], ['watch', 0.3], ['turn', 0.3], ['walk', 1.0], ['walk', 3.0], ['plant', 0.4], ['push', 0.6]]) {
+      const page = await fresh(opts, `/?tier=full&t=${T_POSTER}&act=${act}&u=${u}`, 1000)
+      await waitReady(page)
+      if (act !== 'catch') { await page.eval(`window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })`); await sleep(500) }
+      const b = await page.eval('window.__bounds()')
+      const hit = b.panels.filter((p) => overlap(p, b.figure))
+      seen.push(`${act} ${u}: ${b.host}`)
+      if (hit.length) bad.push(`${act} ${u}: ${hit.map((h) => h.kind).join(', ')}`)
+      if (b.host !== (act === 'catch' ? 'hero' : 'contact')) bad.push(`${act} ${u}: host ${b.host}`)
+      await page.close()
+    }
+    check('scene', `every act clear of the plates @${label}`, bad.length ? 'fail' : 'pass', bad.join(' | ') || `${seen.length} stills: catch, painting, stall, get-away, watch, turn, walk, plant, push`)
+  }
+
+  // the painting changes no program
+  {
+    const page = await fresh({ width: 1440, height: 900, dpr: 1 }, '/?tier=full', 1500)
+    await waitReady(page)
+    const before = await page.eval('__bench(2).programs')
+    await page.eval(`window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })`)
+    await sleep(3500)
+    const r = await page.eval(`({ programs: __bench(2).programs, host: __stats.host, painted: !!document.querySelector('[data-band="contact"].painted') })`)
+    check('scene', 'the painting compiles nothing', r.painted && r.host === 'contact' && r.programs === before ? 'pass' : 'fail', `programs ${before} before, ${r.programs} after the painting (host ${r.host}, painted ${r.painted})`)
+    await page.close()
+  }
+
+  // the pot: the canvas lands on its still, and its passes are cheap on a phone
+  {
+    let sharp = null
+    try {
+      sharp = (await import('../../tools/sharp.mjs')).default
+    } catch {
+      sharp = null
+    }
+    const rows = []
+    for (const theme of ['light', 'dark']) {
+      const shots = []
+      for (const [q, css] of [[`/?tier=full&theme=${theme}`, '.frieze-canvas, .pot-snap { visibility: hidden !important } .pot .pot-still--in { opacity: 1 !important; transition: none !important }'], [`/?tier=full&t=${T_POSTER}&pot=-70&theme=${theme}`, '']]) {
+        const page = await fresh({ width: 1440, height: 900, dpr: 2 }, q, 1500)
+        await waitReady(page).catch(() => {})
+        await page.eval(`(() => { const s = document.createElement('style'); s.textContent = ${JSON.stringify(css)}; document.head.appendChild(s); const r = document.querySelector('.belly').getBoundingClientRect(); window.scrollTo({ top: r.top + scrollY - 40, behavior: 'instant' }) })()`)
+        await sleep(1500)
+        const box = await page.eval(`(() => { const r = document.querySelector('.pot-rail .pot').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height } })()`)
+        const png = path.join(scratch || path.join(ROOT, '.build/qa'), `pot-${theme}-${shots.length}.png`)
+        await page.screenshot(png, { clip: box })
+        shots.push(png)
+        await page.close()
+      }
+      if (sharp) {
+        const [a, c] = await Promise.all(shots.map((f) => sharp(f).raw().toBuffer({ resolveWithObject: true })))
+        let sum = 0
+        const n = Math.min(a.data.length, c.data.length)
+        for (let i = 0; i < n; i++) sum += Math.abs(a.data[i] - c.data[i])
+        rows.push([theme, +(sum / n).toFixed(2)])
+      }
+    }
+    check('scene', 'the canvas lands on the pot still', rows.length === 2 && rows.every(([, d]) => d < 2) ? 'pass' : 'fail', rows.map(([t, d]) => `${t} ${d} levels`).join(', ') + ' mean difference (under 2)')
+    const page = await cdp.newPage({ width: 390, height: 844, dpr: 2, mobile: true })
+    await page.goto(url + '/?tier=lite', { settle: 1500 })
+    await waitReady(page)
+    await page.eval(`document.querySelector('.pot-band').scrollIntoView({ block: 'center', behavior: 'instant' })`)
+    await sleep(1500)
+    await page.eval('__bench(20)')
+    const bp = await page.eval('({ ...__bench(60), host: __stats.host })')
+    check('scene', 'pot pass cost on lite', bp.host === 'pot' && bp.avgMs <= 2.0 ? 'pass' : 'fail', `pot host ${bp.host}, ${Math.round(bp.avgMs * 100) / 100} ms a frame (at most 2.0) at ${bp.size.join('x')}, ${bp.draws} draws`)
+    await page.close()
   }
 
   // one canvas, and it moves to the contact band

@@ -67,9 +67,9 @@ const FRAG = /* glsl */ `
     int row = y == 0 ? 31 : y == 1 ? 17 : y == 2 ? 29 : y == 3 ? 5 : 61;
     return float((row >> x) & 1);
   }
-  float meander(vec2 p){
+  // (the derivatives are taken by the caller, outside the branch that skips this off the band)
+  float meander(vec2 p, vec2 dx, vec2 dy){
     // a 2 x 2 box filter so the key stays clean at any size
-    vec2 dx = dFdx(p) * 0.25, dy = dFdy(p) * 0.25;
     float s = 0.0;
     for (int i = 0; i < 4; i++){
       vec2 o = (i == 0 ? dx + dy : i == 1 ? dx - dy : i == 2 ? -dx + dy : -dx - dy);
@@ -105,7 +105,9 @@ const FRAG = /* glsl */ `
       float unit = (1.066 - 0.935) / 5.0;
       float n = floor(6.28318530718 * 0.86 / (6.0 * unit));
       vec2 p = vec2(circ * n * 6.0, (1.066 - y) / unit);
-      ornInk += mz * meander(p);
+      vec2 mdx = dFdx(p) * 0.25, mdy = dFdy(p) * 0.25;
+      // the key's four samples only on the band itself (a ninth of the pot)
+      if (mz > 0.001) ornInk += mz * meander(p, mdx, mdy);
     }
     orn += mz;
     // the figure band: clay (or black at night) and the live painting on its sector

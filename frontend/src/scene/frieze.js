@@ -949,6 +949,7 @@ export async function mount({ canvas, bands, theme = 'light', tier = 'full', onR
 
   installHooks({
     potShot,
+    inflate: INFLATE,
     act: (name, u) => actAt(name, u),
     loop: () => ({ phase: L.phase, start: L.start, done: L.done, t }),
     r, cam, scene, slope, f, R, canvas, fit: () => fit, host: () => host, W,

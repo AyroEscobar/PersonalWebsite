@@ -10,6 +10,9 @@
                    (degrees to the slope, while that knee is under 0.45 m), the closest the balls come while
                    both are planted; QA holds the floors (no kneel, no stacked feet)
     __legs(n)      the joints of both legs per sample, relative to his root, for a gait sheet
+    __contact(n)   one push cycle at n samples: how far a planted ball slides during its stance (it must not),
+                   and the gap between each palm and the rock's real (displaced) surface, the body's inflate
+                   on the hands counted (negative is pressed in)
     __bounds()     CSS px boxes in the viewport: figure (his skinned mesh), disk, room, canvas, and the
                    header, plate and button boxes on screen, so a check can assert none touches him
     __poster(o)    the transparent poster frame as a PNG data URL (frieze.js poster(), for scripts/poster.mjs)
@@ -19,7 +22,7 @@
 */
 import * as THREE from 'three'
 
-const KEYS = ['__frameAt', '__bench', '__bounds', '__measure', '__poster', '__ready', '__stats', '__gait', '__legs', '__potShot', '__act', '__loop']
+const KEYS = ['__frameAt', '__bench', '__bounds', '__measure', '__poster', '__ready', '__stats', '__gait', '__legs', '__contact', '__potShot', '__act', '__loop']
 
 export function installHooks(ctx) {
   const { r, cam, scene, f, R, canvas, render, step, measure, poster } = ctx
@@ -47,6 +50,40 @@ export function installHooks(ctx) {
     }
     render(t0)
     return rows
+  }
+  window.__contact = (n = 120) => {
+    const sk = f.mesh.skeleton.bones
+    const hb = ['handL', 'handR'].map((nm) => sk.findIndex((b) => b.name === nm))
+    const pos = f.mesh.geometry.attributes.position, si = f.mesh.geometry.attributes.skinIndex, sw = f.mesh.geometry.attributes.skinWeight
+    // the palm's vertices: mostly weighted to a hand bone
+    const verts = [[], []]
+    for (let k = 0; k < pos.count; k++) for (let c = 0; c < 4; c++) { const j = hb.indexOf(si.getComponent(k, c)); if (j >= 0 && sw.getComponent(k, c) > 0.6) verts[j].push(k) }
+    const inflate = (ctx.inflate || 0) * 0.5 // the shader's inflate on the hands is half the body's
+    const radius = ctx.W?.rs?.radius
+    const inv = new THREE.Matrix4(), p = new THREE.Vector3(), d = new THREE.Vector3()
+    const res = { drift: 0, gap: -1, press: 1, samples: n }
+    const land = [null, null]
+    for (let i = 0; i < n; i++) {
+      const tt = 4 + (i / n) * f.T
+      const o = f.update(tt, { shift: 0, leanAdd: 0, crouch: 0, reachAdd: 0 })
+      scene.updateMatrixWorld(true)
+      for (let s = 0; s < 2; s++) {
+        if (o.stance[s]) { if (land[s] === null) land[s] = o.balls[s].x; else res.drift = Math.max(res.drift, Math.abs(o.balls[s].x - land[s])) } else land[s] = null
+      }
+      inv.copy(f.boulder.matrixWorld).invert()
+      for (let h = 0; h < 2; h++) {
+        let m = 1e9
+        for (const k of verts[h]) {
+          p.fromBufferAttribute(pos, k); f.mesh.applyBoneTransform(k, p); p.applyMatrix4(f.mesh.matrixWorld).applyMatrix4(inv)
+          const r0 = radius ? radius(d.copy(p).normalize()) : R
+          m = Math.min(m, p.length() - r0 - inflate)
+        }
+        res.gap = Math.max(res.gap, m)
+        res.press = Math.min(res.press, m)
+      }
+    }
+    res.drift = +res.drift.toFixed(5); res.gap = +res.gap.toFixed(4); res.press = +res.press.toFixed(4)
+    return res
   }
   window.__gait = (n = 100) => {
     const r0 = { kneeMin: 9, kneeAt: 0, shinMin: 90, shinAt: 0, sepMin: 9, sepAt: 0, swingKneeMin: 9 }

@@ -520,6 +520,9 @@ try {
       }
       slow.server.close()
       check('r1', 'T12 no shift when the fonts arrive late', shifts.every(([, v]) => v <= 0.02) ? 'pass' : 'fail', shifts.map(([w, v]) => `${w}: CLS ${v}`).join(', '))
+      // and the first screen holds still: 0.000 to three places at 1440 and on a phone, fonts late or not
+      const main = shifts.filter(([w]) => w === 1440 || w === 390)
+      check('page', 'CLS 0.000 at 1440 and 390', main.length === 2 && main.every(([, v]) => v < 0.0005) ? 'pass' : 'fail', main.map(([w, v]) => `${w}: ${v}`).join(', ') + ' (under 0.0005, fonts held back 500 ms)')
     }
   }
 

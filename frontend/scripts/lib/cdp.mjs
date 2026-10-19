@@ -131,8 +131,9 @@ export async function connect(wsUrl) {
       await s('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
       await s('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     }
-    page.screenshot = async (file, { fullPage = false } = {}) => {
+    page.screenshot = async (file, { fullPage = false, clip = null } = {}) => {
       const params = { format: 'png' }
+      if (clip) params.clip = { x: clip.x, y: clip.y, width: clip.w, height: clip.h, scale: 1 }
       if (fullPage) {
         const { cssContentSize } = await s('Page.getLayoutMetrics')
         const h = Math.min(Math.ceil(cssContentSize.height), 16000)
