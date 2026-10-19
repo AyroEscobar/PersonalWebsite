@@ -17,17 +17,27 @@
   the end of Stack) and lowers its sun, and on it he steps only while you read down. It renders on demand:
   only while the turn, the sun, his stride or the grit moves.
 
+  The story, in the order a visitor meets it: in the hero he pushes, grit kicks back from his rear toe at
+  each push-off and rests on the line among the stones (dust.js); the catch at 6.5 s and every 18 s (the
+  rock gets away, he digs in, holds, goes on); your scroll is his push (he leans in and steps faster
+  scrolling down, braces scrolling up) and he climbs 0.9 m as the hero leaves. On the pot he walks round
+  it as it turns. At Contact the band is bare clay until it is 60% in view, then he is painted in front of
+  you (sketch, slip, incisions, the white), and once the band has been 90% in view for a second the loop
+  plays once: the rock gets away and rolls past him out of the picture, he watches it go, walks down after
+  it, plants and pushes again. A theme switch is a kiln: a heat front through the frieze and up the pot.
+
   The ground line is CSS (crisp, and there before the scene), so the camera follows him along the slope:
   the line never moves on screen, and scroll only changes how far up it he has got.
 
   Two clocks: t is the wall clock, tau the gait clock, which freezes during the catch and ramps back, so
-  the cycle never pops. Flat colour, no lights, no fog, no post, no shadows: a theme switch is a uniform
-  write (vase.js setInks), never a recompile.
+  the cycle never pops. Flat colour, no lights, no fog, no post, no shadows on him: a theme switch, the
+  painting and the kiln are uniform writes (vase.js), never a recompile.
 
   Query flags (tools only): ?t=<s> freezes the clock (a scroll renders one still), ?slip=<s> the catch
-  period (and its first), ?effort=<0..1> a fixed effort,
-  ?pot=<deg> holds the pot at a turn. Hooks (hooks.js): window.__ready, __stats, __bench(n), __frameAt(t), __measure(), __bounds(),
-  __poster(opts).
+  period (and its first), ?effort=<0..1> a fixed effort, ?pot=<deg> holds the pot at a turn, ?act=<name>
+  with ?u=<s> a moment of the catch, the painting or the loop as a still. Hooks (hooks.js): window.__ready,
+  __stats, __bench(n), __frameAt(t), __measure(), __bounds(), __poster(o), __gait(), __legs(), __contact(),
+  __potShot(o), __act(name, u), __loop().
 */
 import * as THREE from 'three'
 import { loadFigure, makeFigure } from './figure.js'
